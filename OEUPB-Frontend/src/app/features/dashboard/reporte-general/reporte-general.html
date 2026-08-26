@@ -1,0 +1,174 @@
+<div class="dashboard-container">
+  
+  <!-- Header del Dashboard -->
+  <header class="dash-header">
+    <div class="header-left">
+      <div class="mini-logo">UPB</div>
+      <h2>Reporte general de egresados</h2>
+    </div>
+    <div class="header-right">
+      <!-- Botón que lleva a Tendencias -->
+      <button class="icon-btn action-btn" title="Ver Tendencias" (click)="irATendencias()">
+        📈
+      </button>
+      <!-- Botón que lleva a la pantalla de Administración/Carga -->
+      <button class="icon-btn action-btn" title="Administración de datos" (click)="irACargaDatos()">
+        📥
+      </button>
+    </div>
+  </header>
+
+  <!-- Controles de Filtros -->
+  <section class="filters-section">
+    <select class="dark-select">
+      <option>Todas las escuelas/facultades</option>
+      <option>Ingeniería</option>
+      <option>Ciencias de la Salud</option>
+    </select>
+    <select class="dark-select">
+      <option>Todas las sedes</option>
+      <option>Sede Principal</option>
+      <option>Sede Norte</option>
+    </select>
+    <select class="dark-select">
+      <option>Cohorte: todas</option>
+      <option>2022</option>
+      <option>2023</option>
+      <option>2024</option>
+    </select>
+  </section>
+
+  <!-- Grillas de Tarjetas -->
+  <section class="cards-grid">
+    
+    <!-- Tarjeta 1: Cantidad de egresados -->
+    <div class="card card-full">
+      <h3>Cantidad de egresados por programa y cohorte</h3>
+      <table class="dark-table">
+        <thead>
+          <tr>
+            <th>Programa</th>
+            <th>2022</th>
+            <th>2023</th>
+            <th>2024</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ingeniería de Sistemas</td>
+            <td>184</td>
+            <td>201</td>
+            <td>219</td>
+            <td>604</td>
+          </tr>
+          <tr>
+            <td>Contaduría</td>
+            <td>142</td>
+            <td>150</td>
+            <td>168</td>
+            <td>460</td>
+          </tr>
+          <tr>
+            <td>Enfermería</td>
+            <td>96</td>
+            <td>103</td>
+            <td>110</td>
+            <td>309</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tarjeta 2: Demora primer empleo -->
+    <div class="card card-half">
+      <h3>Demora promedio en 1er empleo</h3>
+      <table class="dark-table">
+        <thead>
+          <tr>
+            <th>Programa</th>
+            <th class="text-right">Meses</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ing. de Sistemas</td>
+            <td class="text-right text-red">2.4</td>
+          </tr>
+          <tr>
+            <td>Contaduría</td>
+            <td class="text-right text-red">3.1</td>
+          </tr>
+          <tr>
+            <td>Enfermería</td>
+            <td class="text-right text-red">1.8</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tarjeta 3: Satisfacción -->
+    <div class="card card-half">
+      <h3>Promedio de satisfacción laboral</h3>
+      <table class="dark-table">
+        <thead>
+          <tr>
+            <th>Programa</th>
+            <th class="text-right">Sobre 5</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ing. de Sistemas</td>
+            <td class="text-right">4.3</td>
+          </tr>
+          <tr>
+            <td>Contaduría</td>
+            <td class="text-right">4.0</td>
+          </tr>
+          <tr>
+            <td>Enfermería</td>
+            <td class="text-right">4.5</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tarjeta 4: Sector Económico -->
+    <div class="card card-full">
+      <h3>Sector económico y tamaño de empresa</h3>
+      <table class="dark-table">
+        <thead>
+          <tr>
+            <th>Sector</th>
+            <th>Pequeña</th>
+            <th>Mediana</th>
+            <th>Grande</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Financiero</td>
+            <td>12%</td>
+            <td>21%</td>
+            <td>67%</td>
+          </tr>
+          <tr>
+            <td>Tecnología</td>
+            <td>28%</td>
+            <td>34%</td>
+            <td>38%</td>
+          </tr>
+          <tr>
+            <td>Salud</td>
+            <td>15%</td>
+            <td>40%</td>
+            <td>45%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+</div>

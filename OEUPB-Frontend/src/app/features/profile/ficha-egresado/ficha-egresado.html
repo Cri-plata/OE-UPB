@@ -1,0 +1,74 @@
+<div class="profile-container">
+  
+  <!-- Back navigation -->
+  <button class="back-btn" (click)="volver()">
+    <span>←</span> Ficha del egresado
+  </button>
+
+  <!-- Profile Header -->
+  <header class="profile-header">
+    <div class="profile-info">
+      <div class="avatar">MT</div>
+      <div class="details">
+        <h2>María Torres Gil</h2>
+        <p>Ingeniería de Sistemas • Sede principal • Cohorte 2023</p>
+      </div>
+    </div>
+    <div class="status-badge">Empleada</div>
+  </header>
+
+  <!-- Tabs Navigation -->
+  <nav class="tabs-nav">
+    <button class="tab active">Resumen</button>
+    <button class="tab">Momentos</button>
+    <button class="tab">Historial</button>
+  </nav>
+
+  <!-- Summary Grid -->
+  <section class="summary-grid">
+    <div class="info-card">
+      <span class="icon">🪪</span>
+      <p class="label">Cédula</p>
+      <h3>{{ cedula }}</h3>
+    </div>
+    <div class="info-card">
+      <span class="icon">💼</span>
+      <p class="label">Lugar de trabajo</p>
+      <h3>Bancolombia S.A.</h3>
+    </div>
+    <div class="info-card">
+      <span class="icon">🎓</span>
+      <p class="label">¿Estudia actualmente?</p>
+      <h3>Sí — Maestría en Analítica</h3>
+    </div>
+    <div class="info-card">
+      <span class="icon">📍</span>
+      <p class="label">Ciudad</p>
+      <h3>Medellín</h3>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section class="timeline-section card">
+    <h4>Línea de tiempo de momentos</h4>
+    <div class="timeline">
+      <div class="timeline-step completed">
+        <div class="dot"></div>
+        <p>Momento 0</p>
+      </div>
+      <div class="timeline-line completed-line"></div>
+      
+      <div class="timeline-step completed">
+        <div class="dot"></div>
+        <p>Momento 1</p>
+      </div>
+      <div class="timeline-line pending-line"></div>
+      
+      <div class="timeline-step pending">
+        <div class="dot"></div>
+        <p>Momento 5</p>
+      </div>
+    </div>
+  </section>
+
+</div>

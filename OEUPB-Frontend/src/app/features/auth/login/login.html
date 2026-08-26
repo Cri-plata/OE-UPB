@@ -1,0 +1,30 @@
+<div class="login-container">
+  <div class="login-box">
+    
+    <!-- Logo -->
+    <div class="logo-box">
+      <h1>UPB</h1>
+    </div>
+
+    <!-- Títulos -->
+    <h2 class="title">Seguimiento a egresados</h2>
+    <p class="subtitle">Acceso para coordinadores</p>
+
+    <!-- Formulario -->
+    <form (ngSubmit)="onLogin()" class="login-form">
+      <div class="input-group">
+        <input type="email" placeholder="Correo institucional" required>
+      </div>
+      
+      <div class="input-group">
+        <input type="password" placeholder="Contraseña" required>
+      </div>
+
+      <button type="submit" class="btn-primary">Iniciar sesión</button>
+    </form>
+
+    <!-- Link Olvido -->
+    <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+
+  </div>
+</div>

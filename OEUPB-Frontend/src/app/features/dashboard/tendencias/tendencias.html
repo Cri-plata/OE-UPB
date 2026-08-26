@@ -1,0 +1,115 @@
+<div class="dashboard-container">
+  
+  <!-- Header del Dashboard -->
+  <header class="dash-header">
+    <div class="header-left">
+      <div class="mini-logo">UPB</div>
+      <h2>Tendencias por momento de seguimiento</h2>
+    </div>
+    <div class="header-right">
+      <!-- Botón que lleva a la Ficha del Egresado (Simulando búsqueda) -->
+      <button class="icon-btn action-btn" title="Buscar/Ver Ficha de Egresado" (click)="irAFichaEgresado()">
+        👤
+      </button>
+      <button class="icon-btn" title="Descargar Reporte">📥</button>
+    </div>
+  </header>
+
+  <!-- Tarjetas KPI Superiores -->
+  <section class="kpi-grid">
+    <div class="kpi-card">
+      <p>Momento 0 - tasa de graduación</p>
+      <h2 class="text-gold">88%</h2>
+      <small class="text-gold">1,340 presentaron / 1,179 graduados</small>
+    </div>
+    <div class="kpi-card">
+      <p>Momento 1 - tasa de empleabilidad</p>
+      <h2 class="text-red">74%</h2>
+      <small class="text-red">al año de graduados</small>
+    </div>
+    <div class="kpi-card">
+      <p>Momento 5 - tasa de empleabilidad</p>
+      <h2 class="text-red">91%</h2>
+      <small class="text-red">a los cinco años de graduados</small>
+    </div>
+  </section>
+
+  <!-- Gráfica de Evolución Simulada -->
+  <section class="chart-section card">
+    <h3>Evolución de la tasa de empleabilidad por cohorte</h3>
+    <p class="subtitle">Comparación entre momento 1 y momento 5</p>
+    
+    <div class="mock-chart">
+      <div class="chart-group">
+        <div class="bars">
+          <div class="bar gold-bar" style="height: 50%;"></div>
+          <div class="bar red-bar" style="height: 65%;"></div>
+        </div>
+        <span>Cohorte 2018</span>
+      </div>
+      <div class="chart-group">
+        <div class="bars">
+          <div class="bar gold-bar" style="height: 48%;"></div>
+          <div class="bar red-bar" style="height: 70%;"></div>
+        </div>
+        <span>Cohorte 2019</span>
+      </div>
+      <div class="chart-group">
+        <div class="bars">
+          <div class="bar gold-bar" style="height: 55%;"></div>
+          <div class="bar red-bar" style="height: 80%;"></div>
+        </div>
+        <span>Cohorte 2020</span>
+      </div>
+      <div class="chart-group">
+        <div class="bars">
+          <div class="bar gold-bar" style="height: 52%;"></div>
+          <div class="bar red-bar" style="height: 85%;"></div>
+        </div>
+        <span>Cohorte 2021</span>
+      </div>
+    </div>
+
+    <!-- Leyenda -->
+    <div class="chart-legend">
+      <div class="legend-item"><span class="box gold-box"></span> Momento 1 (al año)</div>
+      <div class="legend-item"><span class="box red-box"></span> Momento 5 (5 años)</div>
+    </div>
+  </section>
+
+  <!-- Tabla Resumen -->
+  <section class="summary-section card">
+    <h3>Resumen de tasas por momento</h3>
+    <table class="dark-table">
+      <thead>
+        <tr>
+          <th>Indicador</th>
+          <th class="text-center">Momento 0</th>
+          <th class="text-center">Momento 1</th>
+          <th class="text-center">Momento 5</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Tasa de empleabilidad</td>
+          <td class="text-center">—</td>
+          <td class="text-center font-bold">74%</td>
+          <td class="text-center font-bold">91%</td>
+        </tr>
+        <tr>
+          <td>Continúan estudiando</td>
+          <td class="text-center">—</td>
+          <td class="text-center font-bold">38%</td>
+          <td class="text-center font-bold">22%</td>
+        </tr>
+        <tr>
+          <td>Tasa de respuesta a la encuesta</td>
+          <td class="text-center font-bold">96%</td>
+          <td class="text-center font-bold">61%</td>
+          <td class="text-center font-bold">44%</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>

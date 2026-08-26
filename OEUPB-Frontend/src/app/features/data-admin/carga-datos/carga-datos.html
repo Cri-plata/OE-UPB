@@ -1,0 +1,64 @@
+<div class="data-admin-container">
+  
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="header-left">
+      <div class="mini-logo">UPB</div>
+      <h2>Administración de datos</h2>
+    </div>
+    <div class="header-right">
+      <span class="role-badge">Rol: coordinador</span>
+    </div>
+  </header>
+
+  <!-- Zona de arrastre y carga del Excel -->
+  <section class="upload-zone">
+    <div class="upload-content">
+      <span class="upload-icon">↑</span>
+      <h3>Cargar archivo de encuestas</h3>
+      <p>Arrastra el Excel del Ministerio o selecciónalo manualmente</p>
+      
+      <!-- Input de archivo oculto por estética, simulado por un botón -->
+      <input type="file" id="fileUpload" class="hidden-file-input" accept=".xlsx, .xls">
+      <label for="fileUpload" class="btn-primary">Seleccionar archivo</label>
+    </div>
+  </section>
+
+  <!-- Botón Registro Manual -->
+  <section class="manual-entry-section">
+    <div class="manual-text">
+      <h4>Registro manual de egresado</h4>
+      <p>Agrega un egresado individual sin necesidad de un archivo</p>
+    </div>
+    <button class="btn-outline">+ Nuevo egresado</button>
+  </section>
+
+  <!-- Zona de Filtros y Estadísticas Rápidas -->
+  <section class="filters-and-stats">
+    <div class="filters-panel">
+      <h4>Filtrar registros</h4>
+      <input type="text" placeholder="Número de cédula" class="dark-input">
+      <select class="dark-select"><option>Escuela/facultad</option></select>
+      <select class="dark-select"><option>Sede</option></select>
+      <select class="dark-select"><option>Momento</option></select>
+      <select class="dark-select"><option>Cohorte</option></select>
+    </div>
+
+    <div class="stats-panel">
+      <div class="stat-box">
+        <p>Registros filtrados</p>
+        <h2>312</h2>
+      </div>
+      <div class="stat-box">
+        <p>Salario promedio reportado</p>
+        <h2 class="text-red">$2.870.000</h2>
+      </div>
+      <div class="stat-box">
+        <p>Último archivo cargado</p>
+        <h4>encuestas_2025.xlsx</h4>
+        <small>31 jul 2026 - 214 filas</small>
+      </div>
+    </div>
+  </section>
+
+</div>
