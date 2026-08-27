@@ -1,8 +1,8 @@
-﻿import { Component } from '@angular/core';
+﻿import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
-import { UploadExcelResponseDto, FilaErrorDto } from '../../../../../../../OEUPB-Contracts/APIcontractfront/carga.contract';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-carga-datos',
@@ -12,79 +12,60 @@ import { UploadExcelResponseDto, FilaErrorDto } from '../../../../../../../OEUPB
   styleUrls: ['./carga-datos.scss']
 })
 export class CargaDatosComponent {
-  cargaForm: FormGroup;
+  uploadForm: FormGroup;
   selectedFile: File | null = null;
-  isDragging = false;
-  isUploading = false;
-  uploadResult: UploadExcelResponseDto | null = null;
+  erroresTabla: any[] = [];
+  mensajeValidacion: string | null = null;
+  isSubmitting = false;
+  
+  private readonly API_URL = 'http://localhost:8000/api/carga/excel';
 
-  constructor(private fb: FormBuilder) {
-    this.cargaForm = this.fb.group({
-      momento: ['', Validators.required],
-      sede: ['', Validators.required]
+  constructor(private fb: FormBuilder, private http: HttpClient, private cdr: ChangeDetectorRef) {
+    this.uploadForm = this.fb.group({
+      momento: ['', Validators.required]
     });
   }
 
-  onDragOver(event: DragEvent) {
-    event.preventDefault();
-    this.isDragging = true;
-  }
-
-  onDragLeave(event: DragEvent) {
-    event.preventDefault();
-    this.isDragging = false;
-  }
-
-  onDrop(event: DragEvent) {
-    event.preventDefault();
-    this.isDragging = false;
-    if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-      this.handleFile(event.dataTransfer.files[0]);
-    }
-  }
-
   onFileSelected(event: any) {
-    if (event.target.files && event.target.files.length > 0) {
-      this.handleFile(event.target.files[0]);
-    }
-  }
-
-  private handleFile(file: File) {
-    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+    const file = event.target.files[0];
+    if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
       this.selectedFile = file;
-      this.uploadResult = null; // reset previous results
     } else {
-      alert('Solo se permiten archivos Excel (.xlsx, .xls)');
+      alert('Por favor, selecciona un archivo Excel válido (.xlsx o .xls)');
+      this.selectedFile = null;
     }
-  }
-
-  removeFile() {
-    this.selectedFile = null;
-    this.uploadResult = null;
   }
 
   onSubmit() {
-    if (this.cargaForm.invalid || !this.selectedFile) {
-      this.cargaForm.markAllAsTouched();
-      return;
+    if (this.uploadForm.valid && this.selectedFile) {
+      this.isSubmitting = true;
+      this.mensajeValidacion = null;
+      this.erroresTabla = [];
+
+      const formData = new FormData();
+      formData.append('file', this.selectedFile);
+      formData.append('momento', this.uploadForm.get('momento')?.value);
+      
+
+      this.http.post<any>(this.API_URL, formData).subscribe({
+        next: (response) => {
+          this.isSubmitting = false;
+          this.mensajeValidacion = response.mensaje;
+          this.erroresTabla = response.errores || [];
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.isSubmitting = false;
+          let msg = 'Error del servidor al procesar el archivo.'; if (err.error && err.error.detail) { msg = typeof err.error.detail === 'string' ? err.error.detail : JSON.stringify(err.error.detail); } this.mensajeValidacion = msg;
+          this.cdr.detectChanges();
+        }
+      });
+    } else {
+      alert('Faltan datos por seleccionar o no se ha adjuntado el archivo.');
     }
-
-    this.isUploading = true;
-
-    // MOCK: Simulando carga al backend
-    setTimeout(() => {
-      this.isUploading = false;
-      this.uploadResult = {
-        filasCargadas: 206,
-        filasConError: 2,
-        detallesErrores: [
-          { fila: 15, cedula: '1098765432', motivo: 'Cédula duplicada' },
-          { fila: 84, cedula: '1090123456', motivo: 'Doble titulación detectada' }
-        ]
-      };
-      this.selectedFile = null;
-      this.cargaForm.reset();
-    }, 2000);
   }
 }
+
+
+
 

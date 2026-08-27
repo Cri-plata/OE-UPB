@@ -2,6 +2,7 @@
 from fastapi.middleware.cors import CORSMiddleware
 from presentation.auth_router import router as auth_router
 from presentation.usuarios_router import router as usuarios_router
+from presentation.carga_router import router as carga_router
 
 app = FastAPI(
     title="OE UPB - Observatorio de Egresados",
@@ -21,8 +22,10 @@ app.add_middleware(
 # Registrar rutas
 app.include_router(auth_router)
 app.include_router(usuarios_router)
+app.include_router(carga_router)
 
 @app.get("/")
 def root():
     return {"mensaje": "El Backend de OE UPB está funcionando correctamente."}
+
 

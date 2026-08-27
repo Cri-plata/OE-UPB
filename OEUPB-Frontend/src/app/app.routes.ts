@@ -1,4 +1,6 @@
-﻿import { Routes } from '@angular/router';
+﻿import { TendenciasComponent } from './presentation/features/data-admin/tendencias/tendencias';
+import { ReporteGeneralComponent } from './presentation/features/data-admin/reporte-general/reporte-general';
+import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   { 
@@ -28,6 +30,8 @@ export const routes: Routes = [
   },
   { path: '**', redirectTo: 'login' }
 ];
+
+
 
 
 

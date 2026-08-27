@@ -1,0 +1,78 @@
+﻿<div class="layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="content">
+    <div class="top-banner">
+      <div class="banner-text">
+        <h1>Reporte General de Egresados</h1>
+        <p>Visión global de los indicadores clave de empleabilidad.</p>
+      </div>
+      <div class="upb-logo">
+        <img src="/escudo-upb.png" alt="Escudo UPB" class="escudo-img">
+      </div>
+    </div>
+
+    <div class="dashboard-container">
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          <div class="kpi-data">
+            <h3>Total Egresados</h3>
+            <h2>{{ kpis?.total_egresados || 'Cargando...' }}</h2>
+            <span class="trend up">Registrados en el sistema</span>
+          </div>
+        </div>
+        
+        <div class="kpi-card">
+          <div class="kpi-icon green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          </div>
+          <div class="kpi-data">
+            <h3>Tasa de Empleabilidad</h3>
+            <h2>{{ kpis?.tasa_empleabilidad || '...' }}%</h2>
+            <span class="trend up">Actualmente trabajando</span>
+          </div>
+        </div>
+        
+        <div class="kpi-card">
+          <div class="kpi-icon red">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+          </div>
+          <div class="kpi-data">
+            <h3>Promedio Salarial</h3>
+            <h2>{{ kpis?.promedio_salarial || '...' }}</h2>
+            <span class="trend">Salarios Mínimos (SMLV)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráficas -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h2>Distribución por Programa</h2>
+          <div class="chart-wrapper" *ngIf="isChartReady">
+            <canvas baseChart
+              [data]="pieChartData"
+              [type]="'doughnut'"
+              [options]="pieChartOptions">
+            </canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h2>Nivel de Satisfacción (1 al 4)</h2>
+          <div class="chart-wrapper" *ngIf="isChartReady">
+            <canvas baseChart
+              [data]="barChartData"
+              [type]="'bar'"
+              [options]="barChartOptions">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
