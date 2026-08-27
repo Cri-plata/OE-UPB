@@ -1,0 +1,69 @@
+﻿<div class="layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="content">
+    <header class="topbar">
+      <h1>Administración de Usuarios (CTIC)</h1>
+    </header>
+
+    <div class="admin-grid">
+      <!-- Formulario para crear coordinador -->
+      <div class="card form-card">
+        <h2>Crear Nuevo Coordinador</h2>
+        <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label>Nombre Completo</label>
+            <input type="text" formControlName="nombre" placeholder="Ej. Carlos Gómez">
+          </div>
+          
+          <div class="form-group">
+            <label>Correo Institucional</label>
+            <input type="email" formControlName="correo" placeholder="ejemplo@upb.edu.co">
+          </div>
+
+          <div class="form-group">
+            <label>Sede Asignada *</label>
+            <select formControlName="sede">
+              <option value="">Seleccione una sede...</option>
+              <option value="Bucaramanga">Bucaramanga</option>
+              <option value="Medellín">Medellín</option>
+              <option value="Palmira">Palmira</option>
+              <option value="Montería">Montería</option>
+              <option value="Bogotá">Bogotá</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-primary" [disabled]="userForm.invalid">Crear Coordinador</button>
+        </form>
+      </div>
+
+      <!-- Lista de Usuarios -->
+      <div class="card list-card">
+        <h2>Coordinadores Activos</h2>
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Sede</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of usuarios">
+              <td>{{ u.nombre }}</td>
+              <td>{{ u.correo }}</td>
+              <td><span class="badge">{{ u.rol }}</span></td>
+              <td>{{ u.sede_id || 'N/A' }}</td>
+              <td><button class="btn-danger" (click)="eliminarUsuario(u.id)">Eliminar</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+
+

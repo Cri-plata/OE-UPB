@@ -1,6 +1,10 @@
 ﻿import { Routes } from '@angular/router';
 
 export const routes: Routes = [
+  { 
+    path: 'admin-usuarios', 
+    loadComponent: () => import('./presentation/features/admin/admin-usuarios/admin-usuarios').then(m => m.AdminUsuariosComponent)
+  },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { 
     path: 'login', 
@@ -24,6 +28,7 @@ export const routes: Routes = [
   },
   { path: '**', redirectTo: 'login' }
 ];
+
 
 
 

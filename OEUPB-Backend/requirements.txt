@@ -1,0 +1,10 @@
+﻿fastapi
+uvicorn
+sqlalchemy
+pymysql
+pydantic>=2.6.0
+pydantic-settings
+pyjwt
+python-multipart
+passlib
+bcrypt

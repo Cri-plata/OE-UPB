@@ -5,12 +5,25 @@
   </div>
   
   <nav class="nav-menu">
-    <a routerLink="/reporte" routerLinkActive="active" class="nav-item">📊 Reporte general</a>
-    <a routerLink="/tendencias" routerLinkActive="active" class="nav-item">📈 Tendencias</a>
-    <a routerLink="/carga" routerLinkActive="active" class="nav-item">📁 Cargar datos</a>
+    <!-- Solo visible para Coordinadores y Directivos -->
+    <ng-container *ngIf="userRole !== 'Admin_CTIC'">
+      <a routerLink="/reporte" routerLinkActive="active" class="nav-item">Reporte general</a>
+      <a routerLink="/tendencias" routerLinkActive="active" class="nav-item">Tendencias</a>
+    </ng-container>
+
+    <!-- Solo visible para Coordinadores -->
+    <ng-container *ngIf="userRole === 'Coordinador_Sede'">
+      <a routerLink="/carga" routerLinkActive="active" class="nav-item">Cargar datos</a>
+    </ng-container>
+
+    <!-- Solo visible para Administradores CTIC -->
+    <ng-container *ngIf="userRole === 'Admin_CTIC'">
+      <a routerLink="/admin-usuarios" routerLinkActive="active" class="nav-item">Administrar Usuarios</a>
+    </ng-container>
   </nav>
 
   <div class="bottom-menu">
-    <button class="logout-btn" (click)="logout()">🚪 Cerrar Sesión</button>
+    <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
   </div>
 </aside>
+

@@ -1,4 +1,4 @@
-﻿import { Component, inject } from '@angular/core';
+﻿import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -19,6 +19,7 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private loginUseCase = inject(LoginUseCase);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -41,6 +42,7 @@ export class LoginComponent {
     this.loginUseCase.execute(correo, contrasena).subscribe({
       next: (response) => {
         this.isLoading = false;
+        this.cdr.detectChanges();
         // Redirigir según el rol del usuario (CTIC a usuarios, el resto al dashboard)
         if (response.usuario.rol === 'Admin_CTIC') {
           this.router.navigate(['/admin-usuarios']); // Ruta futura
@@ -50,10 +52,16 @@ export class LoginComponent {
       },
       error: (err) => {
         this.isLoading = false;
+        this.cdr.detectChanges();
         // Extraer mensaje del error de dominio o del servidor HTTP
-        this.errorMessage = err.message || 'Correo o contraseña incorrectos.';
+        this.errorMessage = 'Correo o contraseña no válido. Intente de nuevo.';
+        this.cdr.detectChanges();
       }
     });
   }
 }
+
+
+
+
 

@@ -41,3 +41,20 @@ Este documento rastrea todas las modificaciones arquitectónicas, creaciones de 
 * **Carga Datos Component:** Se maquetó la pantalla de administración de datos con formularios reactivos para elegir Sede y Momento.
 * **Drag & Drop UI:** Se implementó una zona interactiva para arrastrar y soltar el archivo .xlsx o .xls.
 * **Mock del Motor ETL:** Se simuló el caso de uso del procesador de Pandas, mostrando una tabla visual de errores extraída directamente del DTO UploadExcelResponseDto cuando se detectan fallos como 'Doble titulación'.
+
+## [2026-08-26] - Inicialización del Backend (FastAPI)
+* **Arquitectura:** Se inicializó el directorio OEUPB-Backend con las capas de domain, pplication, infrastructure y presentation.
+* **Configuración Base:** Se creó el equirements.txt con las librerías necesarias, el archivo oculto .env para las variables de entorno (MySQL) y el main.py con configuración CORS habilitada para conectar con el puerto 4200 de Angular.
+
+## [2026-08-27] - Panel de Administración y Conexión Real
+* **Backend Autenticación:** Se reemplazó el mock por una conexión real a MySQL usando SQLAlchemy y JWT. Se configuró exitosamente la contraseña con el algoritmo crypt puro solucionando problemas de compatibilidad en Python 3.14.
+* **Frontend Admin-Usuarios:** Se creó la vista protegida para el rol Admin_CTIC. Incluye un formulario reactivo con reglas de negocio (ej. el campo Sede solo es obligatorio si se elige el rol Coordinador) y una tabla de visualización de usuarios.
+* **Ruteo Dinámico:** El LoginUseCase ahora redirige automáticamente a /admin-usuarios o /reporte dependiendo del rol JWT detectado en la respuesta de la API.
+
+## [2026-08-27] - Refinamientos de Seguridad y UI para CTIC
+* **Frontend:** Se eliminaron los emojis del Sidebar y se agregó un borde blanco al botón de Cerrar Sesión para un aspecto más sobrio y corporativo.
+* **Angular Zone.js Fix:** Se implementó ChangeDetectorRef en el Login y en Admin Usuarios para solucionar problemas de renderizado fantasma tras la resolución de peticiones HTTP asíncronas.
+* **Seguridad de Negocio (Full-Stack):** Se implementó una validación estricta para que el sistema solo acepte correos institucionales @upb.edu.co. En el Frontend mediante un Custom Validator reactivo, y en el Backend mediante un rechazo HTTP 400.
+* **Gestión de Coordinadores:** 
+  - Se agregó el endpoint DELETE /api/usuarios/{id} con protección para no poder borrar al Administrador Principal.
+  - Se actualizó la vista para ocultar al Admin_CTIC de la lista y se agregó el botón para eliminar Coordinadores dinámicamente de la interfaz y la base de datos.
