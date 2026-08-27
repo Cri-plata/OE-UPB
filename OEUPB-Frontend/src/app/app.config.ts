@@ -1,12 +1,19 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+﻿import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { provideClientHydration } from '@angular/platform-browser';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+
+import { AuthRepository } from './domain/repositories/auth.repository';
+import { AuthImplementationRepository } from './data/repositories/auth-implementation.repository';
+import { jwtInterceptor } from './data/interceptors/jwt.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideClientHydration(),
-  ],
+    provideHttpClient(withInterceptors([jwtInterceptor])),
+    {
+      provide: AuthRepository,
+      useClass: AuthImplementationRepository
+    }
+  ]
 };

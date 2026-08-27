@@ -1,0 +1,56 @@
+﻿<div class="login-container">
+  <div class="login-card">
+    
+    <div class="logo-container">
+      <div class="logo-box">UPB</div>
+    </div>
+    
+    <h1 class="title">OEUPB</h1>
+    <p class="subtitle">Observatorio de Egresados UPB<br>Acceso para coordinadores</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Correo Institucional -->
+      <div class="form-group">
+        <input 
+          type="email" 
+          formControlName="correo" 
+          placeholder="Correo institucional"
+          class="form-control"
+          [class.is-invalid]="loginForm.get('correo')?.invalid && loginForm.get('correo')?.touched">
+        <div class="error-msg" *ngIf="loginForm.get('correo')?.hasError('required') && loginForm.get('correo')?.touched">
+          El correo es obligatorio.
+        </div>
+        <div class="error-msg" *ngIf="loginForm.get('correo')?.hasError('email') && loginForm.get('correo')?.touched">
+          Debe ser un correo válido.
+        </div>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-group">
+        <input 
+          type="password" 
+          formControlName="contrasena" 
+          placeholder="Contraseña"
+          class="form-control"
+          [class.is-invalid]="loginForm.get('contrasena')?.invalid && loginForm.get('contrasena')?.touched">
+        <div class="error-msg" *ngIf="loginForm.get('contrasena')?.hasError('required') && loginForm.get('contrasena')?.touched">
+          La contraseña es obligatoria.
+        </div>
+      </div>
+
+      <!-- Error Global -->
+      <div class="global-error" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Botón de Envío -->
+      <button type="submit" class="btn-primary" [disabled]="isLoading">
+        {{ isLoading ? 'Procesando...' : 'Iniciar sesión' }}
+      </button>
+
+      <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+      
+    </form>
+  </div>
+</div>

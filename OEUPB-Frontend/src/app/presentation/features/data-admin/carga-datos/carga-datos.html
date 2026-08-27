@@ -1,0 +1,97 @@
+﻿<div class="layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="content">
+    <header class="topbar">
+      <h1>Cargar Datos (Excel)</h1>
+    </header>
+
+    <div class="upload-container">
+      <form [formGroup]="cargaForm" (ngSubmit)="onSubmit()" class="upload-form">
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Momento de Medición *</label>
+            <select formControlName="momento">
+              <option value="">Seleccione el momento...</option>
+              <option value="M0">Momento 0 (Al graduarse)</option>
+              <option value="M1">Momento 1 (Al año de graduarse)</option>
+              <option value="M5">Momento 5 (A los 5 años de graduarse)</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Sede Académica *</label>
+            <select formControlName="sede">
+              <option value="">Seleccione la sede...</option>
+              <option value="1">Bucaramanga</option>
+              <option value="2">Medellín</option>
+            </select>
+          </div>
+        </div>
+
+        <div 
+          class="dropzone" 
+          [class.drag-over]="isDragging"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+          (click)="fileInput.click()"
+          *ngIf="!selectedFile && !uploadResult"
+        >
+          <div class="icon">📄</div>
+          <p>Arrastra tu archivo Excel aquí o haz clic para subir</p>
+          <span class="hint">Soporta .xlsx, .xls</span>
+          <input type="file" #fileInput (change)="onFileSelected($event)" accept=".xlsx, .xls" hidden>
+        </div>
+
+        <div class="file-preview" *ngIf="selectedFile">
+          <div class="file-info">
+            <span class="icon">📊</span>
+            <span>{{ selectedFile.name }}</span>
+          </div>
+          <button type="button" class="remove-btn" (click)="removeFile()" [disabled]="isUploading">✖ Cancelar</button>
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="cargaForm.invalid || !selectedFile || isUploading" *ngIf="!uploadResult">
+          {{ isUploading ? 'Procesando archivo...' : 'Cargar y Procesar' }}
+        </button>
+      </form>
+
+      <!-- Feedback Modal / Result Mockup -->
+      <div class="result-card" *ngIf="uploadResult">
+        <div class="result-header success" *ngIf="uploadResult.filasConError === 0">
+          <h2>✅ Carga Exitosa</h2>
+          <p>{{ uploadResult.filasCargadas }} registros guardados correctamente.</p>
+        </div>
+        
+        <div class="result-header warning" *ngIf="uploadResult.filasConError > 0">
+          <h2>⚠ Carga Parcial</h2>
+          <p>{{ uploadResult.filasCargadas }} registros guardados.</p>
+          <p class="error-count">{{ uploadResult.filasConError }} registros omitidos por errores.</p>
+        </div>
+
+        <table class="error-table" *ngIf="uploadResult.filasConError > 0">
+          <thead>
+            <tr>
+              <th>Fila Excel</th>
+              <th>Cédula</th>
+              <th>Motivo de Rechazo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let err of uploadResult.detallesErrores">
+              <td>{{ err.fila }}</td>
+              <td>{{ err.cedula }}</td>
+              <td><span class="badge error">{{ err.motivo }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <button type="button" class="btn-secondary" (click)="uploadResult = null">Cargar otro archivo</button>
+      </div>
+
+    </div>
+  </main>
+</div>
+

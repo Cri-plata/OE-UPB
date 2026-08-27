@@ -1,32 +1,32 @@
-/* ESTILOS GLOBALES - TEMA UPB */
+﻿/* ESTILOS GLOBALES - TEMA CLARO UPB (MVP) */
 :root {
   --upb-red: #C8102E;
-  --bg-dark: #121212;
-  --panel-bg: #1E1E1E;
-  --text-primary: #FFFFFF;
-  --text-secondary: #B3B3B3;
-  --gold-accent: #D4A373;
+  --bg-light: #f5f5f5;
+  --panel-bg: #ffffff;
+  --text-primary: #121212;
+  --text-secondary: #666666;
+  --border-color: #e0e0e0;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--bg-dark);
+  background-color: var(--bg-light);
   color: var(--text-primary);
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Estilos de scrollbar oscuros */
+/* Estilos de scrollbar claros */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-dark);
+  background: var(--bg-light);
 }
 ::-webkit-scrollbar-thumb {
-  background: #444;
+  background: #c1c1c1;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {

@@ -1,0 +1,48 @@
+﻿<div class="layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="content">
+    <header class="topbar">
+      <h1>Reporte General de Egresados</h1>
+      <div class="filters">
+        <select><option>Todas las facultades</option></select>
+        <select><option>Todos los programas</option></select>
+      </div>
+    </header>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <h3>Total Egresados</h3>
+        <p class="value" *ngIf="kpis.totalEgresados > 0">{{ kpis.totalEgresados }}</p>
+        <p class="loading" *ngIf="kpis.totalEgresados === 0">Cargando...</p>
+      </div>
+      <div class="kpi-card">
+        <h3>Demora Promedio (Meses)</h3>
+        <p class="value" *ngIf="kpis.demoraPromedio > 0">{{ kpis.demoraPromedio }}</p>
+        <p class="loading" *ngIf="kpis.demoraPromedio === 0">Cargando...</p>
+      </div>
+      <div class="kpi-card">
+        <h3>Satisfacción (1-5)</h3>
+        <p class="value" *ngIf="kpis.satisfaccion > 0">{{ kpis.satisfaccion }}</p>
+        <p class="loading" *ngIf="kpis.satisfaccion === 0">Cargando...</p>
+      </div>
+      <div class="kpi-card highlight">
+        <h3>Empleabilidad</h3>
+        <p class="value" *ngIf="kpis.empleabilidad > 0">{{ kpis.empleabilidad }}%</p>
+        <p class="loading" *ngIf="kpis.empleabilidad === 0">Cargando...</p>
+      </div>
+    </div>
+
+    <!-- Placeholder funcional para la gráfica central -->
+    <div class="chart-container">
+      <h3>Distribución por Cohorte (Espacio para Chart.js)</h3>
+      <div class="chart-mock">
+        <div class="bar" style="height: 40%;"></div>
+        <div class="bar" style="height: 70%;"></div>
+        <div class="bar" style="height: 100%;"></div>
+        <div class="bar" style="height: 60%;"></div>
+        <div class="bar" style="height: 85%;"></div>
+      </div>
+    </div>
+  </main>
+</div>
