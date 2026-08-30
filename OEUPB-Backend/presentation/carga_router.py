@@ -1,5 +1,6 @@
 ﻿from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
+from domain.models import Egresado, Medicion
 from infrastructure.database import get_db
 import pandas as pd
 import io
@@ -82,7 +83,7 @@ async def procesar_excel(
     casos_resueltos = total_inicial - total_final
 
     # Guardar en Base de Datos MySQL
-    from domain.models import Egresado, Medicion
+    
     import numpy as np
 
     # Limpiar NaN de Pandas para que sean compatibles con JSON/SQLAlchemy
@@ -137,6 +138,42 @@ async def procesar_excel(
     return CargaResponse(mensaje=mensaje_exito, errores=[])
 
 
+
+
+
+
+
+@router.get("/historial")
+def get_historial(db: Session = Depends(get_db)):
+    from sqlalchemy import func
+    # Consultar cuántas mediciones hay por cada momento
+    resultados = db.query(Medicion.momento, Medicion.anio, func.count(Medicion.id)).group_by(Medicion.momento, Medicion.anio).all()
+    
+    historial = []
+    for momento, anio, cantidad in resultados:
+        # Para datos antiguos que no tenían año, mostramos N/A
+        anio_str = anio if anio else "N/A"
+        historial.append({
+            "momento": momento,
+            "anio": anio,
+            "nombre": f"Momento {momento} - {anio_str}",
+            "registros": cantidad,
+            "estado": "Procesado"
+        })
+    return historial
+
+@router.delete("/momento/{momento}/{anio}")
+def eliminar_momento(momento: int, anio: int, db: Session = Depends(get_db)):
+    # Eliminar todas las encuestas de ese momento
+    db.query(Medicion).filter(Medicion.momento == momento, Medicion.anio == anio).delete()
+    db.commit()
+    
+    # Opcional: Eliminar egresados huérfanos que ya no tengan ninguna medición
+    from sqlalchemy import text
+    db.execute(text("DELETE FROM egresados WHERE numero_documento NOT IN (SELECT egresado_documento FROM mediciones)"))
+    db.commit()
+    
+    return {"mensaje": f"Momento {momento} eliminado correctamente."}
 
 
 

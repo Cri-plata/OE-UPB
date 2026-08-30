@@ -187,9 +187,9 @@
   },
   "active": "5edf525f0b02de4c",
   "lastOpenFiles": [
-    "BACKLOG.md",
-    "CHANGELOG.md",
     "CLAUDE.md",
+    "CHANGELOG.md",
+    "BACKLOG.md",
     "architecture/00-proyecto.md",
     "architecture/04-modelo-datos.md",
     "architecture/03-apicontract.md",

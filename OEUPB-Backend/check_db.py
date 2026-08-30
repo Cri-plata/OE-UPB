@@ -1,15 +1,16 @@
-﻿import sys
-import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from infrastructure.database import SessionLocal
-from domain.models import Usuario
+﻿from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from domain.models import Egresado, Medicion
 
-def check_db():
-    db = SessionLocal()
-    usuarios = db.query(Usuario).all()
-    for u in usuarios:
-        print(f"ID: {u.id} - Nombre: {u.nombre} - Correo: {u.correo} - Rol: {u.rol}")
-    db.close()
+engine = create_engine("mysql+pymysql://root:@localhost/oeupb")
+Session = sessionmaker(bind=engine)
+session = Session()
 
-if __name__ == "__main__":
-    check_db()
+total = session.query(Egresado).count()
+print(f"Total Egresados: {total}")
+
+medicion = session.query(Medicion).first()
+if medicion:
+    print(f"Llaves en la primera medición: {list(medicion.respuestas.keys())}")
+else:
+    print("No hay mediciones.")

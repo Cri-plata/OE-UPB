@@ -2,47 +2,96 @@
   <app-sidebar></app-sidebar>
   
   <main class="content">
-    <header class="topbar">
-      <h1>Reporte General de Egresados</h1>
-      <div class="filters">
-        <select><option>Todas las facultades</option></select>
-        <select><option>Todos los programas</option></select>
+    <div class="top-banner">
+      <div class="banner-text">
+        <h1>Reporte General de Egresados</h1>
+        <p>Visión global de los indicadores clave de empleabilidad.</p>
       </div>
-    </header>
-
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <h3>Total Egresados</h3>
-        <p class="value" *ngIf="kpis.totalEgresados > 0">{{ kpis.totalEgresados }}</p>
-        <p class="loading" *ngIf="kpis.totalEgresados === 0">Cargando...</p>
-      </div>
-      <div class="kpi-card">
-        <h3>Demora Promedio (Meses)</h3>
-        <p class="value" *ngIf="kpis.demoraPromedio > 0">{{ kpis.demoraPromedio }}</p>
-        <p class="loading" *ngIf="kpis.demoraPromedio === 0">Cargando...</p>
-      </div>
-      <div class="kpi-card">
-        <h3>Satisfacción (1-5)</h3>
-        <p class="value" *ngIf="kpis.satisfaccion > 0">{{ kpis.satisfaccion }}</p>
-        <p class="loading" *ngIf="kpis.satisfaccion === 0">Cargando...</p>
-      </div>
-      <div class="kpi-card highlight">
-        <h3>Empleabilidad</h3>
-        <p class="value" *ngIf="kpis.empleabilidad > 0">{{ kpis.empleabilidad }}%</p>
-        <p class="loading" *ngIf="kpis.empleabilidad === 0">Cargando...</p>
+      <div class="upb-logo">
+        <img src="/escudo-upb.png" alt="Escudo UPB" class="escudo-img">
       </div>
     </div>
 
-    <!-- Placeholder funcional para la gráfica central -->
-    <div class="chart-container">
-      <h3>Distribución por Cohorte (Espacio para Chart.js)</h3>
-      <div class="chart-mock">
-        <div class="bar" style="height: 40%;"></div>
-        <div class="bar" style="height: 70%;"></div>
-        <div class="bar" style="height: 100%;"></div>
-        <div class="bar" style="height: 60%;"></div>
-        <div class="bar" style="height: 85%;"></div>
+    <div class="dashboard-container">
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          <div class="kpi-data">
+            <h3>Total Egresados</h3>
+            <h2>{{ kpis?.total_egresados || 'Cargando...' }}</h2>
+            <span class="trend up">Registrados en el sistema</span>
+          </div>
+        </div>
+        
+        <div class="kpi-card">
+          <div class="kpi-icon green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          </div>
+          <div class="kpi-data">
+            <h3>Tasa de Empleabilidad</h3>
+            <h2>{{ kpis?.tasa_empleabilidad || '...' }}%</h2>
+            <span class="trend up">Actualmente trabajando</span>
+          </div>
+        </div>
+        
+        <div class="kpi-card">
+          <div class="kpi-icon red">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+          </div>
+          <div class="kpi-data">
+            <h3>Promedio Salarial</h3>
+            <h2>{{ kpis?.promedio_salarial || '...' }} SMLV</h2>
+            <span class="trend">Salarios Mínimos Legales Vigentes</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráficas -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h2>Distribución por Programa</h2>
+            <select class="chart-type-select" (change)="changePieChartType($event)">
+              <option value="doughnut">Dona (Por defecto)</option>
+              <option value="pie">Pastel</option>
+              <option value="bar">Barras Verticales</option>
+              <option value="line">Líneas</option>
+            </select>
+          </div>
+          <div class="chart-wrapper" *ngIf="isChartReady">
+            <input type="color" #colorPickerPie style="display: none;" (change)="onColorChangePie($event)">
+            <canvas baseChart (chartClick)="onChartClickPie($event)"
+              [data]="pieChartData"
+              [type]="pieChartType"
+              [options]="pieChartOptions">
+            </canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h2>Nivel de Satisfacción (1 al 4)</h2>
+            <select class="chart-type-select" (change)="changeBarChartType($event)">
+              <option value="bar">Barras (Por defecto)</option>
+              <option value="line">Líneas de Tendencia</option>
+              <option value="pie">Pastel</option>
+            </select>
+          </div>
+          <div class="chart-wrapper" *ngIf="isChartReady">
+            <input type="color" #colorPickerBar style="display: none;" (change)="onColorChangeBar($event)">
+            <canvas baseChart (chartClick)="onChartClickBar($event)"
+              [data]="barChartData"
+              [type]="barChartType"
+              [options]="barChartOptions">
+            </canvas>
+          </div>
+        </div>
       </div>
     </div>
   </main>
 </div>
+
+

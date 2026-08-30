@@ -31,7 +31,9 @@ class Medicion(Base):
     id = Column(Integer, primary_key=True, index=True)
     egresado_documento = Column(String(50), ForeignKey("egresados.numero_documento"))
     momento = Column(Integer) # 0, 1, o 5
+    anio = Column(Integer) # Año de aplicación de la encuesta
     sede_id = Column(Integer) # Sede del coordinador
     respuestas = Column(JSON) # Aquí guardamos las 90+ columnas del Excel dinámicamente
     
     egresado = relationship("Egresado", back_populates="mediciones")
+

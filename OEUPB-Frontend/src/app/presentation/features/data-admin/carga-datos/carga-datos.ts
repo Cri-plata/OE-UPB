@@ -1,4 +1,4 @@
-﻿import { Component, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
@@ -11,18 +11,22 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './carga-datos.html',
   styleUrls: ['./carga-datos.scss']
 })
-export class CargaDatosComponent {
+export class CargaDatosComponent implements OnInit {
+  historial: any[] = [];
   uploadForm: FormGroup;
   selectedFile: File | null = null;
   erroresTabla: any[] = [];
   mensajeValidacion: string | null = null;
   isSubmitting = false;
+  aniosDisponibles: number[] = [];
+  mostrarInputAnioManual = false;
   
   private readonly API_URL = 'http://localhost:8000/api/carga/excel';
 
   constructor(private fb: FormBuilder, private http: HttpClient, private cdr: ChangeDetectorRef) {
     this.uploadForm = this.fb.group({
-      momento: ['', Validators.required]
+      momento: ['', Validators.required],
+      anio: ['', Validators.required]
     });
   }
 
@@ -45,6 +49,7 @@ export class CargaDatosComponent {
       const formData = new FormData();
       formData.append('file', this.selectedFile);
       formData.append('momento', this.uploadForm.get('momento')?.value);
+    formData.append('anio', this.uploadForm.get('anio')?.value);
       
 
       this.http.post<any>(this.API_URL, formData).subscribe({
@@ -64,8 +69,47 @@ export class CargaDatosComponent {
       alert('Faltan datos por seleccionar o no se ha adjuntado el archivo.');
     }
   }
+  ngOnInit() {
+    this.cargarHistorial();
+    this.generarAnios();
+  }
+
+  cargarHistorial() {
+    this.http.get<any[]>('http://localhost:8000/api/carga/historial').subscribe({
+      next: (data) => {
+        this.historial = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error("Error cargando historial", err)
+    });
+  }
+
+  eliminarMomento(momento: number, anio: number) {
+    if(confirm(`¿Estás seguro de que deseas eliminar permanentemente todos los datos y encuestas del Momento ${momento} del ${anio}?`)) {
+      this.http.delete(`http://localhost:8000/api/carga/momento/${momento}/${anio}`).subscribe({
+        next: () => {
+          alert(`Momento ${momento} del ${anio} eliminado exitosamente.`);
+          this.cargarHistorial();
+    this.generarAnios();
+        },
+        error: (err) => alert("Error eliminando el archivo.")
+      });
+    }
+  }
+  generarAnios() {
+    const currentYear = new Date().getFullYear();
+    // Generar desde hace 5 años hasta el próximo año
+    for (let i = currentYear - 5; i <= currentYear; i++) {
+      this.aniosDisponibles.push(i);
+    }
+  }
+
+  onAnioChange(event: any) {
+    if (event.target.value === 'otro') {
+      this.mostrarInputAnioManual = true;
+      this.uploadForm.get('anio')?.setValue('');
+    }
+  }
 }
-
-
 
 

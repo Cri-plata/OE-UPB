@@ -36,15 +36,29 @@
         <div class="card">
           <h2>Cargar Datos (Excel)</h2>
           <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()">
-            <div class="form-row">
-              <div class="form-group full">
+            <div class="form-row" style="display: flex; gap: 20px; width: 100%; margin-bottom: 20px;">
+              <div class="form-group" style="flex: 1;">
                 <label>Momento de Medición *</label>
-                <select formControlName="momento">
-                  <option value="">Seleccione el momento...</option>
-                  <option value="0">Momento 0 (Al graduarse)</option>
-                  <option value="1">Momento 1 (1 año después)</option>
-                  <option value="5">Momento 5 (5 años después)</option>
+                <select formControlName="momento" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                  <option value="">Seleccione...</option>
+                  <option value="0">Momento 0</option>
+                  <option value="1">Momento 1</option>
+                  <option value="5">Momento 5</option>
                 </select>
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label>A&ntilde;o de Aplicaci&oacute;n *</label>
+                
+                <select *ngIf="!mostrarInputAnioManual" (change)="onAnioChange($event)" formControlName="anio" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                  <option value="">Seleccione el a&ntilde;o...</option>
+                  <option value="otro">Otro a&ntilde;o (Ingresar manualmente)...</option>
+                  <option *ngFor="let a of aniosDisponibles" [value]="a">{{ a }}</option>
+                </select>
+
+                <div *ngIf="mostrarInputAnioManual" style="display: flex; gap: 8px;">
+                  <input type="number" formControlName="anio" placeholder="Ej. 2019" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                  <button type="button" (click)="mostrarInputAnioManual = false; uploadForm.get('anio')?.setValue('')" style="padding: 10px; border-radius: 6px; background: #6c757d; color: white; border: none; cursor: pointer; font-weight: bold;">X</button>
+                </div>
               </div>
             </div>
 
@@ -103,9 +117,48 @@
           </div>
         </div>
       </div>
+      <div class="card historial-card">
+        <div class="card-header">
+          <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Historial de Cargas</h3>
+        </div>
+        <div class="card-body">
+          <table class="historial-table">
+            <thead>
+              <tr>
+                <th>Archivo Procesado</th>
+                <th>Registros Totales</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of historial">
+                <td><strong>{{ item.nombre }}</strong></td>
+                <td>{{ item.registros }} egresados</td>
+                <td><span class="badge success">{{ item.estado }}</span></td>
+                <td>
+                  <button class="btn-delete" (click)="eliminarMomento(item.momento, item.anio)" title="Eliminar los datos de este momento">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="historial.length === 0">
+                <td colspan="4" class="text-center empty-state">No hay archivos cargados en el sistema.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </main>
 </div>
+
+
+
+
+
+
+
 
 
 

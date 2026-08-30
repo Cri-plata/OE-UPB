@@ -104,3 +104,12 @@ select:focus { outline: none; border-color: #ba0c2f; box-shadow: 0 0 0 3px rgba(
 .card h2 { margin-top: 0; font-size: 20px; color: #212529; margin-bottom: 24px; }
 
 .escudo-img { width: 55px; height: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+
+.historial-card { margin-top: 24px; grid-column: 1 / -1; }
+.historial-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.historial-table th { text-align: left; padding: 12px; border-bottom: 2px solid #e9ecef; color: #495057; font-size: 14px; }
+.historial-table td { padding: 16px 12px; border-bottom: 1px solid #e9ecef; vertical-align: middle; color: #212529; }
+.badge.success { background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.btn-delete { background: none; border: none; color: #ba0c2f; cursor: pointer; padding: 8px; border-radius: 4px; transition: 0.2s; }
+.btn-delete:hover { background: #ffe3e3; }
+.empty-state { padding: 30px !important; color: #6c757d; font-style: italic; }
