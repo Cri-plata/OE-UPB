@@ -1,0 +1,64 @@
+﻿<div class="dashboard-container">
+    <app-sidebar></app-sidebar>
+    <div class="main-content">
+      <header class="header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h2>Directorio de Egresados</h2>
+          <p>Busca e inspecciona el historial de encuestas de cada egresado.</p>
+        </div>
+        <img src="/escudo-upb.png" alt="Escudo UPB" style="height: 50px; width: auto; object-fit: contain;">
+      </header>
+  
+      <div class="filters-card">
+        <div class="filter-group">
+          <label>Buscar por Nombre o Cédula</label>
+          <input type="text" [(ngModel)]="terminoBusqueda" (keyup.enter)="onFiltroChange()" placeholder="Ej: Juan Perez o 10394..." class="modern-input">
+        </div>
+        <div class="filter-group">
+          <label>Filtrar por Programa</label>
+          <select [(ngModel)]="programaSeleccionado" (change)="onFiltroChange()" class="modern-input">
+            <option value="">Todos los Programas</option>
+            <option *ngFor="let prog of programasDisponibles" [value]="prog">{{prog}}</option>
+          </select>
+        </div>
+        <div class="filter-action">
+          <button (click)="onFiltroChange()" class="btn-primary">Buscar</button>
+        </div>
+      </div>
+  
+      <div class="table-container">
+        <div class="loading-overlay" *ngIf="cargando">Cargando datos...</div>
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Documento</th>
+              <th>Nombre Completo</th>
+              <th>Programa Académico</th>
+              <th>Fecha Grado</th>
+              <th>Encuestas Respondidas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of egresados" (click)="verPerfil(e.documento)" class="clickable-row" title="Ver Perfil Completo">
+              <td>{{ e.documento }}</td>
+              <td class="bold-text">{{ e.nombre_completo }}</td>
+              <td>{{ e.programa }}</td>
+              <td>{{ e.fecha_grado }}</td>
+              <td><span class="badge">{{ e.encuestas }}</span></td>
+            </tr>
+            <tr *ngIf="egresados.length === 0 && !cargando">
+              <td colspan="5" class="empty-state">No se encontraron egresados con los filtros seleccionados.</td>
+            </tr>
+          </tbody>
+        </table>
+  
+        <div class="pagination">
+          <button (click)="cambiarPagina(-1)" [disabled]="paginaActual === 1 || cargando">Anterior</button>
+          <span>Página {{ paginaActual }} de {{ getTotalPaginas() }} ({{ totalRegistros }} registros totales)</span>
+          <button (click)="cambiarPagina(1)" [disabled]="paginaActual === getTotalPaginas() || cargando">Siguiente</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+

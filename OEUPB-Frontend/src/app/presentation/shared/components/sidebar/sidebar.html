@@ -9,6 +9,7 @@
     <ng-container *ngIf="userRole !== 'Admin_CTIC'">
       <a routerLink="/reporte" routerLinkActive="active" class="nav-item">Reporte general</a>
       <a routerLink="/tendencias" routerLinkActive="active" class="nav-item">Tendencias</a>
+      <a routerLink="/directorio" routerLinkActive="active" class="nav-item">Directorio</a>
     </ng-container>
 
     <!-- Solo visible para Coordinadores -->
@@ -26,4 +27,6 @@
     <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
   </div>
 </aside>
+
+
 

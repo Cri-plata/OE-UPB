@@ -26,5 +26,11 @@ export const routes: Routes = [
     path: 'perfil/:cedula', 
     loadComponent: () => import('./presentation/features/profile/ficha-egresado/ficha-egresado').then(m => m.FichaEgresado)
   },
+  { 
+    path: 'directorio', 
+    loadComponent: () => import('./presentation/features/dashboard/directorio/directorio').then(m => m.DirectorioComponent)
+  },
   { path: '**', redirectTo: 'login' }
 ];
+
+

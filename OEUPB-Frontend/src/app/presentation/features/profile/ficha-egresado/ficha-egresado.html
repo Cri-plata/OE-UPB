@@ -1,74 +1,67 @@
-<div class="profile-container">
+﻿<div class="dashboard-container">
+    <app-sidebar></app-sidebar>
+    <div class="main-content">
+      
+      <div class="top-bar">
+        <button class="back-btn" (click)="volver()">
+          &#8592; Volver al Directorio
+        </button>
+        <img src="/escudo-upb.png" alt="UPB" class="logo-mini">
+      </div>
   
-  <!-- Back navigation -->
-  <button class="back-btn" (click)="volver()">
-    <span>←</span> Ficha del egresado
-  </button>
-
-  <!-- Profile Header -->
-  <header class="profile-header">
-    <div class="profile-info">
-      <div class="avatar">MT</div>
-      <div class="details">
-        <h2>María Torres Gil</h2>
-        <p>Ingeniería de Sistemas • Sede principal • Cohorte 2023</p>
-      </div>
-    </div>
-    <div class="status-badge">Empleada</div>
-  </header>
-
-  <!-- Tabs Navigation -->
-  <nav class="tabs-nav">
-    <button class="tab active">Resumen</button>
-    <button class="tab">Momentos</button>
-    <button class="tab">Historial</button>
-  </nav>
-
-  <!-- Summary Grid -->
-  <section class="summary-grid">
-    <div class="info-card">
-      <span class="icon">🪪</span>
-      <p class="label">Cédula</p>
-      <h3>{{ cedula }}</h3>
-    </div>
-    <div class="info-card">
-      <span class="icon">💼</span>
-      <p class="label">Lugar de trabajo</p>
-      <h3>Bancolombia S.A.</h3>
-    </div>
-    <div class="info-card">
-      <span class="icon">🎓</span>
-      <p class="label">¿Estudia actualmente?</p>
-      <h3>Sí — Maestría en Analítica</h3>
-    </div>
-    <div class="info-card">
-      <span class="icon">📍</span>
-      <p class="label">Ciudad</p>
-      <h3>Medellín</h3>
-    </div>
-  </section>
-
-  <!-- Timeline -->
-  <section class="timeline-section card">
-    <h4>Línea de tiempo de momentos</h4>
-    <div class="timeline">
-      <div class="timeline-step completed">
-        <div class="dot"></div>
-        <p>Momento 0</p>
-      </div>
-      <div class="timeline-line completed-line"></div>
+      <div class="loading-overlay" *ngIf="cargando">Cargando perfil...</div>
       
-      <div class="timeline-step completed">
-        <div class="dot"></div>
-        <p>Momento 1</p>
-      </div>
-      <div class="timeline-line pending-line"></div>
-      
-      <div class="timeline-step pending">
-        <div class="dot"></div>
-        <p>Momento 5</p>
+      <div class="error-msg" *ngIf="error">{{ error }}</div>
+  
+      <div class="profile-layout" *ngIf="perfil && !cargando">
+        
+        <!-- Tarjeta Izquierda: Info Básica -->
+        <div class="card basic-info-card">
+          <div class="avatar-circle">
+            {{ perfil.nombre_completo.charAt(0) }}
+          </div>
+          <h2>{{ perfil.nombre_completo }}</h2>
+          <p class="cedula">C.C. {{ perfil.documento }}</p>
+          
+          <hr>
+          
+          <div class="info-row">
+            <span class="label">Programa:</span>
+            <span class="value">{{ perfil.programa }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Fecha de Grado:</span>
+            <span class="value">{{ perfil.fecha_grado }}</span>
+          </div>
+        </div>
+  
+        <!-- Tarjeta Derecha: Historial Encuestas -->
+        <div class="card surveys-card">
+          <h3>Trayectoria de Encuestas (OLE)</h3>
+          <p class="subtitle">Resumen de respuestas proporcionadas por el egresado en los diferentes momentos.</p>
+  
+          <div class="timeline">
+            <div class="timeline-item" *ngFor="let m of perfil.encuestas">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="moment-header">
+                  <h4>Momento {{ m.momento }}</h4>
+                  <span class="year-badge">{{ m.anio ? m.anio : 'N/A' }}</span>
+                </div>
+                <div class="survey-details">
+                  <p><strong>Estado Laboral:</strong> {{ m.empleabilidad }}</p>
+                  <p><strong>Salario Declarado:</strong> {{ m.salario }}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="empty-timeline" *ngIf="perfil.encuestas.length === 0">
+              No hay encuestas registradas para este egresado.
+            </div>
+          </div>
+  
+        </div>
+  
       </div>
     </div>
-  </section>
-
-</div>
+  </div>

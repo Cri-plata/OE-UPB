@@ -21,12 +21,20 @@ class CargaResponse(BaseModel):
 @router.post("/excel", response_model=CargaResponse)
 async def procesar_excel(
     momento: int = Form(...),
-
+    anio: int = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
     if not file.filename.endswith(('.xlsx', '.xls')):
         raise HTTPException(status_code=400, detail="El archivo debe ser un Excel (.xlsx o .xls)")
+
+    # REGLA DE NEGOCIO: Evitar duplicidad de cargas
+    carga_existente = db.query(Medicion).filter(Medicion.momento == momento, Medicion.anio == anio).first()
+    if carga_existente:
+        raise HTTPException(
+            status_code=409, 
+            detail=f"Ya existen registros cargados para el Momento {momento} del año {anio}. Por favor, elimine el archivo desde el Historial antes de volver a cargarlo."
+        )
 
     # Leer el archivo a la memoria
     contents = await file.read()
@@ -52,20 +60,16 @@ async def procesar_excel(
     # Limpiar datos: Quitar espacios en blanco
     df.columns = df.columns.str.strip()
 
-    # Validar fila por fila (Simulación de reglas de negocio)
-    for index, row in df.iterrows():
-        fila_real = index + 2 # +2 por el encabezado y porque empieza en 0
-        
-        # Validación de cédula vacía
-        if pd.isna(row.get('NUMERO_DOCUMENTO')):
-            errores.append(ErrorFila(fila=fila_real, columna="NUMERO_DOCUMENTO", error="La cédula no puede estar vacía"))
+    # REGLA DE LIMPIEZA: Eliminar filas basura del final del Excel
+    # Reemplazar celdas con solo espacios por NaN
+    import numpy as np
+    df.replace(r'^\s*$', np.nan, regex=True, inplace=True)
+    
+    # Si la fila no tiene ni Cdula ni Programa, es casi seguro una fila de totales o basura
+    df.dropna(subset=['NUMERO_DOCUMENTO', 'PROGRAMA'], how='all', inplace=True)
 
-        # Validación de nombre vacío
-        if pd.isna(row.get('PRIMER NOMBRE')):
-            errores.append(ErrorFila(fila=fila_real, columna="PRIMER NOMBRE", error="El nombre no puede estar vacío"))
 
-    if errores:
-        return CargaResponse(mensaje="Se encontraron errores estructurales (vacíos o formato)", errores=errores)
+    
 
     total_inicial = len(df)
 
@@ -74,11 +78,17 @@ async def procesar_excel(
     df['FECHA_GRADO'] = pd.to_datetime(df['FECHA_GRADO'], errors='coerce')
     
     # 2. Ordenar por Cédula y luego por Fecha de Grado (de la más antigua a la más reciente)
-    df = df.sort_values(by=['NUMERO_DOCUMENTO', 'FECHA_GRADO'])
+
+    # 2. Separar anonimos de identificados para no borrar anonimos por error
+    df_con_cedula = df.dropna(subset=['NUMERO_DOCUMENTO'])
+    df_anonimos = df[df['NUMERO_DOCUMENTO'].isna()]
+
+    # 3. Ordenar y eliminar duplicados SOLO en los que tienen cedula
+    df_con_cedula = df_con_cedula.sort_values(by=['NUMERO_DOCUMENTO', 'FECHA_GRADO'])
+    df_con_cedula = df_con_cedula.drop_duplicates(subset=['NUMERO_DOCUMENTO'], keep='last')
     
-    # 3. Eliminar duplicados manteniendo solo la ÚLTIMA fila (la fecha más reciente)
-    df = df.drop_duplicates(subset=['NUMERO_DOCUMENTO'], keep='last')
-    
+    # 4. Volver a unir
+    df = pd.concat([df_con_cedula, df_anonimos], ignore_index=True)
     total_final = len(df)
     casos_resueltos = total_inicial - total_final
 
@@ -93,27 +103,41 @@ async def procesar_excel(
     sede_coordinador = 1
 
     for index, row in df.iterrows():
-        doc = str(row.get('NUMERO_DOCUMENTO'))
+        # Manejo de Cdulas vacas (Annimos)
+        is_empty_doc = pd.isna(row.get('NUMERO_DOCUMENTO')) or str(row.get('NUMERO_DOCUMENTO')).strip() == ''
         
-        # 1. Crear o Actualizar al Egresado
-        egresado = db.query(Egresado).filter(Egresado.numero_documento == doc).first()
-        if not egresado:
-            egresado = Egresado(
-                numero_documento=doc,
-                primer_nombre=str(row.get('PRIMER NOMBRE', '')),
-                primer_apellido=str(row.get('PRIMER_APELLIDO', '')),
-                programa=str(row.get('PROGRAMA', '')),
-                fecha_grado=row.get('FECHA_GRADO') if pd.notnull(row.get('FECHA_GRADO')) else None
-            )
-            db.add(egresado)
-        else:
-            # Actualizamos fecha de grado si es más reciente
-            if row.get('FECHA_GRADO') and pd.notnull(row.get('FECHA_GRADO')):
-                if not egresado.fecha_grado or row.get('FECHA_GRADO') > egresado.fecha_grado:
-                    egresado.fecha_grado = row.get('FECHA_GRADO')
-                    egresado.programa = str(row.get('PROGRAMA', ''))
+        doc = None
+        if not is_empty_doc:
+            doc = str(row.get('NUMERO_DOCUMENTO'))
+            if doc.endswith('.0'):
+                doc = doc[:-2]
+                
+        # 1. Crear o Actualizar al Egresado SOLO si hay cdula
+        if doc:
+            egresado = db.query(Egresado).filter(Egresado.numero_documento == doc).first()
+            if not egresado:
+                
+                # Manejo de Nombres vacos o sin segundo nombre
+                p_nombre = str(row.get('PRIMER NOMBRE', '')) if not pd.isna(row.get('PRIMER NOMBRE')) else "Sin Nombre"
+                p_apellido = str(row.get('PRIMER_APELLIDO', '')) if not pd.isna(row.get('PRIMER_APELLIDO')) else ""
+                prog = str(row.get('PROGRAMA', '')) if not pd.isna(row.get('PROGRAMA')) else "Sin Programa"
+                
+                egresado = Egresado(
+                    numero_documento=doc,
+                    primer_nombre=p_nombre,
+                    primer_apellido=p_apellido,
+                    programa=prog,
+                    fecha_grado=row.get('FECHA_GRADO') if pd.notnull(row.get('FECHA_GRADO')) else None
+                )
+                db.add(egresado)
+            else:
+                # Actualizamos fecha de grado si es mas reciente
+                if row.get('FECHA_GRADO') and pd.notnull(row.get('FECHA_GRADO')):
+                    if not egresado.fecha_grado or row.get('FECHA_GRADO') > egresado.fecha_grado:
+                        egresado.fecha_grado = row.get('FECHA_GRADO')
+                        
+            db.commit() # Aseguramos que el egresado exista para la llave foranea
 
-        db.commit() # Aseguramos que el egresado exista para la llave foránea
         
         # 2. Guardar la medición con todas sus respuestas en JSON
         # Convertimos las fechas a string para el JSON
@@ -124,6 +148,7 @@ async def procesar_excel(
         medicion = Medicion(
             egresado_documento=doc,
             momento=momento,
+            anio=anio,
             sede_id=sede_coordinador,
             respuestas=respuestas_dict
         )
@@ -163,9 +188,12 @@ def get_historial(db: Session = Depends(get_db)):
     return historial
 
 @router.delete("/momento/{momento}/{anio}")
-def eliminar_momento(momento: int, anio: int, db: Session = Depends(get_db)):
+def eliminar_momento(momento: int, anio: str, db: Session = Depends(get_db)):
     # Eliminar todas las encuestas de ese momento
-    db.query(Medicion).filter(Medicion.momento == momento, Medicion.anio == anio).delete()
+    if anio == "null" or anio == "N/A" or anio == "None":
+        db.query(Medicion).filter(Medicion.momento == momento, Medicion.anio.is_(None)).delete(synchronize_session=False)
+    else:
+        db.query(Medicion).filter(Medicion.momento == momento, Medicion.anio == int(anio)).delete(synchronize_session=False)
     db.commit()
     
     # Opcional: Eliminar egresados huérfanos que ya no tengan ninguna medición
@@ -174,6 +202,11 @@ def eliminar_momento(momento: int, anio: int, db: Session = Depends(get_db)):
     db.commit()
     
     return {"mensaje": f"Momento {momento} eliminado correctamente."}
+
+
+
+
+
 
 
 

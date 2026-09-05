@@ -4,6 +4,7 @@ from presentation.auth_router import router as auth_router
 from presentation.usuarios_router import router as usuarios_router
 from presentation.carga_router import router as carga_router
 from presentation.reportes_router import router as reportes_router
+from presentation.directorio_router import router as directorio_router
 
 app = FastAPI(
     title="OE UPB - Observatorio de Egresados",
@@ -25,10 +26,13 @@ app.include_router(auth_router)
 app.include_router(usuarios_router)
 app.include_router(carga_router)
 app.include_router(reportes_router)
+app.include_router(directorio_router)
 
 @app.get("/")
 def root():
     return {"mensaje": "El Backend de OE UPB está funcionando correctamente."}
+
+
 
 
 
