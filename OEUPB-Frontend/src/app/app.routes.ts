@@ -30,6 +30,10 @@ export const routes: Routes = [
     path: 'directorio', 
     loadComponent: () => import('./presentation/features/dashboard/directorio/directorio').then(m => m.DirectorioComponent)
   },
+  { 
+    path: 'mi-perfil', 
+    loadComponent: () => import('./presentation/features/profile/perfil-usuario/perfil-usuario').then(m => m.PerfilUsuarioComponent)
+  },
   { path: '**', redirectTo: 'login' }
 ];
 

@@ -2,6 +2,7 @@
 from sqlalchemy.orm import Session
 from domain.models import Egresado, Medicion
 from infrastructure.database import get_db
+from application.auth_service import get_current_user
 import pandas as pd
 import io
 from pydantic import BaseModel
@@ -23,7 +24,8 @@ async def procesar_excel(
     momento: int = Form(...),
     anio: int = Form(...),
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
     if not file.filename.endswith(('.xlsx', '.xls')):
         raise HTTPException(status_code=400, detail="El archivo debe ser un Excel (.xlsx o .xls)")
@@ -99,8 +101,8 @@ async def procesar_excel(
     # Limpiar NaN de Pandas para que sean compatibles con JSON/SQLAlchemy
     df = df.replace({np.nan: None})
 
-    # Extraemos la sede (hardcodeada a 1 por ahora, luego vendrá del token JWT)
-    sede_coordinador = 1
+    # Extraemos la sede del token JWT
+    sede_coordinador = current_user.get('sede_id') or 1
 
     for index, row in df.iterrows():
         # Manejo de Cdulas vacas (Annimos)

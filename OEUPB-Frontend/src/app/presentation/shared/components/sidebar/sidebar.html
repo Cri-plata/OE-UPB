@@ -21,12 +21,15 @@
     <ng-container *ngIf="userRole === 'Admin_CTIC'">
       <a routerLink="/admin-usuarios" routerLinkActive="active" class="nav-item">Administrar Usuarios</a>
     </ng-container>
+    <!-- Perfil General -->
+    <a routerLink="/mi-perfil" routerLinkActive="active" class="nav-item">Mi Perfil</a>
   </nav>
 
   <div class="bottom-menu">
     <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
   </div>
 </aside>
+
 
 
 

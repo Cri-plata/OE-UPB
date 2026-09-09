@@ -1,6 +1,7 @@
 ﻿from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from infrastructure.database import get_db
+from application.auth_service import get_current_user
 from domain.models import Egresado, Medicion
 from pydantic import BaseModel
 import re
@@ -40,7 +41,7 @@ def extraer_salario(texto):
     return None
 
 @router.get("/general", response_model=KpisResponse)
-def get_reporte_general(db: Session = Depends(get_db)):
+def get_reporte_general(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     total = db.query(Egresado).count()
     
     programas = db.query(Egresado.programa).all()
@@ -52,7 +53,7 @@ def get_reporte_general(db: Session = Depends(get_db)):
         else:
             dist[prog] = 1
             
-    mediciones = db.query(Medicion).all()
+    mediciones = query_med.all()
     
     empleados_count = 0
     respuestas_validas = 0
@@ -123,7 +124,7 @@ def get_reporte_general(db: Session = Depends(get_db)):
     }
 
 @router.get("/tendencias")
-def get_tendencias(db: Session = Depends(get_db)):
+def get_tendencias(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     # Obtenemos todas las mediciones con sus egresados asociados
     mediciones = db.query(Medicion, Egresado.programa).join(Egresado, Medicion.egresado_documento == Egresado.numero_documento).all()
     
