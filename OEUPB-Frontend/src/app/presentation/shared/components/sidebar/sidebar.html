@@ -18,7 +18,7 @@
     </ng-container>
 
     <!-- Solo visible para Administradores CTIC -->
-    <ng-container *ngIf="userRole === 'Admin_CTIC'">
+    <ng-container *ngIf="userRole === 'Admin_CTIC' || userRole === 'Coordinador_Sede'">
       <a routerLink="/admin-usuarios" routerLinkActive="active" class="nav-item">Administrar Usuarios</a>
     </ng-container>
     <!-- Perfil General -->
