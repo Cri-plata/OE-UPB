@@ -1,4 +1,8 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+﻿path = r"C:\Users\USUARIO\Documents\U\OE UPB\OEUPB-Frontend\src\app\data\interceptors\jwt.interceptor.ts"
+with open(path, "r", encoding="utf-8") as f:
+    content = f.read()
+
+new_content = """import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
@@ -31,3 +35,8 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
     })
   );
 };
+"""
+
+with open(path, "w", encoding="utf-8") as f:
+    f.write(new_content)
+print("Interceptor actualizado para manejar 401 y redirigir al login.")

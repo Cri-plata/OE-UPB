@@ -1,0 +1,81 @@
+<div class="layout">
+  <app-sidebar></app-sidebar>
+  
+  <main class="content">
+    <div class="top-banner">
+      <div class="banner-text">
+        <h1>Explorador Dinámico de Reportes</h1>
+        <p>Cruza, filtra y analiza libremente cualquiera de las 53 preguntas de la encuesta oficial SNIES.</p>
+      </div>
+      <div class="upb-logo">
+        <img src="/escudo-upb.png" alt="Escudo UPB" class="escudo-img">
+      </div>
+    </div>
+
+    <div class="dashboard-container">
+      
+      <!-- Panel de Control / Filtros -->
+      <div class="control-panel">
+        <div class="filters-row">
+          <div class="control-group full-width">
+            <label>¿Qué pregunta deseas graficar? (Eje X)</label>
+            <select class="custom-select" [(ngModel)]="preguntaSeleccionada" (change)="generarGrafica()">
+              <option *ngFor="let p of preguntasDisponibles" [value]="p">{{ p | slice:0:120 }}{{p.length > 120 ? '...' : ''}}</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="filters-row mt-3">
+          <div class="control-group">
+            <label>Filtrar por Momento:</label>
+            <select class="custom-select" [(ngModel)]="momentoSeleccionado" (change)="generarGrafica()">
+              <option value="">Todas las cohortes / momentos</option>
+              <option *ngFor="let m of momentosDisponibles" [value]="m">Momento {{ m }}</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Filtrar por Programa:</label>
+            <select class="custom-select" [(ngModel)]="programaSeleccionado" (change)="generarGrafica()">
+              <option value="">Todos los programas</option>
+              <option *ngFor="let prog of programasDisponibles" [value]="prog">{{ prog }}</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Filtrar por Año de Medición:</label>
+            <select class="custom-select" [(ngModel)]="anioSeleccionado" (change)="generarGrafica()">
+              <option value="">Todos los años</option>
+              <option *ngFor="let anio of aniosDisponibles" [value]="anio">{{ anio }}</option>
+            </select>
+          </div>
+          
+          <div class="control-group">
+            <label>Tipo de Gráfica:</label>
+            <select class="custom-select" [(ngModel)]="tipoGrafico">
+              <option value="bar">Barras Verticales</option>
+              <option value="pie">Gráfico de Pastel (Pie)</option>
+              <option value="doughnut">Gráfico de Dona</option>
+              <option value="line">Líneas</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <h2>Resultados: {{ preguntaSeleccionada }}</h2>
+        <div class="chart-wrapper" *ngIf="isChartReady">
+          <canvas baseChart
+            [data]="chartData"
+            [type]="tipoGrafico"
+            [options]="chartOptions">
+          </canvas>
+        </div>
+        <div class="loading-state" *ngIf="!isChartReady">
+          Cargando gráfica dinámica...
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

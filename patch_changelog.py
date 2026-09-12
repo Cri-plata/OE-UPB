@@ -1,27 +1,25 @@
 ﻿import datetime
-
 path = r"C:\Users\USUARIO\Documents\U\OE UPB\CHANGELOG.md"
 with open(path, "r", encoding="utf-8") as f:
     content = f.read()
 
-new_log = """
-### Añadido (2026-09-04)
-- **Directorio de Egresados**: Nuevo módulo de búsqueda, paginación y filtro de programas para inspeccionar la tabla de egresados.
-- **Ficha del Egresado**: Nueva vista de perfil individual que muestra los detalles del estudiante y una línea de tiempo (Timeline) con su historial de encuestas y salarios en cada momento.
-- **Carga de Datos**: La tabla del Historial de Cargas ahora se actualiza en tiempo real inmediatamente después de subir un archivo de Excel.
+today = datetime.datetime.now().strftime("%Y-%m-%d")
 
-### Cambiado
-- **Carga de Datos**: El algoritmo de extracción de Pandas fue flexibilizado para tolerar encuestas anónimas (estudiantes que no proveen documento) registrándolos en las métricas pero sin crear perfiles vacíos en el Directorio.
-- **Carga de Datos**: El algoritmo ahora filtra e ignora automáticamente las filas basura o de "sumatorias/totales" ubicadas al final de los archivos Excel oficiales.
-- **Enrutamiento**: Se migró de `RenderMode.Prerender` a `RenderMode.Client` en el servidor de Angular para prevenir errores de compilación con rutas paramétricas como `/perfil/:cedula`.
+new_changelog = f"""### Añadido ({today})
+- **Explorador de Datos**: Nuevo módulo de Business Intelligence (Generador de Reportes Dinámico) que permite cruzar cualquiera de las 53 preguntas del instrumento SNIES y visualizar los resultados en Barras, Dona, Pie o Líneas.
+- **Tendencias**: Rediseño completo de la gráfica histórica implementando paletas vibrantes, áreas bajo la curva (Fill) y suavizado de líneas para una apariencia más profesional.
+- **Backend (Tendencias)**: El endpoint de tendencias fue reconstruido para soportar y calcular matemáticamente la Empleabilidad, el Promedio Salarial y el Promedio de Satisfacción General de forma dinámica.
+
+### Arreglado ({today})
+- **Seguridad (Historial de Cargas)**: Se parchó una fuga de datos en la tabla del historial donde los Coordinadores podían ver archivos subidos por otras sedes. 
+- **Seguridad (Carga de Datos)**: Se corrigió la regla de validación de duplicidad (HTTP 409 Conflict) para que esté aislada por Sedes (Multitenancy).
+- **Reporte General**: Se reparó un Error Interno del Servidor (HTTP 500) causado por una variable no inicializada (`query_med`) durante la reestructuración de la base de datos.
+- **Autenticación**: Se programó un manejador de excepciones (HTTP 401 Unauthorized) en el `jwt.interceptor.ts` del Frontend para que, al caducar el token JWT, el sistema limpie el caché de forma segura y redirija automáticamente a la pantalla de Login sin romper la interfaz gráfica.
+
 """
 
-# Insert right under ## [Unreleased] or at the top of the Additions
-if "## [Unreleased]" in content:
-    content = content.replace("## [Unreleased] - 2026-08-30", "## [Unreleased] - 2026-08-30" + new_log)
-else:
-    content = content + new_log
+content = content.replace("## [Unreleased] - 2026-08-30\n", "## [Unreleased] - 2026-08-30\n" + new_changelog)
 
 with open(path, "w", encoding="utf-8") as f:
     f.write(content)
-print("CHANGELOG actualizado.")
+print("CHANGELOG.md actualizado.")

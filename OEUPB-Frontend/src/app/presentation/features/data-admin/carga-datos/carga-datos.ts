@@ -57,6 +57,7 @@ export class CargaDatosComponent implements OnInit {
           this.isSubmitting = false;
           this.mensajeValidacion = response.mensaje;
           this.erroresTabla = response.errores || [];
+          this.cargarHistorial(); // Actualizar tabla automáticamente
           this.cdr.detectChanges();
         },
         error: (err) => {

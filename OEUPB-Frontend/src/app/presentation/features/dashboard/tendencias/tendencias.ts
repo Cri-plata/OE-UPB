@@ -18,12 +18,43 @@ export class TendenciasComponent implements OnInit {
   currentIndicator = 'empleabilidad';
   currentIndicatorName = 'Tasa de Empleabilidad';
 
-  public lineChartOptions: ChartConfiguration['options'] = { 
-    responsive: true, 
+  public lineChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
     maintainAspectRatio: false,
-    elements: {
-      line: { tension: 0.4, borderWidth: 3 },
-      point: { radius: 5, hitRadius: 10, hoverRadius: 7 }
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+          font: { family: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif", size: 12 }
+        }
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        titleColor: '#000',
+        bodyColor: '#333',
+        borderColor: '#ddd',
+        borderWidth: 1,
+        padding: 12,
+        boxPadding: 6
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false }
+      },
+      y: {
+        beginAtZero: false,
+        grid: { color: 'rgba(0, 0, 0, 0.05)' }
+      }
+    },
+    interaction: {
+      mode: 'nearest',
+      axis: 'x',
+      intersect: false
     }
   };
   
