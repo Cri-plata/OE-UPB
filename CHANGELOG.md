@@ -1,6 +1,11 @@
 # Changelog
 
 ## [Unreleased] - 2026-08-30
+### Añadido (2026-09-12)
+- **Módulo de IA (Habilidades Demandadas)**: Pipeline de PLN para extracción y clasificación de habilidades blandas y duras desde texto libre de encuestas con spaCy (`es_core_news_md`) y descubrimiento de emergentes con TF-IDF (`/api/ia/habilidades-demandadas`).
+- **Módulo de IA (Reglas de Asociación)**: Análisis de canasta (Market Basket Analysis) con `mlxtend` (`apriori` + `association_rules`) para identificar co-ocurrencias de habilidades con métricas de soporte, confianza, lift y filtro por ocurrencias mínimas (`/api/ia/reglas-asociacion`).
+- **Configuración**: Nota de instalación del modelo `es_core_news_md` de spaCy (`python -m spacy download es_core_news_md`) en la documentación.
+
 ### Añadido (2026-09-04)
 - **Directorio de Egresados**: Nuevo módulo de búsqueda, paginación y filtro de programas para inspeccionar la tabla de egresados.
 - **Ficha del Egresado**: Nueva vista de perfil individual que muestra los detalles del estudiante y una línea de tiempo (Timeline) con su historial de encuestas y salarios en cada momento.
