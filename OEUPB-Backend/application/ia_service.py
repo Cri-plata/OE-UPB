@@ -13,12 +13,15 @@ Restricciones:
 
 import unicodedata
 import re
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Set, Tuple, Optional
 from collections import Counter
 
 import numpy as np
+import pandas as pd
 import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. MODELO SPACY (carga lazy para no bloquear el arranque del servidor)
@@ -463,3 +466,172 @@ def analizar_habilidades_demandadas(
             "respuestas_sin_habilidad": total - respuestas_con_habilidad,
         },
     }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 6. ANÁLISIS DE REGLAS DE ASOCIACIÓN (Market Basket Analysis)
+# ─────────────────────────────────────────────────────────────────────────────
+def extraer_habilidades_por_respuesta(texto_crudo: str) -> Set[str]:
+    """
+    Extrae el conjunto de habilidades únicas detectadas en una respuesta abierta
+    utilizando el pipeline de doble-forma (lematizada + cruda).
+    """
+    if not texto_crudo or not isinstance(texto_crudo, str):
+        return set()
+
+    texto_lema = preprocesar_texto(texto_crudo)
+    texto_crudo_norm = _preprocesar_crudo(texto_crudo)
+
+    habs_lema = _extraer_habilidades_y_residual(texto_lema)[0] if texto_lema else set()
+    habs_crudo = _extraer_habilidades_y_residual(texto_crudo_norm)[0] if texto_crudo_norm else set()
+
+    return habs_lema | habs_crudo
+
+
+# Alias de compatibilidad
+extraer_habilidades_de_texto = extraer_habilidades_por_respuesta
+
+
+def generar_reglas_asociacion(
+    textos_respuestas: List[str] = None,
+    transacciones: List[Set[str]] = None,
+    min_soporte: float = 0.05,
+    min_confianza: float = 0.5,
+    min_ocurrencias: int = 3,
+    top_reglas: int = 20,
+) -> dict:
+    """
+    Calcula reglas de asociación (Market Basket Analysis) sobre las habilidades demandadas.
+    Aplica Apriori con max_len=2 (reglas 1 a 1: 'si menciona X, también menciona Y') y
+    filtra por ocurrencias mínimas absolutas para evitar reglas basadas en datos insuficientes.
+
+    Args:
+        textos_respuestas: Lista de respuestas abiertas crudas (opcional si se pasan transacciones).
+        transacciones: Lista de sets de habilidades ya extraídas por respuesta (opcional).
+        min_soporte: Proporción mínima de transacciones que deben contener el par (default 0.05).
+        min_confianza: Probabilidad condicional mínima P(Y|X) (default 0.5).
+        min_ocurrencias: Conteo absoluto mínimo de transacciones reales que respaldan la regla (default 3).
+        top_reglas: Límite de reglas a devolver, ordenadas por lift descendente (default 20).
+
+    Returns:
+        dict con metadatos de filtrado y lista de reglas formateadas:
+        {
+            "total_respuestas": int,
+            "transacciones_validas": int,
+            "transacciones_insuficientes": int,
+            "total_reglas": int,
+            "reglas": [
+                {
+                    "si_menciona": str,
+                    "tambien_menciona": str,
+                    "ocurrencias": int,
+                    "soporte": float,
+                    "confianza": float,
+                    "lift": float,
+                }
+            ]
+        }
+    """
+    # 1. Obtener transacciones (sets de habilidades por respuesta)
+    if transacciones is None:
+        transacciones = [extraer_habilidades_por_respuesta(t) for t in (textos_respuestas or [])]
+
+    total_respuestas = len(transacciones)
+
+    # 2. Filtrar transacciones con al menos 2 habilidades (las de < 2 no pueden formar pares)
+    transacciones_validas = [list(habs) for habs in transacciones if len(habs) >= 2]
+    total_validas = len(transacciones_validas)
+    insuficientes = total_respuestas - total_validas
+
+    if total_validas < 2:
+        return {
+            "total_respuestas": total_respuestas,
+            "transacciones_validas": total_validas,
+            "transacciones_insuficientes": insuficientes,
+            "total_reglas": 0,
+            "reglas": [],
+        }
+
+    # 3. Construir matriz binaria con TransactionEncoder
+    te = TransactionEncoder()
+    te_ary = te.fit(transacciones_validas).transform(transacciones_validas)
+    df = pd.DataFrame(te_ary, columns=te.columns_)
+
+    # 4. Apriori con max_len=2 (estrictamente pares: un antecedente y un consecuente)
+    try:
+        frequent_itemsets = apriori(
+            df,
+            min_support=min_soporte,
+            use_colnames=True,
+            max_len=2,
+        )
+    except Exception:
+        frequent_itemsets = pd.DataFrame()
+
+    if frequent_itemsets.empty:
+        return {
+            "total_respuestas": total_respuestas,
+            "transacciones_validas": total_validas,
+            "transacciones_insuficientes": insuficientes,
+            "total_reglas": 0,
+            "reglas": [],
+        }
+
+    # 5. Generar reglas de asociación filtrando por confianza mínima
+    try:
+        rules = association_rules(
+            frequent_itemsets,
+            metric="confidence",
+            min_threshold=min_confianza,
+        )
+    except Exception:
+        rules = pd.DataFrame()
+
+    if rules.empty:
+        return {
+            "total_respuestas": total_respuestas,
+            "transacciones_validas": total_validas,
+            "transacciones_insuficientes": insuficientes,
+            "total_reglas": 0,
+            "reglas": [],
+        }
+
+    # 6. Filtrar por ocurrencias mínimas absolutas (soporte * total_transacciones >= min_ocurrencias)
+    reglas_formateadas = []
+    for _, row in rules.iterrows():
+        ocurrencias = int(round(row["support"] * total_validas))
+        if ocurrencias < min_ocurrencias:
+            continue
+
+        antecedente = list(row["antecedents"])[0]
+        consecuente = list(row["consequents"])[0]
+
+        reglas_formateadas.append({
+            "si_menciona": antecedente,
+            "tambien_menciona": consecuente,
+            "ocurrencias": ocurrencias,
+            "soporte": round(float(row["support"]), 4),
+            "confianza": round(float(row["confidence"]), 4),
+            "lift": round(float(row["lift"]), 4),
+        })
+
+    # 7. Ordenar por lift descendente (desempate por confianza y soporte)
+    reglas_formateadas.sort(
+        key=lambda r: (r["lift"], r["confianza"], r["soporte"]),
+        reverse=True,
+    )
+
+    if top_reglas and top_reglas > 0:
+        reglas_formateadas = reglas_formateadas[:top_reglas]
+
+    return {
+        "total_respuestas": total_respuestas,
+        "transacciones_validas": total_validas,
+        "transacciones_insuficientes": insuficientes,
+        "total_reglas": len(reglas_formateadas),
+        "reglas": reglas_formateadas,
+    }
+
+
+# Alias de compatibilidad
+calcular_reglas_asociacion = generar_reglas_asociacion
