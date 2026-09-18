@@ -3,8 +3,28 @@
 ## [Unreleased] - 2026-08-30
 ### Añadido (2026-09-12)
 - **Módulo de IA (Habilidades Demandadas)**: Pipeline de PLN para extracción y clasificación de habilidades blandas y duras desde texto libre de encuestas con spaCy (`es_core_news_md`) y descubrimiento de emergentes con TF-IDF (`/api/ia/habilidades-demandadas`).
-- **Módulo de IA (Reglas de Asociación)**: Análisis de canasta (Market Basket Analysis) con `mlxtend` (`apriori` + `association_rules`) para identificar co-ocurrencias de habilidades con métricas de soporte, confianza, lift y filtro por ocurrencias mínimas (`/api/ia/reglas-asociacion`).
+- **Módulo de IA (Reglas de Asociación / Co-relaciones)**: Análisis de canasta (Market Basket Analysis) con `mlxtend` (`apriori` + `association_rules`) para identificar co-ocurrencias de habilidades con métricas de soporte, confianza, lift y filtro por ocurrencias mínimas (`/api/ia/reglas-asociacion`).
+- **Frontend (Co-relaciones)**: Nueva interfaz interactiva para visualización de co-ocurrencias laborales, KPIs, filtros dinámicos por momentos/años y gráficos de habilidades blandas y duras (`/habilidades`).
 - **Configuración**: Nota de instalación del modelo `es_core_news_md` de spaCy (`python -m spacy download es_core_news_md`) en la documentación.
+- **Explorador de Datos**: Nuevo módulo de Business Intelligence (Generador de Reportes Dinámico) que permite cruzar cualquiera de las 53 preguntas del instrumento SNIES y visualizar los resultados en Barras, Dona, Pie o Líneas.
+- **Tendencias**: Rediseño completo de la gráfica histórica implementando paletas vibrantes, áreas bajo la curva (Fill) y suavizado de líneas para una apariencia más profesional.
+- **Backend (Tendencias)**: El endpoint de tendencias fue reconstruido para soportar y calcular matemáticamente la Empleabilidad, el Promedio Salarial y el Promedio de Satisfacción General de forma dinámica.
+
+### Arreglado (2026-09-12)
+- **Seguridad (Historial de Cargas)**: Se parchó una fuga de datos en la tabla del historial donde los Coordinadores podían ver archivos subidos por otras sedes. 
+- **Seguridad (Carga de Datos)**: Se corrigió la regla de validación de duplicidad (HTTP 409 Conflict) para que esté aislada por Sedes (Multitenancy).
+- **Reporte General**: Se reparó un Error Interno del Servidor (HTTP 500) causado por una variable no inicializada (`query_med`) durante la reestructuración de la base de datos.
+- **Autenticación**: Se programó un manejador de excepciones (HTTP 401 Unauthorized) en el `jwt.interceptor.ts` del Frontend para que, al caducar el token JWT, el sistema limpie el caché de forma segura y redirija automáticamente a la pantalla de Login sin romper la interfaz gráfica.
+
+### Añadido (2026-09-09)
+- **Administración de Usuarios**: Se reestructuró la pestaña de Gestión de Accesos habilitándola también para los Coordinadores de Sede con un sistema de separación de deberes (Separation of Duties).
+- **Seguridad (Creación de Usuarios)**: El rol CTIC ahora está estrictamente limitado a crear exclusivamente cuentas de `Coordinador_Sede`. Los Coordinadores, a su vez, son los únicos autorizados para crear `Directivos` y `Profesores` para su propia jurisdicción.
+- **Seguridad (Invisibilidad CTIC)**: Las cuentas de nivel CTIC fueron removidas completamente de la tabla de visualización global (invisibles para todos, incluyendo para otros CTIC) para evitar manipulaciones operativas.
+- **UX/UI (Formularios Dinámicos)**: El formulario de creación de usuarios ahora es reactivo a la sesión; autocompleta el rol para los CTIC y esconde la casilla de asignación de Sede para los Coordinadores, inyectándola por debajo para agilizar el registro.
+
+- **Perfil de Usuario**: Nueva pestaña interactiva que muestra los datos de sesión, el rol, la sede asignada y los privilegios de seguridad del usuario autenticado.
+- **Sedes**: Se añadió soporte oficial para la Seccional Bogotá (Sede 5) en los diccionarios internos de la aplicación.
+- **Seguridad (Multitenancy)**: El sistema ahora cuenta con arquitectura multitenante. Todos los endpoints (Reportes, Directorio, Perfil, Carga) extraen la Sede del token JWT y limitan los datos mostrados exclusivamente a los de la jurisdicción del Coordinador que inicia sesión.
 
 ### Añadido (2026-09-04)
 - **Directorio de Egresados**: Nuevo módulo de búsqueda, paginación y filtro de programas para inspeccionar la tabla de egresados.

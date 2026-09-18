@@ -1,4 +1,5 @@
-﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { AuthImplementationRepository } from '../../../../data/repositories/auth-implementation.repository';
+﻿import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
@@ -25,22 +26,39 @@ export class AdminUsuariosComponent implements OnInit {
   usuarios: UsuarioResponseDto[] = [];
   private readonly API_URL = 'http://localhost:8000/api/usuarios';
 
+  private authRepo = inject(AuthImplementationRepository);
+  usuarioActual: any = null;
+  sedesDisponibles: string[] = [];
+
   constructor(private fb: FormBuilder, private http: HttpClient, private cdr: ChangeDetectorRef) {
     this.userForm = this.fb.group({
       nombre: ['', Validators.required],
       correo: ['', [Validators.required, Validators.email, upbEmailValidator]],
-      sede: ['', Validators.required]
+      sede: [''],
+      rol: ['', Validators.required]
     });
   }
 
   ngOnInit() {
+    this.usuarioActual = this.authRepo.getUsuarioActual();
+    const mapaSedes: any = { 1: 'Bucaramanga', 2: 'Medellín', 3: 'Palmira', 4: 'Montería', 5: 'Bogotá' };
+    if (this.usuarioActual.rol === 'Admin_CTIC') {
+      this.sedesDisponibles = ['Bucaramanga', 'Medellín', 'Palmira', 'Montería', 'Bogotá'];
+    } else if (this.usuarioActual.rol === 'Coordinador_Sede' && this.usuarioActual.sedeId) {
+      this.sedesDisponibles = [mapaSedes[this.usuarioActual.sedeId]];
+    }
+    if (this.sedesDisponibles.length === 1) {
+      this.userForm.patchValue({ sede: this.sedesDisponibles[0] });
+    }
+    if (this.usuarioActual.rol === 'Admin_CTIC') {
+      this.userForm.patchValue({ rol: 'Coordinador_Sede' });
+    }
     this.cargarUsuarios();
   }
 
   cargarUsuarios() {
     this.http.get<UsuarioResponseDto[]>(this.API_URL).subscribe({
       next: (data) => {
-        // Filtrar para no mostrar al super administrador si queremos, o mostrarlos todos
         this.usuarios = data.filter(u => u.rol !== 'Admin_CTIC');
         this.cdr.detectChanges();
       },
@@ -51,10 +69,14 @@ export class AdminUsuariosComponent implements OnInit {
   onSubmit() {
     if (this.userForm.valid) {
       const formValue = this.userForm.value;
+      if (formValue.rol === 'Coordinador_Sede' && !formValue.sede) {
+        alert('Los Coordinadores de Sede deben tener una sede asignada obligatoriamente.');
+        return;
+      }
       const nuevoUsuario: UsuarioCreateDto = {
         nombre: formValue.nombre,
         correo: formValue.correo,
-        rol: 'Coordinador_Sede',
+        rol: formValue.rol,
         sede: formValue.sede
       };
 
@@ -78,7 +100,7 @@ export class AdminUsuariosComponent implements OnInit {
     }
   }
   eliminarUsuario(id: number) {
-    if (confirm('¿Estás seguro de que deseas eliminar este coordinador?')) {
+    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
       this.http.delete(`${this.API_URL}/${id}`).subscribe({
         next: () => {
           this.usuarios = this.usuarios.filter(u => u.id !== id);
@@ -89,6 +111,7 @@ export class AdminUsuariosComponent implements OnInit {
     }
   }
 }
+
 
 
 

@@ -1,77 +1,43 @@
-﻿import re
-
-path = r"C:\Users\USUARIO\Documents\U\OE UPB\OEUPB-Backend\presentation\carga_router.py"
+﻿path = r"C:\Users\USUARIO\Documents\U\OE UPB\OEUPB-Backend\presentation\carga_router.py"
 with open(path, "r", encoding="utf-8") as f:
     content = f.read()
 
-# 1. Remove the strict validation block
-content = re.sub(r'# Validar fila por fila.*?if errores:\s*return CargaResponse.*?errores=errores\)', '', content, flags=re.DOTALL)
+# Replace endpoint parameters and hardcoded sede
+content = content.replace(
+    "def procesar_excel(\n    momento: int = Form(...),\n    anio: int = Form(...),\n    file: UploadFile = File(...),\n    db: Session = Depends(get_db)\n):",
+    "def procesar_excel(\n    momento: int = Form(...),\n    anio: int = Form(...),\n    file: UploadFile = File(...),\n    db: Session = Depends(get_db),\n    current_user: dict = Depends(get_current_user)\n):"
+)
 
-# 2. Modify the DB insertion loop
-find_loop = """    for index, row in df.iterrows():
-        doc = str(row.get('NUMERO_DOCUMENTO'))
-        
-        # 1. Crear o Actualizar al Egresado
-        egresado = db.query(Egresado).filter(Egresado.numero_documento == doc).first()
-        if not egresado:
-            egresado = Egresado(
-                numero_documento=doc,
-                primer_nombre=str(row.get('PRIMER NOMBRE', '')),
-                primer_apellido=str(row.get('PRIMER_APELLIDO', '')),
-                programa=str(row.get('PROGRAMA', '')),
-                fecha_grado=row.get('FECHA_GRADO') if pd.notnull(row.get('FECHA_GRADO')) else None
-            )
-            db.add(egresado)
-        else:
-            # Actualizamos fecha de grado si es ms reciente
-            if row.get('FECHA_GRADO') and pd.notnull(row.get('FECHA_GRADO')):
-                if not egresado.fecha_grado or row.get('FECHA_GRADO') > egresado.fecha_grado:
-                    egresado.fecha_grado = row.get('FECHA_GRADO')
-                    egresado.programa = str(row.get('PROGRAMA', ''))
+# Historial endpoint
+content = content.replace(
+    "def obtener_historial_cargas(db: Session = Depends(get_db)):",
+    "def obtener_historial_cargas(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):"
+)
+content = content.replace(
+    "    cargas = db.query(Medicion.momento, Medicion.anio, func.count(Medicion.id).label('total'))\\",
+    "    query = db.query(Medicion.momento, Medicion.anio, func.count(Medicion.id).label('total'))\n    if current_user.get('rol') == 'Coordinador_Sede':\n        query = query.filter(Medicion.sede_id == current_user.get('sede_id'))\n    cargas = query\\"
+)
 
-        db.commit() # Aseguramos que el egresado exista para la llave fornea
-"""
+# Eliminar endpoint
+content = content.replace(
+    "def eliminar_momento(momento: int, anio: int, db: Session = Depends(get_db)):",
+    "def eliminar_momento(momento: int, anio: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):"
+)
+content = content.replace(
+    "    query = db.query(Medicion).filter(Medicion.momento == momento)",
+    "    query = db.query(Medicion).filter(Medicion.momento == momento)\n    if current_user.get('rol') == 'Coordinador_Sede':\n        query = query.filter(Medicion.sede_id == current_user.get('sede_id'))"
+)
 
-replace_loop = """    for index, row in df.iterrows():
-        # Manejo de Cdulas vacas (Annimos)
-        is_empty_doc = pd.isna(row.get('NUMERO_DOCUMENTO')) or str(row.get('NUMERO_DOCUMENTO')).strip() == ''
-        
-        doc = None
-        if not is_empty_doc:
-            doc = str(row.get('NUMERO_DOCUMENTO'))
-            if doc.endswith('.0'):
-                doc = doc[:-2]
-                
-        # 1. Crear o Actualizar al Egresado SOLO si hay cdula
-        if doc:
-            egresado = db.query(Egresado).filter(Egresado.numero_documento == doc).first()
-            if not egresado:
-                
-                # Manejo de Nombres vacos o sin segundo nombre
-                p_nombre = str(row.get('PRIMER NOMBRE', '')) if not pd.isna(row.get('PRIMER NOMBRE')) else "Sin Nombre"
-                p_apellido = str(row.get('PRIMER_APELLIDO', '')) if not pd.isna(row.get('PRIMER_APELLIDO')) else ""
-                prog = str(row.get('PROGRAMA', '')) if not pd.isna(row.get('PROGRAMA')) else "Sin Programa"
-                
-                egresado = Egresado(
-                    numero_documento=doc,
-                    primer_nombre=p_nombre,
-                    primer_apellido=p_apellido,
-                    programa=prog,
-                    fecha_grado=row.get('FECHA_GRADO') if pd.notnull(row.get('FECHA_GRADO')) else None
-                )
-                db.add(egresado)
-            else:
-                # Actualizamos fecha de grado si es mas reciente
-                if row.get('FECHA_GRADO') and pd.notnull(row.get('FECHA_GRADO')):
-                    if not egresado.fecha_grado or row.get('FECHA_GRADO') > egresado.fecha_grado:
-                        egresado.fecha_grado = row.get('FECHA_GRADO')
-                        
-            db.commit() # Aseguramos que el egresado exista para la llave foranea
-"""
-# We use regex to replace the loop carefully, as there might be slight encoding differences in the comments
-content = re.sub(r'    for index, row in df\.iterrows\(\):.*?db\.commit\(\) # Aseguramos que el egresado exista para la llave for.*?a', replace_loop, content, flags=re.DOTALL)
+# Replace hardcoded sede in procesar_excel
+content = content.replace(
+    "    # Extraemos la sede (hardcodeada a 1 por ahora, luego vendrá del token JWT)\n    sede_coordinador = 1",
+    "    # Extraemos la sede del token JWT\n    sede_coordinador = current_user.get('sede_id') or 1"
+)
+
+# Needs to import get_current_user
+if "get_current_user" not in content[:500]:
+    content = content.replace("from infrastructure.database import get_db", "from infrastructure.database import get_db\nfrom application.auth_service import get_current_user")
 
 with open(path, "w", encoding="utf-8") as f:
     f.write(content)
-
-print("Backend modificado para soportar encuestas anónimas y nombres vacíos.")
+print("carga_router actualizado.")

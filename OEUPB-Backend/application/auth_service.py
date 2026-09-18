@@ -36,3 +36,27 @@ def authenticate_user(db: Session, correo: str, contrasena: str):
     if not verify_password(contrasena, user.contrasena_hash):
         return False
     return user
+
+
+from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException, status
+from pydantic import BaseModel
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="No se pudo validar las credenciales",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        correo: str = payload.get("sub")
+        rol: str = payload.get("rol")
+        sede_id: int = payload.get("sede_id")
+        if correo is None:
+            raise credentials_exception
+        return {"correo": correo, "rol": rol, "sede_id": sede_id}
+    except jwt.PyJWTError:
+        raise credentials_exception

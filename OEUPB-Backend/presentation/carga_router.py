@@ -2,6 +2,7 @@
 from sqlalchemy.orm import Session
 from domain.models import Egresado, Medicion
 from infrastructure.database import get_db
+from application.auth_service import get_current_user
 import pandas as pd
 import io
 from pydantic import BaseModel
@@ -23,17 +24,24 @@ async def procesar_excel(
     momento: int = Form(...),
     anio: int = Form(...),
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
     if not file.filename.endswith(('.xlsx', '.xls')):
         raise HTTPException(status_code=400, detail="El archivo debe ser un Excel (.xlsx o .xls)")
 
-    # REGLA DE NEGOCIO: Evitar duplicidad de cargas
-    carga_existente = db.query(Medicion).filter(Medicion.momento == momento, Medicion.anio == anio).first()
+        # REGLA DE NEGOCIO: Evitar duplicidad de cargas por sede
+    sede_coordinador_actual = current_user.get('sede_id') or 1
+    carga_existente = db.query(Medicion).filter(
+        Medicion.momento == momento, 
+        Medicion.anio == anio,
+        Medicion.sede_id == sede_coordinador_actual
+    ).first()
+    
     if carga_existente:
         raise HTTPException(
             status_code=409, 
-            detail=f"Ya existen registros cargados para el Momento {momento} del año {anio}. Por favor, elimine el archivo desde el Historial antes de volver a cargarlo."
+            detail=f"Tu sede ya tiene registros cargados para el Momento {momento} del año {anio}. Por favor, elimínelos desde el Historial antes de volver a cargarlos."
         )
 
     # Leer el archivo a la memoria
@@ -99,8 +107,8 @@ async def procesar_excel(
     # Limpiar NaN de Pandas para que sean compatibles con JSON/SQLAlchemy
     df = df.replace({np.nan: None})
 
-    # Extraemos la sede (hardcodeada a 1 por ahora, luego vendrá del token JWT)
-    sede_coordinador = 1
+    # Extraemos la sede del token JWT
+    sede_coordinador = current_user.get('sede_id') or 1
 
     for index, row in df.iterrows():
         # Manejo de Cdulas vacas (Annimos)
@@ -169,10 +177,12 @@ async def procesar_excel(
 
 
 @router.get("/historial")
-def get_historial(db: Session = Depends(get_db)):
+def get_historial(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     from sqlalchemy import func
-    # Consultar cuántas mediciones hay por cada momento
-    resultados = db.query(Medicion.momento, Medicion.anio, func.count(Medicion.id)).group_by(Medicion.momento, Medicion.anio).all()
+    query = db.query(Medicion.momento, Medicion.anio, func.count(Medicion.id))
+    if current_user.get('rol') == 'Coordinador_Sede':
+        query = query.filter(Medicion.sede_id == current_user.get('sede_id'))
+    resultados = query.group_by(Medicion.momento, Medicion.anio).all()
     
     historial = []
     for momento, anio, cantidad in resultados:
@@ -188,12 +198,19 @@ def get_historial(db: Session = Depends(get_db)):
     return historial
 
 @router.delete("/momento/{momento}/{anio}")
-def eliminar_momento(momento: int, anio: str, db: Session = Depends(get_db)):
+def eliminar_momento(momento: int, anio: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    if current_user.get('rol') == 'Coordinador_Sede':
+        # Validar que no borre algo de otra sede? Realmente al borrar vamos a filtrar por sede
+        pass
     # Eliminar todas las encuestas de ese momento
     if anio == "null" or anio == "N/A" or anio == "None":
-        db.query(Medicion).filter(Medicion.momento == momento, Medicion.anio.is_(None)).delete(synchronize_session=False)
+        (db.query(Medicion).filter(Medicion.momento == momento, Medicion.anio.is_(None))
+       .filter(Medicion.sede_id == current_user.get('sede_id') if current_user.get('rol') == 'Coordinador_Sede' else True)
+       .delete(synchronize_session=False))
     else:
-        db.query(Medicion).filter(Medicion.momento == momento, Medicion.anio == int(anio)).delete(synchronize_session=False)
+        (db.query(Medicion).filter(Medicion.momento == momento, Medicion.anio == int(anio))
+       .filter(Medicion.sede_id == current_user.get('sede_id') if current_user.get('rol') == 'Coordinador_Sede' else True)
+       .delete(synchronize_session=False))
     db.commit()
     
     # Opcional: Eliminar egresados huérfanos que ya no tengan ninguna medición

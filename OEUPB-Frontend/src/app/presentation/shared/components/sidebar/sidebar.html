@@ -9,6 +9,7 @@
     <ng-container *ngIf="userRole !== 'Admin_CTIC'">
       <a routerLink="/reporte" routerLinkActive="active" class="nav-item">Reporte general</a>
       <a routerLink="/tendencias" routerLinkActive="active" class="nav-item">Tendencias</a>
+      <a routerLink="/explorador" routerLinkActive="active" class="nav-item">Explorador de Datos</a>
       <a routerLink="/directorio" routerLinkActive="active" class="nav-item">Directorio</a>
       <a routerLink="/habilidades" routerLinkActive="active" class="nav-item">Co-relaciones</a>
     </ng-container>
@@ -19,15 +20,18 @@
     </ng-container>
 
     <!-- Solo visible para Administradores CTIC -->
-    <ng-container *ngIf="userRole === 'Admin_CTIC'">
+    <ng-container *ngIf="userRole === 'Admin_CTIC' || userRole === 'Coordinador_Sede'">
       <a routerLink="/admin-usuarios" routerLinkActive="active" class="nav-item">Administrar Usuarios</a>
     </ng-container>
+    <!-- Perfil General -->
+    <a routerLink="/mi-perfil" routerLinkActive="active" class="nav-item">Mi Perfil</a>
   </nav>
 
   <div class="bottom-menu">
     <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
   </div>
 </aside>
+
 
 
 

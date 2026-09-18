@@ -1,0 +1,55 @@
+﻿<div class="dashboard-container">
+    <app-sidebar></app-sidebar>
+    <div class="main-content">
+      
+      <div class="top-bar">
+        <h2>Mi Perfil</h2>
+        <img src="/escudo-upb.png" alt="UPB" class="logo-mini">
+      </div>
+  
+      <div class="profile-layout" *ngIf="usuario">
+        
+        <div class="card basic-info-card">
+          <div class="avatar-circle">
+            {{ usuario.nombre.charAt(0).toUpperCase() }}
+          </div>
+          <h2>{{ usuario.nombre }}</h2>
+          <p class="role-badge">{{ usuario.rol.replace('_', ' ') }}</p>
+          
+          <hr>
+          
+          <div class="info-row">
+            <span class="label">Correo Institucional:</span>
+            <span class="value">{{ usuario.correo }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Sede Asignada:</span>
+            <span class="value">{{ sedeNombre }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">ID de Sistema:</span>
+            <span class="value">#00{{ usuario.id }}</span>
+          </div>
+        </div>
+  
+        <div class="card security-card">
+          <h3>Información de Seguridad</h3>
+          <p class="subtitle">Detalles de acceso a tu cuenta dentro de la plataforma del Observatorio.</p>
+  
+          <div class="security-list">
+            <div class="sec-item">
+              <h4>Estado de Cuenta</h4>
+              <span class="status-badge active">Activa</span>
+            </div>
+            <div class="sec-item">
+              <h4>Permisos de Acceso</h4>
+              <p *ngIf="usuario.rol === 'Coordinador_Sede'">Tienes permisos exclusivos para cargar, eliminar y consultar estadísticas y egresados correspondientes a la seccional de {{ sedeNombre }}.</p>
+              <p *ngIf="usuario.rol === 'Admin_CTIC'">Tienes permisos de acceso a nivel nacional, incluyendo administración de usuarios de todo el sistema.</p>
+              <p *ngIf="usuario.rol === 'Directivo'">Tienes acceso global a la estadística y reportes gerenciales del observatorio a nivel nacional.</p>
+            </div>
+          </div>
+        </div>
+  
+      </div>
+    </div>
+  </div>

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { ExploradorComponent } from './presentation/features/dashboard/explorador/explorador';
 
 export const routes: Routes = [
   { 
@@ -18,6 +19,7 @@ export const routes: Routes = [
     path: 'tendencias', 
     loadComponent: () => import('./presentation/features/dashboard/tendencias/tendencias').then(m => m.TendenciasComponent)
   },
+  { path: 'explorador', component: ExploradorComponent },
   { 
     path: 'carga', 
     loadComponent: () => import('./presentation/features/data-admin/carga-datos/carga-datos').then(m => m.CargaDatosComponent)
@@ -34,7 +36,9 @@ export const routes: Routes = [
     path: 'habilidades', 
     loadComponent: () => import('./presentation/features/dashboard/habilidades-demandadas/habilidades-demandadas').then(m => m.HabilidadesDemandadasComponent)
   },
+  { 
+    path: 'mi-perfil', 
+    loadComponent: () => import('./presentation/features/profile/perfil-usuario/perfil-usuario').then(m => m.PerfilUsuarioComponent)
+  },
   { path: '**', redirectTo: 'login' }
 ];
-
-

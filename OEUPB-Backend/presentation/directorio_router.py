@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, text
 from domain.models import Egresado, Medicion
 from infrastructure.database import get_db
+from application.auth_service import get_current_user
 from typing import Optional
 
 router = APIRouter(prefix="/api/directorio", tags=["Directorio"])
@@ -13,9 +14,13 @@ def obtener_directorio(
     programa: Optional[str] = None,
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=100),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
     query = db.query(Egresado)
+    if current_user.get('rol') == 'Coordinador_Sede':
+        query = query.join(Medicion).filter(Medicion.sede_id == current_user.get('sede_id'))
+
 
     # Filtrar por texto libre (Nombre, Apellido o Cdula)
     if q:
@@ -62,18 +67,29 @@ def obtener_directorio(
     }
 
 @router.get("/programas")
-def obtener_programas_unicos(db: Session = Depends(get_db)):
-    programas = db.query(Egresado.programa).distinct().all()
+def obtener_programas_unicos(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    query = db.query(Egresado.programa).filter(Egresado.programa != None)
+    if current_user.get('rol') == 'Coordinador_Sede':
+        query = query.join(Medicion).filter(Medicion.sede_id == current_user.get('sede_id'))
+    programas = query.distinct().all()
+
     return [p[0] for p in programas if p[0]]
 
 @router.get("/perfil/{documento}")
-def obtener_perfil_egresado(documento: str, db: Session = Depends(get_db)):
+def obtener_perfil_egresado(documento: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     egresado = db.query(Egresado).filter(Egresado.numero_documento == documento).first()
     if not egresado:
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Egresado no encontrado")
         
-    mediciones = db.query(Medicion).filter(Medicion.egresado_documento == documento).order_by(Medicion.momento).all()
+    med_query = db.query(Medicion).filter(Medicion.egresado_documento == documento)
+    if current_user.get('rol') == 'Coordinador_Sede':
+        med_query = med_query.filter(Medicion.sede_id == current_user.get('sede_id'))
+    mediciones = med_query.order_by(Medicion.momento).all()
+    
+    if not mediciones and current_user.get('rol') == 'Coordinador_Sede':
+        raise HTTPException(status_code=403, detail="No tiene permisos para ver este egresado")
+
     
     encuestas = []
     for m in mediciones:
