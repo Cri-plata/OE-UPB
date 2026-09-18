@@ -1,0 +1,274 @@
+<div class="layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="content">
+    <!-- Top Banner Institucional -->
+    <div class="top-banner">
+      <div class="banner-text">
+        <h1>Análisis de Co-relaciones de Habilidades</h1>
+        <p>Extracción de competencias demandadas y reglas de co-ocurrencia del mercado laboral a partir de encuestas de egresados.</p>
+      </div>
+      <div class="upb-logo">
+        <img src="/escudo-upb.png" alt="Escudo UPB" class="escudo-img">
+      </div>
+    </div>
+
+    <div class="dashboard-container">
+      <!-- Tarjetas KPI Resumen -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-icon">📋</span>
+            <span class="kpi-label">Respuestas Analizadas</span>
+          </div>
+          <div class="kpi-value">{{ estadisticas?.total_respuestas_analizadas || totalRespuestasReglas || 0 }}</div>
+          <div class="kpi-subtext">Texto libre de encuestas</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-icon">🎯</span>
+            <span class="kpi-label">Habilidades Catalogadas</span>
+          </div>
+          <div class="kpi-value">{{ habilidadesReconocidas.length }}</div>
+          <div class="kpi-subtext">Categorías detectadas</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-icon">🔗</span>
+            <span class="kpi-label">Reglas de Asociación</span>
+          </div>
+          <div class="kpi-value highlight">{{ totalReglas }}</div>
+          <div class="kpi-subtext">Pares significativos (Lift &ge; 1.0)</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-icon">💡</span>
+            <span class="kpi-label">Habilidades Emergentes</span>
+          </div>
+          <div class="kpi-value">{{ candidatasEmergentes.length }}</div>
+          <div class="kpi-subtext">Descubiertas por TF-IDF</div>
+        </div>
+      </div>
+
+      <!-- Barra de Navegación de Pestañas -->
+      <div class="tabs-container">
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'reglas'" 
+          (click)="setTab('reglas')">
+          <span class="tab-icon">🔄</span>
+          Reglas de Asociación (Co-ocurrencias)
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'habilidades'" 
+          (click)="setTab('habilidades')">
+          <span class="tab-icon">📊</span>
+          Catálogo de Habilidades & Emergentes
+        </button>
+      </div>
+
+      <!-- Panel de Filtros Compartido -->
+      <div class="control-panel">
+        <div class="control-group">
+          <label>Momento de Medición:</label>
+          <select class="custom-select" [(ngModel)]="filtroMomento" (change)="aplicarFiltros()">
+            <option value="">Todos los momentos</option>
+            <option value="0">Momento 0 (Graduación)</option>
+            <option value="1">Momento 1 (1 año)</option>
+            <option value="5">Momento 5 (5 años)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Año de Encuesta:</label>
+          <select class="custom-select" [(ngModel)]="filtroAnio" (change)="aplicarFiltros()">
+            <option value="">Todos los años</option>
+            <option *ngFor="let a of aniosDisponibles" [value]="a">{{ a }}</option>
+          </select>
+        </div>
+
+        <div class="control-group" *ngIf="activeTab === 'reglas'">
+          <label>Ocurrencias Mínimas (Egresados):</label>
+          <select class="custom-select" [(ngModel)]="filtroMinOcurrencias" (change)="aplicarFiltros()">
+            <option [ngValue]="1">&ge; 1 egresado (Sin filtro)</option>
+            <option [ngValue]="2">&ge; 2 egresados (Muestras pequeñas)</option>
+            <option [ngValue]="3">&ge; 3 egresados (Estándar de calidad)</option>
+            <option [ngValue]="5">&ge; 5 egresados (Alta significancia)</option>
+          </select>
+        </div>
+
+        <div class="control-group" *ngIf="activeTab === 'reglas'">
+          <label>Confianza Mínima:</label>
+          <select class="custom-select" [(ngModel)]="filtroMinConfianza" (change)="aplicarFiltros()">
+            <option [ngValue]="0.4">40% o superior</option>
+            <option [ngValue]="0.5">50% o superior (Recomendado)</option>
+            <option [ngValue]="0.6">60% o superior</option>
+            <option [ngValue]="0.75">75% o superior (Fuerte)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Estado de Carga / Error -->
+      <div class="loading-box" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Procesando texto libre con spaCy y extrayendo patrones con Apriori...</p>
+      </div>
+
+      <div class="alert-box alert-error" *ngIf="errorMensaje && !isLoading">
+        {{ errorMensaje }}
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- PESTAÑA 1: REGLAS DE ASOCIACIÓN (CO-OCURRENCIAS) -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div class="tab-content" *ngIf="activeTab === 'reglas' && !isLoading">
+        <div class="info-card">
+          <div class="info-icon">💡</div>
+          <div class="info-text">
+            <strong>¿Qué representan estas reglas? (Market Basket Analysis):</strong>
+            Muestran qué competencias se exigen conjuntamente en las mismas respuestas.
+            Un <em>Lift &gt; 1.0</em> indica una correlación positiva superior al azar; mientras más alto sea el Lift, más indisociables son ambas habilidades en el perfil laboral.
+          </div>
+        </div>
+
+        <!-- Tabla de Reglas -->
+        <div class="table-card">
+          <div class="table-header-row">
+            <h2>Patrones de Co-ocurrencia Identificados ({{ reglasAsociacion.length }} reglas activas)</h2>
+            <div class="meta-tag" *ngIf="transaccionesValidas > 0">
+              Respaldado en {{ transaccionesValidas }} encuestas con &ge; 2 habilidades ({{ transaccionesInsuficientes }} descartadas por tener &lt; 2)
+            </div>
+          </div>
+
+          <div class="table-responsive" *ngIf="reglasAsociacion.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Si la empresa menciona...</th>
+                  <th>También exige...</th>
+                  <th class="text-center">Egresados</th>
+                  <th class="text-center">Soporte</th>
+                  <th class="text-center">Confianza</th>
+                  <th class="text-center">Lift</th>
+                  <th>Insight Interpretativo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let r of reglasAsociacion">
+                  <td>
+                    <span class="skill-pill antecedent">{{ r.si_menciona }}</span>
+                  </td>
+                  <td>
+                    <span class="skill-pill consequent">{{ r.tambien_menciona }}</span>
+                  </td>
+                  <td class="text-center bold">
+                    <span class="count-badge">{{ r.ocurrencias }}</span>
+                  </td>
+                  <td class="text-center">
+                    {{ (r.soporte * 100) | number:'1.1-1' }}%
+                  </td>
+                  <td class="text-center">
+                    <div class="progress-cell">
+                      <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" [style.width.%]="r.confianza * 100"></div>
+                      </div>
+                      <span class="progress-text">{{ (r.confianza * 100) | number:'1.0-0' }}%</span>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span class="lift-badge" [ngClass]="getLiftBadge(r.lift)">
+                      {{ r.lift | number:'1.2-2' }} &bull; {{ getLiftTexto(r.lift) }}
+                    </span>
+                  </td>
+                  <td class="insight-cell">
+                    {{ getInsight(r) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state" *ngIf="reglasAsociacion.length === 0">
+            <div class="empty-icon">🔍</div>
+            <h3>No se encontraron reglas con los umbrales actuales</h3>
+            <p>
+              Con el filtro de <strong>&ge; {{ filtroMinOcurrencias }} egresados</strong> y <strong>{{ (filtroMinConfianza * 100) }}% de confianza</strong> no hay combinaciones que califiquen.
+            </p>
+            <button class="action-btn" (click)="filtroMinOcurrencias = 2; filtroMinConfianza = 0.5; aplicarFiltros()">
+              Ajustar a &ge; 2 egresados y 50% de confianza
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- PESTAÑA 2: CATÁLOGO DE HABILIDADES & EMERGENTES -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div class="tab-content" *ngIf="activeTab === 'habilidades' && !isLoading">
+        <!-- Gráficos Blandas vs Duras -->
+        <div class="charts-row">
+          <div class="chart-card half-card">
+            <div class="chart-header">
+              <h2>Top Habilidades Blandas</h2>
+              <span class="badge-tag blanda">Interpersonales</span>
+            </div>
+            <div class="chart-wrapper" *ngIf="isChartReady">
+              <canvas baseChart
+                [data]="blandasChartData"
+                [type]="barChartType"
+                [options]="blandasChartOptions">
+              </canvas>
+            </div>
+          </div>
+
+          <div class="chart-card half-card">
+            <div class="chart-header">
+              <h2>Top Habilidades Duras / Técnicas</h2>
+              <span class="badge-tag dura">Técnicas</span>
+            </div>
+            <div class="chart-wrapper" *ngIf="isChartReady">
+              <canvas baseChart
+                [data]="durasChartData"
+                [type]="barChartType"
+                [options]="durasChartOptions">
+              </canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección de Habilidades Emergentes (TF-IDF) -->
+        <div class="table-card mt-24">
+          <div class="table-header-row">
+            <div>
+              <h2>Habilidades Emergentes del Mercado (No Catalogadas)</h2>
+              <p class="section-subtitle">
+                Términos y bigramas técnicos descubiertos automáticamente en el texto residual mediante TF-IDF. Candidatas para incluir en futuros planes curriculares.
+              </p>
+            </div>
+            <span class="meta-tag emergente">Detección No Supervisada (TF-IDF)</span>
+          </div>
+
+          <div class="emergentes-grid" *ngIf="candidatasEmergentes.length > 0">
+            <div class="emergente-chip" *ngFor="let c of candidatasEmergentes">
+              <span class="emergente-name">{{ c.termino }}</span>
+              <div class="emergente-metrics">
+                <span class="metric-badge score" title="Score TF-IDF">Score: {{ c.score_tfidf | number:'1.3-3' }}</span>
+                <span class="metric-badge docs" title="Documentos donde aparece">{{ c.frecuencia_documentos }} doc(s)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty-state" *ngIf="candidatasEmergentes.length === 0">
+            <p>No se encontraron términos emergentes en el conjunto seleccionado.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

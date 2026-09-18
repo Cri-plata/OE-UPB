@@ -30,6 +30,10 @@ export const routes: Routes = [
     path: 'directorio', 
     loadComponent: () => import('./presentation/features/dashboard/directorio/directorio').then(m => m.DirectorioComponent)
   },
+  { 
+    path: 'habilidades', 
+    loadComponent: () => import('./presentation/features/dashboard/habilidades-demandadas/habilidades-demandadas').then(m => m.HabilidadesDemandadasComponent)
+  },
   { path: '**', redirectTo: 'login' }
 ];
 
