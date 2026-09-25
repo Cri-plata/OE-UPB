@@ -1,115 +1,314 @@
-﻿from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Literal, Optional
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+
+from application.auth_service import (
+    INITIAL_CREDENTIAL_MODE,
+    expiracion_credencial_inicial,
+    expiracion_credencial_recuperacion,
+    generar_contrasena_temporal,
+    generar_credencial_inicial,
+    get_current_user,
+    get_password_hash,
+)
+from domain.models import AuditoriaCuenta, Egresado, Medicion, Sede, Usuario
 from infrastructure.database import get_db
-from application.auth_service import get_current_user
-from application.auth_service import get_password_hash
-from domain.models import Usuario
-from pydantic import BaseModel
-from typing import List, Optional, Union
 
 router = APIRouter(prefix="/api/usuarios", tags=["Usuarios"])
 
-# Contratos (Pydantic Models)
+PERMISOS_CONSULTA = {"ver_reporte_general", "ver_tendencias", "ver_explorador", "ver_publicaciones"}
+ETIQUETAS = {"Rector", "Profesor", "Administrativo"}
+
+
 class UsuarioCreateRequest(BaseModel):
     nombre: str
     correo: str
-    rol: str
-    sede: Optional[str] = None
+    numero_documento: str = Field(min_length=6, max_length=20, pattern=r"^[0-9]+$")
+    rol: Literal["Coordinador_Sede", "Usuario_Consulta"]
+    sede_id: Optional[int] = None
+    etiqueta: Optional[Literal["Rector", "Profesor", "Administrativo"]] = None
+    permisos: List[Literal["ver_reporte_general", "ver_tendencias", "ver_explorador", "ver_publicaciones"]] = Field(default_factory=list)
+    programas: List[str] = Field(default_factory=list)
+
+
+class UsuarioUpdateRequest(BaseModel):
+    nombre: Optional[str] = None
+    sede_id: Optional[int] = None
+    etiqueta: Optional[Literal["Rector", "Profesor", "Administrativo"]] = None
+    permisos: Optional[List[Literal["ver_reporte_general", "ver_tendencias", "ver_explorador", "ver_publicaciones"]]] = None
+    programas: Optional[List[str]] = None
+
 
 class UsuarioResponse(BaseModel):
     id: int
     nombre: str
     correo: str
-    rol: str
-    sede_id: Optional[Union[str, int]] = None # En una DB real apuntaría a una tabla Sedes, por ahora pasamos el string
+    rol: Literal["Admin_CTIC", "Coordinador_Sede", "Usuario_Consulta"]
+    sede_id: Optional[int] = None
+    debe_cambiar_contrasena: bool
+    credencial_temporal_expira_en: Optional[datetime] = None
+    activo: bool
+    version_autorizacion: int
+    etiqueta: Optional[Literal["Rector", "Profesor", "Administrativo"]] = None
+    permisos: List[Literal["ver_reporte_general", "ver_tendencias", "ver_explorador", "ver_publicaciones"]]
+    programas: List[str]
 
-    class Config:
-        from_attributes = True
+
+class UsuarioCreateResponse(UsuarioResponse):
+    contrasena_temporal: str
+    modo_credencial: Literal["documento", "random"]
+
+
+class ReemisionCredencialRequest(BaseModel):
+    motivo: str = Field(min_length=10, max_length=500)
+
+
+class ReemisionCredencialResponse(BaseModel):
+    usuario: UsuarioResponse
+    contrasena_temporal: str
+    credencial_temporal_expira_en: datetime
+
+
+class MotivoRequest(BaseModel):
+    motivo: str = Field(min_length=10, max_length=500)
+
+
+class MensajeResponse(BaseModel):
+    mensaje: str
+
+
+def _serializar(usuario: Usuario) -> dict:
+    return {
+        "id": usuario.id, "nombre": usuario.nombre, "correo": usuario.correo,
+        "rol": usuario.rol, "sede_id": usuario.sede_id,
+        "debe_cambiar_contrasena": usuario.debe_cambiar_contrasena,
+        "credencial_temporal_expira_en": usuario.credencial_temporal_expira_en,
+        "activo": usuario.activo, "version_autorizacion": usuario.version_autorizacion,
+        "etiqueta": usuario.etiqueta, "permisos": list(usuario.permisos or []),
+        "programas": list(usuario.programas or []),
+    }
+
+
+def _validar_administracion(actor: dict, objetivo: Usuario) -> None:
+    permitido = (
+        actor.get("rol") == "Admin_CTIC" and objetivo.rol == "Coordinador_Sede"
+    ) or (
+        actor.get("rol") == "Coordinador_Sede"
+        and objetivo.rol == "Usuario_Consulta"
+        and objetivo.sede_id == actor.get("sede_id")
+    )
+    if not permitido:
+        raise HTTPException(status_code=403, detail="No puedes administrar esta cuenta")
+
+
+def _programas_sede(db: Session, sede_id: int) -> set[str]:
+    filas = (
+        db.query(Egresado.programa)
+        .join(Medicion, Medicion.egresado_documento == Egresado.numero_documento)
+        .filter(Medicion.sede_id == sede_id, Egresado.programa.isnot(None))
+        .distinct().all()
+    )
+    return {fila[0] for fila in filas if fila[0]}
+
+
+def _validar_alcance_consulta(db: Session, sede_id: int, etiqueta: Optional[str], permisos: List[str], programas: List[str]) -> None:
+    if etiqueta not in ETIQUETAS:
+        raise HTTPException(status_code=422, detail="Etiqueta de perfil inválida")
+    invalidos = set(permisos) - PERMISOS_CONSULTA
+    if invalidos:
+        raise HTTPException(status_code=422, detail=f"Permisos inválidos: {sorted(invalidos)}")
+    no_disponibles = set(programas) - _programas_sede(db, sede_id)
+    if no_disponibles:
+        raise HTTPException(status_code=422, detail=f"Programas fuera del alcance de la sede: {sorted(no_disponibles)}")
+
+
+def _validar_sede(db: Session, sede_id: Optional[int]) -> int:
+    if sede_id is None:
+        raise HTTPException(status_code=422, detail="La sede es obligatoria")
+    existe = db.query(Sede).filter(Sede.id == sede_id, Sede.activa.is_(True)).first()
+    if existe is None:
+        raise HTTPException(status_code=422, detail="La sede no existe o está inactiva")
+    return sede_id
+
+
+@router.get("/programas-asignables", response_model=List[str])
+def programas_asignables(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    if current_user.get("rol") != "Coordinador_Sede" or current_user.get("sede_id") is None:
+        raise HTTPException(status_code=403, detail="Solo un coordinador puede consultar programas asignables")
+    return sorted(_programas_sede(db, current_user["sede_id"]))
+
 
 @router.get("/", response_model=List[UsuarioResponse])
-def get_usuarios(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
-    query = db.query(Usuario)
-    from sqlalchemy import or_
-    # Nadie ve al CTIC en la tabla, ni siquiera el mismo CTIC
-    query = query.filter(Usuario.rol != 'Admin_CTIC')
-    
-    if current_user.get('rol') == 'Coordinador_Sede':
-        # Un coordinador solo puede ver a usuarios de su misma sede o usuarios nacionales (Directivos sin sede)
-        query = query.filter(or_(Usuario.sede_id == current_user.get('sede_id'), Usuario.sede_id == None))
-    usuarios = query.all()
+def get_usuarios(incluir_inactivos: bool = Query(True), db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    if current_user.get("rol") == "Admin_CTIC":
+        query = db.query(Usuario).filter(Usuario.rol == "Coordinador_Sede")
+    elif current_user.get("rol") == "Coordinador_Sede":
+        query = db.query(Usuario).filter(Usuario.rol == "Usuario_Consulta", Usuario.sede_id == current_user.get("sede_id"))
+    else:
+        raise HTTPException(status_code=403, detail="No puedes administrar usuarios")
+    if not incluir_inactivos:
+        query = query.filter(Usuario.activo.is_(True))
+    return [_serializar(usuario) for usuario in query.order_by(Usuario.nombre).all()]
 
-    # Mapeo temporal del id de la sede para que el Frontend vea el string
-    for u in usuarios:
-        if u.sede_id == 1: u.sede_id = "Bucaramanga"
-        elif u.sede_id == 2: u.sede_id = "Medellín"
-        elif u.sede_id == 3: u.sede_id = "Palmira"
-        elif u.sede_id == 4: u.sede_id = "Montería"
-        elif u.sede_id == 5: u.sede_id = "Bogotá"
-    return usuarios
 
-@router.post("/", response_model=UsuarioResponse)
+@router.post("/", response_model=UsuarioCreateResponse)
 def create_usuario(user_data: UsuarioCreateRequest, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
-    # Verificar si el correo ya existe
-    if not user_data.correo.endswith('@upb.edu.co'):
+    correo = user_data.correo.strip().lower()
+    if not correo.endswith("@upb.edu.co"):
         raise HTTPException(status_code=400, detail="El correo debe ser @upb.edu.co")
-
-    existe = db.query(Usuario).filter(Usuario.correo == user_data.correo).first()
-    if existe:
+    if db.query(Usuario).filter(Usuario.correo == correo).first():
         raise HTTPException(status_code=400, detail="El correo ya está registrado en el sistema")
 
-    # Bloquear escalada de privilegios
-    if current_user.get('rol') == 'Admin_CTIC':
-        if user_data.rol != 'Coordinador_Sede':
-            raise HTTPException(status_code=403, detail="El Administrador CTIC solo tiene permitido crear cuentas de Coordinador de Sede")
-            
-    if current_user.get('rol') == 'Coordinador_Sede':
-        if user_data.rol == 'Admin_CTIC':
-            raise HTTPException(status_code=403, detail="No tienes permisos para crear un Administrador CTIC")
-        if user_data.rol == 'Coordinador_Sede':
-            raise HTTPException(status_code=403, detail="Un Coordinador de Sede no tiene permisos para crear a otro Coordinador de Sede. (Solicítelo a CTIC)")
-        
-        # Mapeo temporal para saber si intenta crear en otra sede
-        mapa_sedes_verif = {"Bucaramanga": 1, "Medelln": 2, "Palmira": 3, "Montera": 4, "Bogot": 5}
-        sede_intentada = mapa_sedes_verif.get(user_data.sede) if user_data.sede else None
-        
-        # Si intenta asignarle una sede y esa sede NO es la suya
-        if sede_intentada and sede_intentada != current_user.get('sede_id'):
-            raise HTTPException(status_code=403, detail="Solo puedes crear usuarios para tu propia sede o de nivel Nacional")
-        
-    # Mapeo simple de sedes
-    mapa_sedes = {"Bucaramanga": 1, "Medellín": 2, "Palmira": 3, "Montería": 4, "Bogotá": 5}
-    sede_id = mapa_sedes.get(user_data.sede) if user_data.sede else None
+    if current_user.get("rol") == "Admin_CTIC":
+        if user_data.rol != "Coordinador_Sede":
+            raise HTTPException(status_code=403, detail="CTIC solo puede crear coordinadores")
+        sede_id = _validar_sede(db, user_data.sede_id)
+        etiqueta, permisos, programas = None, [], []
+    elif current_user.get("rol") == "Coordinador_Sede":
+        if user_data.rol != "Usuario_Consulta":
+            raise HTTPException(status_code=403, detail="El coordinador solo puede crear usuarios de consulta")
+        sede_id = current_user.get("sede_id")
+        if sede_id is None:
+            raise HTTPException(status_code=403, detail="El coordinador no tiene sede asignada")
+        if user_data.sede_id is not None and user_data.sede_id != sede_id:
+            raise HTTPException(status_code=403, detail="Solo puedes crear usuarios de tu propia sede")
+        _validar_alcance_consulta(db, sede_id, user_data.etiqueta, user_data.permisos, user_data.programas)
+        etiqueta, permisos, programas = user_data.etiqueta, sorted(set(user_data.permisos)), sorted(set(user_data.programas))
+    else:
+        raise HTTPException(status_code=403, detail="No puedes crear usuarios")
 
-    nuevo_usuario = Usuario(
-        nombre=user_data.nombre,
-        correo=user_data.correo,
-        contrasena_hash=get_password_hash("upb123"), # Contraseña por defecto
-        rol=user_data.rol,
-        sede_id=sede_id
+    temporal = generar_credencial_inicial(user_data.numero_documento.strip())
+    expira_en = expiracion_credencial_inicial()
+    usuario = Usuario(
+        nombre=user_data.nombre.strip(), correo=correo,
+        contrasena_hash=get_password_hash(temporal), rol=user_data.rol,
+        sede_id=sede_id, debe_cambiar_contrasena=True, activo=True,
+        credencial_temporal_expira_en=expira_en,
+        version_autorizacion=1, etiqueta=etiqueta, permisos=permisos, programas=programas,
     )
-    
-    db.add(nuevo_usuario)
-    db.commit()
-    db.refresh(nuevo_usuario)
-    
-    return nuevo_usuario
+    db.add(usuario); db.commit(); db.refresh(usuario)
+    return {**_serializar(usuario), "contrasena_temporal": temporal, "modo_credencial": INITIAL_CREDENTIAL_MODE}
 
 
-@router.delete("/{usuario_id}")
-def delete_usuario(usuario_id: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+@router.post("/{usuario_id}/regenerar-credencial-temporal", response_model=ReemisionCredencialResponse)
+def regenerar_credencial_temporal(
+    usuario_id: int,
+    solicitud: ReemisionCredencialRequest,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
-    if not usuario:
+    if usuario is None:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    
-    # Regla de negocio: No se puede eliminar al admin principal
-    if usuario.rol == 'Admin_CTIC':
-        raise HTTPException(status_code=403, detail="No se puede eliminar al Administrador Principal")
-    
-    if current_user.get('rol') == 'Coordinador_Sede':
-        if usuario.sede_id is not None and usuario.sede_id != current_user.get('sede_id'):
-            raise HTTPException(status_code=403, detail="No tienes permisos para eliminar a un usuario de otra sede")
-        
-    db.delete(usuario)
-    db.commit()
-    return {"mensaje": "Usuario eliminado exitosamente"}
+    _validar_administracion(current_user, usuario)
+    if not usuario.activo:
+        raise HTTPException(status_code=409, detail="Reactiva la cuenta antes de recuperar su acceso")
+    actor = db.query(Usuario).filter(Usuario.correo == current_user.get("correo")).first()
+    if actor is None:
+        raise HTTPException(status_code=401, detail="Usuario autenticado no encontrado")
 
+    temporal = generar_contrasena_temporal()
+    expira_en = expiracion_credencial_recuperacion()
+    usuario.contrasena_hash = get_password_hash(temporal)
+    usuario.debe_cambiar_contrasena = True
+    usuario.credencial_temporal_expira_en = expira_en
+    usuario.version_autorizacion += 1
+    db.add(AuditoriaCuenta(
+        accion="REEMISION_CREDENCIAL",
+        actor_id=actor.id,
+        actor_correo=actor.correo,
+        objetivo_id=usuario.id,
+        objetivo_correo=usuario.correo,
+        objetivo_rol=usuario.rol,
+        sede_id=usuario.sede_id,
+        motivo=solicitud.motivo.strip(),
+    ))
+    db.commit()
+    db.refresh(usuario)
+    return {
+        "usuario": _serializar(usuario),
+        "contrasena_temporal": temporal,
+        "credencial_temporal_expira_en": expira_en,
+    }
+
+
+@router.patch("/{usuario_id}", response_model=UsuarioResponse)
+def actualizar_usuario(usuario_id: int, cambios: UsuarioUpdateRequest, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if usuario is None:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    _validar_administracion(current_user, usuario)
+    if cambios.nombre is not None:
+        usuario.nombre = cambios.nombre.strip()
+    if usuario.rol == "Coordinador_Sede" and cambios.sede_id is not None:
+        usuario.sede_id = _validar_sede(db, cambios.sede_id)
+    if usuario.rol == "Usuario_Consulta":
+        etiqueta = cambios.etiqueta if cambios.etiqueta is not None else usuario.etiqueta
+        permisos = cambios.permisos if cambios.permisos is not None else list(usuario.permisos or [])
+        programas = cambios.programas if cambios.programas is not None else list(usuario.programas or [])
+        _validar_alcance_consulta(db, usuario.sede_id, etiqueta, permisos, programas)
+        usuario.etiqueta, usuario.permisos, usuario.programas = etiqueta, sorted(set(permisos)), sorted(set(programas))
+    elif any(value is not None for value in (cambios.etiqueta, cambios.permisos, cambios.programas)):
+        raise HTTPException(status_code=422, detail="Los coordinadores no usan permisos de consulta")
+    usuario.version_autorizacion += 1
+    db.commit(); db.refresh(usuario)
+    return _serializar(usuario)
+
+
+def _cambiar_estado(usuario_id: int, activo: bool, db: Session, current_user: dict) -> dict:
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if usuario is None:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    _validar_administracion(current_user, usuario)
+    usuario.activo = activo
+    usuario.version_autorizacion += 1
+    db.commit(); db.refresh(usuario)
+    return _serializar(usuario)
+
+
+@router.post("/{usuario_id}/desactivar", response_model=UsuarioResponse)
+def desactivar_usuario(usuario_id: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    return _cambiar_estado(usuario_id, False, db, current_user)
+
+
+@router.post("/{usuario_id}/reactivar", response_model=UsuarioResponse)
+def reactivar_usuario(usuario_id: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    return _cambiar_estado(usuario_id, True, db, current_user)
+
+
+@router.delete("/{usuario_id}", response_model=UsuarioResponse)
+def delete_usuario(usuario_id: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    """La eliminación ordinaria es una desactivación recuperable."""
+    return _cambiar_estado(usuario_id, False, db, current_user)
+
+
+@router.delete("/{usuario_id}/permanente", response_model=MensajeResponse)
+def borrar_usuario_permanentemente(usuario_id: int, solicitud: MotivoRequest, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if usuario is None:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    _validar_administracion(current_user, usuario)
+    if usuario.activo:
+        raise HTTPException(status_code=409, detail="Desactiva la cuenta antes del borrado físico")
+    actor = db.query(Usuario).filter(Usuario.correo == current_user.get("correo")).first()
+    if actor is None:
+        raise HTTPException(status_code=401, detail="Usuario autenticado no encontrado")
+    db.add(AuditoriaCuenta(
+        accion="BORRADO_FISICO", actor_id=actor.id, actor_correo=actor.correo,
+        objetivo_id=usuario.id, objetivo_correo=usuario.correo, objetivo_rol=usuario.rol,
+        sede_id=usuario.sede_id, motivo=solicitud.motivo.strip(),
+    ))
+    db.delete(usuario)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="La cuenta conserva relaciones y no puede borrarse físicamente",
+        )
+    return {"mensaje": "Usuario eliminado físicamente y evento auditado"}

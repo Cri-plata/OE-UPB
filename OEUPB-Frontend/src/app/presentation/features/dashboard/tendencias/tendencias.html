@@ -34,8 +34,13 @@
       </div>
 
       <div class="chart-card">
-        <h2>Evolución Histórica: {{ currentIndicatorName }}</h2>
-        <div class="chart-wrapper line-chart" *ngIf="isChartReady">
+        <button (click)="exportarGrafica()">Exportar PNG</button>
+        <div class="publication-header">
+          <h2>Evolución Histórica: {{ currentIndicatorName }}</h2>
+          <button *ngIf="!publicaciones[graficaKey]" class="publish-btn" [disabled]="publicando || !isChartReady" (click)="publicar()">Publicar</button>
+          <button *ngIf="publicaciones[graficaKey]" class="withdraw-btn" [disabled]="publicando" (click)="retirar()">Retirar publicación</button>
+        </div>
+        <div id="grafica-tendencias" class="chart-wrapper line-chart" *ngIf="isChartReady">
           <canvas baseChart
             [data]="lineChartData"
             [type]="chartType"

@@ -5,14 +5,18 @@
   </div>
   
   <nav class="nav-menu">
-    <!-- Solo visible para Coordinadores y Directivos -->
-    <ng-container *ngIf="userRole !== 'Admin_CTIC'">
+    <!-- Los reportes actuales son privados de la sede y exclusivos del coordinador. -->
+    <ng-container *ngIf="userRole === 'Coordinador_Sede'">
       <a routerLink="/reporte" routerLinkActive="active" class="nav-item">Reporte general</a>
       <a routerLink="/tendencias" routerLinkActive="active" class="nav-item">Tendencias</a>
       <a routerLink="/explorador" routerLinkActive="active" class="nav-item">Explorador de Datos</a>
+      <a routerLink="/analitica" routerLinkActive="active" class="nav-item">Analítica y alertas</a>
       <a routerLink="/directorio" routerLinkActive="active" class="nav-item">Directorio</a>
       <a routerLink="/habilidades" routerLinkActive="active" class="nav-item">Co-relaciones</a>
     </ng-container>
+
+    <a *ngIf="userRole === 'Coordinador_Sede' || userRole === 'Usuario_Consulta'"
+      routerLink="/publicaciones" routerLinkActive="active" class="nav-item">Gráficas publicadas</a>
 
     <!-- Solo visible para Coordinadores -->
     <ng-container *ngIf="userRole === 'Coordinador_Sede'">

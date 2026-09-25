@@ -1,5 +1,9 @@
 # Requerimientos Clasificados
 
+> **Estado:** requisitos objetivo. Un requisito documentado no implica que esté implementado. Consultar [`matriz-trazabilidad.md`](matriz-trazabilidad.md) para el estado verificado.
+
+**Convención:** `Requerimiento Ligado` identifica dependencias funcionales directas; no sustituye la cobertura HU/CU/RN de la matriz de trazabilidad.
+
 | Número de requisito | RF-01 |
 |---|---|
 | Nombre de requisito | El sistema debe permitir subir... |
@@ -37,7 +41,7 @@
 | Nombre de requisito | El sistema debe guardar toda... |
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-04, RF-05 |
+| Requerimiento Ligado | RF-04 |
 | Descripción del requerimiento | El sistema debe guardar toda la información en una base de datos central. |
 
 | Número de requisito | RF-06 |
@@ -54,7 +58,7 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-01 |
-| Descripción del requerimiento | El sistema debe registrar la fecha exacta en la que se sube cada archivo. |
+| Descripción del requerimiento | El sistema debe registrar cada archivo como una carga auditable con identificador, fecha y hora, actor, sede, momento, año de grado, nombre o huella del archivo, estado, versión, resultado y mediciones afectadas. |
 
 | Número de requisito | RF-08 |
 |---|---|
@@ -70,7 +74,7 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-08 |
-| Descripción del requerimiento | El sistema debe confirmar con un mensaje si la carga de datos fue exitosa o si hubo errores. |
+| Descripción del requerimiento | El sistema debe confirmar si la carga fue exitosa o detallar los errores. Una recarga de la misma sede, momento y año de grado debe reemplazar la versión vigente dentro de una sola transacción; ante cualquier fallo debe conservarse intacta la versión anterior. |
 
 | Número de requisito | RF-10 |
 |---|---|
@@ -126,7 +130,7 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
-| Descripción del requerimiento | El sistema debe permitir agrupar a los usuarios según el programa que estudiaron. |
+| Descripción del requerimiento | El sistema debe permitir agrupar a los egresados según el programa que estudiaron. |
 
 | Número de requisito | RF-17 |
 |---|---|
@@ -134,7 +138,7 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
-| Descripción del requerimiento | El sistema debe permitir actualizar si el egresado está trabajando, emprendiendo o estudiando o desempleado. |
+| Descripción del requerimiento | El sistema debe permitir actualizar el estado principal del egresado usando el catálogo: empleado, independiente, estudiante o sin empleo. Cuando aplique, la formalidad del empleo se registra como un atributo separado. |
 
 | Número de requisito | RF-18 |
 |---|---|
@@ -158,7 +162,7 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-19 |
-| Descripción del requerimiento | El panel debe mostrar gráficos sobre los estudios adicionales que realizan los egresados(revisar el porcentaje que está trabajando, emprendiendo, haciendo postgrado o desempleado) |
+| Descripción del requerimiento | El panel debe mostrar gráficos sobre los estudios adicionales que realizan los egresados. El estado laboral se presenta por separado conforme al catálogo definido en RF-17. |
 
 | Número de requisito | RF-21 |
 |---|---|
@@ -174,7 +178,7 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-18 |
-| Descripción del requerimiento | El panel debe tener un filtro para ver los datos según el año de grado (cohorte). |
+| Descripción del requerimiento | El panel debe tener un filtro para ver los datos según el año de grado o cohorte. El año informado durante la carga representa siempre este año de grado. |
 
 | Número de requisito | RF-23 |
 |---|---|
@@ -182,14 +186,14 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-18 |
-| Descripción del requerimiento | El panel debe tener un filtro para agrupar por situación laboral (empleado, sin empleo, independiente). |
+| Descripción del requerimiento | El panel debe permitir agrupar por situación laboral: empleado, independiente, estudiante o sin empleo. |
 
 | Número de requisito | RF-24 |
 |---|---|
 | Nombre de requisito | El panel debe mostrar líneas... |
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-04 |
+| Requerimiento Ligado | RF-18 |
 | Descripción del requerimiento | El panel debe mostrar líneas de tiempo para ver tendencias de empleo. |
 
 | Número de requisito | RF-25 |
@@ -253,16 +257,16 @@
 | Nombre de requisito | El sistema debe sugerir tendencias... |
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-04 |
+| Requerimiento Ligado | RF-18, RF-67 |
 | Descripción del requerimiento | El sistema debe sugerir tendencias de cursos o programas nuevos basados en los datos |
 
 | Número de requisito | RNF-02 |
 |---|---|
-| Nombre de requisito | El sistema debe pOE UPBr usarse... |
+| Nombre de requisito | El sistema debe poder usarse... |
 | Tipo | ☐ Requisito | ☑ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
-| Descripción del requerimiento | El sistema debe pOE UPBr usarse desde cualquier navegador de internet en un computador (versión web). |
+| Descripción del requerimiento | El sistema debe poder usarse desde los navegadores de internet definidos como compatibles en la estrategia de pruebas (versión web). |
 
 | Número de requisito | RNF-03 |
 |---|---|
@@ -277,16 +281,16 @@
 | Nombre de requisito | El sistema debe pedir un... |
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-31 |
-| Descripción del requerimiento | El sistema debe pedir un usuario y contraseña para pOE UPBr entrar |
+| Requerimiento Ligado | - |
+| Descripción del requerimiento | El sistema debe pedir un usuario y contraseña para poder entrar. |
 
 | Número de requisito | RF-33 |
 |---|---|
-| Nombre de requisito | El coordinador de egresados debe... |
+| Nombre de requisito | Alcance operativo del coordinador de sede |
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-01 |
-| Descripción del requerimiento | El coordinador de egresados debe tener acceso completo a todas las herramientas. |
+| Requerimiento Ligado | RF-32 |
+| Descripción del requerimiento | El coordinador de sede debe administrar las encuestas de su propia sede, gestionar sus usuarios de consulta y publicar o retirar gráficas agregadas. No puede crear otros coordinadores ni acceder a datos fuente de otra sede. |
 
 | Número de requisito | RNF-04 |
 |---|---|
@@ -302,15 +306,15 @@
 | Tipo | ☐ Requisito | ☑ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-01 |
-| Descripción del requerimiento | El sistema debe estar diseñado para pOE UPBr crecer y usarse en otras sedes de la universidad |
+| Descripción del requerimiento | El sistema debe estar diseñado para poder crecer y usarse en otras sedes de la universidad. |
 
 | Número de requisito | RF-34 |
 |---|---|
-| Nombre de requisito | El sistema debe permitir filtrar... |
+| Nombre de requisito | Aislamiento de datos fuente por sede |
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-33 |
-| Descripción del requerimiento | El sistema debe permitir filtrar la información por la sede donde estudió el egresado |
+| Descripción del requerimiento | El sistema debe identificar la sede propietaria de cada encuesta y aplicar ese alcance en consultas, gráficas y permisos. Los datos fuente no pueden cruzar sedes. |
 
 | Número de requisito | RNF-06 |
 |---|---|
@@ -322,27 +326,27 @@
 
 | Número de requisito | RF-35 |
 |---|---|
-| Nombre de requisito | El sistema debe permitir unir... |
+| Nombre de requisito | Consulta de gráficas publicadas por otras sedes |
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-04 |
-| Descripción del requerimiento | El sistema debe permitir unir la información de varias sedes para ver un reporte total. |
+| Requerimiento Ligado | RF-33, RF-34 |
+| Descripción del requerimiento | El sistema debe permitir consultar en una vista común las gráficas y métricas agregadas que los coordinadores de otras sedes hayan publicado. La vista no debe unir ni exponer datos fuente o respuestas individuales. |
 
 | Número de requisito | RF-36 |
 |---|---|
-| Nombre de requisito | El sistema debe permitir crear... |
+| Nombre de requisito | Administración jerárquica de cuentas |
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-35 |
-| Descripción del requerimiento | El sistema debe permitir crear cuentas para otros coordinadores de sedes distintas. |
+| Requerimiento Ligado | RF-33 |
+| Descripción del requerimiento | El Admin CTIC debe crear las cuentas de Coordinador de Sede. Cada coordinador debe crear y administrar únicamente usuarios de consulta de su propia sede. |
 
 | Número de requisito | RF-37 |
 |---|---|
-| Nombre de requisito | Permitir asignar permisos de acceso... |
+| Nombre de requisito | Permitir asignar permisos y programas... |
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-04 |
-| Descripción del requerimiento | Permitir asignar permisos de acceso diferenciados por sede (ej. un coordinador de sede solo ve su propia información, salvo un rol consolidado que vea todas) |
+| Requerimiento Ligado | RF-36 |
+| Descripción del requerimiento | Al crear un usuario de consulta, el coordinador debe asignarle manualmente programas y permisos de visualización. Las etiquetas rector, profesor y administrativo son informativas y no conceden privilegios implícitos. El backend debe mostrar únicamente las gráficas publicadas compatibles con los permisos y programas asignados. Los coordinadores, por su rol técnico, pueden ver todas las publicadas. |
 
 | Número de requisito | RF-38 |
 |---|---|
@@ -534,7 +538,7 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-18 |
-| Descripción del requerimiento | El sistema debe mostrar gráficas que comparen el porcentaje de egresados que son empleados, emprendedores o estudiantes. |
+| Descripción del requerimiento | El sistema debe mostrar gráficas que comparen el porcentaje de egresados empleados, independientes, estudiantes o sin empleo. |
 
 | Número de requisito | RF-62 |
 |---|---|
@@ -614,7 +618,7 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
-| Descripción del requerimiento | El modelo de IA debe predecir la probabilidad de empleo formal de una cohorte basándose en datos históricos. |
+| Descripción del requerimiento | **En pausa por decisión de producto.** No se implementará un modelo predictivo hasta aprobar la variable objetivo, las métricas, la población, el horizonte y los criterios de aceptación. |
 
 | Número de requisito | RF-72 |
 |---|---|
@@ -647,5 +651,3 @@
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-72 |
 | Descripción del requerimiento | El modelo de IA debe entrenarse exclusivamente con datos anonimizados, sin usar nombres ni documentos de identidad.(NF) |
-
-

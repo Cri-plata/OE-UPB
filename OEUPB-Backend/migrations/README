@@ -1,0 +1,25 @@
+Migraciones canónicas de OE UPB
+===============================
+
+La conexión se toma de `DATABASE_URL`; no se guardan credenciales en
+`alembic.ini`.
+
+Base nueva:
+
+    alembic upgrade head
+
+Base existente creada antes de Alembic:
+
+1. Crear y verificar un respaldo.
+2. Comparar la estructura con `OEUPB-Docs/specs/db/oeupb-schema.sql` anterior a
+   la tabla `cargas`.
+3. Marcar el baseline sin ejecutar DDL:
+
+       alembic stamp 70dad5413f5b
+
+4. Aplicar las migraciones posteriores:
+
+       alembic upgrade head
+
+Nunca ejecutar `stamp` sobre una base vacía. Nunca aplicar una migración en
+producción sin respaldo y ensayo de restauración.

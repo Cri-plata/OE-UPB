@@ -1,0 +1,42 @@
+name: Product quality
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  backend-and-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r OEUPB-Backend/requirements.txt
+      - name: Backend tests
+        working-directory: OEUPB-Backend
+        env:
+          DATABASE_URL: sqlite://
+        run: python -m unittest discover -s tests -v
+      - name: Contracts and docs
+        run: |
+          python tools/validate_contracts.py
+          python tools/validate_docs.py
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: OEUPB-Frontend/package-lock.json
+      - working-directory: OEUPB-Frontend
+        run: npm ci
+      - working-directory: OEUPB-Frontend
+        run: npm test -- --watch=false
+      - working-directory: OEUPB-Frontend
+        run: npm run check:architecture
+      - working-directory: OEUPB-Frontend
+        run: npm run build

@@ -1,0 +1,87 @@
+# Archivo histórico del backlog de OE UPB
+
+Este archivo conserva tareas completadas, reemplazadas o descartadas. No debe usarse para priorizar trabajo activo.
+
+## Verificado y archivado el 2026-09-22
+
+Los siguientes ítems figuraban como pendientes en el backlog de 2026-08-26, pero el código actual demuestra que existe una implementación al menos funcional. Que estén archivados no significa que carezcan de deuda técnica; los pendientes reales relacionados están en `BACKLOG.md`.
+
+- [x] **DOC-01 original — Contratos iniciales:** existen DTO TypeScript y Pydantic en `OEUPB-Contracts/`. Reemplazado por API-01 para resolver su divergencia.
+- [x] **UI-00 — Setup de contratos TypeScript:** existen contratos en `OEUPB-Contracts/APIcontractfront/`.
+- [x] **UI-01 — Login:** existe pantalla, repositorio de autenticación, interceptor JWT y endpoint real.
+- [x] **UI-02 — Gestión de usuarios:** existe formulario y tabla conectados a `/api/usuarios`.
+- [x] **UI-03 — Carga Excel:** existe pantalla conectada a `/api/carga/excel`, historial y eliminación por momento/año.
+- [x] **UI-04 — Dashboard:** existen reporte general, tendencias y explorador conectados al backend.
+- [x] **API-01 — Login/JWT:** implementado en `/api/auth/login`, con `rol` y `sede_id` en el token.
+- [x] **API-02 — Usuarios:** existen listado, creación y eliminación.
+- [x] **API-03 — Carga:** existe ETL con Pandas y persistencia de mediciones JSON.
+- [x] **Diseño UI — Nuevo usuario:** el formulario fue implementado, aunque no existiera un mockup separado.
+- [x] **REQ-01, REQ-02, REQ-03 y UX-01:** documentación inicial, requisitos, historias y revisión de mockups existentes.
+
+## Elementos reemplazados
+
+- **API-04 — IA simulada:** se retira como criterio suficiente. El backlog activo exige implementación verificable, anonimización y pruebas.
+- **DB-01 original — Script SQL puntual:** se reemplaza por migraciones formales y esquema canónico versionado.
+
+## Completado el 2026-09-23
+
+- [x] **SEC-02 — Eliminar fallbacks inseguros de sede:** carga, historial y eliminación rechazan coordinadores sin sede y ya no asignan sede 1 por defecto.
+- [x] **SEC-05 — Validar momentos:** backend y pruebas aceptan únicamente 0, 1 y 5.
+- [x] **SEC-06 — Resolver formato permitido:** frontend y backend aceptan exclusivamente `.xlsx` y el backend valida que Pandas pueda leer el contenido.
+- [x] **DB-01 — Incorporar migraciones formales:** Alembic contiene un baseline para bases nuevas y una migración verificada de `cargas`; la adopción de bases existentes está documentada.
+- [x] **LOAD-01 — Carga auditable:** cada archivo tiene ID, huella, actor, sede, momento, cohorte, estado y versión; la recarga sustituye transaccionalmente la versión vigente y la eliminación opera por `carga_id`.
+- [x] **SEC-07 — Evitar contraseña fija:** cada cuenta recibe una contraseña temporal aleatoria, mostrada una sola vez, y el backend exige reemplazarla antes de permitir otras operaciones.
+
+## Completado el 2026-09-23 (P0 de permisos)
+
+- [x] **SEC-01 — Aplicar la matriz RBAC aprobada:** backend restringe datos privados a coordinadores, separa administración CTIC/coordinador y cubre denegaciones y escalada con pruebas 403.
+- [x] **SEC-04 — Corregir aislamiento del directorio:** tabla, perfil, programas e historial de mediciones vuelven a aplicar el `sede_id` autenticado.
+- [x] **SHARE-01 — Modelar usuarios de consulta:** roles heredados migran a `Usuario_Consulta`; se persisten etiqueta informativa, cuatro permisos y programas validados contra los observados en la sede.
+- [x] **SHARE-02 — Separar administración y ciclo de vida de cuentas:** se incorporaron desactivación/reactivación, borrado físico excepcional auditado, versión de autorización y revocación inmediata de sesiones.
+
+## Completado el 2026-09-24 — Contratos, datos y calidad
+
+- [x] **API-01 — Sincronizar consumidores con OpenAPI:** Angular consume tipos generados; un validador comprueba tipos, rutas, respuestas y ausencia de URLs duplicadas.
+- [x] **API-02 — Decidir versionado de rutas:** ADR-011 mantiene `/api/*` con evolución compatible.
+- [x] **DB-02 — Aprobar modelo objetivo:** ADR-012 conserva `Egresado`–`Medicion` y formaliza intentos.
+- [x] **DB-03 — Crear catálogo de sedes:** `sedes` y `/api/sedes` reemplazan mapas repetidos y agregan FK.
+- [x] **DB-04 — Completar invariantes heredadas:** mediciones completas, carga, actor, sede, momento, cohorte, respuestas e intento son obligatorios; cargas legacy usan actor técnico desactivado.
+- [x] **DB-05 — Auditar eliminación física de cargas:** el evento inmutable se registra con actor, alcance, versión, cantidad, archivo y motivo en la misma transacción.
+- [x] **DB-06 — Modelar múltiples intentos:** se persisten intento/fecha y los indicadores declaran selección del último intento identificado.
+- [x] **QA-01 — Organizar y ampliar pruebas backend:** 19 pruebas cubren autenticación, RBAC, sedes, carga, reportes, intentos y contratos.
+- [x] **QA-02 — Ampliar pruebas frontend:** 11 pruebas cubren login, interceptor, permisos, carga y directorio.
+- [x] **QA-03 — Añadir pruebas de contrato e integración:** OpenAPI se compara con FastAPI y los tipos/consumidores se validan en CI.
+
+## Completado el 2026-09-24 — Publicación de gráficas
+
+- [x] **SHARE-03 — Modelar publicación de gráficas:** `PublicacionGrafica` conserva una instantánea agregada e inmutable con propietario, sede, programas, permiso, definición, métricas, aprobación, versión, estado y trazabilidad temporal.
+- [x] **SHARE-04 — Implementar publicación y audiencia automática:** Reporte General, Tendencias y Explorador permiten publicar/retirar; el catálogo separado filtra en backend por rol, permisos y programas, sin exponer datos fuente.
+
+## Completado el 2026-09-24 — Arquitectura frontend y operación
+
+- [x] **FE-01 — Centralizar configuración de API:** la URL base vive en `environment.ts`/`api.config.ts` y un validador impide URLs duplicadas.
+- [x] **FE-02 — Completar separación de capas:** Presentation dejó de importar `HttpClient`; los clientes tipados se concentran en `data/api/`.
+- [x] **FE-03 — Proteger rutas por sesión y rol:** guards funcionales cubren sesión, invitado, cambio inicial pendiente y matriz de roles.
+- [x] **FE-04 — Normalizar el design system:** tokens CSS globales y paleta de gráficas sustituyen colores repetidos; la arquitectura se valida automáticamente.
+- [x] **OPS-01 — Configuración reproducible:** `.env.example`, dependencias fijadas, lockfile, migraciones y procedimiento desde cero están documentados y verificados.
+- [x] **OPS-02 — Configurar CI:** GitHub Actions ejecuta pruebas, build, OpenAPI/tipos, enlaces/documentación y arquitectura frontend.
+
+## Completado el 2026-09-24 — Funcionalidad objetivo P2
+
+- [x] **DATA-01 — CRUD manual de egresados:** coordinadores crean, corrigen y eliminan registros manuales de su sede; cada operación exige motivo, conserva auditoría y bloquea conflictos intersede o borrado con mediciones.
+- [x] **EXP-01 — Exportación:** el directorio filtrado se descarga como `.xlsx` y Reporte General, Tendencias y Explorador exportan sus lienzos como PNG.
+- [x] **IA-02 — Clasificación NLP anonimizada:** el backend extrae únicamente respuestas abiertas, elimina correos, números y datos conocidos del egresado, y clasifica competencias localmente sin enviar texto a terceros.
+- [x] **IA-03 — Alertas de patrones negativos:** la vista de analítica presenta reglas descriptivas por programa para baja empleabilidad y recurrencia negativa, con muestra y severidad; no se presenta como predicción.
+- [x] **DEPLOY-01 — Preparación productiva en repositorio:** Dockerfiles, Compose, proxy HTTPS, CORS por entorno, health checks, logs de solicitud sin cuerpos, backup, restauración protegida por confirmación y runbook de rollback están versionados. La instalación real de Docker, certificados y simulacro institucional corresponde al ambiente.
+
+## Completado el 2026-09-24 — Endurecimiento de autenticación P2
+
+- [x] **SEC-03 — Endurecer secretos JWT:** fuera de desarrollo/test el proceso falla si `SECRET_KEY` falta, es conocida o tiene menos de 32 caracteres; producción exige además credenciales iniciales aleatorias.
+- [x] **SEC-08 — Regenerar credencial temporal:** CTIC recupera coordinadores y cada coordinador sus usuarios de consulta; la operación exige motivo, reemplaza la credencial, revoca sesiones y conserva auditoría.
+- [x] **SEC-09 — Ciclo de vida de credencial inicial:** el alta solicita documento y guarda solo su hash; la credencial vence, mantiene el cambio inicial bloqueante y usa modo aleatorio en producción. La recuperación emite una alternativa aleatoria de corta duración.
+
+## Completado el 2026-09-24 — Higiene del repositorio P2
+
+- [x] **REPO-01 — Clasificar scripts temporales:** se revisaron y retiraron 73 scripts históricos de parches, diagnósticos y datos; las utilidades vigentes quedaron en `tools/` o `OEUPB-Backend/scripts/`, y Git conserva lo retirado.
+- [x] **DOC-01 — Auditar RF-01 a RF-73:** la matriz registra evidencia y estado individual para los 73 requisitos (32 implementados, 33 parciales, 7 no implementados y 1 en pausa).
+- [x] **DOC-02 — Resolver decisiones abiertas:** las ocho preguntas del plan fueron resueltas por ADR vigentes o delimitadas formalmente en `audits/03-cierre-decisiones-abiertas.md`.

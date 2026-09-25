@@ -5,6 +5,9 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "generate:api": "python ../tools/generate_api_types.py",
+    "check:api": "python ../tools/generate_api_types.py --check",
+    "check:architecture": "python ../tools/validate_frontend_architecture.py",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:front-oeupb": "node dist/front-oeupb/server/server.mjs"

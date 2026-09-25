@@ -9,7 +9,7 @@
     <div class="admin-grid">
       <!-- Formulario para crear coordinador -->
       <div class="card form-card">
-        <h2>Crear Nuevo Usuario</h2>
+        <h2>{{ usuarioEditandoId ? 'Editar usuario' : 'Crear nuevo usuario' }}</h2>
         <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
           <div class="form-group">
             <label>Nombre Completo</label>
@@ -18,7 +18,7 @@
           
           <div class="form-group">
             <label>Correo Institucional</label>
-            <input type="email" formControlName="correo" placeholder="ejemplo@upb.edu.co">
+            <input type="email" formControlName="correo" placeholder="ejemplo@upb.edu.co" [readonly]="usuarioEditandoId !== null">
           </div>
 
           <div class="form-group">
@@ -26,20 +26,51 @@
                         <select formControlName="rol">
               <option value="">Seleccione un rol...</option>
               <option value="Coordinador_Sede" *ngIf="usuarioActual?.rol === 'Admin_CTIC'">Coordinador de Sede</option>
-              <option value="Directivo" *ngIf="usuarioActual?.rol === 'Coordinador_Sede'">Directivo</option>
-              <option value="Profesor" *ngIf="usuarioActual?.rol === 'Coordinador_Sede'">Profesor</option>
+              <option value="Usuario_Consulta" *ngIf="usuarioActual?.rol === 'Coordinador_Sede'">Usuario de consulta</option>
             </select>
           </div>
+
+          <div class="form-group" *ngIf="usuarioEditandoId === null">
+            <label>Número de documento *</label>
+            <input type="text" inputmode="numeric" formControlName="numero_documento" placeholder="Solo números">
+            <small>En desarrollo se usa como credencial inicial; solo se almacena su hash.</small>
+          </div>
+
+          <ng-container *ngIf="usuarioActual?.rol === 'Coordinador_Sede'">
+            <div class="form-group">
+              <label>Etiqueta informativa *</label>
+              <select formControlName="etiqueta">
+                <option value="">Seleccione una etiqueta...</option>
+                <option value="Rector">Rector</option>
+                <option value="Profesor">Profesor</option>
+                <option value="Administrativo">Administrativo</option>
+              </select>
+            </div>
+            <fieldset class="form-group" formGroupName="permisos">
+              <legend>Permisos</legend>
+              <label *ngFor="let permiso of permisosDisponibles" class="check-option">
+                <input type="checkbox" [formControlName]="permiso.id"> {{ permiso.nombre }}
+              </label>
+            </fieldset>
+            <div class="form-group">
+              <label>Programas autorizados</label>
+              <select formControlName="programas" multiple size="5">
+                <option *ngFor="let programa of programasDisponibles" [value]="programa">{{ programa }}</option>
+              </select>
+              <small>Solo aparecen programas observados en cargas de tu sede.</small>
+            </div>
+          </ng-container>
 
           <div class="form-group" *ngIf="usuarioActual?.rol === 'Admin_CTIC'">
-            <label>Sede Asignada * (Dejar vacío si es Nacional)</label>
-                        <select formControlName="sede">
+            <label>Sede asignada *</label>
+                        <select formControlName="sede_id">
               <option value="">Seleccione una sede...</option>
-              <option *ngFor="let s of sedesDisponibles" [value]="s">{{ s }}</option>
+              <option *ngFor="let s of sedesDisponibles" [ngValue]="s.id">{{ s.nombre }}</option>
             </select>
           </div>
 
-          <button type="submit" class="btn-primary" [disabled]="userForm.invalid">Crear Usuario</button>
+          <button type="submit" class="btn-primary" [disabled]="userForm.invalid">{{ usuarioEditandoId ? 'Guardar cambios' : 'Crear usuario' }}</button>
+          <button *ngIf="usuarioEditandoId" type="button" class="btn-secondary" (click)="cancelarEdicion()">Cancelar</button>
         </form>
       </div>
 
@@ -53,6 +84,8 @@
               <th>Correo</th>
               <th>Rol</th>
               <th>Sede</th>
+              <th>Alcance</th>
+              <th>Estado</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -61,14 +94,40 @@
               <td>{{ u.nombre }}</td>
               <td>{{ u.correo }}</td>
               <td><span class="badge">{{ u.rol }}</span></td>
-              <td>{{ u.sede_id || 'N/A' }}</td>
-              <td><button class="btn-danger" (click)="eliminarUsuario(u.id)">Eliminar</button></td>
+              <td>{{ nombreSede(u.sede_id) }}</td>
+              <td>{{ u.etiqueta || '—' }}<br><small>{{ u.programas.join(', ') || 'Sin programas' }}</small></td>
+              <td>{{ u.activo ? 'Activa' : 'Inactiva' }}</td>
+              <td>
+                <button class="btn-secondary" (click)="editarUsuario(u)">Editar</button>
+                <button class="btn-secondary" (click)="regenerarCredencial(u)" [disabled]="!u.activo">Recuperar acceso</button>
+                <button class="btn-danger" (click)="cambiarEstado(u)">{{ u.activo ? 'Desactivar' : 'Reactivar' }}</button>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
   </main>
+</div>
+
+<div class="credential-modal-backdrop" *ngIf="credencialTemporal">
+  <section class="credential-modal" role="dialog" aria-modal="true" aria-labelledby="credential-title">
+    <h2 id="credential-title">Cuenta creada</h2>
+    <p>Entrega esta credencial temporal al usuario por un canal seguro. Solo se mostrará en esta ventana.</p>
+    <dl>
+      <dt>Correo</dt>
+      <dd>{{ credencialTemporal.correo }}</dd>
+      <dt>Contraseña temporal</dt>
+      <dd class="temporary-password">{{ credencialTemporal.contrasena }}</dd>
+      <dt *ngIf="credencialTemporal.expiraEn">Vence</dt>
+      <dd *ngIf="credencialTemporal.expiraEn">{{ credencialTemporal.expiraEn | date:'medium' }}</dd>
+    </dl>
+    <p>En el primer ingreso, el sistema exigirá crear una contraseña nueva antes de permitir cualquier otra operación.</p>
+    <div class="credential-actions">
+      <button type="button" class="btn-primary" (click)="copiarContrasenaTemporal()">Copiar contraseña</button>
+      <button type="button" class="btn-secondary" (click)="cerrarCredencialTemporal()">Ya la guardé</button>
+    </div>
+  </section>
 </div>
 
 

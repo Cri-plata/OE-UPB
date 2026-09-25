@@ -1,37 +1,23 @@
-# Backlog de Desarrollo Kanban (OE UPB - PI3)
+# Backlog activo de OE UPB
 
-Este documento es nuestra "Hoja de Ruta" técnica. Aquí dividiremos las Historias de Usuario en tareas de programación específicas para que el equipo de desarrollo sepa exactamente qué hacer.
+**Última verificación contra el código:** 2026-09-25
 
----
+**Última decisión de producto incorporada:** 2026-09-25
+**Regla:** este archivo contiene solo trabajo pendiente. Al completar o descartar un ítem, moverlo a [`BACKLOG_ARCHIVE.md`](BACKLOG_ARCHIVE.md) con evidencia.
 
-## 📌 TODO (Por Hacer)
+## P0 — Privacidad del Explorador
 
-### Diseño y Prototipado
-- [ ] **Diseño UI:** Crear el mockup faltante para el formulario de "Nuevo Usuario" (Admin CTIC).
+- [ ] **EXP-02 — Restringir variables graficables.** Aplicar en backend un catálogo de variables analíticas permitidas y excluir identificadores, datos personales y metadatos administrativos del selector, las consultas y las publicaciones. Cubrir los campos reportados y los alias de columnas con pruebas. Ver [`audits/04-hallazgos-explorador-publicaciones.md`](audits/04-hallazgos-explorador-publicaciones.md#h-exp-01--variables-personales-y-administrativas-aparecen-como-graficables).
 
-### Backend (Python & MySQL)
-- [ ] **DB-01:** Crear el script de migración SQL para las tablas `usuarios`, `egresados` y `encuestas` (Modelo Relacional y JSON).
-- [ ] **API-01 (Auth):** Programar el endpoint de Login (`POST /api/auth/login`) y la generación del Token JWT con el `sede_id`.
-- [ ] **API-02 (Usuarios):** Programar el CRUD de usuarios para el Admin CTIC.
-- [ ] **API-03 (Carga):** Programar la lógica con `Pandas` para recibir el Excel, limpiar columnas, validar cédulas duplicadas y guardar en base de datos.
-- [ ] **API-04 (IA Base):** Crear un endpoint básico que simule la predicción de empleabilidad.
+## P1 — Flujo de publicación
 
-### Frontend (Angular)
-- [ ] **UI-00 (Setup):** Generar los contratos de TypeScript en la carpeta `APIcontractfront`.
-- [ ] **UI-01 (Auth):** Maquetar y conectar la pantalla de Login a la API de Python.
-- [ ] **UI-02 (Admin):** Maquetar la pantalla de Gestión de Usuarios y el modal de "Nuevo Usuario".
-- [ ] **UI-03 (Data):** Conectar la funcionalidad "Drag & Drop" de Excel con la API de Carga y diseñar el manejo del Modal de Errores.
-- [ ] **UI-04 (Dashboard):** Implementar la vista del Reporte General y conectar los filtros desplegables.
+- [ ] **PUB-01 — Cerrar correctamente el estado de publicación.** La acción `Publicar gráfica` debe finalizar en éxito/error, impedir duplicados, actualizar inmediatamente el estado visible y permitir reintento controlado.
+- [ ] **PUB-02 — Corregir la carga del catálogo publicado.** La vista debe resolver listas con datos, vacías y errores; debe reflejar el ciclo publicar → consultar → retirar sin perder las restricciones de audiencia.
 
----
+## P2 — Comparación en el Explorador
 
-## 🚧 IN PROGRESS (En Progreso)
-- [ ] **DOC-01:** Redacción de contratos de comunicación (API Contracts) entre Frontend y Backend.
+- [ ] **EXP-03 — Permitir varias gráficas simultáneas.** Añadir `Crear otra gráfica` y mantener configuraciones, estados y acciones independientes para comparar varias visualizaciones en la misma pantalla.
 
----
+## P2 — Decisión de producto en pausa
 
-## ✅ DONE (Terminado)
-- [x] **REQ-01:** Documentación Arquitectónica (Proyecto, Stack, Bases de Datos).
-- [x] **REQ-02:** Análisis de Actas y traducción a 73 Requerimientos Formales.
-- [x] **REQ-03:** Redacción de Historias de Usuario robustas (Gherkin).
-- [x] **UX-01:** Validación de Mockups (Figma) en Modo Claro.
+- [ ] **IA-01 — Modelo predictivo (en pausa).** No iniciar implementación hasta que producto apruebe objetivo, métricas, población, horizonte y criterios de aceptación conforme a ADR-009.

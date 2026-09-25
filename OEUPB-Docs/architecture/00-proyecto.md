@@ -1,53 +1,71 @@
-# Visión General del Proyecto: OE UPB (Observatorio de Egresados UPB)
+# Arquitectura general de OE UPB
 
-## Índice de Documentación del Proyecto
-Este archivo es la puerta de entrada a la arquitectura. Aquí tienes el mapa de todos los documentos técnicos del proyecto:
+**Estado:** Vigente
 
-| Archivo | Ubicación | Descripción |
-| :--- | :--- | :--- |
-| **`00-proyecto.md`** | `/architecture` | Este documento master (Visión, alcance, usuarios, pilares). |
-| **`02-arquitectura-tecnica.md`** | `/architecture` | Decisiones técnicas consolidadas (Stack Angular + Python + MySQL). |
-| **`03-apicontract.md`** | `/architecture` | Contratos de la API REST (Endpoints de Login, Carga y Dashboards). |
-| **`04-modelo-datos.md`** | `/architecture` | Diagrama Entidad-Relación, tablas y lógica de almacenamiento JSON. |
-| **`01-requerimientos.md`** | `/requirements` | Requerimientos funcionales y no funcionales originales. |
-| **`02-historias-usuario.md`** | `/requirements` | Historias de usuario ágiles separadas por épica. |
-| **`03-reglas-negocio.md`** | `/requirements` | Reglas estrictas de validación y privacidad (Silos de datos). |
-| **`04-hallazgos-figma.md`** | `/requirements` | Análisis de la Interfaz de Usuario (UI) y pantallas de Figma. |
-| **`BACKLOG.md`** | `/ (Raíz)` | Backlog Kanban para la gestión ágil de las tareas de desarrollo. |
+**Verificado contra el código:** 2026-09-23
 
----
+**Política objetivo actualizada:** 2026-09-23
 
-## 1. ¿Qué es OE UPB?
-Es una plataforma web analítica orientada al seguimiento de egresados. Su objetivo en esta fase de Proyecto Integrador 3 (PI3) es centralizar, normalizar y visualizar la información histórica y actual proveniente de encuestas institucionales (Momentos 0, 1 y 5), permitiendo pasar de un modelo de gestión manual (hojas de cálculo esparcidas) a uno automatizado, centralizado y predictivo.
+## Propósito
 
-## 2. Alcance Funcional para PI3 (MVP)
-Para cumplir con los objetivos del séptimo semestre, el sistema garantiza la entrega de las siguientes funcionalidades clave:
+OE UPB centraliza información de egresados y encuestas de seguimiento para reemplazar hojas de cálculo dispersas por una fuente institucional consultable y analítica.
 
-| Módulo Principal | Descripción Funcional | Tecnología Base |
-| :--- | :--- | :--- |
-| **Carga y Limpieza** | Procesamiento masivo de archivos Excel provenientes del Observatorio Laboral para unificarlos. | Python (Pandas) |
-| **Dashboard Interactivo** | Panel visual para la toma de decisiones con filtros dinámicos y métricas de empleabilidad. | Angular 17+ |
-| **Modelo Predictivo (IA)** | Integración de IA para predecir empleabilidad y clasificar respuestas de texto libre de egresados. | Scikit-Learn / OpenAI |
-| **Repositorio Central** | Almacenamiento seguro, estandarizado y centralizado de la "Única Fuente de Verdad". | MySQL Relacional |
+## Módulos del monorepo
 
-## 3. Matriz de Usuarios y Privacidad Multi-Sede
-El sistema opera bajo una arquitectura de **Silos de Datos Estrictos por Sede**. Ningún usuario puede vulnerar la privacidad de los egresados de otras sedes. 
+```text
+OEUPB-Frontend (Angular :4200)
+        │ HTTP + JWT
+        ▼
+OEUPB-Backend (FastAPI :8000)
+        │ SQLAlchemy + PyMySQL
+        ▼
+MySQL
 
-| Rol del Sistema | Nivel de Acceso | Responsabilidad Principal | Regla de Aislamiento de Datos |
-| :--- | :--- | :--- | :--- |
-| **Administrador CTIC** | Gestión de Accesos | Creación, edición y bloqueo de cuentas institucionales. Soporte técnico. | **Sin acceso a datos.** No consumen ni visualizan dashboards de egresados. |
-| **Coordinador de Sede** | Control Total (Local) | Carga de archivos Excel, edición manual de egresados, visualización del Dashboard. | **Silo local.** Solo ve la información de su sede (Ej. Solo Bucaramanga). |
-| **Directivo / Decano** | Solo Lectura | Revisión de métricas, gráficas y toma de decisiones basadas en tendencias. | **Silo local.** Solo ve el dashboard filtrado de su respectiva sede asignada. |
+OEUPB-Contracts
+  DTO heredados; en transición hacia OpenAPI canónico
+```
 
-> *Nota: El acceso de usuarios finales (los propios egresados para auto-actualizar sus datos) queda documentado como una escalabilidad futura recomendada para el Proyecto de Grado.*
+| Módulo | Responsabilidad actual |
+|---|---|
+| Frontend | Login, gestión de usuarios, carga, reportes, tendencias, explorador, directorio y perfiles |
+| Backend | JWT, usuarios, ETL de Excel, consultas de reportes y directorio |
+| Base de datos | Usuarios, egresados y mediciones con respuestas JSON |
+| Contratos | Tipos manuales que deben sincronizarse con OpenAPI |
 
-## 4. Pilares del Proyecto
-Más allá del código, la concepción del **OE UPB** se sostiene sobre pilares que garantizan su viabilidad y el valor aportado a la Universidad Pontificia Bolivariana:
+## Roles observados
 
-| Pilar | Tipo | Beneficio / Justificación Institucional |
-| :--- | :--- | :--- |
-| **Centralización y Calidad** | Estratégico | Elimina el riesgo de datos duplicados y desactualizados al unificar múltiples archivos Excel en una base robusta. |
-| **Análisis de Decisiones** | Estratégico | Transforma números estáticos en tableros gráficos interactivos para identificar falencias curriculares. |
-| **Proactividad con IA** | Innovación | Permite a la universidad dejar de reaccionar al pasado y anticiparse al futuro laboral de sus próximas cohortes. |
-| **Habeas Data (Silos)** | Seguridad | Garantiza el cumplimiento estricto de la ley de protección de datos al aislar la información por sedes universitarias. |
-| **Desacoplamiento API** | Arquitectura | Al separar Frontend (Angular) del Backend (Python), el proyecto puede evolucionar a una app móvil sin reescribir la lógica. |
+| Rol | Estado actual verificado | Estado normativo |
+|---|---|---|
+| `Admin_CTIC` | Crea coordinadores; no tiene sede en el modelo actual | Administra solo coordinadores y no accede a datos ni gráficas |
+| `Coordinador_Sede` | Opera datos de su sede y crea roles inferiores | Administra datos propios y usuarios de consulta; publica gráficas agregadas; ve todas las publicadas |
+| `Usuario_Consulta` | Implementado con etiqueta, permisos, programas, sede, estado y catálogo de publicaciones autorizado | Rol único de solo lectura; no accede a datos privados |
+
+La política normativa está definida en RN-03 y RN-06 a RN-11. RBAC, cuentas, aislamiento y publicación de gráficas agregadas están implementados.
+
+## Flujos principales
+
+1. **Autenticación:** credenciales institucionales → JWT con rol y sede → almacenamiento local en frontend.
+2. **Carga:** Excel + momento + año → validación y limpieza con Pandas → egresados y mediciones JSON.
+3. **Consulta:** frontend solicita indicadores/directorio → backend filtra según identidad JWT → MySQL responde.
+4. **Análisis:** endpoints agregan campos conocidos y respuestas JSON para gráficas.
+5. **Publicación:** coordinador publica una gráfica propia → backend guarda definición agregada, sede y programas → usuarios autorizados la consultan sin acceso a datos fuente.
+
+## Principios vigentes
+
+- La autorización pertenece al backend.
+- El aislamiento de datos fuente por sede es una frontera de seguridad.
+- Compartir entre sedes significa publicar gráficas y métricas agregadas; nunca habilitar consultas a filas o respuestas de otra sede.
+- La audiencia de una gráfica se calcula en backend a partir de permisos y programas asignados manualmente al usuario. Las etiquetas rector, profesor o administrativo no amplían el alcance.
+- El código real y la documentación deben distinguirse del diseño objetivo.
+- OpenAPI es la fuente canónica de contratos HTTP.
+- Los cambios estructurales de datos deben pasar por migraciones formales.
+- La arquitectura por capas es objetivo y convención; su cumplimiento actual es parcial y debe verificarse por cambio.
+
+## Documentos relacionados
+
+- [Frontend](01-frontend.md)
+- [Backend](02-backend.md)
+- [Contratos](03-contratos.md)
+- [Modelo de datos](04-modelo-datos.md)
+- [Despliegue](05-despliegue.md)
+- [ADRs](../adr/INDEX.md)

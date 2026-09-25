@@ -13,8 +13,12 @@ import { LoginUseCase } from '../../../../domain/usecases/login.usecase';
 })
 export class LoginComponent {
   loginForm: FormGroup;
+  cambioForm: FormGroup;
   errorMessage: string | null = null;
+  cambioError: string | null = null;
   isLoading = false;
+  isChangingPassword = false;
+  mostrarCambioObligatorio = false;
 
   private fb = inject(FormBuilder);
   private loginUseCase = inject(LoginUseCase);
@@ -25,6 +29,10 @@ export class LoginComponent {
     this.loginForm = this.fb.group({
       correo: ['', [Validators.required, Validators.email]],
       contrasena: ['', [Validators.required, Validators.minLength(6)]]
+    });
+    this.cambioForm = this.fb.group({
+      nuevaContrasena: ['', [Validators.required, Validators.minLength(10)]],
+      confirmarContrasena: ['', [Validators.required, Validators.minLength(10)]]
     });
   }
 
@@ -43,21 +51,63 @@ export class LoginComponent {
       next: (response) => {
         this.isLoading = false;
         this.cdr.detectChanges();
-        // Redirigir según el rol del usuario (CTIC a usuarios, el resto al dashboard)
-        if (response.usuario.rol === 'Admin_CTIC') {
-          this.router.navigate(['/admin-usuarios']); // Ruta futura
-        } else {
-          this.router.navigate(['/reporte']); // Ruta futura
+        if (response.usuario.debeCambiarContrasena) {
+          this.mostrarCambioObligatorio = true;
+          this.cdr.detectChanges();
+          return;
         }
+        this.redirigirPorRol(response.usuario.rol);
       },
       error: (err) => {
         this.isLoading = false;
         this.cdr.detectChanges();
-        // Extraer mensaje del error de dominio o del servidor HTTP
-        this.errorMessage = 'Correo o contraseña no válido. Intente de nuevo.';
+        const detail = err.error?.detail;
+        this.errorMessage = detail?.codigo === 'CREDENCIAL_TEMPORAL_VENCIDA'
+          ? detail.mensaje
+          : 'Correo o contraseña no válido. Intente de nuevo.';
         this.cdr.detectChanges();
       }
     });
+  }
+
+  cambiarContrasena(): void {
+    if (this.cambioForm.invalid) {
+      this.cambioForm.markAllAsTouched();
+      return;
+    }
+
+    const { nuevaContrasena, confirmarContrasena } = this.cambioForm.value;
+    this.cambioError = null;
+    this.isChangingPassword = true;
+
+    try {
+      this.loginUseCase.cambiarContrasenaTemporal(nuevaContrasena, confirmarContrasena).subscribe({
+        next: (response) => {
+          this.isChangingPassword = false;
+          this.mostrarCambioObligatorio = false;
+          this.cdr.detectChanges();
+          this.redirigirPorRol(response.usuario.rol);
+        },
+        error: (err) => {
+          this.isChangingPassword = false;
+          this.cambioError = err.error?.detail || 'No se pudo cambiar la contraseña.';
+          this.cdr.detectChanges();
+        }
+      });
+    } catch (error: any) {
+      this.isChangingPassword = false;
+      this.cambioError = error.message;
+    }
+  }
+
+  private redirigirPorRol(rol: string): void {
+    if (rol === 'Admin_CTIC') {
+      this.router.navigate(['/admin-usuarios']);
+    } else if (rol === 'Usuario_Consulta') {
+      this.router.navigate(['/mi-perfil']);
+    } else {
+      this.router.navigate(['/reporte']);
+    }
   }
 }
 

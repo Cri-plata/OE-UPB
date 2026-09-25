@@ -1,0 +1,3337 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OE UPB - Observatorio de Egresados",
+    "description": "API RESTful para el procesamiento de egresados UPB.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Autenticación"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Correo o contraseña incorrectos"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/cambiar-contrasena-temporal": {
+      "post": {
+        "tags": [
+          "Autenticación"
+        ],
+        "summary": "Cambiar Contrasena Temporal",
+        "operationId": "cambiar_contrasena_temporal_api_auth_cambiar_contrasena_temporal_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CambioContrasenaTemporalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "La contraseña no cumple la política"
+          },
+          "401": {
+            "description": "Token inválido o vencido"
+          },
+          "409": {
+            "description": "La cuenta no requiere cambio inicial"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/usuarios/programas-asignables": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Programas Asignables",
+        "operationId": "programas_asignables_api_usuarios_programas_asignables_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "title": "Response Programas Asignables Api Usuarios Programas Asignables Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/usuarios/": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Get Usuarios",
+        "operationId": "get_usuarios_api_usuarios__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "incluir_inactivos",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Incluir Inactivos"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UsuarioResponse"
+                  },
+                  "title": "Response Get Usuarios Api Usuarios  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Create Usuario",
+        "operationId": "create_usuario_api_usuarios__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/usuarios/{usuario_id}/regenerar-credencial-temporal": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Regenerar Credencial Temporal",
+        "operationId": "regenerar_credencial_temporal_api_usuarios__usuario_id__regenerar_credencial_temporal_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Usuario Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReemisionCredencialRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReemisionCredencialResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/usuarios/{usuario_id}": {
+      "patch": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Actualizar Usuario",
+        "operationId": "actualizar_usuario_api_usuarios__usuario_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Usuario Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Delete Usuario",
+        "description": "La eliminación ordinaria es una desactivación recuperable.",
+        "operationId": "delete_usuario_api_usuarios__usuario_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Usuario Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/usuarios/{usuario_id}/desactivar": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Desactivar Usuario",
+        "operationId": "desactivar_usuario_api_usuarios__usuario_id__desactivar_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Usuario Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/usuarios/{usuario_id}/reactivar": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Reactivar Usuario",
+        "operationId": "reactivar_usuario_api_usuarios__usuario_id__reactivar_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Usuario Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/usuarios/{usuario_id}/permanente": {
+      "delete": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Borrar Usuario Permanentemente",
+        "operationId": "borrar_usuario_permanentemente_api_usuarios__usuario_id__permanente_delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Usuario Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MotivoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MensajeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/carga/excel": {
+      "post": {
+        "tags": [
+          "Carga de Datos"
+        ],
+        "summary": "Procesar Excel",
+        "operationId": "procesar_excel_api_carga_excel_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_procesar_excel_api_carga_excel_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CargaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El archivo no es .xlsx o su contenido no puede leerse"
+          },
+          "403": {
+            "description": "El usuario no es coordinador o no tiene sede asignada"
+          },
+          "422": {
+            "description": "El momento o los parámetros no son válidos"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/carga/historial": {
+      "get": {
+        "tags": [
+          "Carga de Datos"
+        ],
+        "summary": "Get Historial",
+        "operationId": "get_historial_api_carga_historial_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/HistorialCargaItem"
+                  },
+                  "type": "array",
+                  "title": "Response Get Historial Api Carga Historial Get"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El usuario no es coordinador o no tiene sede asignada"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/carga/archivo/{carga_id}": {
+      "delete": {
+        "tags": [
+          "Carga de Datos"
+        ],
+        "summary": "Eliminar Carga",
+        "operationId": "eliminar_carga_api_carga_archivo__carga_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "carga_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Carga Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EliminarCargaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MensajeResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El usuario no es coordinador o no tiene sede asignada"
+          },
+          "404": {
+            "description": "La carga no existe dentro de la sede autorizada"
+          },
+          "409": {
+            "description": "La carga ya no está vigente"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reportes/general": {
+      "get": {
+        "tags": [
+          "Reportes"
+        ],
+        "summary": "Get Reporte General",
+        "operationId": "get_reporte_general_api_reportes_general_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KpisResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/reportes/tendencias": {
+      "get": {
+        "tags": [
+          "Reportes"
+        ],
+        "summary": "Get Tendencias",
+        "operationId": "get_tendencias_api_reportes_tendencias_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "indicador",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "empleabilidad",
+              "title": "Indicador"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TendenciasResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reportes/explorador/init": {
+      "get": {
+        "tags": [
+          "Reportes"
+        ],
+        "summary": "Explorador Init",
+        "operationId": "explorador_init_api_reportes_explorador_init_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExploradorInitResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/reportes/explorador": {
+      "get": {
+        "tags": [
+          "Reportes"
+        ],
+        "summary": "Explorador Data",
+        "operationId": "explorador_data_api_reportes_explorador_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pregunta",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pregunta"
+            }
+          },
+          {
+            "name": "momento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Momento"
+            }
+          },
+          {
+            "name": "programa",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Programa"
+            }
+          },
+          {
+            "name": "anio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Anio"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExploradorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/directorio/tabla": {
+      "get": {
+        "tags": [
+          "Directorio"
+        ],
+        "summary": "Obtener Directorio",
+        "operationId": "obtener_directorio_api_directorio_tabla_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "programa",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Programa"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectorioResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/directorio/programas": {
+      "get": {
+        "tags": [
+          "Directorio"
+        ],
+        "summary": "Obtener Programas Unicos",
+        "operationId": "obtener_programas_unicos_api_directorio_programas_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "title": "Response Obtener Programas Unicos Api Directorio Programas Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/directorio/perfil/{documento}": {
+      "get": {
+        "tags": [
+          "Directorio"
+        ],
+        "summary": "Obtener Perfil Egresado",
+        "operationId": "obtener_perfil_egresado_api_directorio_perfil__documento__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Documento"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerfilEgresadoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/directorio/egresados": {
+      "post": {
+        "tags": [
+          "Directorio"
+        ],
+        "summary": "Crear Egresado",
+        "operationId": "crear_egresado_api_directorio_egresados_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EgresadoManualRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperacionEgresadoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/directorio/egresados/{documento}": {
+      "patch": {
+        "tags": [
+          "Directorio"
+        ],
+        "summary": "Editar Egresado",
+        "operationId": "editar_egresado_api_directorio_egresados__documento__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Documento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EgresadoManualUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperacionEgresadoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Directorio"
+        ],
+        "summary": "Eliminar Egresado",
+        "operationId": "eliminar_egresado_api_directorio_egresados__documento__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "documento",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Documento"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EliminarEgresadoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperacionEgresadoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/directorio/exportar.xlsx": {
+      "get": {
+        "tags": [
+          "Directorio"
+        ],
+        "summary": "Exportar Directorio",
+        "operationId": "exportar_directorio_api_directorio_exportar_xlsx_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "programa",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Programa"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Directorio Excel",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sedes/": {
+      "get": {
+        "tags": [
+          "Sedes"
+        ],
+        "summary": "Listar Sedes",
+        "operationId": "listar_sedes_api_sedes__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SedeResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Sedes Api Sedes  Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/publicaciones/": {
+      "get": {
+        "tags": [
+          "Publicaciones"
+        ],
+        "summary": "Listar Publicaciones Autorizadas",
+        "operationId": "listar_publicaciones_autorizadas_api_publicaciones__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PublicacionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Publicaciones Autorizadas Api Publicaciones  Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Publicaciones"
+        ],
+        "summary": "Publicar Grafica",
+        "operationId": "publicar_grafica_api_publicaciones__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublicacionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicacionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/publicaciones/{publicacion_id}": {
+      "delete": {
+        "tags": [
+          "Publicaciones"
+        ],
+        "summary": "Retirar Publicacion",
+        "operationId": "retirar_publicacion_api_publicaciones__publicacion_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "publicacion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Publicacion Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicacionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/publicaciones/mias": {
+      "get": {
+        "tags": [
+          "Publicaciones"
+        ],
+        "summary": "Listar Publicaciones Propias",
+        "operationId": "listar_publicaciones_propias_api_publicaciones_mias_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PublicacionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Publicaciones Propias Api Publicaciones Mias Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/analitica/resumen": {
+      "get": {
+        "tags": [
+          "Analítica"
+        ],
+        "summary": "Resumen",
+        "operationId": "resumen_api_analitica_resumen_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnaliticaResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/health/live": {
+      "get": {
+        "tags": [
+          "Operación"
+        ],
+        "summary": "Liveness",
+        "operationId": "liveness_api_health_live_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health/ready": {
+      "get": {
+        "tags": [
+          "Operación"
+        ],
+        "summary": "Readiness",
+        "operationId": "readiness_api_health_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AlertaResponse": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "programa": {
+            "type": "string",
+            "title": "Programa"
+          },
+          "severidad": {
+            "type": "string",
+            "title": "Severidad"
+          },
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          },
+          "valor": {
+            "type": "number",
+            "title": "Valor"
+          },
+          "muestra": {
+            "type": "integer",
+            "title": "Muestra"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tipo",
+          "programa",
+          "severidad",
+          "mensaje",
+          "valor",
+          "muestra"
+        ],
+        "title": "AlertaResponse"
+      },
+      "AnaliticaResponse": {
+        "properties": {
+          "textos_analizados": {
+            "type": "integer",
+            "title": "Textos Analizados"
+          },
+          "competencias": {
+            "items": {
+              "$ref": "#/components/schemas/CompetenciaResponse"
+            },
+            "type": "array",
+            "title": "Competencias"
+          },
+          "alertas": {
+            "items": {
+              "$ref": "#/components/schemas/AlertaResponse"
+            },
+            "type": "array",
+            "title": "Alertas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "textos_analizados",
+          "competencias",
+          "alertas"
+        ],
+        "title": "AnaliticaResponse"
+      },
+      "Body_procesar_excel_api_carga_excel_post": {
+        "properties": {
+          "momento": {
+            "type": "integer",
+            "title": "Momento"
+          },
+          "anio": {
+            "type": "integer",
+            "title": "Anio",
+            "description": "Año de grado o cohorte"
+          },
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "Archivo Excel en formato .xlsx"
+          }
+        },
+        "type": "object",
+        "required": [
+          "momento",
+          "anio",
+          "file"
+        ],
+        "title": "Body_procesar_excel_api_carga_excel_post"
+      },
+      "CambioContrasenaTemporalRequest": {
+        "properties": {
+          "nuevaContrasena": {
+            "type": "string",
+            "title": "Nuevacontrasena"
+          },
+          "confirmarContrasena": {
+            "type": "string",
+            "title": "Confirmarcontrasena"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nuevaContrasena",
+          "confirmarContrasena"
+        ],
+        "title": "CambioContrasenaTemporalRequest"
+      },
+      "CargaResponse": {
+        "properties": {
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          },
+          "errores": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorFila"
+            },
+            "type": "array",
+            "title": "Errores",
+            "default": []
+          },
+          "carga_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Carga Id"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "estado": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estado"
+          },
+          "registros": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registros"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mensaje"
+        ],
+        "title": "CargaResponse"
+      },
+      "ChartDatasetResponse": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "data": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "borderColor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bordercolor"
+          },
+          "backgroundColor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Backgroundcolor"
+          },
+          "borderWidth": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Borderwidth"
+          },
+          "pointBackgroundColor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pointbackgroundcolor"
+          },
+          "pointBorderColor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pointbordercolor"
+          },
+          "pointBorderWidth": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pointborderwidth"
+          },
+          "pointRadius": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pointradius"
+          },
+          "pointHoverRadius": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pointhoverradius"
+          },
+          "fill": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fill"
+          },
+          "tension": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tension"
+          },
+          "spanGaps": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spangaps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "data"
+        ],
+        "title": "ChartDatasetResponse"
+      },
+      "CompetenciaResponse": {
+        "properties": {
+          "categoria": {
+            "type": "string",
+            "title": "Categoria"
+          },
+          "frecuencia": {
+            "type": "integer",
+            "title": "Frecuencia"
+          }
+        },
+        "type": "object",
+        "required": [
+          "categoria",
+          "frecuencia"
+        ],
+        "title": "CompetenciaResponse"
+      },
+      "DatasetGrafica": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "maxLength": 150,
+            "title": "Label"
+          },
+          "data": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Data"
+          },
+          "backgroundColor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Backgroundcolor"
+          },
+          "borderColor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bordercolor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "data"
+        ],
+        "title": "DatasetGrafica"
+      },
+      "DefinicionGrafica": {
+        "properties": {
+          "origen": {
+            "type": "string",
+            "enum": [
+              "reporte_general",
+              "tendencias",
+              "explorador"
+            ],
+            "title": "Origen"
+          },
+          "tipo_visualizacion": {
+            "type": "string",
+            "enum": [
+              "bar",
+              "line",
+              "pie",
+              "doughnut"
+            ],
+            "title": "Tipo Visualizacion"
+          },
+          "indicador": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Indicador"
+          },
+          "pregunta": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pregunta"
+          },
+          "momento": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "enum": [
+                  0,
+                  1,
+                  5
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Momento"
+          },
+          "programa": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Programa"
+          },
+          "anio": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 2200.0,
+                "minimum": 1900.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "origen",
+          "tipo_visualizacion"
+        ],
+        "title": "DefinicionGrafica"
+      },
+      "DirectorioItem": {
+        "properties": {
+          "documento": {
+            "type": "string",
+            "title": "Documento"
+          },
+          "nombre_completo": {
+            "type": "string",
+            "title": "Nombre Completo"
+          },
+          "programa": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Programa"
+          },
+          "fecha_grado": {
+            "type": "string",
+            "title": "Fecha Grado"
+          },
+          "encuestas": {
+            "type": "string",
+            "title": "Encuestas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "documento",
+          "nombre_completo",
+          "programa",
+          "fecha_grado",
+          "encuestas"
+        ],
+        "title": "DirectorioItem"
+      },
+      "DirectorioResponse": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/DirectorioItem"
+            },
+            "type": "array",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "page",
+          "limit",
+          "data"
+        ],
+        "title": "DirectorioResponse"
+      },
+      "EgresadoManualRequest": {
+        "properties": {
+          "numero_documento": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 3,
+            "title": "Numero Documento"
+          },
+          "primer_nombre": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Primer Nombre"
+          },
+          "primer_apellido": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primer Apellido"
+          },
+          "programa": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Programa"
+          },
+          "fecha_grado": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Grado"
+          },
+          "motivo": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Motivo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "numero_documento",
+          "primer_nombre",
+          "programa",
+          "motivo"
+        ],
+        "title": "EgresadoManualRequest"
+      },
+      "EgresadoManualUpdate": {
+        "properties": {
+          "primer_nombre": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primer Nombre"
+          },
+          "primer_apellido": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primer Apellido"
+          },
+          "programa": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Programa"
+          },
+          "fecha_grado": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Grado"
+          },
+          "motivo": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Motivo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "motivo"
+        ],
+        "title": "EgresadoManualUpdate"
+      },
+      "EliminarCargaRequest": {
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 10,
+            "title": "Motivo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "motivo"
+        ],
+        "title": "EliminarCargaRequest"
+      },
+      "EliminarEgresadoRequest": {
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Motivo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "motivo"
+        ],
+        "title": "EliminarEgresadoRequest"
+      },
+      "EncuestaPerfilResponse": {
+        "properties": {
+          "momento": {
+            "type": "integer",
+            "title": "Momento"
+          },
+          "anio": {
+            "type": "integer",
+            "title": "Anio"
+          },
+          "empleabilidad": {
+            "title": "Empleabilidad"
+          },
+          "salario": {
+            "title": "Salario"
+          },
+          "respuestas_completas": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Respuestas Completas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "momento",
+          "anio",
+          "empleabilidad",
+          "salario",
+          "respuestas_completas"
+        ],
+        "title": "EncuestaPerfilResponse"
+      },
+      "ErrorFila": {
+        "properties": {
+          "fila": {
+            "type": "integer",
+            "title": "Fila"
+          },
+          "columna": {
+            "type": "string",
+            "title": "Columna"
+          },
+          "error": {
+            "type": "string",
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fila",
+          "columna",
+          "error"
+        ],
+        "title": "ErrorFila"
+      },
+      "ExploradorInitResponse": {
+        "properties": {
+          "preguntas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Preguntas"
+          },
+          "programas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Programas"
+          },
+          "anios": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Anios"
+          }
+        },
+        "type": "object",
+        "required": [
+          "preguntas",
+          "programas",
+          "anios"
+        ],
+        "title": "ExploradorInitResponse"
+      },
+      "ExploradorResponse": {
+        "properties": {
+          "labels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Labels"
+          },
+          "valores": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Valores"
+          }
+        },
+        "type": "object",
+        "required": [
+          "labels",
+          "valores"
+        ],
+        "title": "ExploradorResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "HealthResponse"
+      },
+      "HistorialCargaItem": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "momento": {
+            "type": "integer",
+            "title": "Momento"
+          },
+          "anio": {
+            "type": "integer",
+            "title": "Anio"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "nombre_archivo": {
+            "type": "string",
+            "title": "Nombre Archivo"
+          },
+          "fecha_carga": {
+            "type": "string",
+            "title": "Fecha Carga"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "registros": {
+            "type": "integer",
+            "title": "Registros"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "momento",
+          "anio",
+          "nombre",
+          "nombre_archivo",
+          "fecha_carga",
+          "version",
+          "registros",
+          "estado"
+        ],
+        "title": "HistorialCargaItem"
+      },
+      "KpisResponse": {
+        "properties": {
+          "total_egresados": {
+            "type": "integer",
+            "title": "Total Egresados"
+          },
+          "tasa_empleabilidad": {
+            "type": "number",
+            "title": "Tasa Empleabilidad"
+          },
+          "promedio_salarial": {
+            "type": "number",
+            "title": "Promedio Salarial"
+          },
+          "distribucion_programas": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Distribucion Programas"
+          },
+          "nivel_satisfaccion": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Nivel Satisfaccion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_egresados",
+          "tasa_empleabilidad",
+          "promedio_salarial",
+          "distribucion_programas",
+          "nivel_satisfaccion"
+        ],
+        "title": "KpisResponse"
+      },
+      "LoginRequest": {
+        "properties": {
+          "correoInstitucional": {
+            "type": "string",
+            "title": "Correoinstitucional"
+          },
+          "contrasena": {
+            "type": "string",
+            "title": "Contrasena"
+          }
+        },
+        "type": "object",
+        "required": [
+          "correoInstitucional",
+          "contrasena"
+        ],
+        "title": "LoginRequest"
+      },
+      "LoginResponse": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "usuario": {
+            "$ref": "#/components/schemas/UsuarioLoginResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "usuario"
+        ],
+        "title": "LoginResponse"
+      },
+      "MensajeResponse": {
+        "properties": {
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mensaje"
+        ],
+        "title": "MensajeResponse"
+      },
+      "MetricasGrafica": {
+        "properties": {
+          "labels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Labels"
+          },
+          "datasets": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetGrafica"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Datasets"
+          }
+        },
+        "type": "object",
+        "required": [
+          "labels",
+          "datasets"
+        ],
+        "title": "MetricasGrafica"
+      },
+      "MotivoRequest": {
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 10,
+            "title": "Motivo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "motivo"
+        ],
+        "title": "MotivoRequest"
+      },
+      "OperacionEgresadoResponse": {
+        "properties": {
+          "documento": {
+            "type": "string",
+            "title": "Documento"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          }
+        },
+        "type": "object",
+        "required": [
+          "documento",
+          "estado"
+        ],
+        "title": "OperacionEgresadoResponse"
+      },
+      "PerfilEgresadoResponse": {
+        "properties": {
+          "documento": {
+            "type": "string",
+            "title": "Documento"
+          },
+          "nombre_completo": {
+            "type": "string",
+            "title": "Nombre Completo"
+          },
+          "programa": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Programa"
+          },
+          "fecha_grado": {
+            "type": "string",
+            "title": "Fecha Grado"
+          },
+          "encuestas": {
+            "items": {
+              "$ref": "#/components/schemas/EncuestaPerfilResponse"
+            },
+            "type": "array",
+            "title": "Encuestas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "documento",
+          "nombre_completo",
+          "programa",
+          "fecha_grado",
+          "encuestas"
+        ],
+        "title": "PerfilEgresadoResponse"
+      },
+      "PublicacionCreate": {
+        "properties": {
+          "grafica_key": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 3,
+            "pattern": "^[a-z0-9_\\-]+$",
+            "title": "Grafica Key"
+          },
+          "titulo": {
+            "type": "string",
+            "maxLength": 180,
+            "minLength": 3,
+            "title": "Titulo"
+          },
+          "programas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Programas"
+          },
+          "definicion": {
+            "$ref": "#/components/schemas/DefinicionGrafica"
+          },
+          "metricas": {
+            "$ref": "#/components/schemas/MetricasGrafica"
+          },
+          "aprobada_privacidad": {
+            "type": "boolean",
+            "const": true,
+            "title": "Aprobada Privacidad"
+          }
+        },
+        "type": "object",
+        "required": [
+          "grafica_key",
+          "titulo",
+          "programas",
+          "definicion",
+          "metricas",
+          "aprobada_privacidad"
+        ],
+        "title": "PublicacionCreate"
+      },
+      "PublicacionResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "grafica_key": {
+            "type": "string",
+            "title": "Grafica Key"
+          },
+          "titulo": {
+            "type": "string",
+            "title": "Titulo"
+          },
+          "sede_id": {
+            "type": "integer",
+            "title": "Sede Id"
+          },
+          "sede_nombre": {
+            "type": "string",
+            "title": "Sede Nombre"
+          },
+          "programas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Programas"
+          },
+          "permiso_requerido": {
+            "type": "string",
+            "title": "Permiso Requerido"
+          },
+          "definicion": {
+            "$ref": "#/components/schemas/DefinicionGrafica"
+          },
+          "metricas": {
+            "$ref": "#/components/schemas/MetricasGrafica"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "aprobada_privacidad": {
+            "type": "boolean",
+            "title": "Aprobada Privacidad"
+          },
+          "fecha_publicacion": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Publicacion"
+          },
+          "fecha_retiro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Retiro"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "grafica_key",
+          "titulo",
+          "sede_id",
+          "sede_nombre",
+          "programas",
+          "permiso_requerido",
+          "definicion",
+          "metricas",
+          "version",
+          "estado",
+          "aprobada_privacidad",
+          "fecha_publicacion",
+          "fecha_retiro"
+        ],
+        "title": "PublicacionResponse"
+      },
+      "ReemisionCredencialRequest": {
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 10,
+            "title": "Motivo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "motivo"
+        ],
+        "title": "ReemisionCredencialRequest"
+      },
+      "ReemisionCredencialResponse": {
+        "properties": {
+          "usuario": {
+            "$ref": "#/components/schemas/UsuarioResponse"
+          },
+          "contrasena_temporal": {
+            "type": "string",
+            "title": "Contrasena Temporal"
+          },
+          "credencial_temporal_expira_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Credencial Temporal Expira En"
+          }
+        },
+        "type": "object",
+        "required": [
+          "usuario",
+          "contrasena_temporal",
+          "credencial_temporal_expira_en"
+        ],
+        "title": "ReemisionCredencialResponse"
+      },
+      "SedeResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "codigo": {
+            "type": "string",
+            "title": "Codigo"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "codigo",
+          "nombre"
+        ],
+        "title": "SedeResponse"
+      },
+      "TendenciasResponse": {
+        "properties": {
+          "labels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Labels"
+          },
+          "datasets": {
+            "items": {
+              "$ref": "#/components/schemas/ChartDatasetResponse"
+            },
+            "type": "array",
+            "title": "Datasets"
+          }
+        },
+        "type": "object",
+        "required": [
+          "labels",
+          "datasets"
+        ],
+        "title": "TendenciasResponse"
+      },
+      "UsuarioCreateRequest": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "correo": {
+            "type": "string",
+            "title": "Correo"
+          },
+          "numero_documento": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 6,
+            "pattern": "^[0-9]+$",
+            "title": "Numero Documento"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "Coordinador_Sede",
+              "Usuario_Consulta"
+            ],
+            "title": "Rol"
+          },
+          "sede_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sede Id"
+          },
+          "etiqueta": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Rector",
+                  "Profesor",
+                  "Administrativo"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etiqueta"
+          },
+          "permisos": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "ver_reporte_general",
+                "ver_tendencias",
+                "ver_explorador",
+                "ver_publicaciones"
+              ]
+            },
+            "type": "array",
+            "title": "Permisos"
+          },
+          "programas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Programas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombre",
+          "correo",
+          "numero_documento",
+          "rol"
+        ],
+        "title": "UsuarioCreateRequest"
+      },
+      "UsuarioCreateResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "correo": {
+            "type": "string",
+            "title": "Correo"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "Admin_CTIC",
+              "Coordinador_Sede",
+              "Usuario_Consulta"
+            ],
+            "title": "Rol"
+          },
+          "sede_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sede Id"
+          },
+          "debe_cambiar_contrasena": {
+            "type": "boolean",
+            "title": "Debe Cambiar Contrasena"
+          },
+          "credencial_temporal_expira_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credencial Temporal Expira En"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          },
+          "version_autorizacion": {
+            "type": "integer",
+            "title": "Version Autorizacion"
+          },
+          "etiqueta": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Rector",
+                  "Profesor",
+                  "Administrativo"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etiqueta"
+          },
+          "permisos": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "ver_reporte_general",
+                "ver_tendencias",
+                "ver_explorador",
+                "ver_publicaciones"
+              ]
+            },
+            "type": "array",
+            "title": "Permisos"
+          },
+          "programas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Programas"
+          },
+          "contrasena_temporal": {
+            "type": "string",
+            "title": "Contrasena Temporal"
+          },
+          "modo_credencial": {
+            "type": "string",
+            "enum": [
+              "documento",
+              "random"
+            ],
+            "title": "Modo Credencial"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "correo",
+          "rol",
+          "debe_cambiar_contrasena",
+          "activo",
+          "version_autorizacion",
+          "permisos",
+          "programas",
+          "contrasena_temporal",
+          "modo_credencial"
+        ],
+        "title": "UsuarioCreateResponse"
+      },
+      "UsuarioLoginResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "correo": {
+            "type": "string",
+            "title": "Correo"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "Admin_CTIC",
+              "Coordinador_Sede",
+              "Usuario_Consulta"
+            ],
+            "title": "Rol"
+          },
+          "sedeId": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sedeid"
+          },
+          "debeCambiarContrasena": {
+            "type": "boolean",
+            "title": "Debecambiarcontrasena"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "correo",
+          "rol",
+          "sedeId",
+          "debeCambiarContrasena"
+        ],
+        "title": "UsuarioLoginResponse"
+      },
+      "UsuarioResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "correo": {
+            "type": "string",
+            "title": "Correo"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "Admin_CTIC",
+              "Coordinador_Sede",
+              "Usuario_Consulta"
+            ],
+            "title": "Rol"
+          },
+          "sede_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sede Id"
+          },
+          "debe_cambiar_contrasena": {
+            "type": "boolean",
+            "title": "Debe Cambiar Contrasena"
+          },
+          "credencial_temporal_expira_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credencial Temporal Expira En"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          },
+          "version_autorizacion": {
+            "type": "integer",
+            "title": "Version Autorizacion"
+          },
+          "etiqueta": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Rector",
+                  "Profesor",
+                  "Administrativo"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etiqueta"
+          },
+          "permisos": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "ver_reporte_general",
+                "ver_tendencias",
+                "ver_explorador",
+                "ver_publicaciones"
+              ]
+            },
+            "type": "array",
+            "title": "Permisos"
+          },
+          "programas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Programas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "correo",
+          "rol",
+          "debe_cambiar_contrasena",
+          "activo",
+          "version_autorizacion",
+          "permisos",
+          "programas"
+        ],
+        "title": "UsuarioResponse"
+      },
+      "UsuarioUpdateRequest": {
+        "properties": {
+          "nombre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre"
+          },
+          "sede_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sede Id"
+          },
+          "etiqueta": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Rector",
+                  "Profesor",
+                  "Administrativo"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etiqueta"
+          },
+          "permisos": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "ver_reporte_general",
+                    "ver_tendencias",
+                    "ver_explorador",
+                    "ver_publicaciones"
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Permisos"
+          },
+          "programas": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Programas"
+          }
+        },
+        "type": "object",
+        "title": "UsuarioUpdateRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

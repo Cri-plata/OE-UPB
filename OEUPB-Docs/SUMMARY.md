@@ -1,0 +1,50 @@
+# Índice
+
+- [Inicio](README.md)
+- [Contexto canónico](CLAUDE.md)
+- [Backlog activo](BACKLOG.md)
+- [Backlog histórico](BACKLOG_ARCHIVE.md)
+- [Changelog documental](CHANGELOG.md)
+- Arquitectura
+  - [Visión general](architecture/00-proyecto.md)
+  - [Frontend](architecture/01-frontend.md)
+  - [Backend](architecture/02-backend.md)
+  - [Contratos](architecture/03-contratos.md)
+  - [Modelo de datos](architecture/04-modelo-datos.md)
+  - [Despliegue](architecture/05-despliegue.md)
+- Requisitos
+  - [Requerimientos](requirements/01-requerimientos.md)
+  - [Historias de usuario](requirements/02-historias-usuario.md)
+  - [Reglas de negocio](requirements/03-reglas-negocio.md)
+  - [Hallazgos de Figma](requirements/04-hallazgos-figma.md)
+  - [Casos de uso](requirements/casos-de-uso.md)
+  - [Matriz de trazabilidad](requirements/matriz-trazabilidad.md)
+- Especificaciones
+  - [Introducción](specs/README.md)
+  - [OpenAPI](specs/api/openapi.json)
+  - [Esquema SQL](specs/db/oeupb-schema.sql)
+- Diseño
+  - [Design system](design/design-system.md)
+- Decisiones
+  - [Índice de ADR](adr/INDEX.md)
+- Operación
+  - [Comandos de desarrollo](docs/00-comandos-desarrollo.md)
+  - [Configuración local](docs/01-configuracion-local.md)
+  - [Datos de prueba](docs/02-datos-prueba.md)
+  - [Estrategia de pruebas](docs/03-estrategia-pruebas.md)
+  - [Seguridad y privacidad](docs/04-seguridad-privacidad.md)
+  - [Inventario de scripts](docs/05-inventario-scripts.md)
+  - [Runbook de despliegue y rollback](docs/06-runbook-despliegue.md)
+  - [Estado funcional actual](docs/07-estado-funcional-actual.md)
+- Auditorías
+  - [Organización documental](audits/01-auditoria-organizacion-documental.md)
+  - [Requerimientos, especificaciones y arquitectura](audits/02-auditoria-requerimientos.md)
+  - [Cierre de decisiones abiertas](audits/03-cierre-decisiones-abiertas.md)
+  - [Hallazgos del Explorador y publicaciones](audits/04-hallazgos-explorador-publicaciones.md)
+- Planes
+  - [Backend — histórico](plans/01-plan-backend.md)
+  - [Frontend — histórico](plans/02-plan-frontend.md)
+  - [Despliegue](plans/03-plan-despliegue.md)
+  - [Reorganización documental](plans/04-plan-reorganizacion-documental.md)
+- Archivo
+  - [Documentos reemplazados](archive/README.md)

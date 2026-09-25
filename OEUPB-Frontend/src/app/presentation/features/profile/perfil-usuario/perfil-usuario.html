@@ -45,7 +45,7 @@
               <h4>Permisos de Acceso</h4>
               <p *ngIf="usuario.rol === 'Coordinador_Sede'">Tienes permisos exclusivos para cargar, eliminar y consultar estadísticas y egresados correspondientes a la seccional de {{ sedeNombre }}.</p>
               <p *ngIf="usuario.rol === 'Admin_CTIC'">Tienes permisos de acceso a nivel nacional, incluyendo administración de usuarios de todo el sistema.</p>
-              <p *ngIf="usuario.rol === 'Directivo'">Tienes acceso global a la estadística y reportes gerenciales del observatorio a nivel nacional.</p>
+              <p *ngIf="usuario.rol === 'Usuario_Consulta'">Tu acceso de solo lectura depende de los permisos, programas y publicaciones asignados por el coordinador de tu sede.</p>
             </div>
           </div>
         </div>

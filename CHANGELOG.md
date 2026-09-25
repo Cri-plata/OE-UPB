@@ -1,6 +1,31 @@
 # Changelog
 
+Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
+
 ## [Unreleased] - 2026-08-30
+### Añadido (2026-09-24)
+- **Higiene del repositorio:** se retiraron 73 scripts históricos ad hoc, se organizó un generador Excel reproducible y se cerraron la trazabilidad RF y las decisiones documentales pendientes.
+- **Autenticación endurecida:** secreto obligatorio y robusto fuera de desarrollo, credenciales temporales con expiración, recuperación RBAC auditada y modo inicial aleatorio obligatorio en producción.
+- **Directorio manual:** CRUD por sede con auditoría, motivo obligatorio, control de conflictos y exportación Excel.
+- **Exportación visual:** Reporte General, Tendencias y Explorador descargan sus gráficas como PNG.
+- **Analítica NLP:** clasificación local de competencias sobre texto anonimizado y alertas descriptivas de empleabilidad por programa.
+- **Preparación productiva:** contenedores, proxy HTTPS, CORS por entorno, health checks, observabilidad, backup, restauración y runbook de rollback.
+- **Arquitectura Angular:** El acceso HTTP se movió a clientes tipados de Data y las rutas ahora aplican guards de sesión y rol.
+- **Design system:** Se consolidaron tokens CSS globales y una paleta única para Chart.js, con validación automática en CI.
+- **Operación reproducible:** Dependencias Python fijadas, `.env.example`, migraciones, lockfile y procedimiento de inicialización desde cero.
+- **Publicación de gráficas:** Los coordinadores pueden publicar o retirar instantáneas agregadas desde Reporte General, Tendencias y Explorador; coordinadores y usuarios de consulta disponen de una vista separada filtrada por audiencia.
+- **Privacidad de publicaciones:** Las instantáneas son inmutables y versionadas, requieren aprobación explícita y contienen únicamente etiquetas y métricas numéricas, nunca datos fuente.
+- **Contratos API:** OpenAPI genera los modelos TypeScript consumidos por Angular y una validación automática evita divergencias entre rutas, respuestas y clientes.
+- **Datos:** Se añadió el catálogo persistente de sedes, relaciones obligatorias y soporte explícito de intentos de medición con política de selección por indicador.
+- **Auditoría de cargas:** La eliminación física exige motivo, conserva un evento inmutable y evita reutilizar números de versión borrados.
+- **Calidad:** Se consolidaron 19 pruebas de backend y 11 de frontend, más validaciones de contratos, documentación y compilación en CI.
+
+### Añadido (2026-09-23)
+- **RBAC:** Se implementaron `Admin_CTIC`, `Coordinador_Sede` y `Usuario_Consulta` con administración jerárquica y denegaciones 403.
+- **Permisos:** Los usuarios de consulta almacenan etiqueta informativa, cuatro permisos y programas validados contra cargas visibles de su sede.
+- **Cuentas:** Se añadieron desactivación/reactivación, borrado físico excepcional auditado y revocación inmediata mediante versión de autorización.
+- **Aislamiento:** Directorio, perfiles, reportes, explorador y cargas restringen los datos privados al coordinador y a su sede.
+
 ### Añadido (2026-09-12)
 - **Módulo de IA (Habilidades Demandadas)**: Pipeline de PLN para extracción y clasificación de habilidades blandas y duras desde texto libre de encuestas con spaCy (`es_core_news_md`) y descubrimiento de emergentes con TF-IDF (`/api/ia/habilidades-demandadas`).
 - **Módulo de IA (Reglas de Asociación / Co-relaciones)**: Análisis de canasta (Market Basket Analysis) con `mlxtend` (`apriori` + `association_rules`) para identificar co-ocurrencias de habilidades con métricas de soporte, confianza, lift y filtro por ocurrencias mínimas (`/api/ia/reglas-asociacion`).

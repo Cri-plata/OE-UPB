@@ -63,8 +63,13 @@
       </div>
 
       <div class="chart-container">
-        <h2>Resultados: {{ preguntaSeleccionada }}</h2>
-        <div class="chart-wrapper" *ngIf="isChartReady">
+        <button (click)="exportarGrafica()">Exportar PNG</button>
+        <div class="publication-header">
+          <h2>Resultados: {{ preguntaSeleccionada }}</h2>
+          <button *ngIf="!publicaciones[graficaKey]" class="publish-btn" [disabled]="publicando || !isChartReady" (click)="publicar()">Publicar</button>
+          <button *ngIf="publicaciones[graficaKey]" class="withdraw-btn" [disabled]="publicando" (click)="retirar()">Retirar publicación</button>
+        </div>
+        <div id="grafica-explorador" class="chart-wrapper" *ngIf="isChartReady">
           <canvas baseChart
             [data]="chartData"
             [type]="tipoGrafico"

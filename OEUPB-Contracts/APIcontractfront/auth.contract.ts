@@ -23,6 +23,12 @@ export interface UsuarioDto {
   id: number;
   nombre: string;
   correo: string;
-  rol: 'Admin_CTIC' | 'Coordinador_Sede' | 'Directivo';
+  rol: 'Admin_CTIC' | 'Coordinador_Sede' | 'Usuario_Consulta';
   sedeId: number | null; // Nullable para Admin_CTIC
+  debeCambiarContrasena: boolean;
+}
+
+export interface CambioContrasenaTemporalRequestDto {
+  nuevaContrasena: string;
+  confirmarContrasena: string;
 }

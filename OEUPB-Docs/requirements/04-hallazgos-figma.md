@@ -1,27 +1,27 @@
 # Hallazgos y Análisis de Mockups (OE UPB)
 
+> **Estado:** evidencia histórica de diseño. La fuente vigente para estilos y componentes es [`../design/design-system.md`](../design/design-system.md). La selección manual de sede durante la carga y el rechazo genérico de cédulas duplicadas quedaron reemplazados por RN-01, RN-06 y ADR-006. La publicación entre sedes ocurre desde cada gráfica, no desde la pantalla de carga.
+
 Tras analizar los 8 nuevos mockups (UI en Modo Claro / Blanco con colores institucionales UPB) y cruzarlos con las Actas de Reunión del 19 de Agosto, se han encontrado las siguientes correspondencias y faltantes:
 
 ## 1. Correspondencia Directa (Mockups vs Requerimientos)
-*   **Ficha del Egresado:** Cumple con la visualización individual. Muestra la línea de tiempo de momentos (0, 1 y 5).
-*   **Reporte General (Dashboard):** Cumple con los filtros requeridos (Sede, Facultad, Cohorte) y muestra las métricas de empleabilidad y salarios.
-*   **Administración de Datos:** Cumple perfectamente con la carga (Drag & Drop) y permite seleccionar explícitamente el Momento de la encuesta y la Sede (Filtros), como se exigió en el Acta 1.
-*   **Tendencias por Momento:** Cumple con el cruce de variables M1 vs M5 requerido en el Acta 2.
-*   **Inteligencia Artificial:** Excelente representación gráfica del word cloud / barras para NLP y las alertas de riesgo de desempleo.
-*   **Gestión de Usuarios:** Se incluyó la pantalla para el Administrador CTIC. Muestra los roles (Decano, Coordinador, Administrador) y la asignación de sedes (Silos de datos).
-*   **Modal de Errores Excel:** Gran adición funcional. Cumple con la regla de negocio de rechazar "Cédulas duplicadas" y "Cédulas vacías", permitiendo descargar el reporte de errores.
+*   **Ficha del Egresado:** Representa visualmente la ficha individual y una línea de tiempo de momentos (0, 1 y 5). Esta evidencia visual no verifica el filtrado por sede ni la implementación del flujo.
+*   **Reporte General (Dashboard):** Representa visualmente filtros históricos de Sede, Facultad y Cohorte, además de métricas de empleabilidad y salarios. La política vigente exige derivar la sede propia del JWT y separar las publicaciones agregadas de otras sedes.
+*   **Administración de Datos:** El mockup histórico permite seleccionar Momento y Sede. La política vigente conserva la selección de Momento, pero la sede debe derivarse del JWT del coordinador y no puede seleccionarse para ampliar alcance.
+*   **Tendencias por Momento:** Representa visualmente el cruce M1 vs M5 requerido en el Acta 2; no demuestra que el contrato o la comparación longitudinal estén implementados.
+*   **Inteligencia Artificial:** Representa visualmente un word cloud / barras para NLP y alertas de riesgo de desempleo. La clasificación NLP no está implementada y la predicción permanece en pausa.
+*   **Gestión de Usuarios:** Se incluyó una pantalla con roles históricos (Decano, Coordinador, Administrador). La política vigente usa `Admin_CTIC`, `Coordinador_Sede` y `Usuario_Consulta`; este último recibe permisos y programas al crear la cuenta.
+*   **Modal de Errores Excel:** El mockup contempla cédulas duplicadas y vacías. La política vigente debe distinguir duplicados dentro de la carga, resueltos según ADR-006, de documentos ya persistidos, tratados mediante actualización según RN-01.
 
 ## 2. Pantallas / Estados Faltantes (Brechas)
 A pesar de la alta fidelidad de los nuevos mockups, faltan las siguientes pantallas críticas mencionadas en el **Acta 2 (19 de Agosto - 5:14 p.m.)**:
 
-1.  **Formulario de "Nuevo Usuario" (Admin CTIC):**
+1.  **Formulario de "Nuevo Coordinador" (Admin CTIC):**
     *   *Contexto:* Existe el botón "Nuevo usuario" en la vista de Gestión de Usuarios, pero no hay un mockup del formulario en sí.
-    *   *Faltante:* Falta el diseño del formulario donde el Admin CTIC ingresa el Correo, Nombre, Rol y, lo más importante, selecciona la **Sede o Facultad** a la que quedará anclado el usuario.
+    *   *Faltante vigente:* Falta el diseño del formulario donde el Admin CTIC ingresa correo y nombre, y selecciona la **Sede**. El rol no es seleccionable: se asigna siempre `Coordinador_Sede`, conforme a HU-01 y RN-07. La referencia histórica a “Facultad” no forma parte de la política vigente.
 2.  **Lógica Visual de "Doble Titulación":**
     *   *Contexto:* El Acta 2 menciona que ante un caso de doble titulación en un mismo momento, solo se registrará la última carrera obtenida.
     *   *Recomendación:* Asegurarse de que el modal de errores del Excel (Mockup 8) esté preparado para arrojar un error del tipo "Doble titulación detectada - Se omitió registro antiguo" si llega a pasar.
 
 ## 3. Elementos Diferidos (Proyecto de Grado)
 *   **Verificación de Dos Pasos (2FA/OTP):** Aunque el Acta 2 sugiere implementar un sistema de verificación con código al correo (estilo SIGA), se ha decidido con el cliente que este requerimiento no es un bloqueante funcional para PI3. Si el tiempo de desarrollo lo permite, se integrará; de lo contrario, queda oficialmente diferido para la fase de **Proyecto de Grado**. Por ende, **NO es obligatorio** diseñar su mockup actualmente.
-
-

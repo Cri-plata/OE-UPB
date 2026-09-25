@@ -1,0 +1,14 @@
+<div class="dashboard-container"><app-sidebar></app-sidebar><main class="main-content">
+  <header><h2>Analítica de textos y alertas</h2><p>Clasificación local sobre textos anonimizados. Las alertas son descriptivas y no son predicciones.</p></header>
+  <p *ngIf="error" class="error">{{ error }}</p>
+  <ng-container *ngIf="resumen">
+    <section class="card"><h3>Competencias mencionadas</h3><p>{{ resumen.textos_analizados }} textos abiertos analizados</p>
+      <div class="bar" *ngFor="let item of resumen.competencias"><span>{{ item.categoria }}</span><strong>{{ item.frecuencia }}</strong></div>
+      <p *ngIf="!resumen.competencias.length">No hay menciones clasificables.</p>
+    </section>
+    <section class="card"><h3>Alertas de empleabilidad</h3>
+      <article class="alert" [class.high]="alerta.severidad === 'alta'" *ngFor="let alerta of resumen.alertas"><strong>{{ alerta.programa }}</strong><p>{{ alerta.mensaje }}</p><small>Valor: {{ alerta.valor }} · muestra: {{ alerta.muestra }}</small></article>
+      <p *ngIf="!resumen.alertas.length">No se detectaron patrones que superen los umbrales descriptivos.</p>
+    </section>
+  </ng-container>
+</main></div>

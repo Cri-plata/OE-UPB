@@ -1,7 +1,7 @@
 ﻿.dashboard-container {
     display: flex;
     min-height: 100vh;
-    background-color: #f4f6f9;
+    background-color: var(--color-background);
   }
   
   .main-content {
@@ -22,7 +22,7 @@
   .back-btn {
     background: none;
     border: none;
-    color: #ba0c2f;
+    color: var(--color-brand);
     font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
@@ -59,7 +59,7 @@
     .avatar-circle {
       width: 100px;
       height: 100px;
-      background: #ba0c2f;
+      background: var(--color-brand);
       color: white;
       font-size: 3rem;
       font-weight: bold;
@@ -72,11 +72,11 @@
   
     h2 {
       margin: 0;
-      color: #333;
+      color: var(--color-navigation-hover);
     }
   
     .cedula {
-      color: #777;
+      color: var(--color-text-subtle);
       margin-top: 5px;
       margin-bottom: 20px;
     }
@@ -84,7 +84,7 @@
     hr {
       width: 100%;
       border: 0;
-      border-top: 1px solid #eee;
+      border-top: 1px solid var(--color-divider);
       margin-bottom: 20px;
     }
   
@@ -97,10 +97,10 @@
   
       .label {
         font-weight: bold;
-        color: #555;
+        color: var(--color-text-tertiary);
       }
       .value {
-        color: #333;
+        color: var(--color-navigation-hover);
       }
     }
   }
@@ -110,10 +110,10 @@
   
     h3 {
       margin-top: 0;
-      color: #ba0c2f;
+      color: var(--color-brand);
     }
     .subtitle {
-      color: #666;
+      color: var(--color-text-secondary);
       font-size: 0.9rem;
       margin-bottom: 30px;
     }
@@ -141,7 +141,7 @@
     top: 5px;
     width: 12px;
     height: 12px;
-    background: #ba0c2f;
+    background: var(--color-brand);
     border-radius: 50%;
     border: 3px solid white;
   }
@@ -150,7 +150,7 @@
     background: #f9f9f9;
     padding: 15px;
     border-radius: 6px;
-    border: 1px solid #eee;
+    border: 1px solid var(--color-divider);
   }
   
   .moment-header {
@@ -161,11 +161,11 @@
   
     h4 {
       margin: 0;
-      color: #333;
+      color: var(--color-navigation-hover);
     }
     
     .year-badge {
-      background: #333;
+      background: var(--color-navigation-hover);
       color: white;
       padding: 3px 8px;
       border-radius: 4px;

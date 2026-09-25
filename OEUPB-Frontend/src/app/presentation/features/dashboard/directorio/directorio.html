@@ -6,8 +6,21 @@
           <h2>Directorio de Egresados</h2>
           <p>Busca e inspecciona el historial de encuestas de cada egresado.</p>
         </div>
+        <div class="header-actions"><button class="btn-secondary" (click)="exportar()">Exportar Excel</button><button class="btn-primary" (click)="nuevo()">Nuevo egresado</button></div>
         <img src="/escudo-upb.png" alt="Escudo UPB" style="height: 50px; width: auto; object-fit: contain;">
       </header>
+
+      <p class="success-message" *ngIf="mensaje">{{ mensaje }}</p>
+      <p class="error-message" *ngIf="error">{{ error }}</p>
+      <section class="filters-card" *ngIf="mostrandoFormulario">
+        <div class="filter-group"><label>Documento</label><input class="modern-input" [(ngModel)]="formulario.numero_documento" [disabled]="!!editandoDocumento"></div>
+        <div class="filter-group"><label>Nombres</label><input class="modern-input" [(ngModel)]="formulario.primer_nombre"></div>
+        <div class="filter-group"><label>Apellidos</label><input class="modern-input" [(ngModel)]="formulario.primer_apellido"></div>
+        <div class="filter-group"><label>Programa</label><input class="modern-input" [(ngModel)]="formulario.programa"></div>
+        <div class="filter-group"><label>Fecha de grado</label><input type="date" class="modern-input" [(ngModel)]="formulario.fecha_grado"></div>
+        <div class="filter-group"><label>Motivo</label><input class="modern-input" [(ngModel)]="formulario.motivo"></div>
+        <div class="filter-action"><button class="btn-primary" (click)="guardar()">Guardar</button><button class="btn-secondary" (click)="mostrandoFormulario=false">Cancelar</button></div>
+      </section>
   
       <div class="filters-card">
         <div class="filter-group">
@@ -36,6 +49,7 @@
               <th>Programa Académico</th>
               <th>Fecha Grado</th>
               <th>Encuestas Respondidas</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -45,9 +59,10 @@
               <td>{{ e.programa }}</td>
               <td>{{ e.fecha_grado }}</td>
               <td><span class="badge">{{ e.encuestas }}</span></td>
+              <td><button class="action-btn" (click)="editar(e, $event)">Editar</button><button class="action-btn danger" (click)="eliminar(e, $event)">Eliminar</button></td>
             </tr>
             <tr *ngIf="egresados.length === 0 && !cargando">
-              <td colspan="5" class="empty-state">No se encontraron egresados con los filtros seleccionados.</td>
+              <td colspan="6" class="empty-state">No se encontraron egresados con los filtros seleccionados.</td>
             </tr>
           </tbody>
         </table>

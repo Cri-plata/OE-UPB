@@ -2,9 +2,13 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
-import { HttpClient } from '@angular/common/http';
+import { ReportesApi } from '../../../../data/api/reportes.api';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
+import { PublicacionesApi } from '../../../../data/api/publicaciones.api';
+import { PublicacionCreate, PublicacionResponse } from '../../../../data/api/generated-api.models';
+import { CHART_PALETTE } from '../../../shared/chart-palette';
+import { exportChart } from '../../../shared/export-chart';
 
 @Component({
   selector: 'app-explorador',
@@ -14,6 +18,7 @@ import { ChartConfiguration, ChartType } from 'chart.js';
   styleUrls: ['./explorador.scss']
 })
 export class ExploradorComponent implements OnInit {
+  exportarGrafica() { exportChart('#grafica-explorador canvas', 'explorador.png'); }
   // Opciones disponibles
   preguntasDisponibles: string[] = [];
   programasDisponibles: string[] = [];
@@ -29,6 +34,8 @@ export class ExploradorComponent implements OnInit {
 
   // Chart Data
   isChartReady = false;
+  publicaciones: Record<string, PublicacionResponse> = {};
+  publicando = false;
   chartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
   chartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -38,17 +45,17 @@ export class ExploradorComponent implements OnInit {
     }
   };
 
-  private readonly API_URL = 'http://localhost:8000/api/reportes/explorador';
-  private readonly INIT_URL = 'http://localhost:8000/api/reportes/explorador/init';
-
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private reportesApi: ReportesApi, private cdr: ChangeDetectorRef, private publicacionesApi: PublicacionesApi) {}
 
   ngOnInit() {
+    this.publicacionesApi.listarPropias().subscribe(publicaciones => {
+      this.publicaciones = Object.fromEntries(publicaciones.map(publicacion => [publicacion.grafica_key, publicacion]));
+    });
     this.cargarFiltrosIniciales();
   }
 
   cargarFiltrosIniciales() {
-    this.http.get<any>(this.INIT_URL).subscribe({
+    this.reportesApi.exploradorInit().subscribe({
       next: (data) => {
         this.preguntasDisponibles = data.preguntas || [];
         this.programasDisponibles = data.programas || [];
@@ -66,12 +73,12 @@ export class ExploradorComponent implements OnInit {
     if (!this.preguntaSeleccionada) return;
     
     this.isChartReady = false;
-    let url = `${this.API_URL}?pregunta=${encodeURIComponent(this.preguntaSeleccionada)}`;
-    if (this.momentoSeleccionado !== '') url += `&momento=${this.momentoSeleccionado}`;
-    if (this.programaSeleccionado !== '') url += `&programa=${encodeURIComponent(this.programaSeleccionado)}`;
-    if (this.anioSeleccionado !== '') url += `&anio=${this.anioSeleccionado}`;
-
-    this.http.get<any>(url).subscribe({
+    this.reportesApi.explorar({
+      pregunta: this.preguntaSeleccionada,
+      momento: this.momentoSeleccionado === '' ? undefined : this.momentoSeleccionado,
+      programa: this.programaSeleccionado || undefined,
+      anio: this.anioSeleccionado === '' ? undefined : this.anioSeleccionado,
+    }).subscribe({
       next: (data) => {
         this.chartData = {
           labels: data.labels,
@@ -79,10 +86,7 @@ export class ExploradorComponent implements OnInit {
             {
               data: data.valores,
               label: 'Respuestas',
-              backgroundColor: [
-                '#E63946', '#1D3557', '#2A9D8F', '#F4A261', '#9B5DE5',
-                '#0077B6', '#00B4D8', '#90E0EF', '#CAF0F8', '#FFB703'
-              ],
+              backgroundColor: [...CHART_PALETTE],
               borderWidth: 1
             }
           ]
@@ -94,6 +98,55 @@ export class ExploradorComponent implements OnInit {
         console.error("Error generando gráfica", err);
         alert("Ocurrió un error al generar el reporte.");
       }
+    });
+  }
+
+  get graficaKey(): string {
+    const definicion = `${this.preguntaSeleccionada}|${this.momentoSeleccionado}|${this.programaSeleccionado}|${this.anioSeleccionado}`;
+    let hash = 0;
+    for (let i = 0; i < definicion.length; i++) hash = ((hash << 5) - hash + definicion.charCodeAt(i)) | 0;
+    return `explorador_${Math.abs(hash).toString(36)}`;
+  }
+
+  publicar() {
+    if (!confirm('Confirmo que esta gráfica contiene únicamente métricas agregadas y está aprobada para publicación.')) return;
+    const programas = this.programaSeleccionado ? [this.programaSeleccionado] : this.programasDisponibles;
+    const payload: PublicacionCreate = {
+      grafica_key: this.graficaKey,
+      titulo: `Explorador: ${this.preguntaSeleccionada.slice(0, 150)}`,
+      programas,
+      definicion: {
+        origen: 'explorador', tipo_visualizacion: this.tipoGrafico as PublicacionCreate['definicion']['tipo_visualizacion'],
+        pregunta: this.preguntaSeleccionada,
+        momento: this.momentoSeleccionado === '' ? undefined : this.momentoSeleccionado as 0 | 1 | 5,
+        programa: this.programaSeleccionado || undefined,
+        anio: this.anioSeleccionado === '' ? undefined : this.anioSeleccionado,
+      },
+      metricas: {
+        labels: (this.chartData.labels ?? []).map(String),
+        datasets: this.chartData.datasets.map(dataset => ({
+          label: dataset.label || 'Respuestas',
+          data: dataset.data.map(valor => typeof valor === 'number' ? valor : null),
+          backgroundColor: Array.isArray(dataset.backgroundColor) ? dataset.backgroundColor.map(String) : (typeof dataset.backgroundColor === 'string' ? dataset.backgroundColor : undefined),
+          borderColor: typeof dataset.borderColor === 'string' ? dataset.borderColor : undefined,
+        }))
+      },
+      aprobada_privacidad: true
+    };
+    this.publicando = true;
+    this.publicacionesApi.publicar(payload).subscribe({
+      next: publicacion => { this.publicaciones[this.graficaKey] = publicacion; this.publicando = false; },
+      error: () => { alert('No fue posible publicar la gráfica.'); this.publicando = false; }
+    });
+  }
+
+  retirar() {
+    const publicacion = this.publicaciones[this.graficaKey];
+    if (!publicacion || !confirm('¿Retirar esta publicación?')) return;
+    this.publicando = true;
+    this.publicacionesApi.retirar(publicacion.id).subscribe({
+      next: () => { delete this.publicaciones[this.graficaKey]; this.publicando = false; },
+      error: () => { alert('No fue posible retirar la publicación.'); this.publicando = false; }
     });
   }
 }

@@ -2,7 +2,8 @@
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
-import { HttpClient } from '@angular/common/http';
+import { CargaApi } from '../../../../data/api/carga.api';
+import { HistorialCargaItem } from '../../../../data/api/generated-api.models';
 
 @Component({
   selector: 'app-carga-datos',
@@ -12,7 +13,7 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./carga-datos.scss']
 })
 export class CargaDatosComponent implements OnInit {
-  historial: any[] = [];
+  historial: HistorialCargaItem[] = [];
   uploadForm: FormGroup;
   selectedFile: File | null = null;
   erroresTabla: any[] = [];
@@ -21,9 +22,7 @@ export class CargaDatosComponent implements OnInit {
   aniosDisponibles: number[] = [];
   mostrarInputAnioManual = false;
   
-  private readonly API_URL = 'http://localhost:8000/api/carga/excel';
-
-  constructor(private fb: FormBuilder, private http: HttpClient, private cdr: ChangeDetectorRef) {
+  constructor(private fb: FormBuilder, private cargaApi: CargaApi, private cdr: ChangeDetectorRef) {
     this.uploadForm = this.fb.group({
       momento: ['', Validators.required],
       anio: ['', Validators.required]
@@ -32,10 +31,10 @@ export class CargaDatosComponent implements OnInit {
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
-    if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+    if (file && file.name.toLowerCase().endsWith('.xlsx')) {
       this.selectedFile = file;
     } else {
-      alert('Por favor, selecciona un archivo Excel válido (.xlsx o .xls)');
+      alert('Por favor, selecciona un archivo Excel válido (.xlsx)');
       this.selectedFile = null;
     }
   }
@@ -52,7 +51,7 @@ export class CargaDatosComponent implements OnInit {
     formData.append('anio', this.uploadForm.get('anio')?.value);
       
 
-      this.http.post<any>(this.API_URL, formData).subscribe({
+      this.cargaApi.cargar(formData).subscribe({
         next: (response) => {
           this.isSubmitting = false;
           this.mensajeValidacion = response.mensaje;
@@ -76,7 +75,7 @@ export class CargaDatosComponent implements OnInit {
   }
 
   cargarHistorial() {
-    this.http.get<any[]>('http://localhost:8000/api/carga/historial').subscribe({
+    this.cargaApi.historial().subscribe({
       next: (data) => {
         this.historial = data;
         this.cdr.detectChanges();
@@ -85,15 +84,19 @@ export class CargaDatosComponent implements OnInit {
     });
   }
 
-  eliminarMomento(momento: number, anio: number) {
-    if(confirm(`¿Estás seguro de que deseas eliminar permanentemente todos los datos y encuestas del Momento ${momento} del ${anio}?`)) {
-      this.http.delete(`http://localhost:8000/api/carga/momento/${momento}/${anio}`).subscribe({
+  eliminarCarga(carga: HistorialCargaItem) {
+    if(confirm(`¿Deseas retirar la carga ${carga.nombre_archivo} (versión ${carga.version})?`)) {
+      const motivo = prompt('Indica el motivo de la eliminación (mínimo 10 caracteres):');
+      if (!motivo || motivo.trim().length < 10) {
+        alert('Debes registrar un motivo de al menos 10 caracteres.');
+        return;
+      }
+      this.cargaApi.eliminar(carga.id, motivo.trim()).subscribe({
         next: () => {
-          alert(`Momento ${momento} del ${anio} eliminado exitosamente.`);
+          alert(`Carga ${carga.nombre_archivo} eliminada exitosamente.`);
           this.cargarHistorial();
-    this.generarAnios();
         },
-        error: (err) => alert("Error eliminando el archivo.")
+        error: () => alert("Error eliminando la carga.")
       });
     }
   }

@@ -1,5 +1,7 @@
 # Plan de Desarrollo Backend (Python)
 
+> **Estado:** histórico. Describe la planificación inicial; el estado vigente está en `../BACKLOG.md` y `../architecture/02-backend.md`.
+
 ## 1. Fase Inicial: Setup y Conexión
 * **Entorno:** Configurar un entorno virtual en Python (env) y definir las dependencias en 
 equirements.txt (FastAPI/Flask, Pandas, SQLAlchemy, PyJWT, scikit-learn).

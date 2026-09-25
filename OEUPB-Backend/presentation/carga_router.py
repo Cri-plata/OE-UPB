@@ -1,14 +1,42 @@
 ﻿from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
-from domain.models import Egresado, Medicion
+from sqlalchemy import func
+from domain.models import Carga, Egresado, EventoEliminacionCarga, Medicion, Usuario
 from infrastructure.database import get_db
 from application.auth_service import get_current_user
 import pandas as pd
 import io
-from pydantic import BaseModel
-from typing import List
+import hashlib
+from pydantic import BaseModel, Field
+from typing import List, Optional
 
 router = APIRouter(prefix="/api/carga", tags=["Carga de Datos"])
+
+MOMENTOS_PERMITIDOS = {0, 1, 5}
+
+
+def validar_coordinador_con_sede(current_user: dict) -> int:
+    if current_user.get("rol") != "Coordinador_Sede":
+        raise HTTPException(
+            status_code=403,
+            detail="Solo un Coordinador de Sede puede administrar cargas",
+        )
+
+    sede_id = current_user.get("sede_id")
+    if sede_id is None:
+        raise HTTPException(
+            status_code=403,
+            detail="El Coordinador de Sede no tiene una sede válida asignada",
+        )
+    return sede_id
+
+
+def validar_momento(momento: int) -> None:
+    if momento not in MOMENTOS_PERMITIDOS:
+        raise HTTPException(
+            status_code=422,
+            detail="El momento debe ser 0, 1 o 5",
+        )
 
 class ErrorFila(BaseModel):
     fila: int
@@ -18,34 +46,58 @@ class ErrorFila(BaseModel):
 class CargaResponse(BaseModel):
     mensaje: str
     errores: List[ErrorFila] = []
+    carga_id: Optional[int] = None
+    version: Optional[int] = None
+    estado: Optional[str] = None
+    registros: Optional[int] = None
 
-@router.post("/excel", response_model=CargaResponse)
+
+class HistorialCargaItem(BaseModel):
+    id: int
+    momento: int
+    anio: int
+    nombre: str
+    nombre_archivo: str
+    fecha_carga: str
+    version: int
+    registros: int
+    estado: str
+
+
+class MensajeResponse(BaseModel):
+    mensaje: str
+
+
+class EliminarCargaRequest(BaseModel):
+    motivo: str = Field(min_length=10, max_length=500)
+
+
+@router.post(
+    "/excel",
+    response_model=CargaResponse,
+    responses={
+        400: {"description": "El archivo no es .xlsx o su contenido no puede leerse"},
+        403: {"description": "El usuario no es coordinador o no tiene sede asignada"},
+        422: {"description": "El momento o los parámetros no son válidos"},
+    },
+)
 async def procesar_excel(
     momento: int = Form(...),
-    anio: int = Form(...),
-    file: UploadFile = File(...),
+    anio: int = Form(..., description="Año de grado o cohorte"),
+    file: UploadFile = File(..., description="Archivo Excel en formato .xlsx"),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    if not file.filename.endswith(('.xlsx', '.xls')):
-        raise HTTPException(status_code=400, detail="El archivo debe ser un Excel (.xlsx o .xls)")
+    sede_coordinador_actual = validar_coordinador_con_sede(current_user)
+    validar_momento(momento)
 
-        # REGLA DE NEGOCIO: Evitar duplicidad de cargas por sede
-    sede_coordinador_actual = current_user.get('sede_id') or 1
-    carga_existente = db.query(Medicion).filter(
-        Medicion.momento == momento, 
-        Medicion.anio == anio,
-        Medicion.sede_id == sede_coordinador_actual
-    ).first()
-    
-    if carga_existente:
-        raise HTTPException(
-            status_code=409, 
-            detail=f"Tu sede ya tiene registros cargados para el Momento {momento} del año {anio}. Por favor, elimínelos desde el Historial antes de volver a cargarlos."
-        )
+    nombre_archivo = (file.filename or "").lower()
+    if not nombre_archivo.endswith(".xlsx"):
+        raise HTTPException(status_code=400, detail="El único formato permitido es .xlsx")
 
     # Leer el archivo a la memoria
     contents = await file.read()
+    hash_archivo = hashlib.sha256(contents).hexdigest()
     
     try:
         # Usar Pandas para leer el Excel
@@ -107,68 +159,146 @@ async def procesar_excel(
     # Limpiar NaN de Pandas para que sean compatibles con JSON/SQLAlchemy
     df = df.replace({np.nan: None})
 
-    # Extraemos la sede del token JWT
-    sede_coordinador = current_user.get('sede_id') or 1
+    try:
+        actor = db.query(Usuario).filter(
+            Usuario.correo == current_user.get("correo")
+        ).first()
+        if actor is None:
+            raise HTTPException(status_code=403, detail="El usuario autenticado no existe")
 
-    for index, row in df.iterrows():
-        # Manejo de Cdulas vacas (Annimos)
-        is_empty_doc = pd.isna(row.get('NUMERO_DOCUMENTO')) or str(row.get('NUMERO_DOCUMENTO')).strip() == ''
-        
-        doc = None
-        if not is_empty_doc:
-            doc = str(row.get('NUMERO_DOCUMENTO'))
-            if doc.endswith('.0'):
-                doc = doc[:-2]
-                
-        # 1. Crear o Actualizar al Egresado SOLO si hay cdula
-        if doc:
-            egresado = db.query(Egresado).filter(Egresado.numero_documento == doc).first()
-            if not egresado:
-                
-                # Manejo de Nombres vacos o sin segundo nombre
-                p_nombre = str(row.get('PRIMER NOMBRE', '')) if not pd.isna(row.get('PRIMER NOMBRE')) else "Sin Nombre"
-                p_apellido = str(row.get('PRIMER_APELLIDO', '')) if not pd.isna(row.get('PRIMER_APELLIDO')) else ""
-                prog = str(row.get('PROGRAMA', '')) if not pd.isna(row.get('PROGRAMA')) else "Sin Programa"
-                
-                egresado = Egresado(
-                    numero_documento=doc,
-                    primer_nombre=p_nombre,
-                    primer_apellido=p_apellido,
-                    programa=prog,
-                    fecha_grado=row.get('FECHA_GRADO') if pd.notnull(row.get('FECHA_GRADO')) else None
-                )
-                db.add(egresado)
-            else:
-                # Actualizamos fecha de grado si es mas reciente
-                if row.get('FECHA_GRADO') and pd.notnull(row.get('FECHA_GRADO')):
-                    if not egresado.fecha_grado or row.get('FECHA_GRADO') > egresado.fecha_grado:
-                        egresado.fecha_grado = row.get('FECHA_GRADO')
-                        
-            db.commit() # Aseguramos que el egresado exista para la llave foranea
-
-        
-        # 2. Guardar la medición con todas sus respuestas en JSON
-        # Convertimos las fechas a string para el JSON
-        respuestas_dict = row.to_dict()
-        if isinstance(respuestas_dict.get('FECHA_GRADO'), pd.Timestamp):
-            respuestas_dict['FECHA_GRADO'] = respuestas_dict['FECHA_GRADO'].strftime('%Y-%m-%d %H:%M:%S')
-
-        medicion = Medicion(
-            egresado_documento=doc,
-            momento=momento,
-            anio=anio,
-            sede_id=sede_coordinador,
-            respuestas=respuestas_dict
+        consulta_alcance = db.query(Carga).filter(
+            Carga.sede_id == sede_coordinador_actual,
+            Carga.momento == momento,
+            Carga.anio_grado == anio,
         )
-        db.add(medicion)
-        
-    db.commit()
+        ultima_carga = consulta_alcance.order_by(Carga.version.desc()).first()
+        carga_anterior = (
+            consulta_alcance.filter(Carga.estado == "vigente")
+            .order_by(Carga.version.desc())
+            .first()
+        )
+        ultima_version_eliminada = db.query(func.max(EventoEliminacionCarga.version)).filter(
+            EventoEliminacionCarga.sede_id == sede_coordinador_actual,
+            EventoEliminacionCarga.momento == momento,
+            EventoEliminacionCarga.anio_grado == anio,
+        ).scalar() or 0
+        version = max(ultima_carga.version if ultima_carga else 0, ultima_version_eliminada) + 1
+
+        nueva_carga = Carga(
+            nombre_archivo=file.filename or "carga.xlsx",
+            hash_archivo=hash_archivo,
+            usuario_id=actor.id,
+            sede_id=sede_coordinador_actual,
+            momento=momento,
+            anio_grado=anio,
+            estado="procesando",
+            version=version,
+            registros=0,
+            reemplaza_carga_id=carga_anterior.id if carga_anterior else None,
+        )
+        db.add(nueva_carga)
+        db.flush()
+
+        if carga_anterior:
+            db.query(Medicion).filter(
+                Medicion.carga_id == carga_anterior.id
+            ).delete(synchronize_session=False)
+            carga_anterior.estado = "reemplazada"
+
+        for _, row in df.iterrows():
+            is_empty_doc = (
+                pd.isna(row.get("NUMERO_DOCUMENTO"))
+                or str(row.get("NUMERO_DOCUMENTO")).strip() == ""
+            )
+
+            doc = None
+            if not is_empty_doc:
+                doc = str(row.get("NUMERO_DOCUMENTO"))
+                if doc.endswith(".0"):
+                    doc = doc[:-2]
+
+            if doc:
+                egresado = db.query(Egresado).filter(
+                    Egresado.numero_documento == doc
+                ).first()
+                if not egresado:
+                    p_nombre = (
+                        str(row.get("PRIMER NOMBRE", ""))
+                        if not pd.isna(row.get("PRIMER NOMBRE"))
+                        else "Sin Nombre"
+                    )
+                    p_apellido = (
+                        str(row.get("PRIMER_APELLIDO", ""))
+                        if not pd.isna(row.get("PRIMER_APELLIDO"))
+                        else ""
+                    )
+                    programa = (
+                        str(row.get("PROGRAMA", ""))
+                        if not pd.isna(row.get("PROGRAMA"))
+                        else "Sin Programa"
+                    )
+                    egresado = Egresado(
+                        numero_documento=doc,
+                        primer_nombre=p_nombre,
+                        primer_apellido=p_apellido,
+                        programa=programa,
+                        fecha_grado=(
+                            row.get("FECHA_GRADO")
+                            if pd.notnull(row.get("FECHA_GRADO"))
+                            else None
+                        ),
+                    )
+                    db.add(egresado)
+                elif pd.notnull(row.get("FECHA_GRADO")):
+                    if (
+                        not egresado.fecha_grado
+                        or row.get("FECHA_GRADO") > egresado.fecha_grado
+                    ):
+                        egresado.fecha_grado = row.get("FECHA_GRADO")
+
+            respuestas_dict = row.to_dict()
+            if isinstance(respuestas_dict.get("FECHA_GRADO"), pd.Timestamp):
+                respuestas_dict["FECHA_GRADO"] = respuestas_dict[
+                    "FECHA_GRADO"
+                ].strftime("%Y-%m-%d %H:%M:%S")
+
+            db.add(
+                Medicion(
+                    carga_id=nueva_carga.id,
+                    egresado_documento=doc,
+                    momento=momento,
+                    anio=anio,
+                    sede_id=sede_coordinador_actual,
+                    intento=1,
+                    respuestas=respuestas_dict,
+                )
+            )
+
+        nueva_carga.estado = "vigente"
+        nueva_carga.registros = total_final
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="La carga no pudo persistirse; la versión anterior se conservó",
+        ) from exc
 
     mensaje_exito = f"Archivo procesado exitosamente. Se guardaron {total_final} egresados."
     if casos_resueltos > 0:
         mensaje_exito += f" Se detectaron y resolvieron automáticamente {casos_resueltos} casos de Doble Titulación (se dejó la fecha más reciente)."
 
-    return CargaResponse(mensaje=mensaje_exito, errores=[])
+    return CargaResponse(
+        mensaje=mensaje_exito,
+        errores=[],
+        carga_id=nueva_carga.id,
+        version=nueva_carga.version,
+        estado=nueva_carga.estado,
+        registros=nueva_carga.registros,
+    )
 
 
 
@@ -176,49 +306,107 @@ async def procesar_excel(
 
 
 
-@router.get("/historial")
+@router.get(
+    "/historial",
+    response_model=List[HistorialCargaItem],
+    responses={403: {"description": "El usuario no es coordinador o no tiene sede asignada"}},
+)
 def get_historial(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
-    from sqlalchemy import func
-    query = db.query(Medicion.momento, Medicion.anio, func.count(Medicion.id))
-    if current_user.get('rol') == 'Coordinador_Sede':
-        query = query.filter(Medicion.sede_id == current_user.get('sede_id'))
-    resultados = query.group_by(Medicion.momento, Medicion.anio).all()
-    
-    historial = []
-    for momento, anio, cantidad in resultados:
-        # Para datos antiguos que no tenían año, mostramos N/A
-        anio_str = anio if anio else "N/A"
-        historial.append({
-            "momento": momento,
-            "anio": anio,
-            "nombre": f"Momento {momento} - {anio_str}",
-            "registros": cantidad,
-            "estado": "Procesado"
-        })
-    return historial
+    sede_id = validar_coordinador_con_sede(current_user)
+    cargas = (
+        db.query(Carga)
+        .filter(Carga.sede_id == sede_id)
+        .order_by(Carga.fecha_carga.desc(), Carga.id.desc())
+        .all()
+    )
 
-@router.delete("/momento/{momento}/{anio}")
-def eliminar_momento(momento: int, anio: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
-    if current_user.get('rol') == 'Coordinador_Sede':
-        # Validar que no borre algo de otra sede? Realmente al borrar vamos a filtrar por sede
-        pass
-    # Eliminar todas las encuestas de ese momento
-    if anio == "null" or anio == "N/A" or anio == "None":
-        (db.query(Medicion).filter(Medicion.momento == momento, Medicion.anio.is_(None))
-       .filter(Medicion.sede_id == current_user.get('sede_id') if current_user.get('rol') == 'Coordinador_Sede' else True)
-       .delete(synchronize_session=False))
-    else:
-        (db.query(Medicion).filter(Medicion.momento == momento, Medicion.anio == int(anio))
-       .filter(Medicion.sede_id == current_user.get('sede_id') if current_user.get('rol') == 'Coordinador_Sede' else True)
-       .delete(synchronize_session=False))
-    db.commit()
-    
-    # Opcional: Eliminar egresados huérfanos que ya no tengan ninguna medición
-    from sqlalchemy import text
-    db.execute(text("DELETE FROM egresados WHERE numero_documento NOT IN (SELECT egresado_documento FROM mediciones)"))
-    db.commit()
-    
-    return {"mensaje": f"Momento {momento} eliminado correctamente."}
+    return [
+        {
+            "id": carga.id,
+            "momento": carga.momento,
+            "anio": carga.anio_grado,
+            "nombre": f"Momento {carga.momento} - Cohorte {carga.anio_grado}",
+            "nombre_archivo": carga.nombre_archivo,
+            "fecha_carga": carga.fecha_carga.isoformat(),
+            "version": carga.version,
+            "registros": carga.registros,
+            "estado": carga.estado,
+        }
+        for carga in cargas
+    ]
+
+@router.delete(
+    "/archivo/{carga_id}",
+    response_model=MensajeResponse,
+    responses={
+        403: {"description": "El usuario no es coordinador o no tiene sede asignada"},
+        404: {"description": "La carga no existe dentro de la sede autorizada"},
+        409: {"description": "La carga ya no está vigente"},
+    },
+)
+def eliminar_carga(
+    carga_id: int,
+    solicitud: EliminarCargaRequest,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    from sqlalchemy import exists
+
+    sede_id = validar_coordinador_con_sede(current_user)
+    carga = (
+        db.query(Carga)
+        .filter(Carga.id == carga_id, Carga.sede_id == sede_id)
+        .first()
+    )
+    if carga is None:
+        raise HTTPException(status_code=404, detail="Carga no encontrada")
+    if carga.estado != "vigente":
+        raise HTTPException(status_code=409, detail="La carga ya no está vigente")
+
+    actor = db.query(Usuario).filter(
+        Usuario.correo == current_user.get("correo")
+    ).first()
+    if actor is None:
+        raise HTTPException(status_code=403, detail="El usuario autenticado no existe")
+    if db.query(Carga).filter(Carga.reemplaza_carga_id == carga.id).first():
+        raise HTTPException(
+            status_code=409,
+            detail="La carga está referenciada por una versión posterior",
+        )
+
+    try:
+        db.add(EventoEliminacionCarga(
+            carga_id_eliminada=carga.id,
+            actor_id=actor.id,
+            actor_correo=actor.correo,
+            sede_id=carga.sede_id,
+            momento=carga.momento,
+            anio_grado=carga.anio_grado,
+            version=carga.version,
+            registros=carga.registros,
+            nombre_archivo=carga.nombre_archivo,
+            hash_archivo=carga.hash_archivo,
+            motivo=solicitud.motivo.strip(),
+        ))
+        db.query(Medicion).filter(Medicion.carga_id == carga.id).delete(
+            synchronize_session=False
+        )
+        db.delete(carga)
+
+        db.query(Egresado).filter(
+            ~exists().where(
+                Medicion.egresado_documento == Egresado.numero_documento
+            )
+        ).delete(synchronize_session=False)
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="La carga no pudo eliminarse y no se aplicaron cambios",
+        ) from exc
+
+    return {"mensaje": f"Carga {carga_id} eliminada físicamente y evento auditado."}
 
 
 
