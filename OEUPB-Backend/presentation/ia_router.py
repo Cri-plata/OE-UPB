@@ -9,13 +9,14 @@ de análisis de habilidades sin almacenar texto crudo más allá del procesamien
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Set
 
 from infrastructure.database import get_db
 from domain.models import Medicion
 from application.ia_service import (
     analizar_habilidades_demandadas,
     generar_reglas_asociacion,
+    extraer_habilidades_por_respuesta,
 )
 
 router = APIRouter(prefix="/api/ia", tags=["Inteligencia Artificial"])
@@ -66,70 +67,86 @@ class HabilidadesDemandadasResponse(BaseModel):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Utilidad: extraer textos libres relevantes del campo JSON de respuestas
+# Utilidad: extraer textos libres relevantes de preguntas abiertas auténticas
 # ─────────────────────────────────────────────────────────────────────────────
-# Palabras clave para identificar preguntas abiertas (texto libre) dentro
-# del campo JSON dinámico de las encuestas del OLE/UPB.
-_KEYWORDS_PREGUNTAS_ABIERTAS = [
-    "competencia",
-    "habilidad",
-    "conocimiento",
-    "formación",
-    "preparación",
+# Patrones para identificar preguntas abiertas en el instrumento de egresados UPB / SNIES
+_OPEN_PATTERNS = [
+    "describa brevemente la principal tarea",
+    "tarea que usted realiza",
+    "aspecto a mejorar",
+    "aspectos a mejorar",
     "qué le faltó",
     "qué le hizo falta",
-    "debilidad",
-    "fortaleza",
-    "mejorar",
     "sugerencia",
     "recomendación",
+    "recomendacion",
     "observación",
+    "observacion",
     "comentario",
+    "curso",
+    "seminario",
+    "(otro)",
+]
+
+# Patrones para excluir preguntas de opción múltiple fija o metadatos
+_EXCLUDE_PATTERNS = [
+    "canal de b",
+    "dificultad a la hora",
+    "razón para recomendar",
+    "razon para recomendar",
+    "razón para no recomendar",
+    "razon para no recomendar",
+    "opciones de formación",
+    "opciones de formacion",
+    "lugar de residencia",
+    "tipo de contrato",
+    "sector está",
+    "sector esta",
+    "sector se",
+    "factor",
+    "smlv",
+    "ingreso mensual",
+    "cine ",
+    "formas de trabajo",
 ]
 
 
 def _extraer_textos_libres(respuestas_json: dict) -> List[str]:
     """
     Dado el diccionario JSON de una medición (respuestas_completas),
-    extrae los valores de las preguntas que parecen ser de texto libre
-    relacionadas con habilidades/competencias.
+    extrae los textos libres de preguntas abiertas (tareas laborales, aspectos
+    a mejorar, campos de especificación 'Otro', cursos o sugerencias).
 
-    Si ninguna pregunta coincide con los keywords, incluye TODOS los valores
-    de texto con longitud >= 30 caracteres (heurística para preguntas abiertas
-    vs. respuestas cerradas cortas como "SI", "NO", "3", etc.)
+    Filtra explícitamente opciones cerradas de selección única para evitar
+    ruido estadístico en el análisis de PLN.
     """
     if not respuestas_json or not isinstance(respuestas_json, dict):
         return []
 
     textos = []
-    textos_por_keyword = []
-
     for key, val in respuestas_json.items():
         if val is None or not isinstance(val, str):
             continue
 
         val_strip = val.strip()
-        if len(val_strip) < 10:  # Descartar respuestas muy cortas
+        if len(val_strip) < 5:
             continue
 
         key_lower = key.lower()
 
-        # Buscar si la pregunta (key) contiene algún keyword de preguntas abiertas
-        for kw in _KEYWORDS_PREGUNTAS_ABIERTAS:
-            if kw in key_lower:
-                textos_por_keyword.append(val_strip)
-                break
+        # Descartar preguntas que son de opción múltiple cerrada conocida
+        if any(exc in key_lower for exc in _EXCLUDE_PATTERNS):
+            continue
 
-        # Heurística: valores largos probablemente son texto libre
-        if len(val_strip) >= 30:
+        # Extraer si coincide con preguntas abiertas reconocidas
+        if any(pat in key_lower for pat in _OPEN_PATTERNS):
             textos.append(val_strip)
 
-    # Preferir textos filtrados por keyword; si no hay, usar la heurística
-    return textos_por_keyword if textos_por_keyword else textos
+    return textos
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Endpoint principal
+# Endpoints de IA
 # ─────────────────────────────────────────────────────────────────────────────
 @router.get("/habilidades-demandadas", response_model=HabilidadesDemandadasResponse)
 def get_habilidades_demandadas(
@@ -141,19 +158,6 @@ def get_habilidades_demandadas(
     """
     Analiza las respuestas abiertas de las encuestas de egresados y extrae
     las habilidades blandas y duras más demandadas por el mercado laboral.
-
-    **Pipeline:**
-    1. Consulta las mediciones (opcionalmente filtradas por momento y/o año)
-    2. Extrae los textos libres del campo JSON de respuestas
-    3. Preprocesa con spaCy (lematización, remoción de stopwords, preservación de PROPN)
-    4. Hace matching contra el diccionario de habilidades (longest match first, sin doble conteo)
-    5. Aplica TF-IDF (ngram_range=(1,2)) sobre el texto residual para descubrir habilidades emergentes
-    6. Devuelve el resultado agregado con conteos y scores
-
-    **Filtros opcionales:**
-    - `momento`: 0 (grado), 1 (un año), 5 (cinco años)
-    - `anio`: año de aplicación de la encuesta
-    - `top_emergentes`: cantidad de candidatas TF-IDF a devolver (default 15)
     """
     # 1. Consultar mediciones con filtros opcionales
     query = db.query(Medicion)
@@ -164,7 +168,7 @@ def get_habilidades_demandadas(
 
     mediciones = query.all()
 
-    # 2. Extraer textos libres del JSON de cada medición
+    # 2. Extraer textos libres de las preguntas abiertas de cada medición
     todos_los_textos: List[str] = []
     for m in mediciones:
         textos_extraidos = _extraer_textos_libres(m.respuestas)
@@ -195,16 +199,16 @@ def get_habilidades_demandadas(
 def get_reglas_asociacion(
     momento: Optional[int] = Query(None, description="Filtrar por momento de encuesta (0, 1 o 5)"),
     anio: Optional[int] = Query(None, description="Filtrar por año de carga"),
-    min_soporte: float = Query(0.05, ge=0.001, le=1.0, description="Soporte mínimo para apriori (default 0.05)"),
-    min_confianza: float = Query(0.5, ge=0.01, le=1.0, description="Confianza mínima para las reglas (default 0.5)"),
-    min_ocurrencias: int = Query(3, ge=1, description="Ocurrencias mínimas absolutas de egresados para respaldar la regla (default 3)"),
+    min_soporte: float = Query(0.01, ge=0.001, le=1.0, description="Soporte mínimo para apriori (default 0.01)"),
+    min_confianza: float = Query(0.4, ge=0.01, le=1.0, description="Confianza mínima para las reglas (default 0.4)"),
+    min_ocurrencias: int = Query(2, ge=1, description="Ocurrencias mínimas absolutas de egresados para respaldar la regla (default 2)"),
     top_reglas: int = Query(20, ge=1, le=100, description="Cantidad máxima de reglas a devolver (default 20)"),
     db: Session = Depends(get_db),
 ):
     """
     Calcula reglas de asociación (Market Basket Analysis) sobre las habilidades demandadas.
-    Aplica Apriori con max_len=2 (reglas 1 a 1: 'si menciona X, también menciona Y') y
-    filtra por ocurrencias mínimas absolutas para evitar reglas basadas en datos insuficientes.
+    Construye la 'canasta' consolidada por cada egresado (unificando todas las preguntas
+    abiertas que respondió) y aplica Apriori con max_len=2 para pares 1 a 1.
     """
     # 1. Consultar mediciones con filtros opcionales
     query = db.query(Medicion)
@@ -215,13 +219,16 @@ def get_reglas_asociacion(
 
     mediciones = query.all()
 
-    # 2. Extraer textos libres del JSON de cada medición
-    todos_los_textos: List[str] = []
+    # 2. Construir transacciones por egresado / medición (Canasta unificada de MBA)
+    transacciones: List[Set[str]] = []
     for m in mediciones:
-        textos_extraidos = _extraer_textos_libres(m.respuestas)
-        todos_los_textos.extend(textos_extraidos)
+        textos_m = _extraer_textos_libres(m.respuestas)
+        habs_egresado: Set[str] = set()
+        for t in textos_m:
+            habs_egresado.update(extraer_habilidades_por_respuesta(t))
+        transacciones.append(habs_egresado)
 
-    if not todos_los_textos:
+    if not transacciones:
         return ReglasAsociacionResponse(
             total_respuestas=0,
             transacciones_validas=0,
@@ -230,9 +237,9 @@ def get_reglas_asociacion(
             reglas=[],
         )
 
-    # 3. Calcular reglas de asociación con mlxtend
+    # 3. Calcular reglas de asociación con mlxtend a nivel de egresado
     resultado = generar_reglas_asociacion(
-        textos_respuestas=todos_los_textos,
+        transacciones=transacciones,
         min_soporte=min_soporte,
         min_confianza=min_confianza,
         min_ocurrencias=min_ocurrencias,

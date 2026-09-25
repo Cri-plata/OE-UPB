@@ -199,8 +199,8 @@
             <p>
               Con el filtro de <strong>&ge; {{ filtroMinOcurrencias }} egresados</strong> y <strong>{{ (filtroMinConfianza * 100) }}% de confianza</strong> no hay combinaciones que califiquen.
             </p>
-            <button class="action-btn" (click)="filtroMinOcurrencias = 2; filtroMinConfianza = 0.5; aplicarFiltros()">
-              Ajustar a &ge; 2 egresados y 50% de confianza
+            <button class="action-btn" (click)="filtroMinOcurrencias = 1; filtroMinConfianza = 0.4; aplicarFiltros()">
+              Explorar combinaciones con &ge; 1 egresado
             </button>
           </div>
         </div>
