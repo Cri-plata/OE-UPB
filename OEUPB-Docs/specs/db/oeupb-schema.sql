@@ -30,7 +30,8 @@ CREATE TABLE usuarios (
     UNIQUE KEY uq_usuarios_correo (correo),
     KEY ix_usuarios_id (id),
     KEY ix_usuarios_correo (correo),
-    CONSTRAINT fk_usuarios_sede FOREIGN KEY (sede_id) REFERENCES sedes (id)
+    CONSTRAINT fk_usuarios_sede FOREIGN KEY (sede_id) REFERENCES sedes (id),
+    CONSTRAINT ck_usuarios_sede_por_rol CHECK (rol = 'Admin_CTIC' OR sede_id IS NOT NULL)
 );
 
 CREATE TABLE auditoria_cuentas (

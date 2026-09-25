@@ -1,7 +1,7 @@
 # Hallazgos del Explorador y publicación de gráficas
 
 **Fecha del reporte:** 2026-09-25  
-**Estado:** pendiente de corrección y verificación técnica.  
+**Estado:** H-EXP-01 corregido (EXP-02). H-PUB-01 y H-PUB-02 corregidos con pruebas el 2026-09-25 y pendientes de validación manual (causa: aplicación zoneless con estado fuera de signals). H-EXP-02 pendiente (EXP-03).  
 **Origen:** validación manual de usuario en entorno local.
 
 Este documento registra el comportamiento observado sin asumir todavía su causa técnica. Los ítems ejecutables viven en el backlog activo.

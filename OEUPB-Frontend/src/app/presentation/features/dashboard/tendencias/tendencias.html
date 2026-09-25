@@ -14,6 +14,9 @@
 
     <div class="dashboard-container">
       
+      <app-filtros-analiticos (aplicar)="aplicarFiltros($event)"></app-filtros-analiticos>
+      <p class="publish-error" role="alert" *ngIf="errorCarga">{{ errorCarga }}</p>
+
       <!-- Panel de Control -->
       <div class="control-panel">
         <div class="control-group">
@@ -35,10 +38,17 @@
 
       <div class="chart-card">
         <button (click)="exportarGrafica()">Exportar PNG</button>
+        <p class="publish-error" role="alert" *ngIf="publicacion.errorCarga()">{{ publicacion.errorCarga() }}</p>
         <div class="publication-header">
           <h2>Evolución Histórica: {{ currentIndicatorName }}</h2>
-          <button *ngIf="!publicaciones[graficaKey]" class="publish-btn" [disabled]="publicando || !isChartReady" (click)="publicar()">Publicar</button>
-          <button *ngIf="publicaciones[graficaKey]" class="withdraw-btn" [disabled]="publicando" (click)="retirar()">Retirar publicación</button>
+          <ng-container *ngIf="publicacion.estaPublicada(graficaKey); else accionPublicar">
+            <span class="publication-status">Publicada v{{ publicacion.publicacion(graficaKey)?.version }}</span>
+            <button class="withdraw-btn" [disabled]="publicacion.ocupado()" (click)="retirar()">{{ publicacion.procesando(graficaKey) ? 'Retirando…' : 'Retirar publicación' }}</button>
+          </ng-container>
+          <ng-template #accionPublicar>
+            <button class="publish-btn" [disabled]="publicacion.ocupado() || !isChartReady" (click)="publicar()">{{ publicacion.procesando(graficaKey) ? 'Publicando…' : (publicacion.error(graficaKey) ? 'Reintentar publicación' : 'Publicar') }}</button>
+          </ng-template>
+          <p class="publish-error" role="alert" *ngIf="publicacion.error(graficaKey)">{{ publicacion.error(graficaKey) }}</p>
         </div>
         <div id="grafica-tendencias" class="chart-wrapper line-chart" *ngIf="isChartReady">
           <canvas baseChart
@@ -47,10 +57,50 @@
             [options]="lineChartOptions">
           </canvas>
         </div>
-        <div class="loading-state" *ngIf="!isChartReady">
+        <div class="loading-state" *ngIf="!isChartReady && !errorCarga">
           Calculando tendencias históricas en la base de datos...
         </div>
       </div>
+
+      <section class="chart-card comparacion" aria-labelledby="titulo-comparacion">
+        <h2 id="titulo-comparacion">Comparación entre momentos (mismos egresados)</h2>
+        <div class="control-panel">
+          <div class="control-group">
+            <label for="momento-inicial">Momento inicial</label>
+            <select id="momento-inicial" class="custom-select" [value]="momentoInicial()" (change)="cambiarComparacion('inicial', $any($event.target).value)">
+              <option value="0">Momento 0</option><option value="1">Momento 1</option><option value="5">Momento 5</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label for="momento-final">Momento a comparar</label>
+            <select id="momento-final" class="custom-select" [value]="momentoFinal()" (change)="cambiarComparacion('final', $any($event.target).value)">
+              <option value="0">Momento 0</option><option value="1">Momento 1</option><option value="5">Momento 5</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label for="indicador-comparacion">Indicador</label>
+            <select id="indicador-comparacion" class="custom-select" [value]="indicadorComparacion()" (change)="cambiarComparacion('indicador', $any($event.target).value)">
+              <option value="empleabilidad">Tasa de empleabilidad (%)</option>
+              <option value="salario">Promedio salarial (SMLV)</option>
+            </select>
+          </div>
+        </div>
+
+        @if (cargandoComparacion()) {
+          <p class="loading-state" role="status">Emparejando egresados…</p>
+        } @else if (errorComparacion()) {
+          <p class="publish-error" role="alert">{{ errorComparacion() }}</p>
+        } @else if (programasComparables().length === 0) {
+          <p class="empty-state">Datos insuficientes para la comparación seleccionada. Se requieren al menos {{ comparacion()?.minimo_pares }} egresados de la misma cohorte con respuesta en ambos momentos.</p>
+        } @else {
+          <div id="grafica-comparacion" class="chart-wrapper line-chart">
+            <canvas baseChart [data]="comparacionChartData()" type="bar" [options]="comparacionChartOptions"></canvas>
+          </div>
+        }
+        @if (programasInsuficientes().length) {
+          <p class="nota">Sin pares suficientes: {{ programasInsuficientes().map(p => p.programa + ' (' + p.pares + ')').join(', ') }}.</p>
+        }
+      </section>
     </div>
   </main>
 </div>

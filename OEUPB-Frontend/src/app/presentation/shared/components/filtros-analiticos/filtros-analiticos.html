@@ -1,0 +1,47 @@
+<section class="filtros" aria-label="Filtros analíticos">
+  <details class="filtro">
+    <summary>Programa académico <span class="contador">{{ programas().length || 'Todos' }}</span></summary>
+    <div class="opciones">
+      @for (programa of programasDisponibles(); track programa) {
+        <label>
+          <input type="checkbox" [checked]="programas().includes(programa)" (change)="alternarPrograma(programa, $any($event.target).checked)">
+          {{ programa }}
+        </label>
+      } @empty {
+        <span class="vacio">Sin programas con datos</span>
+      }
+    </div>
+  </details>
+
+  <details class="filtro">
+    <summary>Cohorte (año de grado) <span class="contador">{{ anios().length || 'Todas' }}</span></summary>
+    <div class="opciones">
+      @for (anio of aniosDisponibles(); track anio) {
+        <label>
+          <input type="checkbox" [checked]="anios().includes(anio)" (change)="alternarAnio(anio, $any($event.target).checked)">
+          {{ anio }}
+        </label>
+      } @empty {
+        <span class="vacio">Sin cohortes con datos</span>
+      }
+    </div>
+  </details>
+
+  @if (conMomento()) {
+    <label class="momento">
+      Momento
+      <select [value]="momento() ?? ''" (change)="cambiarMomento($any($event.target).value)">
+        <option value="">Todos</option>
+        <option value="0">Momento 0</option>
+        <option value="1">Momento 1</option>
+        <option value="5">Momento 5</option>
+      </select>
+    </label>
+  }
+
+  <button type="button" class="aplicar" (click)="emitir()">Aplicar filtros</button>
+  <button type="button" class="limpiar" [disabled]="activos() === 0" (click)="limpiar()">Limpiar filtros</button>
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+</section>

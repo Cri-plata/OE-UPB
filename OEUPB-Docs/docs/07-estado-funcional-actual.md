@@ -1,8 +1,8 @@
 # Estado funcional actual de OE UPB
 
-**Fecha de corte:** 2026-09-24  
+**Fecha de corte:** 2026-09-25  
 **Estado:** referencia funcional verificada contra código, pruebas y migraciones  
-**Versión de base de datos esperada:** `g4c82a9d1e30 (head)`
+**Versión de base de datos esperada:** `i6e04c1f3a52 (head)`
 
 ## 1. Propósito del proyecto
 
@@ -63,14 +63,15 @@ El coordinador debería poder cargar archivos `.xlsx` indicando momento y año d
 
 Durante la carga el backend:
 
-1. valida el tipo y el contenido del archivo;
+1. valida el tipo, el tamaño (25 MB como máximo) y el contenido del archivo (50.000 filas como máximo);
+1. normaliza el documento (ADR-017); un documento inválido rechaza el archivo con 422 y el detalle por fila;
 2. procesa las filas con Pandas;
 3. resuelve dobles titulaciones conservando el registro con fecha de grado más reciente dentro de la carga;
-4. guarda egresados y mediciones en una transacción;
+4. guarda egresados y mediciones en una transacción; un documento existente no pierde nombre, apellido ni programa, y un egresado con corrección manual auditada conserva todos sus datos personales (ADR-014);
 5. registra archivo, huella SHA-256, actor, sede, momento, cohorte, versión, estado y cantidad de registros;
-6. reemplaza transaccionalmente la versión vigente cuando se vuelve a cargar el mismo alcance.
+6. reemplaza transaccionalmente la versión vigente cuando se vuelve a cargar el mismo alcance, serializa las cargas de la sede y rechaza con 409 un archivo idéntico a la versión vigente.
 
-El historial solo debe mostrar las cargas de la sede autenticada. La eliminación se realiza por identificador de carga, exige un motivo y conserva un evento de auditoría aun después de eliminar físicamente la carga.
+El historial solo debe mostrar las cargas de la sede autenticada. La eliminación se realiza por identificador de carga, solo aplica a la versión vigente, exige un motivo y conserva un evento de auditoría aun después de eliminar físicamente la carga. La versión reemplazada no se reactiva, y los egresados del directorio manual se conservan.
 
 ## 6. Directorio y perfil del egresado
 
@@ -95,21 +96,28 @@ Un registro manual pertenece al directorio de la sede que lo creó y no debe apa
 
 Debería presentar, con datos de la sede autenticada:
 
-- total de egresados;
-- tasa descriptiva de empleabilidad;
-- promedio salarial cuando existan respuestas utilizables;
+- total de egresados y de encuestas;
+- tasa de empleabilidad y distribución en empleado, independiente, estudiante y sin empleo (ADR-016);
+- tasa de empleo formal e informal (solo en los cuestionarios de seguimiento);
+- promedio y rango salarial (mínimo, mediana y máximo en SMLV);
 - distribución por programa;
 - indicadores disponibles de satisfacción.
 
+Los filtros de selección múltiple de programa y cohorte, y el filtro de momento, se aplican a todas las tarjetas y gráficas. Las publicaciones conservan los filtros.
+
 ### Tendencias
 
-Debería comparar los momentos 0, 1 y 5 para los programas con mayor cantidad de datos. Permite alternar indicadores como empleabilidad, salario y satisfacción.
+Debería comparar los momentos 0, 1 y 5 para los programas con mayor cantidad de datos. Permite alternar indicadores como empleabilidad, salario y satisfacción, y filtrar por programas y cohortes.
+
+La sección de comparación contrasta dos momentos sobre los mismos egresados de la misma cohorte. Solo muestra los programas con al menos 5 pares y lista los que no alcanzan ese mínimo.
 
 ### Explorador de datos
 
 Debería permitir seleccionar una pregunta y filtrar por momento, programa y año. El resultado se presenta como conteos agregados para Chart.js.
 
-**Desviaciones reportadas el 2026-09-25:** el selector incluye identificadores, datos personales y metadatos administrativos que RN-31 prohíbe; además, solo mantiene una gráfica y no permite comparar varias visualizaciones simultáneamente. Estas correcciones corresponden a EXP-02 y EXP-03.
+El backend solo ofrece y acepta variables del catálogo analítico RN-31; documentos, nombres, correos, teléfonos, fechas, identificadores y códigos administrativos se excluyen y se rechazan con 422 (EXP-02, cerrado el 2026-09-25).
+
+Permite crear varias gráficas en la misma pantalla (`Crear otra gráfica`). Cada una conserva su variable, filtros, tipo, carga, errores y publicación, y puede quitarse sin afectar a las demás.
 
 Cuando existen varios intentos identificados para una persona y alcance, los indicadores actuales usan el intento más reciente. Las mediciones anónimas permitidas se conservan en los agregados.
 
@@ -125,13 +133,23 @@ Cada publicación conserva:
 - programas incluidos;
 - permiso requerido;
 - definición de visualización;
-- etiquetas y métricas numéricas;
+- etiquetas y métricas numéricas recalculadas por el backend;
 - versión, estado y fechas;
-- aprobación explícita de privacidad.
+- confirmación explícita de privacidad del coordinador propietario.
+
+El frontend envía solo la definición de la gráfica. El backend recalcula las métricas con los datos de la sede autenticada, deriva los programas de audiencia y agrupa u omite las celdas con menos de 5 observaciones; si no queda ninguna, rechaza la publicación con 422 (ADR-015). Por eso la gráfica publicada puede diferir de la privada.
 
 La publicación nunca debe contener documentos, nombres, correos, respuestas abiertas ni archivos fuente. Los coordinadores pueden consultar las publicaciones vigentes y los usuarios de consulta solo reciben aquellas compatibles con sus permisos y programas. Una actualización crea una versión nueva y conserva la anterior como reemplazada.
 
-**Desviaciones reportadas el 2026-09-25:** la acción de publicar puede quedar cargando aun cuando el backend haya cambiado el estado, y la vista de publicaciones puede permanecer cargando sin resolver datos, vacío o error. PUB-01 y PUB-02 registran la corrección y sus pruebas de regresión.
+**Corrección del 2026-09-25 (PUB-01/PUB-02), pendiente de validación manual:** publicar y retirar terminan siempre en éxito o error, el botón muestra `Publicando…`/`Retirando…`, no admite doble envío y, tras un error, ofrece `Reintentar publicación` con el motivo del backend (por ejemplo, datos insuficientes para el umbral). La vista de publicaciones resuelve datos, vacío o error con `Reintentar` y ofrece `Actualizar`.
+
+Validación manual sugerida:
+
+1. Como coordinador, publicar una gráfica: el botón cambia a `Publicando…` y luego muestra `Publicada vN` y `Retirar publicación` sin otra interacción.
+2. Publicar un filtro con pocos datos: aparece el mensaje de datos insuficientes y el botón `Reintentar publicación`.
+3. Detener el backend y publicar: aparece el mensaje de conexión y la acción puede reintentarse.
+4. Como usuario de consulta autorizado, abrir `Gráficas publicadas`: aparece la gráfica. Con un usuario sin permiso o programa aparece el estado vacío.
+5. Retirar la publicación y pulsar `Actualizar` como usuario de consulta: la gráfica deja de aparecer.
 
 ## 9. Analítica de textos y alertas
 
@@ -143,7 +161,7 @@ El flujo implementado:
 2. anonimiza correos, números que puedan identificar a una persona y datos conocidos del egresado;
 3. clasifica localmente menciones de comunicación, liderazgo, trabajo en equipo, tecnología y datos, idiomas, gestión de proyectos y adaptabilidad;
 4. muestra únicamente conteos agregados;
-5. genera alertas descriptivas cuando un programa tiene al menos tres respuestas válidas y empleabilidad inferior al 70 %, o cuando se repiten al menos tres expresiones negativas de inserción laboral.
+5. genera alertas descriptivas por programa y momento de seguimiento (M1/M5): con al menos 5 respuestas clasificadas, empleabilidad por debajo del 70 % (severidad media) o del 50 % (alta), según la taxonomía de ADR-016; y alertas de texto cuando, entre al menos 5 textos, se repiten 3 o más expresiones negativas.
 
 Este procesamiento no envía texto a servicios externos y no devuelve las respuestas originales. Las alertas no son predicciones ni decisiones automáticas.
 
@@ -156,7 +174,7 @@ El repositorio contiene:
 - Nginx con redirección a HTTPS y HSTS;
 - CORS configurable mediante `CORS_ALLOWED_ORIGINS`;
 - endpoints `/api/health/live` y `/api/health/ready`;
-- identificador de petición, estado y duración en logs, sin registrar cuerpos ni datos personales;
+- identificador de petición, estado y duración en logs, sin registrar cuerpos ni datos personales; el documento se enmascara en las rutas del directorio y la imagen desactiva el access log de Uvicorn;
 - respaldo lógico mediante `backup_database.py`;
 - restauración con confirmación explícita mediante `restore_database.py`;
 - procedimiento de despliegue y rollback documentado.
@@ -165,15 +183,15 @@ La infraestructura Docker no se ejecutó en el equipo de desarrollo porque Docke
 
 ## 11. Verificación disponible
 
-La última revisión aprobó:
+La última revisión (2026-09-25) aprobó:
 
-- 26 pruebas de backend;
-- 15 pruebas de frontend;
+- 59 pruebas de backend;
+- 31 pruebas de frontend;
 - compilación productiva de Angular;
 - sincronización entre FastAPI, OpenAPI y tipos TypeScript;
 - validación de capas frontend, guards y tokens visuales;
 - validación de enlaces y documentación;
-- migración local aplicada hasta `g4c82a9d1e30`.
+- migraciones hasta `i6e04c1f3a52`; la base local debe actualizarse con `alembic upgrade head` (DB-03 y ETL-01).
 
 La compilación Angular mantiene advertencias no bloqueantes por tamaño del paquete inicial y del SCSS de carga de datos.
 

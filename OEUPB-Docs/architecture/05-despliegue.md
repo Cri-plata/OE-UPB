@@ -2,7 +2,7 @@
 
 **Estado:** objetivo; no verificado como desplegado en producción
 
-**Fecha:** 2026-09-24
+**Fecha:** 2026-09-25
 
 ## Topología propuesta
 
@@ -27,7 +27,7 @@ Nginx / proxy institucional
 - Usuario MySQL con mínimo privilegio.
 - Migraciones ejecutadas como paso explícito y reversible.
 - Backups y restauración probados.
-- Logs sin documentos, correos, respuestas abiertas ni tokens completos.
+- Logs sin documentos, correos, respuestas abiertas ni tokens completos. El backend enmascara el documento en las rutas del directorio y la imagen desactiva el access log de Uvicorn; el proxy debe registrar la ruta sin query string o enmascarar `/api/directorio/*` y el parámetro `q`.
 - Health checks, métricas y procedimiento de rollback.
 
 ## Estado actual

@@ -3,6 +3,34 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Cambiado (2026-09-25, P3)
+- **Contrato de errores (API-02):** esquema `ErrorResponse` con 401/403 en toda ruta protegida y códigos propios por endpoint; `DELETE /api/usuarios/{id}` queda marcado como obsoleto; patrón de correo institucional en el contrato.
+- **Programas (PRG-01):** la audiencia de publicaciones y las asignaciones comparan por clave normalizada; los programas sin datos actuales se conservan y se muestran en la administración de cuentas.
+- **Alertas (ANA-02):** por programa y momento de seguimiento, con la taxonomía laboral, muestra mínima de 5 y severidad enumerada.
+- **Formulario de cuentas:** acepta documentos alfanuméricos según ADR-017.
+
+### Añadido (2026-09-25, P2)
+- **Dashboard analítico (ANA-01):** taxonomía laboral de cuatro estados, tasa formal/informal, rango salarial y gráfica publicable de estado laboral; filtros de selección múltiple de programa y cohorte en Reporte General y Tendencias; comparación de momentos con los mismos egresados y un mínimo de 5 pares.
+- **Explorador (EXP-03):** varias gráficas simultáneas e independientes.
+- **Datos (DB-03, ETL-01):** restricción de sede por rol en la base; normalización del documento de identidad en cargas, directorio y cuentas; límites de 25 MB y 50.000 filas; rechazo de cargas con 422 y detalle por fila. Migraciones `h5d93b0e2f41` e `i6e04c1f3a52`.
+
+### Corregido (2026-09-25, P2)
+- **Salario del momento 0:** la pregunta de ingreso en "SMMLV" se ignoraba y los rangos se tomaban por su límite inferior.
+- **Tendencias:** el componente no declaraba el proveedor `PublicacionControl` y fallaba al abrirse.
+- **Ficha del egresado:** muestra el estado laboral y el ingreso reales en lugar de "No informa".
+- **Catálogo RN-31:** excluye además `USUARIO` y las columnas `Unnamed`.
+
+### Cambiado (2026-09-25)
+- **Publicaciones recalculadas en backend:** `POST /api/publicaciones` ignora métricas y programas del cliente, los recalcula con los datos de la sede del JWT y agrupa u omite las celdas con menos de 5 observaciones (ADR-015). El reporte general exige `definicion.indicador`.
+- **Catálogo analítico del Explorador (RN-31):** documentos, nombres, correos, teléfonos, fechas, identificadores y códigos administrativos ya no se ofrecen ni se aceptan (422).
+- **Cargas:** serialización por sede, 409 ante un archivo idéntico a la versión vigente, rango de año 1900-2200 y protección de egresados con corrección manual auditada (ADR-014).
+- **Retiro de publicaciones:** otro coordinador de la sede puede retirar la publicación si el propietario está inactivo o fue reasignado.
+
+### Corregido (2026-09-25)
+- **Publicación de gráficas (PUB-01/PUB-02):** publicar, retirar y consultar el catálogo ya no quedan cargando. La aplicación es zoneless y el estado pasó a signals mediante `PublicacionControl`; se bloquean envíos duplicados y los errores HTTP o de red se muestran con reintento. Se agregaron 8 pruebas de frontend y 1 de backend.
+- **Eliminación de cargas:** ya no borra los egresados del directorio manual de ninguna sede. Antes, en MySQL, cualquier eliminación fallaba mientras existiera un registro manual.
+- **Privacidad en logs:** el documento de identidad se enmascara en las rutas del directorio y la imagen Docker desactiva el access log de Uvicorn.
+
 ### Añadido (2026-09-24)
 - **Higiene del repositorio:** se retiraron 73 scripts históricos ad hoc, se organizó un generador Excel reproducible y se cerraron la trazabilidad RF y las decisiones documentales pendientes.
 - **Autenticación endurecida:** secreto obligatorio y robusto fuera de desarrollo, credenciales temporales con expiración, recuperación RBAC auditada y modo inicial aleatorio obligatorio en producción.

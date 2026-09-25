@@ -2,6 +2,39 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-09-25] - P3 Calidad de contrato y documentación
+
+* **Modelo:** el diagrama ER coincide con el esquema SQL (auditorías, eventos de eliminación y columnas de publicaciones).
+* **Requisitos:** prioridad propuesta para los 81 RF/RNF, `Requerimiento Ligado` corregidos y criterios verificables propuestos para RNF-01 a RNF-06 (validación pendiente en PRD-01).
+* **Reglas:** RN-29 define la clave normalizada de programas y el tratamiento de programas sin datos actuales.
+* **Contratos:** 03-contratos documenta `ErrorResponse`, los códigos por endpoint y las operaciones obsoletas.
+* **Backlog:** API-02, PRG-01, ANA-02 y DOC-03 se archivaron; se agregó PRD-01.
+
+## [2026-09-25] - P2 Analítica y contratos
+
+* **ADR-016:** mapeo de los cuestionarios OLE a la taxonomía laboral, la formalidad, el salario y la comparación de momentos.
+* **ADR-017:** normalización del documento de identidad, límites de carga y rechazo con detalle por fila.
+* **Requisitos:** RF-21, RF-22, RF-23, RF-25, RF-26 y RF-61 pasan a Implementado. RN-01, RN-16, RN-26 y RN-31, HU-07 y CU-05 a CU-07 se actualizaron.
+* **Backlog:** EXP-03, ANA-01, DB-03 y ETL-01 se archivaron; se agregó ANA-03 y se amplió ANA-02.
+
+## [2026-09-25] - Actualización de verificación
+
+* **Pruebas:** la estrategia y el estado funcional reflejan 38 pruebas de backend y 23 de frontend, los casos de privacidad de publicación y la convención de pruebas zoneless.
+* **Estado:** se actualizaron CU-12, la fecha de corte funcional y las fechas de verificación del modelo de datos y del despliegue.
+
+## [2026-09-25] - Corrección del flujo de publicación
+
+* **PUB-01/PUB-02:** se documentó la causa (detección de cambios zoneless con estado fuera de signals), la corrección, las pruebas y la lista de validación manual. RF-35 sigue Parcial hasta esa validación.
+* **Arquitectura frontend:** se registró la convención de usar signals para el estado asíncrono.
+
+## [2026-09-25] - Auditoría de requerimientos 05
+
+* **Auditoría:** se ejecutó `audits/auditoria_requerimientos.md` (20 contradicciones y 21 casos de borde) y se verificó cada hallazgo contra código y ADR en `audits/05-auditoria-requerimientos.md`.
+* **Decisiones:** ADR-014 saca del alcance la custodia institucional y las encuestas manuales y fija la precedencia de cargas. ADR-015 exige recálculo en backend, umbral k = 5 y autoaprobación explícita de las publicaciones.
+* **Requisitos:** se alinearon RN-01, 07, 09, 12-15, 18, 22-24, 26, 28 y 31, HU-01, 05-09 y 11-13, y CU-02 a CU-12 con RN-24, ADR-013, ADR-014 y ADR-015. RF-21, RF-22 y RF-26 pasan a Parcial.
+* **Arquitectura y operación:** se completaron inventarios de routers y rutas, frontera de publicación, invariantes del modelo y enmascaramiento de logs.
+* **Backlog:** EXP-02 archivado; nuevos ítems ANA-01, DB-03, ETL-01, API-02, PRG-01, ANA-02 y DOC-03.
+
 ## [2026-09-25] - Hallazgos de Explorador y publicaciones
 
 * **Privacidad:** se documentó la exclusión obligatoria de PII y metadatos del catálogo graficable mediante RN-31 y EXP-02.

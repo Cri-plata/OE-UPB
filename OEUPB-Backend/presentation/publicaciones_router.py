@@ -6,11 +6,14 @@ from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.orm import Session
 
 from application.auth_service import get_current_user, require_roles
-from domain.models import Egresado, Medicion, PublicacionGrafica, Sede
+from presentation.errores import RESPUESTAS_PROTEGIDAS, ErrorResponse, errores
+from application.indicadores import construir_publicacion
+from application.programas import claves_programas
+from domain.models import PublicacionGrafica, Sede, Usuario
 from infrastructure.database import get_db
 
 
-router = APIRouter(prefix="/api/publicaciones", tags=["Publicaciones"])
+router = APIRouter(prefix="/api/publicaciones", tags=["Publicaciones"], responses=RESPUESTAS_PROTEGIDAS)
 
 PERMISOS_POR_ORIGEN = {
     "reporte_general": "ver_reporte_general",
@@ -27,6 +30,8 @@ class DefinicionGrafica(BaseModel):
     momento: Literal[0, 1, 5] | None = None
     programa: str | None = Field(default=None, max_length=150)
     anio: int | None = Field(default=None, ge=1900, le=2200)
+    programas: list[str] | None = Field(default=None, max_length=100, description="Filtro multiselección de Reporte General y Tendencias")
+    anios: list[int] | None = Field(default=None, max_length=100, description="Filtro multiselección de cohortes")
 
 
 class DatasetGrafica(BaseModel):
@@ -50,12 +55,18 @@ class MetricasGrafica(BaseModel):
 
 
 class PublicacionCreate(BaseModel):
+    """Solicitud de publicación.
+
+    El cliente solo describe qué gráfica publicar. Las métricas y los programas de
+    audiencia los recalcula el backend con los datos de la sede del JWT; cualquier
+    campo adicional enviado por el cliente se ignora.
+    """
     grafica_key: str = Field(pattern=r"^[a-z0-9_\-]+$", min_length=3, max_length=100)
     titulo: str = Field(min_length=3, max_length=180)
-    programas: list[str] = Field(min_length=1, max_length=100)
     definicion: DefinicionGrafica
-    metricas: MetricasGrafica
-    aprobada_privacidad: Literal[True]
+    aprobada_privacidad: Literal[True] = Field(
+        description="Confirmación explícita del coordinador propietario de que revisó la privacidad de la gráfica"
+    )
 
 
 class PublicacionResponse(BaseModel):
@@ -98,18 +109,15 @@ def _serializar(publicacion: PublicacionGrafica, sede_nombre: str) -> dict:
     }
 
 
-def _programas_de_sede(db: Session, sede_id: int) -> set[str]:
-    filas = (
-        db.query(Egresado.programa)
-        .join(Medicion, Medicion.egresado_documento == Egresado.numero_documento)
-        .filter(Medicion.sede_id == sede_id, Egresado.programa.isnot(None))
-        .distinct()
-        .all()
-    )
-    return {programa for (programa,) in filas if programa}
-
-
-@router.post("/", response_model=PublicacionResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=PublicacionResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        **errores(403, d403="El actor no es coordinador o no tiene sede"),
+        422: {"model": ErrorResponse, "description": "Definición no publicable o sin celdas que superen el umbral mínimo de privacidad"},
+    },
+)
 def publicar_grafica(
     payload: PublicacionCreate,
     db: Session = Depends(get_db),
@@ -118,13 +126,11 @@ def publicar_grafica(
     sede_id = current_user.get("sede_id")
     if not sede_id:
         raise HTTPException(status_code=403, detail="El coordinador no tiene una sede asignada")
-    programas = list(dict.fromkeys(programa.strip() for programa in payload.programas if programa.strip()))
-    invalidos = set(programas) - _programas_de_sede(db, sede_id)
-    if not programas or invalidos:
-        raise HTTPException(
-            status_code=422,
-            detail=f"Programas fuera del alcance de la sede: {', '.join(sorted(invalidos))}",
-        )
+    definicion = payload.definicion.model_dump(exclude_none=True)
+    try:
+        metricas, programas = construir_publicacion(db, sede_id, definicion)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     anteriores = (
         db.query(PublicacionGrafica)
@@ -150,8 +156,8 @@ def publicar_grafica(
         coordinador_correo=current_user["correo"],
         programas=programas,
         permiso_requerido=PERMISOS_POR_ORIGEN[payload.definicion.origen],
-        definicion=payload.definicion.model_dump(exclude_none=True),
-        metricas=payload.metricas.model_dump(exclude_none=True),
+        definicion=definicion,
+        metricas=MetricasGrafica.model_validate(metricas).model_dump(exclude_none=True),
         version=(anteriores[0].version + 1) if anteriores else 1,
         aprobada_privacidad=True,
         estado="publicada",
@@ -165,7 +171,7 @@ def publicar_grafica(
     return _serializar(publicacion, sede.nombre)
 
 
-@router.delete("/{publicacion_id}", response_model=PublicacionResponse)
+@router.delete("/{publicacion_id}", response_model=PublicacionResponse, responses=errores(404, 409, d409="La publicación ya no está activa"))
 def retirar_publicacion(
     publicacion_id: int,
     db: Session = Depends(get_db),
@@ -174,8 +180,13 @@ def retirar_publicacion(
     publicacion = db.query(PublicacionGrafica).filter(PublicacionGrafica.id == publicacion_id).first()
     if publicacion is None:
         raise HTTPException(status_code=404, detail="Publicación no encontrada")
-    if publicacion.sede_id != current_user.get("sede_id") or publicacion.coordinador_id != current_user.get("usuario_id"):
+    if publicacion.sede_id != current_user.get("sede_id"):
         raise HTTPException(status_code=403, detail="Solo el coordinador propietario puede retirar esta publicación")
+    if publicacion.coordinador_id != current_user.get("usuario_id"):
+        propietario = db.get(Usuario, publicacion.coordinador_id)
+        propietario_vigente = propietario is not None and propietario.activo and propietario.sede_id == publicacion.sede_id
+        if propietario_vigente:
+            raise HTTPException(status_code=403, detail="Solo el coordinador propietario puede retirar esta publicación")
     if publicacion.estado != "publicada":
         raise HTTPException(status_code=409, detail="La publicación ya no está activa")
     publicacion.estado = "retirada"
@@ -224,7 +235,7 @@ def listar_publicaciones_autorizadas(
         query = query.filter(PublicacionGrafica.sede_id != current_user.get("sede_id"))
     else:
         permisos = set(current_user.get("permisos") or [])
-        programas = set(current_user.get("programas") or [])
+        programas = claves_programas(current_user.get("programas"))
         if "ver_publicaciones" not in permisos or not programas:
             return []
         query = query.filter(PublicacionGrafica.permiso_requerido.in_(permisos))
@@ -233,6 +244,6 @@ def listar_publicaciones_autorizadas(
     if rol == "Usuario_Consulta":
         filas = [
             fila for fila in filas
-            if programas.intersection(set(fila[0].programas or []))
+            if programas.intersection(claves_programas(fila[0].programas))
         ]
     return [_serializar(publicacion, sede_nombre) for publicacion, sede_nombre in filas]

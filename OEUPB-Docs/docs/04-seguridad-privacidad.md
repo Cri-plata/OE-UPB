@@ -13,7 +13,7 @@ OE UPB trata documentos de identidad, información académica, situación labora
 - Archivos de carga limitados por tipo, tamaño y estructura.
 - Consultas parametrizadas mediante ORM o parámetros SQL.
 - Anonimización antes de cualquier servicio externo de IA.
-- Logs sin tokens, documentos, correos ni respuestas completas.
+- Logs sin tokens, documentos, correos ni respuestas completas. El middleware HTTP registra `/api/directorio/perfil/{documento}` y `/api/directorio/egresados/{documento}` con el documento enmascarado, y la imagen Docker desactiva el access log de Uvicorn.
 - Backups cifrados y acceso por mínimo privilegio.
 
 ## Aislamiento por sede
@@ -32,14 +32,15 @@ Fuera de desarrollo el backend tampoco inicia sin un `SECRET_KEY` no trivial de 
 
 ## Gráficas compartidas entre sedes
 
-- Solo el coordinador propietario puede publicar o retirar una gráfica calculada con datos de su sede.
-- La publicación contiene únicamente métricas agregadas y metadatos necesarios para representar la gráfica.
+- Solo el coordinador propietario puede publicar una gráfica. Puede retirarla el propietario o, si este está inactivo o fue reasignado, otro coordinador de la sede.
+- El backend recalcula la publicación con datos de la sede del JWT; el cliente no aporta métricas ni programas.
+- Ninguna celda publicada representa menos de 5 observaciones (ADR-015), y solo se publican variables del catálogo analítico RN-31.
 - No se comparten filas, documentos, nombres, correos, respuestas individuales, archivos de carga, directorios ni perfiles.
 - La audiencia se determina en backend con los permisos y programas asignados a la cuenta; el coordinador no selecciona destinatarios manualmente.
 - Un permiso para ver gráficas compartidas nunca concede acceso a endpoints de datos fuente de otra sede.
 - Debe registrarse quién publicó o retiró la gráfica y cuándo lo hizo.
 
-Estas reglas están implementadas en `PublicacionGrafica` y `/api/publicaciones`: el payload no admite filas ni respuestas, exige aprobación explícita y el catálogo aplica permiso de módulo y coincidencia de programas en backend.
+Estas reglas están implementadas en `application/indicadores.py`, `PublicacionGrafica` y `/api/publicaciones`: el payload solo admite la definición, exige confirmación explícita y el catálogo aplica permiso de módulo y coincidencia de programas en backend. Hay pruebas para el recálculo, la supresión, las variables prohibidas y el retiro.
 
 ## Respuesta ante contradicciones
 

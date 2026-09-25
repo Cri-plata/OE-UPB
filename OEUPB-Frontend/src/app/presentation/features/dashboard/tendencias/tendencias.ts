@@ -1,18 +1,22 @@
-﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, ChangeDetectorRef, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
-import { ReportesApi } from '../../../../data/api/reportes.api';
+import { FiltrosAnaliticos, ReportesApi, SIN_FILTROS } from '../../../../data/api/reportes.api';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
-import { PublicacionesApi } from '../../../../data/api/publicaciones.api';
-import { PublicacionCreate, PublicacionResponse } from '../../../../data/api/generated-api.models';
+import { PublicacionControl } from '../../../shared/publicacion-control';
+import { ComparacionResponse, PublicacionCreate } from '../../../../data/api/generated-api.models';
+import { FiltrosAnaliticosComponent } from '../../../shared/components/filtros-analiticos/filtros-analiticos';
+import { claveConFiltros, definicionDeFiltros, descripcionFiltros } from '../../../shared/filtros-grafica';
+import { mensajeDeError } from '../../../shared/mensaje-error';
 import { CHART_PALETTE } from '../../../shared/chart-palette';
 import { exportChart } from '../../../shared/export-chart';
 
 @Component({
   selector: 'app-tendencias',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, BaseChartDirective],
+  imports: [CommonModule, SidebarComponent, BaseChartDirective, FiltrosAnaliticosComponent],
+  providers: [PublicacionControl],
   templateUrl: './tendencias.html',
   styleUrls: ['./tendencias.scss']
 })
@@ -22,8 +26,27 @@ export class TendenciasComponent implements OnInit {
   chartType: ChartType = 'line';
   currentIndicator = 'empleabilidad';
   currentIndicatorName = 'Tasa de Empleabilidad';
-  publicaciones: Record<string, PublicacionResponse> = {};
-  publicando = false;
+  readonly publicacion = inject(PublicacionControl);
+  filtros: FiltrosAnaliticos = SIN_FILTROS;
+  errorCarga = '';
+
+  // Comparación longitudinal entre dos momentos (HU-08); estado en signals.
+  readonly momentoInicial = signal(0);
+  readonly momentoFinal = signal(1);
+  readonly indicadorComparacion = signal<'empleabilidad' | 'salario'>('empleabilidad');
+  readonly comparacion = signal<ComparacionResponse | null>(null);
+  readonly cargandoComparacion = signal(false);
+  readonly errorComparacion = signal('');
+  readonly programasComparables = computed(() => (this.comparacion()?.programas ?? []).filter(p => p.suficiente));
+  readonly programasInsuficientes = computed(() => (this.comparacion()?.programas ?? []).filter(p => !p.suficiente));
+  readonly comparacionChartData = computed<ChartData<'bar', (number | null)[], string>>(() => ({
+    labels: this.programasComparables().map(p => `${p.programa} (${p.pares} pares)`),
+    datasets: [
+      { label: `Momento ${this.momentoInicial()}`, data: this.programasComparables().map(p => p.valor_inicial ?? null), backgroundColor: CHART_PALETTE[1] },
+      { label: `Momento ${this.momentoFinal()}`, data: this.programasComparables().map(p => p.valor_final ?? null), backgroundColor: CHART_PALETTE[0] },
+    ],
+  }));
+  readonly comparacionChartOptions: ChartConfiguration<'bar'>['options'] = { responsive: true, maintainAspectRatio: false };
 
   public lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -67,20 +90,54 @@ export class TendenciasComponent implements OnInit {
   
   public lineChartData: ChartData<ChartType, (number|null)[], string> = { labels: [], datasets: [] };
 
-  constructor(private reportesApi: ReportesApi, private cdr: ChangeDetectorRef, private publicacionesApi: PublicacionesApi) {}
+  constructor(private reportesApi: ReportesApi, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    this.publicacionesApi.listarPropias().subscribe(publicaciones => {
-      this.publicaciones = Object.fromEntries(publicaciones.map(publicacion => [publicacion.grafica_key, publicacion]));
-    });
+    this.publicacion.cargarPropias();
     this.loadData();
+    this.cargarComparacion();
+  }
+
+  aplicarFiltros(filtros: FiltrosAnaliticos) {
+    this.filtros = filtros;
+    this.loadData();
+    this.cargarComparacion();
+  }
+
+  cargarComparacion() {
+    if (this.momentoInicial() === this.momentoFinal()) {
+      this.comparacion.set(null);
+      this.errorComparacion.set('Seleccione dos momentos distintos.');
+      return;
+    }
+    this.cargandoComparacion.set(true);
+    this.errorComparacion.set('');
+    this.reportesApi.comparacion(this.momentoInicial(), this.momentoFinal(), this.indicadorComparacion(), this.filtros).subscribe({
+      next: comparacion => {
+        this.comparacion.set(comparacion);
+        this.cargandoComparacion.set(false);
+      },
+      error: (err: unknown) => {
+        this.comparacion.set(null);
+        this.errorComparacion.set(mensajeDeError(err, 'No fue posible calcular la comparación.'));
+        this.cargandoComparacion.set(false);
+      }
+    });
+  }
+
+  cambiarComparacion(campo: 'inicial' | 'final' | 'indicador', valor: string) {
+    if (campo === 'inicial') this.momentoInicial.set(Number(valor));
+    if (campo === 'final') this.momentoFinal.set(Number(valor));
+    if (campo === 'indicador') this.indicadorComparacion.set(valor as 'empleabilidad' | 'salario');
+    this.cargarComparacion();
   }
 
   loadData() {
     this.isChartReady = false;
+    this.errorCarga = '';
     this.cdr.detectChanges();
 
-    this.reportesApi.tendencias(this.currentIndicator).subscribe({
+    this.reportesApi.tendencias(this.currentIndicator, this.filtros).subscribe({
       next: (data) => {
         const colors = CHART_PALETTE;
         
@@ -104,7 +161,8 @@ export class TendenciasComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error("Error cargando tendencias", err);
+        this.errorCarga = mensajeDeError(err, 'No fue posible cargar las tendencias.');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -122,40 +180,26 @@ export class TendenciasComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  get graficaKey(): string { return `tendencias_${this.currentIndicator}`; }
+  get graficaKey(): string { return claveConFiltros(`tendencias_${this.currentIndicator}`, { ...this.filtros, momento: undefined }); }
 
   publicar() {
-    if (!confirm('Confirmo que esta gráfica contiene únicamente métricas agregadas y está aprobada para publicación.')) return;
+    if (!confirm('Confirmo que revisé la privacidad de esta gráfica. Se publicarán métricas agregadas recalculadas por el sistema; las categorías con menos de 5 observaciones se agrupan u omiten.')) return;
     const payload: PublicacionCreate = {
       grafica_key: this.graficaKey,
-      titulo: `Evolución histórica: ${this.currentIndicatorName}`,
-      programas: this.lineChartData.datasets.map(dataset => dataset.label || '').filter(Boolean),
-      definicion: { origen: 'tendencias', tipo_visualizacion: this.chartType as 'line' | 'bar', indicador: this.currentIndicator },
-      metricas: {
-        labels: (this.lineChartData.labels ?? []).map(String),
-        datasets: this.lineChartData.datasets.map(dataset => ({
-          label: dataset.label || 'Indicador',
-          data: dataset.data.map(valor => typeof valor === 'number' ? valor : null),
-          backgroundColor: typeof dataset.backgroundColor === 'string' ? dataset.backgroundColor : undefined,
-          borderColor: typeof dataset.borderColor === 'string' ? dataset.borderColor : undefined,
-        }))
+      titulo: `Evolución histórica: ${this.currentIndicatorName}${descripcionFiltros({ ...this.filtros, momento: undefined })}`,
+      definicion: {
+        origen: 'tendencias',
+        tipo_visualizacion: this.chartType as 'line' | 'bar',
+        indicador: this.currentIndicator,
+        ...definicionDeFiltros({ ...this.filtros, momento: undefined }),
       },
       aprobada_privacidad: true
     };
-    this.publicando = true;
-    this.publicacionesApi.publicar(payload).subscribe({
-      next: publicacion => { this.publicaciones[this.graficaKey] = publicacion; this.publicando = false; },
-      error: () => { alert('No fue posible publicar la gráfica.'); this.publicando = false; }
-    });
+    this.publicacion.publicar(payload.grafica_key, payload);
   }
 
   retirar() {
-    const publicacion = this.publicaciones[this.graficaKey];
-    if (!publicacion || !confirm('¿Retirar esta publicación?')) return;
-    this.publicando = true;
-    this.publicacionesApi.retirar(publicacion.id).subscribe({
-      next: () => { delete this.publicaciones[this.graficaKey]; this.publicando = false; },
-      error: () => { alert('No fue posible retirar la publicación.'); this.publicando = false; }
-    });
+    if (!confirm('¿Retirar esta publicación? Dejará de ser visible inmediatamente.')) return;
+    this.publicacion.retirar(this.graficaKey);
   }
 }

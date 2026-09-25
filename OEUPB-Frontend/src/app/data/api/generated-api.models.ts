@@ -2,9 +2,10 @@
 // No editar manualmente; ejecute: npm run generate:api
 
 export interface AlertaResponse {
-  "tipo": string;
+  "tipo": "empleabilidad" | "texto_abierto";
   "programa": string;
-  "severidad": string;
+  "momento"?: number | null;
+  "severidad": "media" | "alta";
   "mensaje": string;
   "valor": number;
   "muestra": number;
@@ -25,6 +26,10 @@ export interface Body_procesar_excel_api_carga_excel_post {
 export interface CambioContrasenaTemporalRequest {
   "nuevaContrasena": string;
   "confirmarContrasena": string;
+}
+
+export interface CargaRechazadaResponse {
+  "detail": DetalleCargaRechazada;
 }
 
 export interface CargaResponse {
@@ -52,6 +57,22 @@ export interface ChartDatasetResponse {
   "spanGaps"?: boolean | null;
 }
 
+export interface ComparacionProgramaResponse {
+  "programa": string;
+  "pares": number;
+  "suficiente": boolean;
+  "valor_inicial"?: number | null;
+  "valor_final"?: number | null;
+}
+
+export interface ComparacionResponse {
+  "momento_inicial": number;
+  "momento_final": number;
+  "indicador": string;
+  "minimo_pares": number;
+  "programas": Array<ComparacionProgramaResponse>;
+}
+
 export interface CompetenciaResponse {
   "categoria": string;
   "frecuencia": number;
@@ -72,6 +93,13 @@ export interface DefinicionGrafica {
   "momento"?: 0 | 1 | 5 | null;
   "programa"?: string | null;
   "anio"?: number | null;
+  "programas"?: Array<string> | null;
+  "anios"?: Array<number> | null;
+}
+
+export interface DetalleCargaRechazada {
+  "mensaje": string;
+  "errores": Array<ErrorFila>;
 }
 
 export interface DirectorioItem {
@@ -122,10 +150,19 @@ export interface EncuestaPerfilResponse {
   "respuestas_completas": Record<string, unknown>;
 }
 
+export interface ErrorCodificado {
+  "codigo": string;
+  "mensaje": string;
+}
+
 export interface ErrorFila {
   "fila": number;
   "columna": string;
   "error": string;
+}
+
+export interface ErrorResponse {
+  "detail": string | ErrorCodificado;
 }
 
 export interface ExploradorInitResponse {
@@ -137,6 +174,12 @@ export interface ExploradorInitResponse {
 export interface ExploradorResponse {
   "labels": Array<string>;
   "valores": Array<number>;
+}
+
+export interface FiltrosDisponiblesResponse {
+  "programas": Array<string>;
+  "anios": Array<number>;
+  "momentos": Array<number>;
 }
 
 export interface HTTPValidationError {
@@ -161,8 +204,14 @@ export interface HistorialCargaItem {
 
 export interface KpisResponse {
   "total_egresados": number;
+  "total_encuestados": number;
   "tasa_empleabilidad": number;
+  "tasa_formalidad"?: number | null;
+  "tasa_informalidad"?: number | null;
+  "observaciones_formalidad": number;
   "promedio_salarial": number;
+  "rango_salarial"?: RangoSalarialResponse | null;
+  "distribucion_estado_laboral": Record<string, number>;
   "distribucion_programas": Record<string, unknown>;
   "nivel_satisfaccion": Record<string, unknown>;
 }
@@ -206,9 +255,7 @@ export interface PerfilEgresadoResponse {
 export interface PublicacionCreate {
   "grafica_key": string;
   "titulo": string;
-  "programas": Array<string>;
   "definicion": DefinicionGrafica;
-  "metricas": MetricasGrafica;
   "aprobada_privacidad": boolean;
 }
 
@@ -227,6 +274,13 @@ export interface PublicacionResponse {
   "aprobada_privacidad": boolean;
   "fecha_publicacion": string;
   "fecha_retiro": string | null;
+}
+
+export interface RangoSalarialResponse {
+  "minimo": number;
+  "mediana": number;
+  "maximo": number;
+  "observaciones": number;
 }
 
 export interface ReemisionCredencialRequest {
@@ -274,6 +328,7 @@ export interface UsuarioCreateResponse {
   "etiqueta"?: "Rector" | "Profesor" | "Administrativo" | null;
   "permisos": Array<"ver_reporte_general" | "ver_tendencias" | "ver_explorador" | "ver_publicaciones">;
   "programas": Array<string>;
+  "programas_sin_datos"?: Array<string>;
   "contrasena_temporal": string;
   "modo_credencial": "documento" | "random";
 }
@@ -300,6 +355,7 @@ export interface UsuarioResponse {
   "etiqueta"?: "Rector" | "Profesor" | "Administrativo" | null;
   "permisos": Array<"ver_reporte_general" | "ver_tendencias" | "ver_explorador" | "ver_publicaciones">;
   "programas": Array<string>;
+  "programas_sin_datos"?: Array<string>;
 }
 
 export interface UsuarioUpdateRequest {

@@ -28,4 +28,25 @@ describe('CargaDatosComponent', () => {
     componente.onFileSelected({ target: { files: [new File(['x'], 'datos.xlsx')] } });
     expect(componente.selectedFile?.name).toBe('datos.xlsx');
   });
+
+  it('muestra el detalle por fila cuando el backend rechaza el archivo', () => {
+    const fixture = TestBed.createComponent(CargaDatosComponent);
+    const componente = fixture.componentInstance;
+    fixture.detectChanges();
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('http://localhost:8000/api/carga/historial').flush([]);
+
+    componente.uploadForm.setValue({ momento: '1', anio: '2024' });
+    componente.selectedFile = new File(['x'], 'datos.xlsx');
+    componente.onSubmit();
+    http.expectOne('http://localhost:8000/api/carga/excel').flush(
+      { detail: { mensaje: 'El archivo contiene 1 documentos inválidos; no se guardó ninguna fila', errores: [{ fila: 3, columna: 'NUMERO_DOCUMENTO', error: 'Documento inválido' }] } },
+      { status: 422, statusText: 'Unprocessable Entity' }
+    );
+
+    expect(componente.isSubmitting).toBe(false);
+    expect(componente.mensajeValidacion).toContain('documentos inválidos');
+    expect(componente.erroresTabla).toEqual([{ fila: 3, columna: 'NUMERO_DOCUMENTO', error: 'Documento inválido' }]);
+    http.verify();
+  });
 });

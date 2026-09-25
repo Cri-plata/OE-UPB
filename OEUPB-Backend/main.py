@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import time
 import uuid
 
@@ -33,13 +34,21 @@ class HealthResponse(BaseModel):
     status: str
 
 
+_RUTAS_CON_DOCUMENTO = re.compile(r"^(/api/directorio/(?:perfil|egresados)/)[^/]+")
+
+
+def ruta_para_log(path: str) -> str:
+    """Oculta el documento de identidad de las rutas antes de registrarlas."""
+    return _RUTAS_CON_DOCUMENTO.sub(lambda match: match.group(1) + "{documento}", path)
+
+
 @app.middleware("http")
 async def request_observability(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))[:100]
     inicio = time.perf_counter()
     response = await call_next(request)
     response.headers["X-Request-ID"] = request_id
-    logger.info("request_id=%s method=%s path=%s status=%s duration_ms=%.2f", request_id, request.method, request.url.path, response.status_code, (time.perf_counter() - inicio) * 1000)
+    logger.info("request_id=%s method=%s path=%s status=%s duration_ms=%.2f", request_id, request.method, ruta_para_log(request.url.path), response.status_code, (time.perf_counter() - inicio) * 1000)
     return response
 
 

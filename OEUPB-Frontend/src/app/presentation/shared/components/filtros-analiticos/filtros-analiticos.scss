@@ -1,0 +1,14 @@
+.filtros { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; margin-bottom: 30px; }
+.filtro { position: relative; background: var(--color-surface); border: 1px solid var(--color-border-control); border-radius: 6px; min-width: 220px; }
+.filtro summary { cursor: pointer; padding: 9px 12px; font-size: 14px; color: var(--color-text-body); display: flex; justify-content: space-between; gap: 12px; }
+.contador { color: var(--color-brand); font-weight: 700; }
+.opciones { position: absolute; z-index: 5; top: 100%; left: 0; min-width: 100%; max-height: 260px; overflow-y: auto; background: var(--color-surface); border: 1px solid var(--color-border-control); border-radius: 6px; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 18px rgba(0, 0, 0, .08); }
+.opciones label { display: flex; gap: 8px; align-items: center; font-size: 14px; white-space: nowrap; }
+.vacio { color: var(--color-text-muted); font-size: 13px; }
+.momento { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--color-text-body); }
+.momento select { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--color-border-control); }
+.aplicar, .limpiar { border-radius: 6px; padding: 9px 14px; font-weight: 700; cursor: pointer; border: 1px solid var(--color-brand); }
+.aplicar { background: var(--color-brand); color: var(--color-surface); }
+.limpiar { background: var(--color-surface); color: var(--color-brand); }
+.limpiar:disabled { opacity: .5; cursor: default; }
+.error { flex-basis: 100%; margin: 0; color: var(--color-error); font-size: 13px; }

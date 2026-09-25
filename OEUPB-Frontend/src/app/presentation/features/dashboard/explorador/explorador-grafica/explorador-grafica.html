@@ -1,0 +1,90 @@
+<section class="grafica-bloque" [attr.aria-label]="'Gráfica ' + numero()">
+  <div class="control-panel">
+    <div class="filters-row">
+      <div class="control-group full-width">
+        <label [attr.for]="idGrafica() + '-pregunta'">¿Qué pregunta deseas graficar? (Eje X)</label>
+        <select [id]="idGrafica() + '-pregunta'" class="custom-select" (change)="cambiar('pregunta', $any($event.target).value)">
+          @for (p of opciones().preguntas; track p) {
+            <option [value]="p" [selected]="pregunta() === p">{{ p | slice:0:120 }}{{ p.length > 120 ? '...' : '' }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="filters-row mt-3">
+      <div class="control-group">
+        <label [attr.for]="idGrafica() + '-momento'">Filtrar por Momento:</label>
+        <select [id]="idGrafica() + '-momento'" class="custom-select" (change)="cambiar('momento', $any($event.target).value)">
+          <option value="">Todas las cohortes / momentos</option>
+          @for (m of momentosDisponibles; track m) {
+            <option [value]="m" [selected]="momento() === m">Momento {{ m }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label [attr.for]="idGrafica() + '-programa'">Filtrar por Programa:</label>
+        <select [id]="idGrafica() + '-programa'" class="custom-select" (change)="cambiar('programa', $any($event.target).value)">
+          <option value="">Todos los programas</option>
+          @for (prog of opciones().programas; track prog) {
+            <option [value]="prog" [selected]="programa() === prog">{{ prog }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label [attr.for]="idGrafica() + '-anio'">Filtrar por Cohorte:</label>
+        <select [id]="idGrafica() + '-anio'" class="custom-select" (change)="cambiar('anio', $any($event.target).value)">
+          <option value="">Todos los años</option>
+          @for (a of opciones().anios; track a) {
+            <option [value]="a" [selected]="anio() === a">{{ a }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label [attr.for]="idGrafica() + '-tipo'">Tipo de Gráfica:</label>
+        <select [id]="idGrafica() + '-tipo'" class="custom-select" [value]="tipo()" (change)="cambiarTipo($any($event.target).value)">
+          <option value="bar">Barras Verticales</option>
+          <option value="pie">Gráfico de Pastel (Pie)</option>
+          <option value="doughnut">Gráfico de Dona</option>
+          <option value="line">Líneas</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <div class="bloque-acciones">
+      <button type="button" (click)="exportar()" [disabled]="!chartData()">Exportar PNG</button>
+      @if (puedeQuitar()) {
+        <button type="button" class="quitar-btn" (click)="quitar.emit()">Quitar gráfica</button>
+      }
+    </div>
+    <div class="publication-header">
+      <h2>Gráfica {{ numero() }}: {{ pregunta() }}</h2>
+      @if (publicacion.estaPublicada(graficaKey())) {
+        <span class="publication-status">Publicada v{{ publicacion.publicacion(graficaKey())?.version }}</span>
+        <button class="withdraw-btn" [disabled]="publicacion.ocupado()" (click)="retirar()">{{ publicacion.procesando(graficaKey()) ? 'Retirando…' : 'Retirar publicación' }}</button>
+      } @else {
+        <button class="publish-btn" [disabled]="publicacion.ocupado() || !chartData()" (click)="publicar()">{{ publicacion.procesando(graficaKey()) ? 'Publicando…' : (publicacion.error(graficaKey()) ? 'Reintentar publicación' : 'Publicar') }}</button>
+      }
+      @if (publicacion.error(graficaKey())) {
+        <p class="publish-error" role="alert">{{ publicacion.error(graficaKey()) }}</p>
+      }
+    </div>
+
+    @if (cargando()) {
+      <div class="loading-state" role="status">Cargando gráfica dinámica...</div>
+    } @else if (error()) {
+      <div class="publish-error" role="alert">
+        {{ error() }}
+        <button type="button" (click)="generar()">Reintentar</button>
+      </div>
+    } @else if (chartData(); as datos) {
+      <div [id]="idGrafica()" class="chart-wrapper">
+        <canvas baseChart [data]="datos" [type]="tipo()" [options]="chartOptions"></canvas>
+      </div>
+    }
+  </div>
+</section>

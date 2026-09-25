@@ -4,6 +4,10 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
 import { CargaApi } from '../../../../data/api/carga.api';
 import { HistorialCargaItem } from '../../../../data/api/generated-api.models';
+import { mensajeDeError } from '../../../shared/mensaje-error';
+
+/** Límite del backend (ETL-01); se anticipa en el cliente para no subir archivos inútiles. */
+export const TAMANO_MAXIMO_CARGA_BYTES = 25 * 1024 * 1024;
 
 @Component({
   selector: 'app-carga-datos',
@@ -32,6 +36,11 @@ export class CargaDatosComponent implements OnInit {
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file && file.name.toLowerCase().endsWith('.xlsx')) {
+      if (file.size > TAMANO_MAXIMO_CARGA_BYTES) {
+        alert('El archivo supera el máximo de 25 MB.');
+        this.selectedFile = null;
+        return;
+      }
       this.selectedFile = file;
     } else {
       alert('Por favor, selecciona un archivo Excel válido (.xlsx)');
@@ -61,7 +70,14 @@ export class CargaDatosComponent implements OnInit {
         },
         error: (err) => {
           this.isSubmitting = false;
-          let msg = 'Error del servidor al procesar el archivo.'; if (err.error && err.error.detail) { msg = typeof err.error.detail === 'string' ? err.error.detail : JSON.stringify(err.error.detail); } this.mensajeValidacion = msg;
+          // Un 422 de carga trae {mensaje, errores} con el detalle por fila (RN-20, ETL-01).
+          const detalle = err?.error?.detail;
+          if (detalle && typeof detalle === 'object' && Array.isArray(detalle.errores)) {
+            this.mensajeValidacion = detalle.mensaje;
+            this.erroresTabla = detalle.errores;
+          } else {
+            this.mensajeValidacion = mensajeDeError(err, 'Error del servidor al procesar el archivo.');
+          }
           this.cdr.detectChanges();
         }
       });

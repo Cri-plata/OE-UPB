@@ -1,17 +1,19 @@
 from collections import defaultdict
-from typing import List
+from typing import List, Literal, Optional
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from application.auth_service import require_roles
+from presentation.errores import RESPUESTAS_PROTEGIDAS
+from application.indicadores import estado_laboral
 from application.medicion_policy import seleccionar_intentos
 from application.nlp_service import clasificar, extraer_textos
 from domain.models import Egresado, Medicion
 from infrastructure.database import get_db
 
-router = APIRouter(prefix="/api/analitica", tags=["Analítica"])
+router = APIRouter(prefix="/api/analitica", tags=["Analítica"], responses=RESPUESTAS_PROTEGIDAS)
 
 
 class CompetenciaResponse(BaseModel):
@@ -20,12 +22,46 @@ class CompetenciaResponse(BaseModel):
 
 
 class AlertaResponse(BaseModel):
-    tipo: str
+    tipo: Literal["empleabilidad", "texto_abierto"]
     programa: str
-    severidad: str
+    momento: Optional[int] = None
+    severidad: Literal["media", "alta"]
     mensaje: str
     valor: float
     muestra: int
+
+
+# ANA-02: criterios de alerta. Solo momentos de seguimiento: en M0 los graduandos
+# que aún estudian no representan un problema de inserción laboral.
+MOMENTOS_SEGUIMIENTO = (1, 5)
+MUESTRA_MINIMA_ALERTA = 5
+UMBRAL_EMPLEABILIDAD_MEDIA = 70.0
+UMBRAL_EMPLEABILIDAD_ALTA = 50.0
+MINIMO_TEXTOS_NEGATIVOS = 3
+
+
+def alertas_de_programas(empleo: dict, textos: dict) -> list[dict]:
+    """Aplica los criterios de ANA-02 a los conteos por programa (y momento)."""
+    alertas = []
+    for (programa, momento), valores in sorted(empleo.items()):
+        if valores["clasificados"] < MUESTRA_MINIMA_ALERTA:
+            continue
+        tasa = round(valores["ocupados"] * 100 / valores["clasificados"], 1)
+        if tasa < UMBRAL_EMPLEABILIDAD_MEDIA:
+            alertas.append({
+                "tipo": "empleabilidad", "programa": programa, "momento": momento,
+                "severidad": "alta" if tasa < UMBRAL_EMPLEABILIDAD_ALTA else "media",
+                "mensaje": f"Empleabilidad del {tasa} % en el momento {momento}, inferior al {UMBRAL_EMPLEABILIDAD_MEDIA:g} %.",
+                "valor": tasa, "muestra": valores["clasificados"],
+            })
+    for programa, valores in sorted(textos.items()):
+        if valores["textos"] >= MUESTRA_MINIMA_ALERTA and valores["negativos"] >= MINIMO_TEXTOS_NEGATIVOS:
+            alertas.append({
+                "tipo": "texto_abierto", "programa": programa, "momento": None, "severidad": "media",
+                "mensaje": "Se repite un patrón negativo de inserción laboral en textos anonimizados.",
+                "valor": float(valores["negativos"]), "muestra": valores["textos"],
+            })
+    return alertas
 
 
 class AnaliticaResponse(BaseModel):
@@ -34,20 +70,12 @@ class AnaliticaResponse(BaseModel):
     alertas: List[AlertaResponse]
 
 
-def _respuesta_empleo(respuestas: dict):
-    for clave, valor in (respuestas or {}).items():
-        if "actividad remunerada" in clave.lower() or "situacion_actual" in clave.lower():
-            normal = str(valor).strip().upper()
-            if normal in {"SI", "SÍ", "NO"}:
-                return normal in {"SI", "SÍ"}
-    return None
-
-
 @router.get("/resumen", response_model=AnaliticaResponse)
 def resumen(db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
     filas = db.query(Medicion, Egresado).join(Egresado, Medicion.egresado_documento == Egresado.numero_documento).filter(Medicion.sede_id == current_user["sede_id"]).all()
     competencias = defaultdict(int)
-    estadisticas = defaultdict(lambda: {"empleados": 0, "validos": 0, "negativos": 0, "textos": 0})
+    empleo = defaultdict(lambda: {"ocupados": 0, "clasificados": 0})
+    textos_por_programa = defaultdict(lambda: {"negativos": 0, "textos": 0})
     total_textos = 0
     for medicion, egresado in seleccionar_intentos(filas):
         datos = [egresado.numero_documento, egresado.primer_nombre, egresado.primer_apellido or ""]
@@ -57,18 +85,11 @@ def resumen(db: Session = Depends(get_db), current_user: dict = Depends(require_
         for categoria, frecuencia in conteo.items():
             competencias[categoria] += frecuencia
         programa = egresado.programa or "Sin programa"
-        empleo = _respuesta_empleo(medicion.respuestas or {})
-        if empleo is not None:
-            estadisticas[programa]["validos"] += 1
-            estadisticas[programa]["empleados"] += int(empleo)
-        estadisticas[programa]["negativos"] += negativos
-        estadisticas[programa]["textos"] += len(textos)
-    alertas = []
-    for programa, valores in estadisticas.items():
-        if valores["validos"] >= 3:
-            tasa = round(valores["empleados"] * 100 / valores["validos"], 1)
-            if tasa < 70:
-                alertas.append({"tipo": "empleabilidad", "programa": programa, "severidad": "alta" if tasa < 50 else "media", "mensaje": "Tasa descriptiva de empleabilidad inferior al 70 %.", "valor": tasa, "muestra": valores["validos"]})
-        if valores["negativos"] >= 3:
-            alertas.append({"tipo": "texto_abierto", "programa": programa, "severidad": "media", "mensaje": "Se repite un patrón negativo de inserción laboral en textos anonimizados.", "valor": float(valores["negativos"]), "muestra": valores["textos"]})
+        estado = estado_laboral(medicion.respuestas)
+        if estado is not None and medicion.momento in MOMENTOS_SEGUIMIENTO:
+            empleo[(programa, medicion.momento)]["clasificados"] += 1
+            empleo[(programa, medicion.momento)]["ocupados"] += estado in ("empleado", "independiente")
+        textos_por_programa[programa]["negativos"] += negativos
+        textos_por_programa[programa]["textos"] += len(textos)
+    alertas = alertas_de_programas(empleo, textos_por_programa)
     return {"textos_analizados": total_textos, "competencias": [{"categoria": k, "frecuencia": v} for k, v in sorted(competencias.items(), key=lambda item: (-item[1], item[0]))], "alertas": alertas}

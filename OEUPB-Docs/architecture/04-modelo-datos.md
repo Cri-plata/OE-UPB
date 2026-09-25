@@ -2,7 +2,7 @@
 
 **Estado:** descripción del modelo SQLAlchemy actual
 
-**Verificado:** 2026-09-24
+**Verificado:** 2026-09-25
 
 **Esquema canónico:** [`../specs/db/oeupb-schema.sql`](../specs/db/oeupb-schema.sql)
 
@@ -16,7 +16,7 @@ erDiagram
         string correo UK
         string contrasena_hash
         string rol
-        int sede_id "nullable"
+        int sede_id "nullable solo para Admin_CTIC (CHECK)"
         boolean debe_cambiar_contrasena
         datetime credencial_temporal_expira_en
         boolean activo
@@ -87,8 +87,10 @@ erDiagram
     PUBLICACIONES_GRAFICAS {
         int id PK
         string grafica_key
+        string titulo
         int sede_id FK
         int coordinador_id FK
+        string coordinador_correo
         json programas
         string permiso_requerido
         json definicion
@@ -96,8 +98,51 @@ erDiagram
         int version
         boolean aprobada_privacidad
         string estado
+        datetime fecha_creacion
         datetime fecha_publicacion
         datetime fecha_retiro
+        int retirado_por_id FK "nullable"
+    }
+    EVENTOS_ELIMINACION_CARGA {
+        int id PK
+        int carga_id_eliminada "sin FK: la carga ya no existe"
+        int actor_id FK
+        string actor_correo
+        int sede_id FK
+        int momento
+        int anio_grado
+        int version
+        int registros
+        string nombre_archivo
+        string hash_archivo
+        string motivo
+        datetime fecha
+    }
+    USUARIOS ||--o{ AUDITORIA_CUENTAS : "actúa sobre"
+    AUDITORIA_CUENTAS {
+        int id PK
+        string accion
+        int actor_id FK
+        string actor_correo
+        int objetivo_id "sin FK: sobrevive al borrado físico"
+        string objetivo_correo
+        string objetivo_rol
+        int sede_id "nullable"
+        string motivo
+        datetime fecha
+    }
+    USUARIOS ||--o{ AUDITORIA_EGRESADOS : registra
+    SEDES ||--o{ AUDITORIA_EGRESADOS : delimita
+    AUDITORIA_EGRESADOS {
+        int id PK
+        string accion
+        int actor_id FK
+        string actor_correo
+        int sede_id FK
+        string egresado_documento "sin FK: sobrevive a la eliminación"
+        json cambios
+        string motivo
+        datetime fecha
     }
 ```
 
@@ -107,7 +152,8 @@ erDiagram
 - Una medición almacena las respuestas dinámicas en JSON.
 - Las encuestas anónimas pueden producir mediciones sin egresado asociado.
 - `sede_id` está en `mediciones`; `egresados` no pertenece directamente a una sede.
-- `usuarios.sede_id` referencia el catálogo `sedes` y solo es nullable para `Admin_CTIC`.
+- `usuarios.sede_id` referencia el catálogo `sedes`. Solo `Admin_CTIC` puede no tener sede: lo valida el backend y lo garantiza `CHECK ck_usuarios_sede_por_rol`.
+- `egresados.numero_documento` se almacena normalizado según ADR-017.
 - Cada archivo se registra como `cargas`; una recarga crea una versión nueva y marca la anterior como reemplazada dentro de la misma transacción.
 - `mediciones.anio` conserva el nombre físico legado, pero su significado vigente es año de grado o cohorte.
 - `carga_id` y `cargas.usuario_id` son obligatorios. Las cargas históricas se atribuyen a una cuenta técnica desactivada.
@@ -123,7 +169,8 @@ ADR-012 conserva `Egresado`–`Medicion` como modelo objetivo. La propuesta arch
 
 - Toda lectura de mediciones debe limitarse por sede según la identidad autenticada.
 - Un egresado solo puede exponerse si existe al menos una medición visible o un vínculo manual `egresados_sedes` para la sede del usuario.
-- La edición manual se bloquea cuando la misma identidad está vinculada a otra sede; la eliminación se bloquea mientras existan mediciones.
+- La edición manual se bloquea (409) cuando la misma identidad está vinculada a otra sede; la eliminación se bloquea mientras existan mediciones. No existe custodia institucional (ADR-014).
+- Al eliminar una carga se borran los egresados sin mediciones y sin vínculo `egresados_sedes`; los registros manuales se conservan.
 - Las consultas de historial deben filtrar nuevamente por sede, incluso si la lista inicial ya fue filtrada.
 - Las respuestas JSON no deben interpolarse directamente en SQL.
 
@@ -131,7 +178,7 @@ ADR-012 conserva `Egresado`–`Medicion` como modelo objetivo. La propuesta arch
 
 `publicaciones_graficas` representa la instantánea agregada aprobada con sede/coordinador propietarios, programas, permiso requerido, definición de renderizado, métricas numéricas inmutables, versión, estado y marcas de tiempo. Una nueva publicación de la misma clave conserva la versión anterior como `reemplazada`; retirar conserva la fila como `retirada`.
 
-La publicación no copia documentos, nombres, correos, respuestas individuales ni archivos fuente. Su contrato HTTP acepta exclusivamente etiquetas, series numéricas y metadatos cerrados de renderizado. No existe una FK hacia mediciones: la instantánea no concede acceso a datos fuente ni se recalcula automáticamente. Una actualización crea y aprueba una versión nueva.
+La publicación no copia documentos, nombres, correos, respuestas individuales ni archivos fuente. El cliente solo envía la definición; etiquetas, series y programas los calcula el backend y las etiquetas provienen de nombres de programa, categorías fijas o respuestas a variables del catálogo RN-31 con al menos 5 observaciones. No existe una FK hacia mediciones: la instantánea no concede acceso a datos fuente ni se recalcula automáticamente. Una actualización crea una versión nueva con nueva confirmación de privacidad (ADR-015).
 
 La unicidad de `egresados.numero_documento` no implica unicidad de medición. `application/medicion_policy.py` declara que los indicadores actuales toman el último intento identificado y conservan todas las mediciones anónimas permitidas en agregados.
 

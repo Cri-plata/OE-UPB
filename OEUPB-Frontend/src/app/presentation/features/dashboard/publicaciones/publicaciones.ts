@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChartData, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
@@ -7,6 +7,7 @@ import { PublicacionesApi } from '../../../../data/api/publicaciones.api';
 import { PublicacionResponse } from '../../../../data/api/generated-api.models';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
 import { CHART_PALETTE } from '../../../shared/chart-palette';
+import { mensajeDeError } from '../../../shared/mensaje-error';
 
 
 @Component({
@@ -18,19 +19,27 @@ import { CHART_PALETTE } from '../../../shared/chart-palette';
 })
 export class PublicacionesComponent implements OnInit {
   private readonly api = inject(PublicacionesApi);
-  publicaciones: PublicacionResponse[] = [];
-  cargando = true;
-  error = '';
+  // Signals: la aplicación es zoneless y la vista debe reflejar la respuesta sin otra interacción.
+  readonly publicaciones = signal<PublicacionResponse[]>([]);
+  readonly cargando = signal(true);
+  readonly error = signal('');
 
   ngOnInit(): void {
+    this.cargar();
+  }
+
+  cargar(): void {
+    this.cargando.set(true);
+    this.error.set('');
     this.api.listarAutorizadas().subscribe({
       next: publicaciones => {
-        this.publicaciones = publicaciones;
-        this.cargando = false;
+        this.publicaciones.set(publicaciones);
+        this.cargando.set(false);
       },
-      error: () => {
-        this.error = 'No fue posible cargar las gráficas publicadas.';
-        this.cargando = false;
+      error: (error: unknown) => {
+        this.publicaciones.set([]);
+        this.error.set(mensajeDeError(error, 'No fue posible cargar las gráficas publicadas.'));
+        this.cargando.set(false);
       }
     });
   }
