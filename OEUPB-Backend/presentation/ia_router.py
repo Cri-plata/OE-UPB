@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Set
 
 from infrastructure.database import get_db
-from domain.models import Medicion
+from domain.models import Medicion, Egresado
 from application.ia_service import (
     analizar_habilidades_demandadas,
     generar_reglas_asociacion,
@@ -152,6 +152,7 @@ def _extraer_textos_libres(respuestas_json: dict) -> List[str]:
 def get_habilidades_demandadas(
     momento: Optional[int] = Query(None, description="Filtrar por momento de encuesta (0, 1 o 5)"),
     anio: Optional[int] = Query(None, description="Filtrar por año de carga"),
+    programa: Optional[str] = Query(None, description="Filtrar por programa académico del egresado"),
     top_emergentes: int = Query(15, ge=1, le=50, description="Cantidad de candidatas emergentes a devolver"),
     db: Session = Depends(get_db),
 ):
@@ -165,6 +166,8 @@ def get_habilidades_demandadas(
         query = query.filter(Medicion.momento == momento)
     if anio is not None:
         query = query.filter(Medicion.anio == anio)
+    if programa:
+        query = query.join(Medicion.egresado).filter(Egresado.programa == programa)
 
     mediciones = query.all()
 
@@ -199,6 +202,7 @@ def get_habilidades_demandadas(
 def get_reglas_asociacion(
     momento: Optional[int] = Query(None, description="Filtrar por momento de encuesta (0, 1 o 5)"),
     anio: Optional[int] = Query(None, description="Filtrar por año de carga"),
+    programa: Optional[str] = Query(None, description="Filtrar por programa académico del egresado"),
     min_soporte: float = Query(0.01, ge=0.001, le=1.0, description="Soporte mínimo para apriori (default 0.01)"),
     min_confianza: float = Query(0.4, ge=0.01, le=1.0, description="Confianza mínima para las reglas (default 0.4)"),
     min_ocurrencias: int = Query(2, ge=1, description="Ocurrencias mínimas absolutas de egresados para respaldar la regla (default 2)"),
@@ -216,6 +220,8 @@ def get_reglas_asociacion(
         query = query.filter(Medicion.momento == momento)
     if anio is not None:
         query = query.filter(Medicion.anio == anio)
+    if programa:
+        query = query.join(Medicion.egresado).filter(Egresado.programa == programa)
 
     mediciones = query.all()
 

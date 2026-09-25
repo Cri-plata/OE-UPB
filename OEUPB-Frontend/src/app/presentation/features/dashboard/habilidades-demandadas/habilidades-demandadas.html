@@ -91,6 +91,14 @@
           </select>
         </div>
 
+        <div class="control-group">
+          <label>Programa Académico:</label>
+          <select class="custom-select" [(ngModel)]="filtroPrograma" (change)="aplicarFiltros()">
+            <option value="">Todos los programas</option>
+            <option *ngFor="let p of programasDisponibles" [value]="p">{{ p }}</option>
+          </select>
+        </div>
+
         <div class="control-group" *ngIf="activeTab === 'reglas'">
           <label>Ocurrencias Mínimas (Egresados):</label>
           <select class="custom-select" [(ngModel)]="filtroMinOcurrencias" (change)="aplicarFiltros()">

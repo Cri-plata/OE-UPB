@@ -48,11 +48,13 @@ export class HabilidadesDemandadasComponent implements OnInit {
   // Filtros interactivos
   filtroMomento: string = '';
   filtroAnio: string = '';
+  filtroPrograma: string = '';
   filtroMinOcurrencias: number = 2;
   filtroMinConfianza: number = 0.5;
   topReglas: number = 20;
 
   aniosDisponibles: number[] = [2026, 2025, 2024, 2023, 2022];
+  programasDisponibles: string[] = [];
 
   // Datos obtenidos
   estadisticas: EstadisticasIA | null = null;
@@ -117,7 +119,18 @@ export class HabilidadesDemandadasComponent implements OnInit {
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
+    this.cargarProgramas();
     this.cargarDatosCompletos();
+  }
+
+  cargarProgramas() {
+    this.http.get<string[]>('http://localhost:8000/api/directorio/programas').subscribe({
+      next: (data) => {
+        this.programasDisponibles = data || [];
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error cargando programas académicos:', err)
+    });
   }
 
   setTab(tab: 'reglas' | 'habilidades') {
@@ -135,12 +148,14 @@ export class HabilidadesDemandadasComponent implements OnInit {
     let paramsHabs = new HttpParams();
     if (this.filtroMomento !== '') paramsHabs = paramsHabs.set('momento', this.filtroMomento);
     if (this.filtroAnio !== '') paramsHabs = paramsHabs.set('anio', this.filtroAnio);
+    if (this.filtroPrograma !== '') paramsHabs = paramsHabs.set('programa', this.filtroPrograma);
     paramsHabs = paramsHabs.set('top_emergentes', '15');
 
     let paramsReglas = new HttpParams();
     if (this.filtroMomento !== '') paramsReglas = paramsReglas.set('momento', this.filtroMomento);
     if (this.filtroAnio !== '') paramsReglas = paramsReglas.set('anio', this.filtroAnio);
-    paramsReglas = paramsReglas.set('min_soporte', '0.05');
+    if (this.filtroPrograma !== '') paramsReglas = paramsReglas.set('programa', this.filtroPrograma);
+    paramsReglas = paramsReglas.set('min_soporte', '0.01');
     paramsReglas = paramsReglas.set('min_confianza', this.filtroMinConfianza.toString());
     paramsReglas = paramsReglas.set('min_ocurrencias', this.filtroMinOcurrencias.toString());
     paramsReglas = paramsReglas.set('top_reglas', this.topReglas.toString());
