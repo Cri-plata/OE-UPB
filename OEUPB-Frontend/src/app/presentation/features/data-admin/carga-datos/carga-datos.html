@@ -47,7 +47,7 @@
                 </select>
               </div>
               <div class="form-group" style="flex: 1;">
-                <label>A&ntilde;o de Aplicaci&oacute;n *</label>
+                <label>A&ntilde;o de Grado / Cohorte *</label>
                 
                 <select *ngIf="!mostrarInputAnioManual" (change)="onAnioChange($event)" formControlName="anio" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
                   <option value="">Seleccione el a&ntilde;o...</option>
@@ -133,11 +133,14 @@
             </thead>
             <tbody>
               <tr *ngFor="let item of historial">
-                <td><strong>{{ item.nombre }}</strong></td>
+                <td>
+                  <strong>{{ item.nombre_archivo }}</strong><br>
+                  <small>{{ item.nombre }} · versión {{ item.version }}</small>
+                </td>
                 <td>{{ item.registros }} egresados</td>
                 <td><span class="badge success">{{ item.estado }}</span></td>
                 <td>
-                  <button class="btn-delete" (click)="eliminarMomento(item.momento, item.anio)" title="Eliminar los datos de este momento">
+                  <button *ngIf="item.estado === 'vigente'" class="btn-delete" (click)="eliminarCarga(item)" title="Retirar esta carga">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   </button>
                 </td>

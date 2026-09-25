@@ -1,0 +1,42 @@
+# Estrategia de pruebas
+
+**Estado:** implementado como baseline automatizado
+
+## Pirámide
+
+| Nivel | Alcance prioritario |
+|---|---|
+| Unitarias | reglas de momento, doble titulación, normalización, RBAC, cálculos KPI |
+| Integración | routers FastAPI + base temporal, aislamiento por sede, JWT, carga Excel |
+| Contrato | OpenAPI válido y consumidores compatibles |
+| Frontend | servicios, interceptor, formularios, estados de error y permisos visibles |
+| E2E | login → carga → reporte; login → directorio → ficha; gestión de usuarios |
+
+## Regla para nueva lógica
+
+1. Agregar una prueba que falle por el comportamiento esperado.
+2. Implementar el mínimo cambio.
+3. Ejecutar pruebas relacionadas y build.
+4. Refactorizar manteniendo la suite verde.
+
+## Casos críticos de seguridad
+
+- Coordinador A no puede leer ni eliminar datos de sede B.
+- `Usuario_Consulta` no puede cargar, borrar, publicar ni administrar usuarios.
+- Token ausente, vencido o manipulado devuelve 401.
+- Rol no autorizado devuelve 403.
+- Usuario sin sede no cae silenciosamente en sede 1.
+- Reintentos de carga no duplican información.
+- CTIC puede administrar coordinadores, pero no datos ni gráficas.
+- Un coordinador solo administra usuarios de consulta de su propia sede.
+- Una gráfica no publicada no es visible desde otra sede.
+- Una gráfica publicada expone métricas agregadas, nunca datos fuente.
+- Un usuario con alcance profesor solo ve gráficas asociadas a sus programas.
+- Retirar una publicación revoca la vista externa sin borrar la gráfica privada.
+
+## Estado actual
+
+- Backend: 26 pruebas bajo `OEUPB-Backend/tests/` cubren autenticación, secreto productivo, expiración y reemisión auditada de credenciales, RBAC, sede, CRUD manual, exportación, NLP, cargas, reportes, publicaciones y OpenAPI.
+- Frontend: 15 pruebas Vitest cubren aplicación, login, interceptor, guards, visibilidad por rol, carga, directorio y cliente de publicaciones.
+- Contrato: el OpenAPI guardado se compara con FastAPI y los tipos TypeScript generados se verifican con `tools/validate_contracts.py`.
+- CI: `.github/workflows/quality.yml` ejecuta pruebas, build y validadores de contratos, documentación y arquitectura frontend.

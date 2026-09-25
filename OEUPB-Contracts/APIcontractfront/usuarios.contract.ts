@@ -7,8 +7,12 @@ import { UsuarioDto } from './auth.contract';
 export interface CreateUsuarioRequestDto {
   nombre: string;
   correo: string;
-  rol: 'Admin_CTIC' | 'Coordinador_Sede' | 'Directivo';
-  sedeId?: number; // Requerido si el rol es Coordinador o Directivo
+  numero_documento: string;
+  rol: 'Coordinador_Sede' | 'Usuario_Consulta';
+  sede_id?: number;
+  etiqueta?: 'Rector' | 'Profesor' | 'Administrativo';
+  permisos?: Array<'ver_reporte_general' | 'ver_tendencias' | 'ver_explorador' | 'ver_publicaciones'>;
+  programas?: string[];
 }
 
 /**

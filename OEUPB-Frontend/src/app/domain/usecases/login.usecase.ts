@@ -25,4 +25,19 @@ export class LoginUseCase {
 
     return this.authRepository.login(correo, contrasena);
   }
+
+  cambiarContrasenaTemporal(nuevaContrasena: string, confirmarContrasena: string): Observable<{ token: string, usuario: Usuario }> {
+    if (nuevaContrasena !== confirmarContrasena) {
+      throw new Error('Las contraseñas no coinciden.');
+    }
+    if (
+      nuevaContrasena.length < 10 ||
+      !/[A-Z]/.test(nuevaContrasena) ||
+      !/[a-z]/.test(nuevaContrasena) ||
+      !/[0-9]/.test(nuevaContrasena)
+    ) {
+      throw new Error('Usa al menos 10 caracteres, una mayúscula, una minúscula y un número.');
+    }
+    return this.authRepository.cambiarContrasenaTemporal(nuevaContrasena, confirmarContrasena);
+  }
 }

@@ -1,9 +1,13 @@
 ﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
-import { HttpClient } from '@angular/common/http';
+import { ReportesApi } from '../../../../data/api/reportes.api';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import { PublicacionesApi } from '../../../../data/api/publicaciones.api';
+import { PublicacionCreate, PublicacionResponse } from '../../../../data/api/generated-api.models';
+import { CHART_PALETTE } from '../../../shared/chart-palette';
+import { exportChart } from '../../../shared/export-chart';
 
 @Component({
   selector: 'app-tendencias',
@@ -13,10 +17,13 @@ import { BaseChartDirective } from 'ng2-charts';
   styleUrls: ['./tendencias.scss']
 })
 export class TendenciasComponent implements OnInit {
+  exportarGrafica() { exportChart('#grafica-tendencias canvas', 'tendencias.png'); }
   isChartReady = false;
   chartType: ChartType = 'line';
   currentIndicator = 'empleabilidad';
   currentIndicatorName = 'Tasa de Empleabilidad';
+  publicaciones: Record<string, PublicacionResponse> = {};
+  publicando = false;
 
   public lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -60,9 +67,12 @@ export class TendenciasComponent implements OnInit {
   
   public lineChartData: ChartData<ChartType, (number|null)[], string> = { labels: [], datasets: [] };
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private reportesApi: ReportesApi, private cdr: ChangeDetectorRef, private publicacionesApi: PublicacionesApi) {}
 
   ngOnInit() {
+    this.publicacionesApi.listarPropias().subscribe(publicaciones => {
+      this.publicaciones = Object.fromEntries(publicaciones.map(publicacion => [publicacion.grafica_key, publicacion]));
+    });
     this.loadData();
   }
 
@@ -70,20 +80,24 @@ export class TendenciasComponent implements OnInit {
     this.isChartReady = false;
     this.cdr.detectChanges();
 
-    this.http.get<any>('http://localhost:8000/api/reportes/tendencias').subscribe({
+    this.reportesApi.tendencias(this.currentIndicator).subscribe({
       next: (data) => {
-        const colors = ['#ba0c2f', '#212529', '#6c757d', '#f4a261', '#2a9d8f'];
+        const colors = CHART_PALETTE;
         
         // Asignar colores a los datasets
-        data.datasets.forEach((ds: any, i: number) => {
-          ds.borderColor = colors[i % colors.length];
-          ds.backgroundColor = colors[i % colors.length] + '33'; // Transparente
-          ds.fill = false;
-        });
-
         this.lineChartData = {
           labels: data.labels,
-          datasets: data.datasets
+          datasets: data.datasets.map((dataset, i) => ({
+            label: dataset.label,
+            data: dataset.data,
+            borderColor: colors[i % colors.length],
+            backgroundColor: colors[i % colors.length] + '33',
+            borderWidth: dataset.borderWidth ?? undefined,
+            pointRadius: dataset.pointRadius ?? undefined,
+            tension: dataset.tension ?? undefined,
+            spanGaps: dataset.spanGaps ?? undefined,
+            fill: false,
+          }))
         };
 
         this.isChartReady = true;
@@ -100,14 +114,48 @@ export class TendenciasComponent implements OnInit {
     const select = event.target;
     this.currentIndicatorName = select.options[select.selectedIndex].text;
     
-    // Aquí en el futuro se enviaría el indicador como parámetro al backend:
-    // this.http.get('.../tendencias?indicador=' + this.currentIndicator)
-    // Por ahora recarga la misma data de empleabilidad real.
     this.loadData();
   }
 
   changeChartType(event: any) {
     this.chartType = event.target.value as ChartType;
     this.cdr.detectChanges();
+  }
+
+  get graficaKey(): string { return `tendencias_${this.currentIndicator}`; }
+
+  publicar() {
+    if (!confirm('Confirmo que esta gráfica contiene únicamente métricas agregadas y está aprobada para publicación.')) return;
+    const payload: PublicacionCreate = {
+      grafica_key: this.graficaKey,
+      titulo: `Evolución histórica: ${this.currentIndicatorName}`,
+      programas: this.lineChartData.datasets.map(dataset => dataset.label || '').filter(Boolean),
+      definicion: { origen: 'tendencias', tipo_visualizacion: this.chartType as 'line' | 'bar', indicador: this.currentIndicator },
+      metricas: {
+        labels: (this.lineChartData.labels ?? []).map(String),
+        datasets: this.lineChartData.datasets.map(dataset => ({
+          label: dataset.label || 'Indicador',
+          data: dataset.data.map(valor => typeof valor === 'number' ? valor : null),
+          backgroundColor: typeof dataset.backgroundColor === 'string' ? dataset.backgroundColor : undefined,
+          borderColor: typeof dataset.borderColor === 'string' ? dataset.borderColor : undefined,
+        }))
+      },
+      aprobada_privacidad: true
+    };
+    this.publicando = true;
+    this.publicacionesApi.publicar(payload).subscribe({
+      next: publicacion => { this.publicaciones[this.graficaKey] = publicacion; this.publicando = false; },
+      error: () => { alert('No fue posible publicar la gráfica.'); this.publicando = false; }
+    });
+  }
+
+  retirar() {
+    const publicacion = this.publicaciones[this.graficaKey];
+    if (!publicacion || !confirm('¿Retirar esta publicación?')) return;
+    this.publicando = true;
+    this.publicacionesApi.retirar(publicacion.id).subscribe({
+      next: () => { delete this.publicaciones[this.graficaKey]; this.publicando = false; },
+      error: () => { alert('No fue posible retirar la publicación.'); this.publicando = false; }
+    });
   }
 }

@@ -1,5 +1,7 @@
 # Plan de Despliegue y Seguridad (Cloud UPB)
 
+> **Estado:** objetivo no verificado como desplegado. La síntesis vigente está en `../architecture/05-despliegue.md`.
+
 ## 1. Entorno de Servidores
 Dado que el proyecto exige confidencialidad (Habeas Data), no se utilizarán nubes públicas genéricas para la base de datos principal, sino los servidores institucionales de la universidad.
 

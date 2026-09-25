@@ -3,12 +3,12 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f5f5; // Fondo gris claro (Modo Claro)
+  background-color: var(--color-background);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .login-card {
-  background-color: #ffffff;
+  background-color: var(--color-surface);
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -23,7 +23,7 @@
   margin-bottom: 15px;
 
   .logo-box {
-    background-color: #C8102E; // Rojo Institucional UPB
+    background-color: var(--color-brand);
     color: white;
     font-weight: bold;
     font-size: 24px;
@@ -40,13 +40,13 @@
 .title {
   font-size: 24px;
   font-weight: 700;
-  color: #121212;
+  color: var(--color-text);
   margin: 0 0 5px;
 }
 
 .subtitle {
   font-size: 14px;
-  color: #666666;
+  color: var(--color-text-secondary);
   margin: 0 0 30px;
 }
 
@@ -58,8 +58,8 @@
 .form-control {
   width: 100%;
   padding: 15px;
-  border: 1px solid #1a1a1a;
-  background-color: #1a1a1a;
+  border: 1px solid var(--color-navigation);
+  background-color: var(--color-navigation);
   color: white;
   border-radius: 8px;
   font-size: 16px;
@@ -71,24 +71,24 @@
 
   &:focus {
     outline: none;
-    border-color: #C8102E;
+    border-color: var(--color-brand);
   }
 
   &.is-invalid {
-    border-color: #C8102E;
+    border-color: var(--color-brand);
     background-color: #2a1618; // Leve tinte rojo
   }
 }
 
 .error-msg {
-  color: #C8102E;
+  color: var(--color-brand);
   font-size: 12px;
   margin-top: 5px;
 }
 
 .global-error {
-  background-color: #ffebee;
-  color: #C8102E;
+  background-color: var(--color-error-background);
+  color: var(--color-brand);
   padding: 10px;
   border-radius: 6px;
   font-size: 14px;
@@ -98,7 +98,7 @@
 .btn-primary {
   width: 100%;
   padding: 15px;
-  background-color: #C8102E;
+  background-color: var(--color-brand);
   color: white;
   border: none;
   border-radius: 8px;
@@ -113,18 +113,55 @@
   }
 
   &:disabled {
-    background-color: #e57373;
+    background-color: var(--color-disabled-danger);
     cursor: not-allowed;
   }
 }
 
 .forgot-password {
   display: inline-block;
-  color: #C8102E;
+  color: var(--color-brand);
   font-size: 14px;
   text-decoration: none;
 
   &:hover {
     text-decoration: underline;
   }
+}
+
+.password-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(18, 18, 18, 0.72);
+}
+
+.password-modal {
+  width: 100%;
+  max-width: 440px;
+  padding: 32px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+
+  h2 {
+    margin: 0 0 8px;
+    color: var(--color-text);
+  }
+
+  > p {
+    margin: 0 0 24px;
+    color: var(--color-text-tertiary);
+    line-height: 1.5;
+  }
+}
+
+.password-policy {
+  margin: -8px 0 20px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }

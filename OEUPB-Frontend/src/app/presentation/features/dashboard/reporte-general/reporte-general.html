@@ -54,14 +54,16 @@
         <div class="chart-card">
           <div class="chart-header">
             <h2>Distribución por Programa</h2>
-            <select class="chart-type-select" (change)="changePieChartType($event)">
-              <option value="doughnut">Dona (Por defecto)</option>
-              <option value="pie">Pastel</option>
-              <option value="bar">Barras Verticales</option>
-              <option value="line">Líneas</option>
-            </select>
+            <div class="chart-actions">
+              <button (click)="exportarGrafica('#grafica-programas canvas', 'distribucion-programas.png')">PNG</button>
+              <select class="chart-type-select" (change)="changePieChartType($event)">
+                <option value="doughnut">Dona (Por defecto)</option><option value="pie">Pastel</option><option value="bar">Barras Verticales</option><option value="line">Líneas</option>
+              </select>
+              <button *ngIf="!publicaciones['reporte_general_distribucion_programas']" class="publish-btn" [disabled]="publicandoKey !== ''" (click)="publicar('reporte_general_distribucion_programas', 'Distribución por Programa', pieChartData, pieChartType)">Publicar</button>
+              <button *ngIf="publicaciones['reporte_general_distribucion_programas']" class="withdraw-btn" [disabled]="publicandoKey !== ''" (click)="retirar('reporte_general_distribucion_programas')">Retirar publicación</button>
+            </div>
           </div>
-          <div class="chart-wrapper" *ngIf="isChartReady">
+          <div id="grafica-programas" class="chart-wrapper" *ngIf="isChartReady">
             <input type="color" #colorPickerPie style="display: none;" (change)="onColorChangePie($event)">
             <canvas baseChart (chartClick)="onChartClickPie($event)"
               [data]="pieChartData"
@@ -74,13 +76,16 @@
         <div class="chart-card">
           <div class="chart-header">
             <h2>Nivel de Satisfacción (1 al 4)</h2>
-            <select class="chart-type-select" (change)="changeBarChartType($event)">
-              <option value="bar">Barras (Por defecto)</option>
-              <option value="line">Líneas de Tendencia</option>
-              <option value="pie">Pastel</option>
-            </select>
+            <div class="chart-actions">
+              <button (click)="exportarGrafica('#grafica-satisfaccion canvas', 'satisfaccion.png')">PNG</button>
+              <select class="chart-type-select" (change)="changeBarChartType($event)">
+                <option value="bar">Barras (Por defecto)</option><option value="line">Líneas de Tendencia</option><option value="pie">Pastel</option>
+              </select>
+              <button *ngIf="!publicaciones['reporte_general_satisfaccion']" class="publish-btn" [disabled]="publicandoKey !== ''" (click)="publicar('reporte_general_satisfaccion', 'Nivel de Satisfacción', barChartData, barChartType)">Publicar</button>
+              <button *ngIf="publicaciones['reporte_general_satisfaccion']" class="withdraw-btn" [disabled]="publicandoKey !== ''" (click)="retirar('reporte_general_satisfaccion')">Retirar publicación</button>
+            </div>
           </div>
-          <div class="chart-wrapper" *ngIf="isChartReady">
+          <div id="grafica-satisfaccion" class="chart-wrapper" *ngIf="isChartReady">
             <input type="color" #colorPickerBar style="display: none;" (change)="onColorChangeBar($event)">
             <canvas baseChart (chartClick)="onChartClickBar($event)"
               [data]="barChartData"

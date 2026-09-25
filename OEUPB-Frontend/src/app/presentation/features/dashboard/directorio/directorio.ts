@@ -1,10 +1,11 @@
 ﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DirectorioApi } from '../../../../data/api/directorio.api';
+import { DirectorioItem } from '../../../../data/api/generated-api.models';
 
 @Component({
   selector: 'app-directorio',
@@ -18,17 +19,20 @@ export class DirectorioComponent implements OnInit {
   programaSeleccionado: string = '';
   
   programasDisponibles: string[] = [];
-  egresados: any[] = [];
+  egresados: DirectorioItem[] = [];
   
   paginaActual: number = 1;
   totalRegistros: number = 0;
   registrosPorPagina: number = 50;
   
   cargando: boolean = false;
+  mostrandoFormulario = false;
+  editandoDocumento: string | null = null;
+  mensaje = '';
+  error = '';
+  formulario = { numero_documento: '', primer_nombre: '', primer_apellido: '', programa: '', fecha_grado: '', motivo: '' };
 
-  private API_URL = 'http://localhost:8000/api/directorio';
-
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router) {}
+  constructor(private directorioApi: DirectorioApi, private cdr: ChangeDetectorRef, private router: Router) {}
 
   ngOnInit() {
     this.cargarProgramas();
@@ -36,23 +40,19 @@ export class DirectorioComponent implements OnInit {
   }
 
   cargarProgramas() {
-    this.http.get<string[]>(`${this.API_URL}/programas`).subscribe(data => {
+    this.directorioApi.programas().subscribe(data => {
       this.programasDisponibles = data;
     });
   }
 
   buscar() {
     this.cargando = true;
-    let url = `${this.API_URL}/tabla?page=${this.paginaActual}&limit=${this.registrosPorPagina}`;
-    
-    if (this.terminoBusqueda.trim() !== '') {
-      url += `&q=${encodeURIComponent(this.terminoBusqueda)}`;
-    }
-    if (this.programaSeleccionado !== '') {
-      url += `&programa=${encodeURIComponent(this.programaSeleccionado)}`;
-    }
-
-    this.http.get<any>(url).subscribe({
+    this.directorioApi.buscar(
+      this.paginaActual,
+      this.registrosPorPagina,
+      this.terminoBusqueda.trim() || undefined,
+      this.programaSeleccionado || undefined,
+    ).subscribe({
       next: (res) => {
         this.egresados = res.data;
         this.totalRegistros = res.total;
@@ -85,6 +85,52 @@ export class DirectorioComponent implements OnInit {
 
   verPerfil(documento: string) {
     this.router.navigate(['/perfil', documento]);
+  }
+
+  nuevo() {
+    this.editandoDocumento = null;
+    this.formulario = { numero_documento: '', primer_nombre: '', primer_apellido: '', programa: '', fecha_grado: '', motivo: 'Registro manual autorizado' };
+    this.mostrandoFormulario = true;
+  }
+
+  editar(e: DirectorioItem, event: Event) {
+    event.stopPropagation();
+    const [primer_nombre, ...resto] = e.nombre_completo.split(' ');
+    this.editandoDocumento = e.documento;
+    this.formulario = { numero_documento: e.documento, primer_nombre, primer_apellido: resto.join(' '), programa: e.programa || '', fecha_grado: e.fecha_grado === 'N/A' ? '' : e.fecha_grado, motivo: 'Corrección manual autorizada' };
+    this.mostrandoFormulario = true;
+  }
+
+  guardar() {
+    this.error = '';
+    const payload = { ...this.formulario, fecha_grado: this.formulario.fecha_grado || null };
+    const operacion = this.editandoDocumento
+      ? this.directorioApi.editar(this.editandoDocumento, payload)
+      : this.directorioApi.crear(payload);
+    operacion.subscribe({
+      next: () => { this.mostrandoFormulario = false; this.mensaje = 'Registro guardado correctamente.'; this.cargarProgramas(); this.buscar(); },
+      error: (err) => { this.error = err.error?.detail || 'No fue posible guardar el registro.'; }
+    });
+  }
+
+  eliminar(e: DirectorioItem, event: Event) {
+    event.stopPropagation();
+    const motivo = window.prompt('Motivo de eliminación (mínimo 5 caracteres):');
+    if (!motivo) return;
+    this.directorioApi.eliminar(e.documento, motivo).subscribe({
+      next: () => { this.mensaje = 'Registro eliminado correctamente.'; this.buscar(); },
+      error: (err) => { this.error = err.error?.detail || 'No fue posible eliminar el registro.'; }
+    });
+  }
+
+  exportar() {
+    this.directorioApi.exportar(this.terminoBusqueda.trim() || undefined, this.programaSeleccionado || undefined).subscribe(blob => {
+      const enlace = document.createElement('a');
+      enlace.href = URL.createObjectURL(blob);
+      enlace.download = 'directorio-egresados.xlsx';
+      enlace.click();
+      URL.revokeObjectURL(enlace.href);
+    });
   }
 }
 

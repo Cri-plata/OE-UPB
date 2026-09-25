@@ -1,5 +1,7 @@
 # Plan de Desarrollo Frontend (Angular)
 
+> **Estado:** histórico. Describe la planificación inicial; el estado vigente está en `../BACKLOG.md` y `../architecture/01-frontend.md`.
+
 ## 1. Fase Inicial: Arquitectura del Proyecto
 * **Estructura Standalone:** Inicializar Angular 17+ usando componentes *Standalone*.
 * **Routing:** Configurar pp.routes.ts con protección de rutas (Guards) para que solo usuarios logueados accedan al sistema.

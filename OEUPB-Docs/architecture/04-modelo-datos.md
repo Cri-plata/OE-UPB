@@ -1,81 +1,138 @@
-# Modelo de Datos (Entidad-Relación)
+# Modelo de datos vigente
 
-## 1. Estrategia de Almacenamiento
-El sistema OE UPB utiliza **MySQL** como motor de base de datos relacional. La principal decisión arquitectónica aquí es **la Normalización**. En lugar de volcar los archivos Excel del OLE directamente en una sola tabla gigante (lo cual generaría duplicados cada vez que se sube un nuevo archivo), los datos se separan lógicamente.
+**Estado:** descripción del modelo SQLAlchemy actual
 
-Esto permite que, si un mismo egresado responde la encuesta del "Momento 1" este año y la del "Momento 5" en cuatro años, el sistema actualice su situación laboral sin duplicar sus datos personales ni académicos.
+**Verificado:** 2026-09-24
 
-## 2. Diccionario de Tablas Principales
+**Esquema canónico:** [`../specs/db/oeupb-schema.sql`](../specs/db/oeupb-schema.sql)
 
-### `usuarios` (Administración y Acceso)
-Almacena a todos los usuarios del sistema. Todos pertenecen a un silo de datos (sede).
-* `id` (PK)
-* `nombre`
-* `email`
-* `password_hash`
-* `rol` (ENUM: 'Admin_CTIC', 'Coordinador_Sede', 'Directivo')
-* `sede_id` (FK - **Obligatorio para todos**. Define el "silo de datos" al que tienen acceso).
-
-### `egresados` (Datos Personales Maestros)
-Almacena la identidad inmutable del graduado.
-* `documento_identidad` (PK - Clave primaria para evitar duplicados)
-* `nombres`
-* `apellidos`
-* `email_personal`
-* `telefono`
-* `ciudad_residencia`
-
-### `historial_academico` (Datos de Grado)
-Relaciona a un egresado con lo que estudió (un egresado podría tener un pregrado y luego un posgrado).
-* `id` (PK)
-* `egresado_doc` (FK)
-* `programa_id` (FK)
-* `cohorte` (Año/Semestre de grado)
-* `sede_id` (FK)
-
-### `encuestas_laborales` (Situación Laboral y Respuestas Dinámicas)
-Almacena los resultados extraídos del Excel. Cada fila representa una encuesta (Momento 0, 1 o 5).
-* `id` (PK)
-* `egresado_doc` (FK)
-* `momento_encuesta` (INT: 0, 1 o 5)
-* `situacion_actual` (Columna fija para filtros rápidos)
-* `rango_salarial` (Columna fija para filtros rápidos)
-* `fecha_carga` (Timestamp)
-* `respuestas_completas` (Columna de tipo **JSON**): *Aquí se guarda el resto de las 50+ preguntas del Excel empaquetadas. Esto evita tener que crear 50 columnas en la base de datos y permite que el Excel cambie en el futuro sin romper el sistema.*
-
-## 3. Diagrama Entidad-Relación (ER)
+## Modelo implementado
 
 ```mermaid
 erDiagram
-    USUARIOS ||--o{ SEDES : "pertenece a"
-    EGRESADOS ||--o{ HISTORIAL_ACADEMICO : "estudia"
-    EGRESADOS ||--o{ ENCUESTAS_LABORALES : "responde"
-    PROGRAMAS ||--o{ HISTORIAL_ACADEMICO : "imparte"
-    SEDES ||--o{ HISTORIAL_ACADEMICO : "gradua en"
-
+    USUARIOS {
+        int id PK
+        string nombre
+        string correo UK
+        string contrasena_hash
+        string rol
+        int sede_id "nullable"
+        boolean debe_cambiar_contrasena
+        datetime credencial_temporal_expira_en
+        boolean activo
+        int version_autorizacion
+        string etiqueta
+        json permisos
+        json programas
+    }
+    SEDES ||--o{ USUARIOS : asigna
+    SEDES ||--o{ CARGAS : delimita
+    SEDES ||--o{ MEDICIONES : delimita
+    SEDES ||--o{ PUBLICACIONES_GRAFICAS : posee
+    SEDES ||--o{ EGRESADOS_SEDES : registra
+    EGRESADOS ||--o{ EGRESADOS_SEDES : vincula
+    SEDES {
+        int id PK
+        string codigo UK
+        string nombre UK
+        boolean activa
+    }
+    EGRESADOS ||--o{ MEDICIONES : responde
+    USUARIOS ||--o{ CARGAS : ejecuta
+    CARGAS ||--o{ MEDICIONES : contiene
+    CARGAS o|--o{ CARGAS : reemplaza
     EGRESADOS {
-        string documento_identidad PK
-        string nombres
-        string email
+        string numero_documento PK
+        string primer_nombre
+        string primer_apellido
+        string programa
+        datetime fecha_grado
     }
-    HISTORIAL_ACADEMICO {
+    MEDICIONES {
         int id PK
-        string cohorte
+        int carga_id FK
+        string egresado_documento FK "nullable para anónimos"
+        int momento
+        int anio
+        int sede_id
+        int intento
+        datetime fecha_registro
+        json respuestas
     }
-    ENCUESTAS_LABORALES {
+    CARGAS {
         int id PK
-        int momento_encuesta
-        string situacion_actual
-        string rango_salarial
+        string nombre_archivo
+        string hash_archivo
+        datetime fecha_carga
+        int usuario_id FK
+        int sede_id
+        int momento
+        int anio_grado
+        string estado
+        int version
+        int registros
+        json errores
+        int reemplaza_carga_id FK
+    }
+    EGRESADOS_SEDES {
+        int id PK
+        string egresado_documento FK
+        int sede_id FK
+        int creado_por_id FK
+        datetime fecha_creacion
+    }
+    USUARIOS ||--o{ EVENTOS_ELIMINACION_CARGA : ejecuta
+    USUARIOS ||--o{ PUBLICACIONES_GRAFICAS : publica
+    SEDES ||--o{ EVENTOS_ELIMINACION_CARGA : delimita
+    PUBLICACIONES_GRAFICAS {
+        int id PK
+        string grafica_key
+        int sede_id FK
+        int coordinador_id FK
+        json programas
+        string permiso_requerido
+        json definicion
+        json metricas
+        int version
+        boolean aprobada_privacidad
+        string estado
+        datetime fecha_publicacion
+        datetime fecha_retiro
     }
 ```
 
-## 4. Procesamiento Analítico (La Librería de Python)
-Para analizar todas las preguntas contenidas en el campo JSON dinámico sin sobrecargar la base de datos MySQL, el sistema se apoya en la librería de análisis de datos de Python (**Pandas**). 
+## Decisiones vigentes
 
-**El flujo es el siguiente:** 
-1. MySQL guarda los datos de forma rápida y segura.
-2. Python extrae la columna JSON y usa Pandas para convertirla en un *DataFrame* (una tabla en memoria RAM súper rápida).
-3. Pandas agrupa, cruza y cuenta las respuestas dinámicamente en fracciones de segundo.
-4. Angular recibe el resumen estadístico ya calculado y grafica el resultado.
+- El documento evita duplicar egresados identificados.
+- Una medición almacena las respuestas dinámicas en JSON.
+- Las encuestas anónimas pueden producir mediciones sin egresado asociado.
+- `sede_id` está en `mediciones`; `egresados` no pertenece directamente a una sede.
+- `usuarios.sede_id` referencia el catálogo `sedes` y solo es nullable para `Admin_CTIC`.
+- Cada archivo se registra como `cargas`; una recarga crea una versión nueva y marca la anterior como reemplazada dentro de la misma transacción.
+- `mediciones.anio` conserva el nombre físico legado, pero su significado vigente es año de grado o cohorte.
+- `carga_id` y `cargas.usuario_id` son obligatorios. Las cargas históricas se atribuyen a una cuenta técnica desactivada.
+- Cada medición posee `intento` y `fecha_registro`; la combinación persona/sede/momento/cohorte/intento es única.
+- El borrado físico de una carga conserva primero un evento inmutable sin FK hacia la carga eliminada.
+- El alta manual crea `egresados_sedes`; crear, editar o eliminar conserva un evento en `auditoria_egresados` con actor, sede, motivo y cambios.
 
+## Modelo objetivo aprobado
+
+ADR-012 conserva `Egresado`–`Medicion` como modelo objetivo. La propuesta archivada de `historial_academico` y `encuestas_laborales` queda descartada para el alcance vigente.
+
+## Reglas de consulta
+
+- Toda lectura de mediciones debe limitarse por sede según la identidad autenticada.
+- Un egresado solo puede exponerse si existe al menos una medición visible o un vínculo manual `egresados_sedes` para la sede del usuario.
+- La edición manual se bloquea cuando la misma identidad está vinculada a otra sede; la eliminación se bloquea mientras existan mediciones.
+- Las consultas de historial deben filtrar nuevamente por sede, incluso si la lista inicial ya fue filtrada.
+- Las respuestas JSON no deben interpolarse directamente en SQL.
+
+## Gráficas publicadas
+
+`publicaciones_graficas` representa la instantánea agregada aprobada con sede/coordinador propietarios, programas, permiso requerido, definición de renderizado, métricas numéricas inmutables, versión, estado y marcas de tiempo. Una nueva publicación de la misma clave conserva la versión anterior como `reemplazada`; retirar conserva la fila como `retirada`.
+
+La publicación no copia documentos, nombres, correos, respuestas individuales ni archivos fuente. Su contrato HTTP acepta exclusivamente etiquetas, series numéricas y metadatos cerrados de renderizado. No existe una FK hacia mediciones: la instantánea no concede acceso a datos fuente ni se recalcula automáticamente. Una actualización crea y aprueba una versión nueva.
+
+La unicidad de `egresados.numero_documento` no implica unicidad de medición. `application/medicion_policy.py` declara que los indicadores actuales toman el último intento identificado y conservan todas las mediciones anónimas permitidas en agregados.
+
+Los programas autorizables no provienen todavía de un catálogo institucional independiente: se derivan de los nombres distintos observados en cargas visibles de la sede. La persistencia de asignaciones debe conservar el valor normalizado y permitir distinguir renombres o alias futuros sin conceder acceso por coincidencias ambiguas.

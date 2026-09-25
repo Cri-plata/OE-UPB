@@ -1,9 +1,11 @@
 ﻿from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from infrastructure.database import get_db
-from application.auth_service import get_current_user
+from application.auth_service import require_roles
 from domain.models import Egresado, Medicion
 from pydantic import BaseModel
+from typing import Any, Dict, List, Optional
+from application.medicion_policy import seleccionar_intentos
 import re
 
 router = APIRouter(prefix="/api/reportes", tags=["Reportes"])
@@ -14,6 +16,38 @@ class KpisResponse(BaseModel):
     promedio_salarial: float
     distribucion_programas: dict
     nivel_satisfaccion: dict
+
+
+class ChartDatasetResponse(BaseModel):
+    label: str
+    data: List[Optional[float]]
+    borderColor: Optional[str] = None
+    backgroundColor: Optional[str] = None
+    borderWidth: Optional[int] = None
+    pointBackgroundColor: Optional[str] = None
+    pointBorderColor: Optional[str] = None
+    pointBorderWidth: Optional[int] = None
+    pointRadius: Optional[int] = None
+    pointHoverRadius: Optional[int] = None
+    fill: Optional[bool] = None
+    tension: Optional[float] = None
+    spanGaps: Optional[bool] = None
+
+
+class TendenciasResponse(BaseModel):
+    labels: List[str]
+    datasets: List[ChartDatasetResponse]
+
+
+class ExploradorInitResponse(BaseModel):
+    preguntas: List[str]
+    programas: List[str]
+    anios: List[int]
+
+
+class ExploradorResponse(BaseModel):
+    labels: List[str]
+    valores: List[int]
 
 def extraer_salario(texto):
     if not texto or not isinstance(texto, str):
@@ -41,14 +75,13 @@ def extraer_salario(texto):
     return None
 
 @router.get("/general", response_model=KpisResponse)
-def get_reporte_general(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+def get_reporte_general(db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
     
     query_med = db.query(Medicion)
     query_egresados = db.query(Egresado)
     
-    if current_user.get('rol') == 'Coordinador_Sede':
-        query_med = query_med.filter(Medicion.sede_id == current_user.get('sede_id'))
-        query_egresados = query_egresados.filter(Egresado.numero_documento.in_(db.query(Medicion.egresado_documento).filter(Medicion.sede_id == current_user.get('sede_id'))))
+    query_med = query_med.filter(Medicion.sede_id == current_user.get('sede_id'))
+    query_egresados = query_egresados.filter(Egresado.numero_documento.in_(db.query(Medicion.egresado_documento).filter(Medicion.sede_id == current_user.get('sede_id'))))
 
     total = query_egresados.count()
     programas = query_egresados.with_entities(Egresado.programa).all()
@@ -61,7 +94,7 @@ def get_reporte_general(db: Session = Depends(get_db), current_user: dict = Depe
         else:
             dist[prog] = 1
             
-    mediciones = query_med.all()
+    mediciones = seleccionar_intentos(query_med.all())
     
     empleados_count = 0
     respuestas_validas = 0
@@ -131,12 +164,11 @@ def get_reporte_general(db: Session = Depends(get_db), current_user: dict = Depe
         "nivel_satisfaccion": resultado_satisfaccion
     }
 
-@router.get("/tendencias")
-def get_tendencias(indicador: str = "empleabilidad", db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+@router.get("/tendencias", response_model=TendenciasResponse)
+def get_tendencias(indicador: str = "empleabilidad", db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
     query = db.query(Medicion, Egresado.programa).join(Egresado, Medicion.egresado_documento == Egresado.numero_documento)
-    if current_user.get('rol') == 'Coordinador_Sede':
-        query = query.filter(Medicion.sede_id == current_user.get('sede_id'))
-    mediciones = query.all()
+    query = query.filter(Medicion.sede_id == current_user.get('sede_id'))
+    mediciones = seleccionar_intentos(query.all())
     
     data_store = {}
     
@@ -298,13 +330,12 @@ def get_tendencias(indicador: str = "empleabilidad", db: Session = Depends(get_d
 
 
 
-@router.get("/explorador/init")
-def explorador_init(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+@router.get("/explorador/init", response_model=ExploradorInitResponse)
+def explorador_init(db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
     query = db.query(Medicion, Egresado.programa).join(Egresado, Medicion.egresado_documento == Egresado.numero_documento)
-    if current_user.get('rol') == 'Coordinador_Sede':
-        query = query.filter(Medicion.sede_id == current_user.get('sede_id'))
+    query = query.filter(Medicion.sede_id == current_user.get('sede_id'))
     
-    mediciones = query.all()
+    mediciones = seleccionar_intentos(query.all())
     
     # Extraer preguntas únicas, programas y años
     preguntas_set = set()
@@ -325,19 +356,18 @@ def explorador_init(db: Session = Depends(get_db), current_user: dict = Depends(
         "anios": sorted(list(anios_set))
     }
 
-@router.get("/explorador")
+@router.get("/explorador", response_model=ExploradorResponse)
 def explorador_data(
     pregunta: str,
     momento: str = None,
     programa: str = None,
     anio: str = None,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(require_roles("Coordinador_Sede"))
 ):
     query = db.query(Medicion, Egresado).join(Egresado, Medicion.egresado_documento == Egresado.numero_documento)
     
-    if current_user.get('rol') == 'Coordinador_Sede':
-        query = query.filter(Medicion.sede_id == current_user.get('sede_id'))
+    query = query.filter(Medicion.sede_id == current_user.get('sede_id'))
         
     if momento and momento != '':
         query = query.filter(Medicion.momento == int(momento))
@@ -346,7 +376,7 @@ def explorador_data(
     if anio and anio != '':
         query = query.filter(Medicion.anio == int(anio))
         
-    resultados = query.all()
+    resultados = seleccionar_intentos(query.all())
     
     # Agrupar las respuestas a la pregunta seleccionada
     conteo_respuestas = {}

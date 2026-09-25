@@ -1,9 +1,13 @@
 ﻿import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
-import { HttpClient } from '@angular/common/http';
+import { ReportesApi } from '../../../../data/api/reportes.api';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import { PublicacionesApi } from '../../../../data/api/publicaciones.api';
+import { DatasetGrafica, PublicacionCreate, PublicacionResponse } from '../../../../data/api/generated-api.models';
+import { CHART_PALETTE } from '../../../shared/chart-palette';
+import { exportChart } from '../../../shared/export-chart';
 
 @Component({
   selector: 'app-reporte-general',
@@ -13,8 +17,12 @@ import { BaseChartDirective } from 'ng2-charts';
   styleUrls: ['./reporte-general.scss']
 })
 export class ReporteGeneralComponent implements OnInit {
+  exportarGrafica(selector: string, nombre: string) { exportChart(selector, nombre); }
   kpis: any = null;
   isChartReady = false;
+  programas: string[] = [];
+  publicaciones: Record<string, PublicacionResponse> = {};
+  publicandoKey = '';
 
   public pieChartType: ChartType = 'doughnut';
   public barChartType: ChartType = 'bar';
@@ -30,10 +38,11 @@ export class ReporteGeneralComponent implements OnInit {
   clickedBarIndex: number | null = null;
   clickedPieIndex: number | null = null;
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private reportesApi: ReportesApi, private cdr: ChangeDetectorRef, private publicacionesApi: PublicacionesApi) {}
 
   ngOnInit() {
-    this.http.get<any>('http://localhost:8000/api/reportes/general').subscribe({
+    this.cargarPublicacionesPropias();
+    this.reportesApi.general().subscribe({
       next: (data) => {
         this.kpis = {
           total_egresados: data.total_egresados,
@@ -42,12 +51,13 @@ export class ReporteGeneralComponent implements OnInit {
         };
 
         const programas = Object.keys(data.distribucion_programas);
+        this.programas = programas;
         const cantidades = Object.values(data.distribucion_programas) as number[];
         
         // Agregar la cantidad exacta al label
         const labelsConCantidad = programas.map((prog, i) => `${prog} (${cantidades[i]})`);
         
-        const baseColors = ['#e63946', '#f4a261', '#e9c46a', '#2a9d8f', '#264653', '#457b9d', '#a8dadc', '#1d3557', '#6c757d', '#343a40', '#000000', '#8338ec', '#ff006e', '#3a86ff', '#ba0c2f'];
+        const baseColors = CHART_PALETTE;
         // Asegurar que cada barra tenga su propio color independiente en memoria para que no se vinculen al editarlos
         const bgColors = programas.map((_, i) => baseColors[i % baseColors.length]);
 
@@ -62,7 +72,7 @@ export class ReporteGeneralComponent implements OnInit {
         this.barChartData = {
           labels: satis_keys,
           datasets: [
-            { data: satis_vals, label: 'Satisfacción Promedio', backgroundColor: ['#ba0c2f', '#cddc39', '#6c757d', '#000000'] }
+            { data: satis_vals, label: 'Satisfacción Promedio', backgroundColor: CHART_PALETTE.slice(0, 4) }
           ]
         };
 
@@ -73,6 +83,52 @@ export class ReporteGeneralComponent implements OnInit {
         console.error("Error cargando reporte general", err);
       }
     });
+  }
+
+  cargarPublicacionesPropias() {
+    this.publicacionesApi.listarPropias().subscribe(publicaciones => {
+      this.publicaciones = Object.fromEntries(publicaciones.map(publicacion => [publicacion.grafica_key, publicacion]));
+    });
+  }
+
+  publicar(key: string, titulo: string, data: ChartData, tipo: ChartType) {
+    if (!confirm('Confirmo que esta gráfica contiene únicamente métricas agregadas y está aprobada para publicación.')) return;
+    const payload: PublicacionCreate = {
+      grafica_key: key,
+      titulo,
+      programas: this.programas,
+      definicion: { origen: 'reporte_general', tipo_visualizacion: tipo as PublicacionCreate['definicion']['tipo_visualizacion'] },
+      metricas: {
+        labels: (data.labels ?? []).map(label => String(label)),
+        datasets: data.datasets.map(dataset => this.datasetPublicable(dataset))
+      },
+      aprobada_privacidad: true
+    };
+    this.publicandoKey = key;
+    this.publicacionesApi.publicar(payload).subscribe({
+      next: publicacion => { this.publicaciones[key] = publicacion; this.publicandoKey = ''; },
+      error: () => { alert('No fue posible publicar la gráfica.'); this.publicandoKey = ''; }
+    });
+  }
+
+  retirar(key: string) {
+    const publicacion = this.publicaciones[key];
+    if (!publicacion || !confirm('¿Retirar esta publicación? Dejará de ser visible inmediatamente.')) return;
+    this.publicandoKey = key;
+    this.publicacionesApi.retirar(publicacion.id).subscribe({
+      next: () => { delete this.publicaciones[key]; this.publicandoKey = ''; },
+      error: () => { alert('No fue posible retirar la publicación.'); this.publicandoKey = ''; }
+    });
+  }
+
+  private datasetPublicable(dataset: any): DatasetGrafica {
+    const background = dataset.backgroundColor;
+    return {
+      label: dataset.label || 'Valores',
+      data: (dataset.data || []).map((valor: unknown) => typeof valor === 'number' ? valor : null),
+      backgroundColor: Array.isArray(background) ? background.map(String) : (typeof background === 'string' ? background : undefined),
+      borderColor: typeof dataset.borderColor === 'string' ? dataset.borderColor : undefined,
+    };
   }
 
   changePieChartType(event: any) {

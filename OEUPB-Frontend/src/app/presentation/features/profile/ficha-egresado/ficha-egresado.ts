@@ -1,7 +1,8 @@
 ﻿import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { DirectorioApi } from '../../../../data/api/directorio.api';
+import { PerfilEgresadoResponse } from '../../../../data/api/generated-api.models';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
 import { ChangeDetectorRef } from '@angular/core';
 
@@ -15,11 +16,11 @@ import { ChangeDetectorRef } from '@angular/core';
 export class FichaEgresado implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private http = inject(HttpClient);
+  private directorioApi = inject(DirectorioApi);
   private cdr = inject(ChangeDetectorRef);
 
   cedula: string = '';
-  perfil: any = null;
+  perfil: PerfilEgresadoResponse | null = null;
   cargando: boolean = true;
   error: string | null = null;
 
@@ -31,7 +32,7 @@ export class FichaEgresado implements OnInit {
   }
 
   cargarPerfil() {
-    this.http.get<any>(`http://localhost:8000/api/directorio/perfil/${this.cedula}`).subscribe({
+    this.directorioApi.perfil(this.cedula).subscribe({
       next: (data) => {
         this.perfil = data;
         this.cargando = false;

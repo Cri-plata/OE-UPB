@@ -1,114 +1,192 @@
-﻿from fastapi import APIRouter, Depends, Query
+from datetime import datetime
+from io import BytesIO
+from typing import Any, Dict, List, Optional
+
+import pandas as pd
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from pydantic import BaseModel, Field
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_, text
-from domain.models import Egresado, Medicion
+
+from application.auth_service import require_roles
+from domain.models import AuditoriaEgresado, Egresado, EgresadoSede, Medicion
 from infrastructure.database import get_db
-from application.auth_service import get_current_user
-from typing import Optional
 
 router = APIRouter(prefix="/api/directorio", tags=["Directorio"])
 
-@router.get("/tabla")
-def obtener_directorio(
-    q: Optional[str] = None,
-    programa: Optional[str] = None,
-    page: int = Query(1, ge=1),
-    limit: int = Query(50, ge=1, le=100),
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
-):
-    query = db.query(Egresado)
-    if current_user.get('rol') == 'Coordinador_Sede':
-        query = query.join(Medicion).filter(Medicion.sede_id == current_user.get('sede_id'))
+
+class DirectorioItem(BaseModel):
+    documento: str
+    nombre_completo: str
+    programa: Optional[str]
+    fecha_grado: str
+    encuestas: str
 
 
-    # Filtrar por texto libre (Nombre, Apellido o Cdula)
+class DirectorioResponse(BaseModel):
+    total: int
+    page: int
+    limit: int
+    data: List[DirectorioItem]
+
+
+class EncuestaPerfilResponse(BaseModel):
+    momento: int
+    anio: int
+    empleabilidad: Any
+    salario: Any
+    respuestas_completas: Dict[str, Any]
+
+
+class PerfilEgresadoResponse(BaseModel):
+    documento: str
+    nombre_completo: str
+    programa: Optional[str]
+    fecha_grado: str
+    encuestas: List[EncuestaPerfilResponse]
+
+
+class EgresadoManualRequest(BaseModel):
+    numero_documento: str = Field(min_length=3, max_length=50)
+    primer_nombre: str = Field(min_length=1, max_length=100)
+    primer_apellido: Optional[str] = Field(default=None, max_length=100)
+    programa: str = Field(min_length=1, max_length=150)
+    fecha_grado: Optional[str] = None
+    motivo: str = Field(min_length=5, max_length=500)
+
+
+class EgresadoManualUpdate(BaseModel):
+    primer_nombre: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    primer_apellido: Optional[str] = Field(default=None, max_length=100)
+    programa: Optional[str] = Field(default=None, min_length=1, max_length=150)
+    fecha_grado: Optional[str] = None
+    motivo: str = Field(min_length=5, max_length=500)
+
+
+class EliminarEgresadoRequest(BaseModel):
+    motivo: str = Field(min_length=5, max_length=500)
+
+
+class OperacionEgresadoResponse(BaseModel):
+    documento: str
+    estado: str
+
+
+def _documentos_visibles(db: Session, sede_id: int):
+    medidos = db.query(Medicion.egresado_documento).filter(Medicion.sede_id == sede_id)
+    manuales = db.query(EgresadoSede.egresado_documento).filter(EgresadoSede.sede_id == sede_id)
+    return medidos.union(manuales)
+
+
+def _query_directorio(db: Session, sede_id: int, q: Optional[str], programa: Optional[str]):
+    query = db.query(Egresado).filter(Egresado.numero_documento.in_(_documentos_visibles(db, sede_id)))
     if q:
         termino = f"%{q}%"
-        query = query.filter(
-            or_(
-                Egresado.numero_documento.like(termino),
-                Egresado.primer_nombre.like(termino),
-                Egresado.primer_apellido.like(termino)
-            )
-        )
-        
-    # Filtrar por programa
+        query = query.filter(or_(Egresado.numero_documento.like(termino), Egresado.primer_nombre.like(termino), Egresado.primer_apellido.like(termino)))
     if programa:
         query = query.filter(Egresado.programa == programa)
+    return query.order_by(Egresado.primer_apellido, Egresado.primer_nombre)
 
-    total_registros = query.count()
-    
-    # Paginacin
-    offset = (page - 1) * limit
-    egresados = query.offset(offset).limit(limit).all()
 
-    # Formatear la salida
-    resultados = []
-    for e in egresados:
-        # Buscar en qu momentos ha participado
-        momentos = db.query(Medicion.momento, Medicion.anio).filter(Medicion.egresado_documento == e.numero_documento).all()
-        
-        historial = [f"M{m.momento} ({m.anio if m.anio else 'N/A'})" for m in momentos]
-        
-        resultados.append({
-            "documento": e.numero_documento,
-            "nombre_completo": f"{e.primer_nombre} {e.primer_apellido}".strip(),
-            "programa": e.programa,
-            "fecha_grado": e.fecha_grado.strftime("%Y-%m-%d") if e.fecha_grado else "N/A",
-            "encuestas": ", ".join(historial) if historial else "Ninguna"
-        })
+def _parse_fecha(value: Optional[str]):
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%Y-%m-%d")
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="fecha_grado debe usar YYYY-MM-DD") from exc
 
-    return {
-        "total": total_registros,
-        "page": page,
-        "limit": limit,
-        "data": resultados
-    }
 
-@router.get("/programas")
-def obtener_programas_unicos(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
-    query = db.query(Egresado.programa).filter(Egresado.programa != None)
-    if current_user.get('rol') == 'Coordinador_Sede':
-        query = query.join(Medicion).filter(Medicion.sede_id == current_user.get('sede_id'))
-    programas = query.distinct().all()
+def _auditar(db: Session, user: dict, documento: str, accion: str, cambios: dict, motivo: str):
+    db.add(AuditoriaEgresado(accion=accion, actor_id=user["usuario_id"], actor_correo=user["correo"], sede_id=user["sede_id"], egresado_documento=documento, cambios=cambios, motivo=motivo))
 
-    return [p[0] for p in programas if p[0]]
 
-@router.get("/perfil/{documento}")
-def obtener_perfil_egresado(documento: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
-    egresado = db.query(Egresado).filter(Egresado.numero_documento == documento).first()
+def _item(db: Session, egresado: Egresado, sede_id: int) -> dict:
+    momentos = db.query(Medicion.momento, Medicion.anio).filter(Medicion.egresado_documento == egresado.numero_documento, Medicion.sede_id == sede_id).all()
+    historial = [f"M{m.momento} ({m.anio if m.anio else 'N/A'})" for m in momentos]
+    return {"documento": egresado.numero_documento, "nombre_completo": f"{egresado.primer_nombre} {egresado.primer_apellido or ''}".strip(), "programa": egresado.programa, "fecha_grado": egresado.fecha_grado.strftime("%Y-%m-%d") if egresado.fecha_grado else "N/A", "encuestas": ", ".join(historial) if historial else "Ninguna"}
+
+
+@router.get("/tabla", response_model=DirectorioResponse)
+def obtener_directorio(q: Optional[str] = None, programa: Optional[str] = None, page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=100), db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
+    query = _query_directorio(db, current_user["sede_id"], q, programa)
+    total = query.count()
+    return {"total": total, "page": page, "limit": limit, "data": [_item(db, e, current_user["sede_id"]) for e in query.offset((page - 1) * limit).limit(limit).all()]}
+
+
+@router.get("/programas", response_model=List[str])
+def obtener_programas_unicos(db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
+    filas = db.query(Egresado.programa).filter(Egresado.programa.is_not(None), Egresado.numero_documento.in_(_documentos_visibles(db, current_user["sede_id"]))).distinct().all()
+    return sorted(p[0] for p in filas if p[0])
+
+
+@router.get("/perfil/{documento}", response_model=PerfilEgresadoResponse)
+def obtener_perfil_egresado(documento: str, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
+    egresado = db.query(Egresado).filter(Egresado.numero_documento == documento, Egresado.numero_documento.in_(_documentos_visibles(db, current_user["sede_id"]))).first()
     if not egresado:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=404, detail="Egresado no encontrado")
-        
-    med_query = db.query(Medicion).filter(Medicion.egresado_documento == documento)
-    if current_user.get('rol') == 'Coordinador_Sede':
-        med_query = med_query.filter(Medicion.sede_id == current_user.get('sede_id'))
-    mediciones = med_query.order_by(Medicion.momento).all()
-    
-    if not mediciones and current_user.get('rol') == 'Coordinador_Sede':
-        raise HTTPException(status_code=403, detail="No tiene permisos para ver este egresado")
-
-    
+        raise HTTPException(status_code=404, detail="Egresado no encontrado en su sede")
+    mediciones = db.query(Medicion).filter(Medicion.egresado_documento == documento, Medicion.sede_id == current_user["sede_id"]).order_by(Medicion.momento).all()
     encuestas = []
-    for m in mediciones:
-        # Extraer variables clave del JSON para la vista rpida
-        salario = m.respuestas.get("Cul es su ingreso mensual actual (salario ms comisiones) en Salarios Mnimos Mensuales Legales Vigentes (SMMLV)?") or m.respuestas.get("Ingreso_Mensual") or "No informa"
-        empleabilidad = m.respuestas.get("En la actualidad, realiza alguna actividad remunerada?") or m.respuestas.get("Situacion_Actual") or "No informa"
-        
-        encuestas.append({
-            "momento": m.momento,
-            "anio": m.anio,
-            "empleabilidad": empleabilidad,
-            "salario": salario,
-            "respuestas_completas": m.respuestas
-        })
-        
-    return {
-        "documento": egresado.numero_documento,
-        "nombre_completo": f"{egresado.primer_nombre} {egresado.primer_apellido}".strip(),
-        "programa": egresado.programa,
-        "fecha_grado": egresado.fecha_grado.strftime("%Y-%m-%d") if egresado.fecha_grado else "N/A",
-        "encuestas": encuestas
-    }
+    for medicion in mediciones:
+        respuestas = medicion.respuestas or {}
+        encuestas.append({"momento": medicion.momento, "anio": medicion.anio, "empleabilidad": respuestas.get("Situacion_Actual") or "No informa", "salario": respuestas.get("Ingreso_Mensual") or "No informa", "respuestas_completas": respuestas})
+    return {"documento": documento, "nombre_completo": f"{egresado.primer_nombre} {egresado.primer_apellido or ''}".strip(), "programa": egresado.programa, "fecha_grado": egresado.fecha_grado.strftime("%Y-%m-%d") if egresado.fecha_grado else "N/A", "encuestas": encuestas}
+
+
+@router.post("/egresados", response_model=OperacionEgresadoResponse, status_code=201)
+def crear_egresado(payload: EgresadoManualRequest, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
+    documento = payload.numero_documento.strip()
+    if db.get(Egresado, documento):
+        raise HTTPException(status_code=409, detail="El documento ya existe; use la edición o solicite resolución institucional")
+    egresado = Egresado(numero_documento=documento, primer_nombre=payload.primer_nombre.strip(), primer_apellido=(payload.primer_apellido or "").strip() or None, programa=payload.programa.strip(), fecha_grado=_parse_fecha(payload.fecha_grado))
+    db.add(egresado)
+    db.flush()
+    db.add(EgresadoSede(egresado_documento=documento, sede_id=current_user["sede_id"], creado_por_id=current_user["usuario_id"]))
+    _auditar(db, current_user, documento, "crear", {"despues": payload.model_dump(exclude={"motivo"})}, payload.motivo)
+    db.commit()
+    return {"documento": documento, "estado": "creado"}
+
+
+def _egresado_editable(db: Session, documento: str, sede_id: int) -> Egresado:
+    egresado = db.query(Egresado).filter(Egresado.numero_documento == documento, Egresado.numero_documento.in_(_documentos_visibles(db, sede_id))).first()
+    if not egresado:
+        raise HTTPException(status_code=404, detail="Egresado no encontrado en su sede")
+    if db.query(Medicion.id).filter(Medicion.egresado_documento == documento, Medicion.sede_id != sede_id).first() or db.query(EgresadoSede.id).filter(EgresadoSede.egresado_documento == documento, EgresadoSede.sede_id != sede_id).first():
+        raise HTTPException(status_code=409, detail="El registro está vinculado a otra sede y requiere resolución institucional")
+    return egresado
+
+
+@router.patch("/egresados/{documento}", response_model=OperacionEgresadoResponse)
+def editar_egresado(documento: str, payload: EgresadoManualUpdate, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
+    egresado = _egresado_editable(db, documento, current_user["sede_id"])
+    antes = {"primer_nombre": egresado.primer_nombre, "primer_apellido": egresado.primer_apellido, "programa": egresado.programa, "fecha_grado": egresado.fecha_grado.isoformat() if egresado.fecha_grado else None}
+    cambios = payload.model_dump(exclude_none=True, exclude={"motivo"})
+    if "fecha_grado" in cambios:
+        cambios["fecha_grado"] = _parse_fecha(cambios["fecha_grado"])
+    for campo, valor in cambios.items():
+        setattr(egresado, campo, valor.strip() if isinstance(valor, str) else valor)
+    _auditar(db, current_user, documento, "editar", {"antes": antes, "despues": {k: v.isoformat() if isinstance(v, datetime) else v for k, v in cambios.items()}}, payload.motivo)
+    db.commit()
+    return {"documento": documento, "estado": "actualizado"}
+
+
+@router.delete("/egresados/{documento}", response_model=OperacionEgresadoResponse)
+def eliminar_egresado(documento: str, payload: EliminarEgresadoRequest, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
+    egresado = _egresado_editable(db, documento, current_user["sede_id"])
+    if db.query(Medicion.id).filter(Medicion.egresado_documento == documento).first():
+        raise HTTPException(status_code=409, detail="No se elimina un egresado con mediciones; retire primero la carga fuente")
+    snapshot = {"primer_nombre": egresado.primer_nombre, "primer_apellido": egresado.primer_apellido, "programa": egresado.programa, "fecha_grado": egresado.fecha_grado.isoformat() if egresado.fecha_grado else None}
+    db.query(EgresadoSede).filter(EgresadoSede.egresado_documento == documento, EgresadoSede.sede_id == current_user["sede_id"]).delete()
+    db.delete(egresado)
+    _auditar(db, current_user, documento, "eliminar", {"antes": snapshot}, payload.motivo)
+    db.commit()
+    return {"documento": documento, "estado": "eliminado"}
+
+
+@router.get("/exportar.xlsx", response_class=Response, responses={200: {"content": {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {"schema": {"type": "string", "format": "binary"}}}, "description": "Directorio Excel"}})
+def exportar_directorio(q: Optional[str] = None, programa: Optional[str] = None, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
+    filas = _query_directorio(db, current_user["sede_id"], q, programa).all()
+    datos = [{"Documento": e.numero_documento, "Nombre": f"{e.primer_nombre} {e.primer_apellido or ''}".strip(), "Programa": e.programa, "Fecha de grado": e.fecha_grado.date() if e.fecha_grado else None} for e in filas]
+    buffer = BytesIO()
+    pd.DataFrame(datos, columns=["Documento", "Nombre", "Programa", "Fecha de grado"]).to_excel(buffer, index=False, sheet_name="Directorio")
+    return Response(content=buffer.getvalue(), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": 'attachment; filename="directorio-egresados.xlsx"'})

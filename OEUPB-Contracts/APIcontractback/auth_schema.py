@@ -12,7 +12,7 @@ class UsuarioDto(BaseModel):
     id: int
     nombre: str
     correo: EmailStr
-    rol: Literal['Admin_CTIC', 'Coordinador_Sede', 'Directivo']
+    rol: Literal['Admin_CTIC', 'Coordinador_Sede', 'Usuario_Consulta']
     sede_id: Optional[int] = None
 
 # --- DTOs de Salida (Responses) ---

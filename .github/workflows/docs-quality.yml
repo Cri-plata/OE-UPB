@@ -1,0 +1,25 @@
+name: Documentation quality
+
+on:
+  pull_request:
+    paths:
+      - "OEUPB-Docs/**"
+      - "tools/validate_docs.py"
+      - ".github/workflows/docs-quality.yml"
+  push:
+    paths:
+      - "OEUPB-Docs/**"
+      - "tools/validate_docs.py"
+      - ".github/workflows/docs-quality.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Validate local links and OpenAPI
+        run: python tools/validate_docs.py
+
