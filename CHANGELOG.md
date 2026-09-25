@@ -3,6 +3,10 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Cambiado (2026-09-25)
+- **Gobierno de UI:** `OEUPB-Docs/design/design.md` pasa a ser la fuente canónica para mockups y frontend; todo cambio visual requiere un mockup previo y la actualización del mapa de pantallas.
+- **Iconografía:** se prohíben emojis en la interfaz, se adopta Lucide como librería estándar y se retiró el emoji heredado de la pantalla de carga.
+
 ### Añadido (2026-09-24)
 - **Higiene del repositorio:** se retiraron 73 scripts históricos ad hoc, se organizó un generador Excel reproducible y se cerraron la trazabilidad RF y las decisiones documentales pendientes.
 - **Autenticación endurecida:** secreto obligatorio y robusto fuera de desarrollo, credenciales temporales con expiración, recuperación RBAC auditada y modo inicial aleatorio obligatorio en producción.

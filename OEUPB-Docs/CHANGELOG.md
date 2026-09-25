@@ -2,6 +2,22 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-09-25] - Corrección integral de mockups según auditoría
+
+* **Tokens y espaciado:** se expuso la cadencia modular de espaciado (`--space-2xs` a `--space-3xl`), radios (`--radius-sm` a `--radius-full`) y padding dinámico en `mockups.css`.
+* **Sidebar responsive:** implementación del rail iconográfico de 72 px en tablet (`768–1279 px`) y drawer overlay para móvil (`< 768 px`) con barra superior institucional (`.mobile-header`), toggle accesible y backdrop oscuro.
+* **Contención horizontal:** se creó `.table-scroll` y se fijaron anchos mínimos específicos para Directorio (900 px), Gestión de usuarios (1000 px) e Historial de carga (650 px), retirando recortes invisibles en `.table-card`.
+* **Jerarquía de acciones:** botones compactos de tabla a 32 px; acciones destructivas de fila (`Eliminar`, `Desactivar`, `Retirar`) migradas a estilo outline sutil (`.table-action.btn-danger`), reservando el relleno sólido para confirmaciones en modal.
+* **Formularios y modales:** etiquetas accesibles visibles en login y cambio de contraseña; panel de control del Explorador reestructurado en dos filas; modales con contención vertical, scroll interno y apilamiento en móvil.
+* **Mapa de pantallas:** `screen-map.md` actualizado con matriz de anchos de referencia responsive y registro exhaustivo de variantes por pantalla.
+* **Regla de tarjetas sin bordes de acento:** se prohibieron explícitamente los bordes de acento de color laterales (izquierdo/derecho) o superiores en tarjetas y paneles en `design/design.md`, `CLAUDE.md` y `screen-map.md`, retirando la clase `border-alert` en `analitica.html` y bordes laterales de contenedores.
+
+## [2026-09-25] - Mockups de las pantallas actuales
+
+* **Diseño:** `design/design.md` reemplaza formalmente a `design-system.md` como fuente canónica y obligatoria para mockups y frontend. Se añadieron reglas de iconografía Lucide, estados, modales, gráficos, tablas, carga de archivos y el bloqueo de implementación sin mockup previo.
+* **Mockups:** se añadieron HTML/CSS navegables de las pantallas existentes en `mockups/`, junto con un mapa de pantallas, roles y flujos. Cada pantalla tiene un HTML estilizado en la misma carpeta que `mockups.css`; los dos modales implementados se documentan en variantes con y sin modal y las tablas muestran datos sintéticos para revisión visual.
+* **Gobierno UI:** `screen-map.md` pasa a ser obligatorio en todo cambio de pantalla o flujo y se prohíben emojis y pictogramas Unicode como sustitutos de iconos.
+
 ## [2026-09-25] - Hallazgos de Explorador y publicaciones
 
 * **Privacidad:** se documentó la exclusión obligatoria de PII y metadatos del catálogo graficable mediante RN-31 y EXP-02.

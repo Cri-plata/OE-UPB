@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>OE UPB · Directorio</title>
+    <link rel="stylesheet" href="mockups.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-input" />
+      <header class="mobile-header">
+        <div class="mobile-brand">
+          <div class="brand-mark">UPB</div>
+          <span>OEUPB</span>
+        </div>
+        <label for="sidebar-toggle" class="menu-toggle-btn" aria-label="Abrir menú de navegación"></label>
+      </header>
+      <label for="sidebar-toggle" class="sidebar-backdrop" aria-label="Cerrar menú"></label>
+      <aside class="sidebar">
+        <div class="sidebar-mobile-close">
+          <label for="sidebar-toggle" class="sidebar-close-btn" aria-label="Cerrar menú"></label>
+        </div>
+        <div class="brand">
+          <div class="brand-mark">UPB</div>
+          <h2 class="brand-title">OEUPB</h2>
+        </div>
+        <nav class="nav-menu">
+          <a class="nav-item" href="reporte-general.html" title="Reporte general"><span class="nav-item-text">Reporte general</span></a>
+          <a class="nav-item" href="tendencias.html" title="Tendencias"><span class="nav-item-text">Tendencias</span></a>
+          <a class="nav-item" href="explorador.html" title="Explorador de Datos"><span class="nav-item-text">Explorador de Datos</span></a>
+          <a class="nav-item" href="analitica.html" title="Analítica y alertas"><span class="nav-item-text">Analítica y alertas</span></a>
+          <a class="nav-item active" href="directorio.html" title="Directorio"><span class="nav-item-text">Directorio</span></a>
+          <a class="nav-item" href="publicaciones.html" title="Gráficas publicadas"><span class="nav-item-text">Gráficas publicadas</span></a>
+          <a class="nav-item" href="carga-datos.html" title="Cargar datos"><span class="nav-item-text">Cargar datos</span></a>
+          <a class="nav-item" href="gestion-usuarios.html" title="Administrar Usuarios"><span class="nav-item-text">Administrar Usuarios</span></a>
+          <a class="nav-item" href="mi-perfil.html" title="Mi Perfil"><span class="nav-item-text">Mi Perfil</span></a>
+        </nav>
+        <div class="bottom-menu">
+          <a class="logout-btn" href="login.html" title="Cerrar Sesión"><span>Cerrar Sesión</span></a>
+        </div>
+      </aside>
+      <main class="content">
+        <section class="page">
+          <header class="page-header">
+            <div class="page-header-content">
+              <h1>Directorio de Egresados</h1>
+              <p>Busca e inspecciona el historial de encuestas de cada egresado.</p>
+            </div>
+            <div class="page-actions">
+              <button class="btn-secondary">Exportar Excel</button>
+              <button class="btn-primary">Nuevo egresado</button>
+            </div>
+          </header>
+          <div class="directory-filters">
+            <div class="control-group">
+              <label>Buscar por Nombre o Cédula</label>
+              <input placeholder="Ej: Juan Pérez o 10394..." />
+            </div>
+            <div class="control-group">
+              <label>Filtrar por Programa</label>
+              <select>
+                <option>Todos los Programas</option>
+                <option>Ingeniería Industrial</option>
+                <option>Administración de Empresas</option>
+                <option>Derecho</option>
+              </select>
+            </div>
+            <button class="btn-primary">Buscar</button>
+          </div>
+          <article class="card table-card">
+            <div class="table-scroll">
+              <table class="directory-table">
+                <thead>
+                  <tr>
+                    <th>Documento</th>
+                    <th>Nombre Completo</th>
+                    <th>Programa Académico</th>
+                    <th>Fecha Grado</th>
+                    <th>Encuestas Respondidas</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1000000001</td>
+                    <td><a href="ficha-egresado.html" class="table-link"><strong>Egresada Demo 01</strong></a></td>
+                    <td>Ingeniería Industrial</td>
+                    <td>2024-06-21</td>
+                    <td><span class="badge">M0 · M1</span></td>
+                    <td>
+                      <div class="table-actions">
+                        <a class="btn-secondary table-action" href="ficha-egresado.html">Ver ficha</a>
+                        <button class="btn-secondary table-action">Editar</button>
+                        <button class="btn-danger table-action">Eliminar</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>1000000002</td>
+                    <td><a href="ficha-egresado.html" class="table-link"><strong>Egresado Demo 02</strong></a></td>
+                    <td>Administración de Empresas</td>
+                    <td>2023-11-17</td>
+                    <td><span class="badge">M0 · M1 · M5</span></td>
+                    <td>
+                      <div class="table-actions">
+                        <a class="btn-secondary table-action" href="ficha-egresado.html">Ver ficha</a>
+                        <button class="btn-secondary table-action">Editar</button>
+                        <button class="btn-danger table-action">Eliminar</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>1000000003</td>
+                    <td><a href="ficha-egresado.html" class="table-link"><strong>Egresada Demo 03</strong></a></td>
+                    <td>Derecho</td>
+                    <td>2025-02-28</td>
+                    <td><span class="badge">M0</span></td>
+                    <td>
+                      <div class="table-actions">
+                        <a class="btn-secondary table-action" href="ficha-egresado.html">Ver ficha</a>
+                        <button class="btn-secondary table-action">Editar</button>
+                        <button class="btn-danger table-action">Eliminar</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pagination">
+              <button class="btn-secondary">Anterior</button>
+              <span>Página 1 de 1 (3 registros totales)</span>
+              <button class="btn-secondary">Siguiente</button>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

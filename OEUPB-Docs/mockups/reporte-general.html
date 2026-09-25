@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>OE UPB · Reporte general</title>
+    <link rel="stylesheet" href="mockups.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-input" />
+      <header class="mobile-header">
+        <div class="mobile-brand">
+          <div class="brand-mark">UPB</div>
+          <span>OEUPB</span>
+        </div>
+        <label for="sidebar-toggle" class="menu-toggle-btn" aria-label="Abrir menú de navegación"></label>
+      </header>
+      <label for="sidebar-toggle" class="sidebar-backdrop" aria-label="Cerrar menú"></label>
+      <aside class="sidebar">
+        <div class="sidebar-mobile-close">
+          <label for="sidebar-toggle" class="sidebar-close-btn" aria-label="Cerrar menú"></label>
+        </div>
+        <div class="brand">
+          <div class="brand-mark">UPB</div>
+          <h2 class="brand-title">OEUPB</h2>
+        </div>
+        <nav class="nav-menu">
+          <a class="nav-item active" href="reporte-general.html" title="Reporte general"><span class="nav-item-text">Reporte general</span></a>
+          <a class="nav-item" href="tendencias.html" title="Tendencias"><span class="nav-item-text">Tendencias</span></a>
+          <a class="nav-item" href="explorador.html" title="Explorador de Datos"><span class="nav-item-text">Explorador de Datos</span></a>
+          <a class="nav-item" href="analitica.html" title="Analítica y alertas"><span class="nav-item-text">Analítica y alertas</span></a>
+          <a class="nav-item" href="directorio.html" title="Directorio"><span class="nav-item-text">Directorio</span></a>
+          <a class="nav-item" href="publicaciones.html" title="Gráficas publicadas"><span class="nav-item-text">Gráficas publicadas</span></a>
+          <a class="nav-item" href="carga-datos.html" title="Cargar datos"><span class="nav-item-text">Cargar datos</span></a>
+          <a class="nav-item" href="gestion-usuarios.html" title="Administrar Usuarios"><span class="nav-item-text">Administrar Usuarios</span></a>
+          <a class="nav-item" href="mi-perfil.html" title="Mi Perfil"><span class="nav-item-text">Mi Perfil</span></a>
+        </nav>
+        <div class="bottom-menu">
+          <a class="logout-btn" href="login.html" title="Cerrar Sesión"><span>Cerrar Sesión</span></a>
+        </div>
+      </aside>
+      <main class="content">
+        <section class="page">
+          <header class="page-header">
+            <div class="page-header-content">
+              <h1>Reporte General de Egresados</h1>
+              <p>Visión global de los indicadores clave de empleabilidad y satisfacción.</p>
+            </div>
+            <img
+              class="shield"
+              src="../../OEUPB-Frontend/public/escudo-upb.png"
+              alt="Escudo UPB"
+            />
+          </header>
+          <div class="kpi-grid">
+            <article class="kpi-card">
+              <div class="kpi-icon blue">
+                <i data-lucide="users" aria-hidden="true"></i>
+              </div>
+              <div>
+                <h3>Total Egresados</h3>
+                <strong>Cargando...</strong>
+                <small>Registrados en la sede</small>
+              </div>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-icon green">
+                <i data-lucide="activity" aria-hidden="true"></i>
+              </div>
+              <div>
+                <h3>Tasa de Empleabilidad</h3>
+                <strong>...%</strong>
+                <small>Actualmente trabajando</small>
+              </div>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-icon red">
+                <i data-lucide="briefcase-business" aria-hidden="true"></i>
+              </div>
+              <div>
+                <h3>Promedio Salarial</h3>
+                <strong>... SMLV</strong>
+                <small>Salarios Mínimos Legales Vigentes</small>
+              </div>
+            </article>
+          </div>
+          <div class="two-column">
+            <article class="card chart-card">
+              <div class="chart-header">
+                <h2>Distribución por Programa</h2>
+                <div class="chart-actions">
+                  <button class="btn-secondary">PNG</button>
+                  <select>
+                    <option>Dona (Por defecto)</option>
+                    <option>Barras</option>
+                  </select>
+                  <button class="publish">Publicar</button>
+                </div>
+              </div>
+              <div class="chart-placeholder">Cargando indicadores...</div>
+            </article>
+            <article class="card chart-card">
+              <div class="chart-header">
+                <h2>Nivel de Satisfacción (1 al 4)</h2>
+                <div class="chart-actions">
+                  <button class="btn-secondary">PNG</button>
+                  <select>
+                    <option>Barras (Por defecto)</option>
+                    <option>Líneas</option>
+                  </select>
+                  <button class="publish">Publicar</button>
+                </div>
+              </div>
+              <div class="chart-placeholder">Cargando indicadores...</div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>

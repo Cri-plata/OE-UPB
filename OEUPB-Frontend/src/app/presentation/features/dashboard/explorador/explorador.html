@@ -2,33 +2,30 @@
   <app-sidebar></app-sidebar>
   
   <main class="content">
-    <div class="top-banner">
-      <div class="banner-text">
+    <header class="page-header">
+      <div class="page-header-content">
         <h1>Explorador Dinámico de Reportes</h1>
         <p>Cruza, filtra y analiza libremente cualquiera de las 53 preguntas de la encuesta oficial SNIES.</p>
       </div>
-      <div class="upb-logo">
-        <img src="/escudo-upb.png" alt="Escudo UPB" class="escudo-img">
-      </div>
-    </div>
+      <img src="escudo-upb.png" alt="Escudo UPB" class="shield">
+    </header>
 
-    <div class="dashboard-container">
-      
+    <div class="explorador-content">
       <!-- Panel de Control / Filtros -->
-      <div class="control-panel">
+      <div class="card control-panel">
         <div class="filters-row">
           <div class="control-group full-width">
             <label>¿Qué pregunta deseas graficar? (Eje X)</label>
-            <select class="custom-select" [(ngModel)]="preguntaSeleccionada" (change)="generarGrafica()">
+            <select class="form-control" [(ngModel)]="preguntaSeleccionada" (change)="generarGrafica()">
               <option *ngFor="let p of preguntasDisponibles" [value]="p">{{ p | slice:0:120 }}{{p.length > 120 ? '...' : ''}}</option>
             </select>
           </div>
         </div>
         
-        <div class="filters-row mt-3">
+        <div class="filters-row">
           <div class="control-group">
             <label>Filtrar por Momento:</label>
-            <select class="custom-select" [(ngModel)]="momentoSeleccionado" (change)="generarGrafica()">
+            <select class="form-control" [(ngModel)]="momentoSeleccionado" (change)="generarGrafica()">
               <option value="">Todas las cohortes / momentos</option>
               <option *ngFor="let m of momentosDisponibles" [value]="m">Momento {{ m }}</option>
             </select>
@@ -36,7 +33,7 @@
 
           <div class="control-group">
             <label>Filtrar por Programa:</label>
-            <select class="custom-select" [(ngModel)]="programaSeleccionado" (change)="generarGrafica()">
+            <select class="form-control" [(ngModel)]="programaSeleccionado" (change)="generarGrafica()">
               <option value="">Todos los programas</option>
               <option *ngFor="let prog of programasDisponibles" [value]="prog">{{ prog }}</option>
             </select>
@@ -44,7 +41,7 @@
 
           <div class="control-group">
             <label>Filtrar por Año de Medición:</label>
-            <select class="custom-select" [(ngModel)]="anioSeleccionado" (change)="generarGrafica()">
+            <select class="form-control" [(ngModel)]="anioSeleccionado" (change)="generarGrafica()">
               <option value="">Todos los años</option>
               <option *ngFor="let anio of aniosDisponibles" [value]="anio">{{ anio }}</option>
             </select>
@@ -52,7 +49,7 @@
           
           <div class="control-group">
             <label>Tipo de Gráfica:</label>
-            <select class="custom-select" [(ngModel)]="tipoGrafico">
+            <select class="form-control" [(ngModel)]="tipoGrafico">
               <option value="bar">Barras Verticales</option>
               <option value="pie">Gráfico de Pastel (Pie)</option>
               <option value="doughnut">Gráfico de Dona</option>
@@ -62,12 +59,14 @@
         </div>
       </div>
 
-      <div class="chart-container">
-        <button (click)="exportarGrafica()">Exportar PNG</button>
-        <div class="publication-header">
-          <h2>Resultados: {{ preguntaSeleccionada }}</h2>
-          <button *ngIf="!publicaciones[graficaKey]" class="publish-btn" [disabled]="publicando || !isChartReady" (click)="publicar()">Publicar</button>
-          <button *ngIf="publicaciones[graficaKey]" class="withdraw-btn" [disabled]="publicando" (click)="retirar()">Retirar publicación</button>
+      <article class="card chart-card">
+        <div class="chart-header">
+          <h2 class="card-title">Resultados: {{ preguntaSeleccionada }}</h2>
+          <div class="chart-actions">
+            <button class="btn-secondary table-action" (click)="exportarGrafica()">Exportar PNG</button>
+            <button *ngIf="!publicaciones[graficaKey]" class="btn-primary table-action" [disabled]="publicando || !isChartReady" (click)="publicar()">Publicar</button>
+            <button *ngIf="publicaciones[graficaKey]" class="btn-secondary table-action" [disabled]="publicando" (click)="retirar()">Retirar publicación</button>
+          </div>
         </div>
         <div id="grafica-explorador" class="chart-wrapper" *ngIf="isChartReady">
           <canvas baseChart
@@ -79,8 +78,7 @@
         <div class="loading-state" *ngIf="!isChartReady">
           Cargando gráfica dinámica...
         </div>
-      </div>
-
+      </article>
     </div>
   </main>
 </div>

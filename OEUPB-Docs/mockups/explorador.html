@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>OE UPB · Explorador</title>
+    <link rel="stylesheet" href="mockups.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-input" />
+      <header class="mobile-header">
+        <div class="mobile-brand">
+          <div class="brand-mark">UPB</div>
+          <span>OEUPB</span>
+        </div>
+        <label for="sidebar-toggle" class="menu-toggle-btn" aria-label="Abrir menú de navegación"></label>
+      </header>
+      <label for="sidebar-toggle" class="sidebar-backdrop" aria-label="Cerrar menú"></label>
+      <aside class="sidebar">
+        <div class="sidebar-mobile-close">
+          <label for="sidebar-toggle" class="sidebar-close-btn" aria-label="Cerrar menú"></label>
+        </div>
+        <div class="brand">
+          <div class="brand-mark">UPB</div>
+          <h2 class="brand-title">OEUPB</h2>
+        </div>
+        <nav class="nav-menu">
+          <a class="nav-item" href="reporte-general.html" title="Reporte general"><span class="nav-item-text">Reporte general</span></a>
+          <a class="nav-item" href="tendencias.html" title="Tendencias"><span class="nav-item-text">Tendencias</span></a>
+          <a class="nav-item active" href="explorador.html" title="Explorador de Datos"><span class="nav-item-text">Explorador de Datos</span></a>
+          <a class="nav-item" href="analitica.html" title="Analítica y alertas"><span class="nav-item-text">Analítica y alertas</span></a>
+          <a class="nav-item" href="directorio.html" title="Directorio"><span class="nav-item-text">Directorio</span></a>
+          <a class="nav-item" href="publicaciones.html" title="Gráficas publicadas"><span class="nav-item-text">Gráficas publicadas</span></a>
+          <a class="nav-item" href="carga-datos.html" title="Cargar datos"><span class="nav-item-text">Cargar datos</span></a>
+          <a class="nav-item" href="gestion-usuarios.html" title="Administrar Usuarios"><span class="nav-item-text">Administrar Usuarios</span></a>
+          <a class="nav-item" href="mi-perfil.html" title="Mi Perfil"><span class="nav-item-text">Mi Perfil</span></a>
+        </nav>
+        <div class="bottom-menu">
+          <a class="logout-btn" href="login.html" title="Cerrar Sesión"><span>Cerrar Sesión</span></a>
+        </div>
+      </aside>
+      <main class="content">
+        <section class="page">
+          <header class="page-header">
+            <div class="page-header-content">
+              <h1>Explorador Dinámico de Reportes</h1>
+              <p>Cruza, filtra y analiza libremente cualquiera de las variables analíticas oficiales de egresados.</p>
+            </div>
+            <img
+              class="shield"
+              src="../../OEUPB-Frontend/public/escudo-upb.png"
+              alt="Escudo UPB"
+            />
+          </header>
+          <div class="control-panel">
+            <div class="control-row-primary">
+              <div class="control-group wide">
+                <label>¿Qué pregunta deseas graficar? (Eje X)</label>
+                <select>
+                  <option>Selecciona una variable analítica...</option>
+                  <option>Situación laboral actual</option>
+                  <option>Sector económico de vinculación</option>
+                  <option>Nivel de satisfacción con la formación</option>
+                  <option>Rango de ingreso salarial</option>
+                </select>
+              </div>
+              <div class="control-actions">
+                <button class="btn-primary">Generar gráfica</button>
+                <button class="btn-secondary">Restablecer</button>
+              </div>
+            </div>
+            <div class="control-row-secondary">
+              <div class="control-group">
+                <label>Filtrar por Momento:</label>
+                <select>
+                  <option>Todas las cohortes / momentos</option>
+                  <option>Momento 0</option>
+                  <option>Momento 1</option>
+                  <option>Momento 5</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label>Filtrar por Programa:</label>
+                <select>
+                  <option>Todos los programas</option>
+                  <option>Ingeniería Industrial</option>
+                  <option>Administración de Empresas</option>
+                  <option>Derecho</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label>Año de Medición:</label>
+                <select>
+                  <option>Todos los años</option>
+                  <option>2025</option>
+                  <option>2024</option>
+                  <option>2023</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label>Tipo de Gráfica:</label>
+                <select>
+                  <option>Barras Verticales</option>
+                  <option>Barras Horizontales</option>
+                  <option>Líneas</option>
+                  <option>Dona</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <article class="card chart-card">
+            <div class="chart-header">
+              <h2>Resultado del cruce</h2>
+              <div class="chart-actions">
+                <button class="btn-secondary">Exportar PNG</button>
+                <button class="publish">Publicar gráfica</button>
+              </div>
+            </div>
+            <div class="chart-placeholder">
+              Selecciona una variable para generar la gráfica.
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

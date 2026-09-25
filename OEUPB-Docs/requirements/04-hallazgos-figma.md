@@ -1,6 +1,6 @@
 # Hallazgos y Análisis de Mockups (OE UPB)
 
-> **Estado:** evidencia histórica de diseño. La fuente vigente para estilos y componentes es [`../design/design-system.md`](../design/design-system.md). La selección manual de sede durante la carga y el rechazo genérico de cédulas duplicadas quedaron reemplazados por RN-01, RN-06 y ADR-006. La publicación entre sedes ocurre desde cada gráfica, no desde la pantalla de carga.
+> **Estado:** evidencia histórica de diseño. La fuente vigente para estilos y componentes es [`../design/design.md`](../design/design.md). La selección manual de sede durante la carga y el rechazo genérico de cédulas duplicadas quedaron reemplazados por RN-01, RN-06 y ADR-006. La publicación entre sedes ocurre desde cada gráfica, no desde la pantalla de carga.
 
 Tras analizar los 8 nuevos mockups (UI en Modo Claro / Blanco con colores institucionales UPB) y cruzarlos con las Actas de Reunión del 19 de Agosto, se han encontrado las siguientes correspondencias y faltantes:
 

@@ -1,37 +1,58 @@
-﻿<aside class="sidebar">
+<aside class="sidebar">
   <div class="brand">
-    <div class="logo">UPB</div>
-    <h2>OEUPB</h2>
+    <div class="brand-mark">UPB</div>
+    <h2 class="brand-title">OEUPB</h2>
   </div>
-  
+
   <nav class="nav-menu">
     <!-- Los reportes actuales son privados de la sede y exclusivos del coordinador. -->
     <ng-container *ngIf="userRole === 'Coordinador_Sede'">
-      <a routerLink="/reporte" routerLinkActive="active" class="nav-item">Reporte general</a>
-      <a routerLink="/tendencias" routerLinkActive="active" class="nav-item">Tendencias</a>
-      <a routerLink="/explorador" routerLinkActive="active" class="nav-item">Explorador de Datos</a>
-      <a routerLink="/analitica" routerLinkActive="active" class="nav-item">Analítica y alertas</a>
-      <a routerLink="/directorio" routerLinkActive="active" class="nav-item">Directorio</a>
+      <a routerLink="/reporte" routerLinkActive="active" class="nav-item nav-reporte" title="Reporte general">
+        <span class="nav-item-text">Reporte general</span>
+      </a>
+      <a routerLink="/tendencias" routerLinkActive="active" class="nav-item nav-tendencias" title="Tendencias">
+        <span class="nav-item-text">Tendencias</span>
+      </a>
+      <a routerLink="/explorador" routerLinkActive="active" class="nav-item nav-explorador" title="Explorador de Datos">
+        <span class="nav-item-text">Explorador de Datos</span>
+      </a>
+      <a routerLink="/analitica" routerLinkActive="active" class="nav-item nav-analitica" title="Analítica y alertas">
+        <span class="nav-item-text">Analítica y alertas</span>
+      </a>
+      <a routerLink="/directorio" routerLinkActive="active" class="nav-item nav-directorio" title="Directorio">
+        <span class="nav-item-text">Directorio</span>
+      </a>
     </ng-container>
 
     <a *ngIf="userRole === 'Coordinador_Sede' || userRole === 'Usuario_Consulta'"
-      routerLink="/publicaciones" routerLinkActive="active" class="nav-item">Gráficas publicadas</a>
+      routerLink="/publicaciones" routerLinkActive="active" class="nav-item nav-publicaciones" title="Gráficas publicadas">
+      <span class="nav-item-text">Gráficas publicadas</span>
+    </a>
 
     <!-- Solo visible para Coordinadores -->
     <ng-container *ngIf="userRole === 'Coordinador_Sede'">
-      <a routerLink="/carga" routerLinkActive="active" class="nav-item">Cargar datos</a>
+      <a routerLink="/carga" routerLinkActive="active" class="nav-item nav-carga" title="Cargar datos">
+        <span class="nav-item-text">Cargar datos</span>
+      </a>
     </ng-container>
 
     <!-- Solo visible para Administradores CTIC -->
     <ng-container *ngIf="userRole === 'Admin_CTIC' || userRole === 'Coordinador_Sede'">
-      <a routerLink="/admin-usuarios" routerLinkActive="active" class="nav-item">Administrar Usuarios</a>
+      <a routerLink="/admin-usuarios" routerLinkActive="active" class="nav-item nav-usuarios" title="Administrar Usuarios">
+        <span class="nav-item-text">Administrar Usuarios</span>
+      </a>
     </ng-container>
+
     <!-- Perfil General -->
-    <a routerLink="/mi-perfil" routerLinkActive="active" class="nav-item">Mi Perfil</a>
+    <a routerLink="/mi-perfil" routerLinkActive="active" class="nav-item nav-perfil" title="Mi Perfil">
+      <span class="nav-item-text">Mi Perfil</span>
+    </a>
   </nav>
 
   <div class="bottom-menu">
-    <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
+    <button class="logout-btn" (click)="logout()" title="Cerrar Sesión">
+      <span>Cerrar Sesión</span>
+    </button>
   </div>
 </aside>
 

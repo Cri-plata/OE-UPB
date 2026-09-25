@@ -62,8 +62,10 @@ La URL base está centralizada en `environments/environment.ts` y `data/api/api.
 1. Servicios HTTP y repositorios pertenecen a Data; los componentes no deben crear URLs.
 2. Modelos y reglas puras pertenecen a Domain.
 3. Presentation solo coordina vista y casos de uso.
-4. Todo estilo nuevo debe usar los tokens del design system.
+4. Todo estilo nuevo debe usar los tokens y componentes de [`../design/design.md`](../design/design.md).
 5. Los permisos visibles mejoran UX, pero el backend sigue siendo la autoridad.
+6. Ninguna pantalla o modificación visual se implementa sin un mockup previo o actualizado en [`../mockups/`](../mockups/) y su entrada correspondiente en [`../mockups/screen-map.md`](../mockups/screen-map.md).
+7. No se utilizan emojis en la interfaz. Los iconos proceden de la librería estándar definida en el sistema de diseño y conservan etiquetas accesibles cuando representan acciones.
 
 ## Objetivo aprobado: permisos y publicación
 

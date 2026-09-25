@@ -1,24 +1,21 @@
-﻿<div class="layout">
+<div class="layout">
   <app-sidebar></app-sidebar>
   
   <main class="content">
-    <div class="top-banner">
-      <div class="banner-text">
+    <header class="page-header">
+      <div class="page-header-content">
         <h1>Análisis de Tendencias (Histórico)</h1>
         <p>Evolución de los indicadores de egresados a través de los momentos (0, 1 y 5 años).</p>
       </div>
-      <div class="upb-logo">
-        <img src="/escudo-upb.png" alt="Escudo UPB" class="escudo-img">
-      </div>
-    </div>
+      <img src="escudo-upb.png" alt="Escudo UPB" class="shield">
+    </header>
 
-    <div class="dashboard-container">
-      
+    <div class="tendencias-content">
       <!-- Panel de Control -->
-      <div class="control-panel">
+      <div class="card control-panel">
         <div class="control-group">
           <label>Indicador a Analizar:</label>
-          <select class="custom-select" (change)="changeIndicator($event)">
+          <select class="form-control" (change)="changeIndicator($event)">
             <option value="empleabilidad">Tasa de Empleabilidad</option>
             <option value="salario">Promedio Salarial (SMLV)</option>
             <option value="satisfaccion">Nivel de Satisfacción General</option>
@@ -26,19 +23,21 @@
         </div>
         <div class="control-group">
           <label>Tipo de Gráfico:</label>
-          <select class="custom-select" (change)="changeChartType($event)">
+          <select class="form-control" (change)="changeChartType($event)">
             <option value="line">Líneas Suavizadas</option>
             <option value="bar">Barras Comparativas</option>
           </select>
         </div>
       </div>
 
-      <div class="chart-card">
-        <button (click)="exportarGrafica()">Exportar PNG</button>
-        <div class="publication-header">
-          <h2>Evolución Histórica: {{ currentIndicatorName }}</h2>
-          <button *ngIf="!publicaciones[graficaKey]" class="publish-btn" [disabled]="publicando || !isChartReady" (click)="publicar()">Publicar</button>
-          <button *ngIf="publicaciones[graficaKey]" class="withdraw-btn" [disabled]="publicando" (click)="retirar()">Retirar publicación</button>
+      <article class="card chart-card">
+        <div class="chart-header">
+          <h2 class="card-title">Evolución Histórica: {{ currentIndicatorName }}</h2>
+          <div class="chart-actions">
+            <button class="btn-secondary table-action" (click)="exportarGrafica()">Exportar PNG</button>
+            <button *ngIf="!publicaciones[graficaKey]" class="btn-primary table-action" [disabled]="publicando || !isChartReady" (click)="publicar()">Publicar</button>
+            <button *ngIf="publicaciones[graficaKey]" class="btn-secondary table-action" [disabled]="publicando" (click)="retirar()">Retirar publicación</button>
+          </div>
         </div>
         <div id="grafica-tendencias" class="chart-wrapper line-chart" *ngIf="isChartReady">
           <canvas baseChart
@@ -50,7 +49,7 @@
         <div class="loading-state" *ngIf="!isChartReady">
           Calculando tendencias históricas en la base de datos...
         </div>
-      </div>
+      </article>
     </div>
   </main>
 </div>

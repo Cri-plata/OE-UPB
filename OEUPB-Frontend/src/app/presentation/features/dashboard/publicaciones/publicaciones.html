@@ -1,33 +1,33 @@
 <div class="layout">
   <app-sidebar></app-sidebar>
   <main class="content">
-    <header class="top-banner">
-      <div>
+    <header class="page-header">
+      <div class="page-header-content">
         <h1>Gráficas publicadas</h1>
         <p>Instantáneas agregadas autorizadas para tu cuenta.</p>
       </div>
     </header>
 
     <section class="publicaciones-grid">
-      <p *ngIf="cargando">Cargando publicaciones…</p>
-      <p class="error" *ngIf="error">{{ error }}</p>
-      <div class="empty" *ngIf="!cargando && !error && publicaciones.length === 0">
+      <p *ngIf="cargando" class="loading-state">Cargando publicaciones…</p>
+      <p class="error-message" *ngIf="error">{{ error }}</p>
+      <div class="card empty-state" *ngIf="!cargando && !error && publicaciones.length === 0">
         No hay gráficas publicadas compatibles con tus permisos y programas.
       </div>
 
-      <article class="publication-card" *ngFor="let publicacion of publicaciones">
+      <article class="card publication-card" *ngFor="let publicacion of publicaciones">
         <div class="publication-meta">
           <div>
             <span class="sede">{{ publicacion.sede_nombre }}</span>
-            <h2>{{ publicacion.titulo }}</h2>
+            <h2 class="card-title">{{ publicacion.titulo }}</h2>
           </div>
-          <span class="version">v{{ publicacion.version }}</span>
+          <span class="badge">v{{ publicacion.version }}</span>
         </div>
         <p class="programas">Programas: {{ publicacion.programas.join(', ') }}</p>
         <div class="chart-wrapper">
           <canvas baseChart [data]="datos(publicacion)" [type]="tipo(publicacion)"></canvas>
         </div>
-        <small>Publicada el {{ publicacion.fecha_publicacion | date:'medium' }}</small>
+        <small class="cell-subtext">Publicada el {{ publicacion.fecha_publicacion | date:'medium' }}</small>
       </article>
     </section>
   </main>

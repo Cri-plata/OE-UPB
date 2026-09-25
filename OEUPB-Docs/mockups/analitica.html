@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>OE UPB · Analítica y alertas</title>
+    <link rel="stylesheet" href="mockups.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-input" />
+      <header class="mobile-header">
+        <div class="mobile-brand">
+          <div class="brand-mark">UPB</div>
+          <span>OEUPB</span>
+        </div>
+        <label for="sidebar-toggle" class="menu-toggle-btn" aria-label="Abrir menú de navegación"></label>
+      </header>
+      <label for="sidebar-toggle" class="sidebar-backdrop" aria-label="Cerrar menú"></label>
+      <aside class="sidebar">
+        <div class="sidebar-mobile-close">
+          <label for="sidebar-toggle" class="sidebar-close-btn" aria-label="Cerrar menú"></label>
+        </div>
+        <div class="brand">
+          <div class="brand-mark">UPB</div>
+          <h2 class="brand-title">OEUPB</h2>
+        </div>
+        <nav class="nav-menu">
+          <a class="nav-item" href="reporte-general.html" title="Reporte general"><span class="nav-item-text">Reporte general</span></a>
+          <a class="nav-item" href="tendencias.html" title="Tendencias"><span class="nav-item-text">Tendencias</span></a>
+          <a class="nav-item" href="explorador.html" title="Explorador de Datos"><span class="nav-item-text">Explorador de Datos</span></a>
+          <a class="nav-item active" href="analitica.html" title="Analítica y alertas"><span class="nav-item-text">Analítica y alertas</span></a>
+          <a class="nav-item" href="directorio.html" title="Directorio"><span class="nav-item-text">Directorio</span></a>
+          <a class="nav-item" href="publicaciones.html" title="Gráficas publicadas"><span class="nav-item-text">Gráficas publicadas</span></a>
+          <a class="nav-item" href="carga-datos.html" title="Cargar datos"><span class="nav-item-text">Cargar datos</span></a>
+          <a class="nav-item" href="gestion-usuarios.html" title="Administrar Usuarios"><span class="nav-item-text">Administrar Usuarios</span></a>
+          <a class="nav-item" href="mi-perfil.html" title="Mi Perfil"><span class="nav-item-text">Mi Perfil</span></a>
+        </nav>
+        <div class="bottom-menu">
+          <a class="logout-btn" href="login.html" title="Cerrar Sesión"><span>Cerrar Sesión</span></a>
+        </div>
+      </aside>
+      <main class="content">
+        <section class="page">
+          <header class="page-header">
+            <div class="page-header-content">
+              <h1>Analítica y alertas</h1>
+              <p>Indicadores complementarios para el seguimiento y aseguramiento de egresados.</p>
+            </div>
+          </header>
+          <div class="kpi-grid">
+            <article class="kpi-card">
+              <div class="kpi-icon blue">
+                <i data-lucide="chart-no-axes-combined" aria-hidden="true"></i>
+              </div>
+              <div>
+                <h3>Registros analizados</h3>
+                <strong>—</strong>
+                <small>Datos de la sede</small>
+              </div>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-icon green">
+                <i data-lucide="badge-check" aria-hidden="true"></i>
+              </div>
+              <div>
+                <h3>Calidad de datos</h3>
+                <strong>—</strong>
+                <small>Resumen analítico</small>
+              </div>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-icon red">
+                <i data-lucide="triangle-alert" aria-hidden="true"></i>
+              </div>
+              <div>
+                <h3>Alertas</h3>
+                <strong>—</strong>
+                <small>Seguimiento requerido</small>
+              </div>
+            </article>
+          </div>
+          <div class="two-column">
+            <article class="card">
+              <h2>Resumen analítico</h2>
+              <div class="chart-placeholder">Cargando resumen analítico...</div>
+            </article>
+            <article class="card">
+              <h2>Alertas de seguimiento</h2>
+              <div class="chart-placeholder">No hay alertas para mostrar.</div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
