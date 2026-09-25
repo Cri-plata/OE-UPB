@@ -13,18 +13,15 @@
   - **Implementado el 2026-09-25, pendiente de validación manual.** La misma causa zoneless. `/publicaciones` usa signals, muestra los estados de datos, vacío y error con `Reintentar`, y tiene un botón `Actualizar`. Pruebas: `publicaciones.spec.ts`, más la prueba de backend `test_ciclo_publicar_consultar_retirar_para_consulta`.
   - **Para cerrar ambos:** validar el flujo en el entorno local (ver la lista de `docs/07-estado-funcional-actual.md`, sección 8) y archivarlos con la evidencia.
 
-## P2 — Analítica y contratos
+## P2 — Analítica
 
-- [ ] **EXP-03 — Permitir varias gráficas simultáneas.** Añadir `Crear otra gráfica` y mantener configuraciones, estados y acciones independientes para comparar varias visualizaciones en la misma pantalla.
-- [ ] **ANA-01 — Filtros e indicadores del dashboard privado.** Multiselección de programa y cohorte en Reporte General y Tendencias (HU-09), comparación de dos momentos con cohorte común (HU-08), tasa formal/informal y rango salarial (HU-07 CA1). Definir la fórmula de la tasa de empleo sobre la taxonomía de RN-16 y el tratamiento de respuestas vacías o no mapeables. Cierra RF-21, RF-22 y RF-26 (auditoría 05: C-12, B-17).
-- [ ] **DB-03 — Invariante de sede por rol en la base.** Añadir una migración con `CHECK (rol = 'Admin_CTIC' OR sede_id IS NOT NULL)`, previa verificación de los datos existentes, y reflejarla en `oeupb-schema.sql` (auditoría 05: C-10).
-- [ ] **ETL-01 — Normalizar el documento de identidad y los límites de carga.** Definir la normalización (puntos, espacios, ceros a la izquierda, documentos alfanuméricos), unificar la validación entre egresado (3-50 caracteres) y usuario (6-20 dígitos), fijar el tamaño y el número de filas máximos, y responder a una carga inválida con error HTTP y detalle por fila en lugar de 200 con `errores` (auditoría 05: B-13, B-14). Requiere migrar los documentos existentes con pruebas de equivalencia.
+- [ ] **ANA-03 — Verificar el mapeo laboral con datos de M5.** ADR-016 supone que el cuestionario de M5 usa la misma redacción que M1. Cuando exista una carga de M5, confirmar los nombres de las preguntas y sus opciones de respuesta (sin leer datos personales) y ajustar `application/indicadores.py` si difieren.
 
 ## P3 — Calidad de contrato y documentación
 
 - [ ] **API-02 — Completar el contrato de errores.** Declarar el esquema `{detail}` y los códigos 401/403/404/409 por endpoint, añadir el patrón `@upb.edu.co` al correo y marcar `DELETE /api/usuarios/{id}` como alias obsoleto de `POST /{id}/desactivar` (auditoría 05: C-11, C-18).
 - [ ] **PRG-01 — Catálogo normalizado de programas.** La visibilidad entre sedes depende de que los nombres de programa coincidan como texto. Definir la normalización o una tabla de equivalencias, y el tratamiento de programas asignados que dejan de observarse (auditoría 05: B-07, B-08).
-- [ ] **ANA-02 — Criterios de alertas.** Enumerar la severidad y fijar umbrales y muestra mínima de las alertas descriptivas de `/api/analitica/resumen` (auditoría 05: B-18).
+- [ ] **ANA-02 — Criterios de alertas.** Enumerar la severidad y fijar umbrales y muestra mínima de las alertas descriptivas de `/api/analitica/resumen`. Además, `analitica_router.py` todavía detecta el empleo con la pregunta SI/NO; debe usar la taxonomía de ADR-016 para coincidir con el Reporte General (auditoría 05: B-18).
 - [ ] **DOC-03 — Completar el modelo y el catálogo de requisitos.** Añadir al diagrama ER `auditoria_cuentas`, `auditoria_egresados`, los atributos de `eventos_eliminacion_carga` y las columnas faltantes de `publicaciones_graficas`. Priorizar los RF/RNF, corregir los `Requerimiento Ligado` sin dependencia funcional y dar métricas verificables a los RNF-01 a RNF-06 (auditoría 05: C-17, C-19, B-20).
 
 ## P2 — Decisión de producto en pausa

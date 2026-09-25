@@ -2,6 +2,18 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-09-25] - P2 Analítica y contratos
+
+* **ADR-016:** mapeo de los cuestionarios OLE a la taxonomía laboral, la formalidad, el salario y la comparación de momentos.
+* **ADR-017:** normalización del documento de identidad, límites de carga y rechazo con detalle por fila.
+* **Requisitos:** RF-21, RF-22, RF-23, RF-25, RF-26 y RF-61 pasan a Implementado. RN-01, RN-16, RN-26 y RN-31, HU-07 y CU-05 a CU-07 se actualizaron.
+* **Backlog:** EXP-03, ANA-01, DB-03 y ETL-01 se archivaron; se agregó ANA-03 y se amplió ANA-02.
+
+## [2026-09-25] - Actualización de verificación
+
+* **Pruebas:** la estrategia y el estado funcional reflejan 38 pruebas de backend y 23 de frontend, los casos de privacidad de publicación y la convención de pruebas zoneless.
+* **Estado:** se actualizaron CU-12, la fecha de corte funcional y las fechas de verificación del modelo de datos y del despliegue.
+
 ## [2026-09-25] - Corrección del flujo de publicación
 
 * **PUB-01/PUB-02:** se documentó la causa (detección de cambios zoneless con estado fuera de signals), la corrección, las pruebas y la lista de validación manual. RF-35 sigue Parcial hasta esa validación.

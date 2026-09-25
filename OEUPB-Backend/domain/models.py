@@ -17,6 +17,7 @@ class Usuario(Base):
     __tablename__ = "usuarios"
     __table_args__ = (
         Index("ix_usuarios_correo", "correo", unique=True),
+        CheckConstraint("rol = 'Admin_CTIC' OR sede_id IS NOT NULL", name="ck_usuarios_sede_por_rol"),
     )
 
     id = Column(Integer, primary_key=True, index=True)

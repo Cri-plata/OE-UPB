@@ -4,6 +4,7 @@ import { finalize } from 'rxjs';
 
 import { PublicacionesApi } from '../../data/api/publicaciones.api';
 import { PublicacionCreate, PublicacionResponse } from '../../data/api/generated-api.models';
+import { mensajeDeError } from './mensaje-error';
 
 /**
  * Estado de publicación de las gráficas de una vista.
@@ -86,16 +87,4 @@ export class PublicacionControl {
   private registrarError(key: string, error: unknown, respaldo: string): void {
     this.errores.update(actuales => ({ ...actuales, [key]: mensajeDeError(error, respaldo) }));
   }
-}
-
-export function mensajeDeError(error: unknown, respaldo: string): string {
-  if (error instanceof HttpErrorResponse) {
-    if (error.status === 0) {
-      return 'No hay conexión con el servidor. Verifica tu conexión e inténtalo de nuevo.';
-    }
-    const detalle = error.error?.detail;
-    if (typeof detalle === 'string') return detalle;
-    if (typeof detalle?.mensaje === 'string') return detalle.mensaje;
-  }
-  return `${respaldo} Inténtalo de nuevo.`;
 }

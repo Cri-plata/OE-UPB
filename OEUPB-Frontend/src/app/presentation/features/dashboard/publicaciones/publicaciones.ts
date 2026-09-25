@@ -7,7 +7,7 @@ import { PublicacionesApi } from '../../../../data/api/publicaciones.api';
 import { PublicacionResponse } from '../../../../data/api/generated-api.models';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
 import { CHART_PALETTE } from '../../../shared/chart-palette';
-import { mensajeDeError } from '../../../shared/publicacion-control';
+import { mensajeDeError } from '../../../shared/mensaje-error';
 
 
 @Component({

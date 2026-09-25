@@ -9,7 +9,7 @@
 
 .dashboard-container { padding: 40px 50px; }
 
-.kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 40px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 30px; margin-bottom: 40px; }
 .kpi-card {
   background: var(--color-surface); border-radius: var(--radius-lg); padding: 24px; display: flex; align-items: center; gap: 20px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--color-banner); transition: transform 0.2s;
@@ -26,7 +26,8 @@
 .kpi-data h2 { margin: 8px 0; font-size: 28px; color: var(--color-text-heading); font-weight: 800; }
 .kpi-data .trend { font-size: 13px; color: var(--color-text-disabled); }
 
-.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+.charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 30px; }
+.nota { margin: 12px 0 0; font-size: 12px; color: var(--color-text-muted); }
 .chart-card {
   background: var(--color-surface); border-radius: var(--radius-lg); padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--color-banner);
 }

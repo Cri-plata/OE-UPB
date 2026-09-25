@@ -4,11 +4,13 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from application.auth_service import require_roles
+from application.documentos import normalizar_documento, normalizar_documento_obligatorio
+from application.indicadores import ETIQUETAS_ESTADO, clave_salario, estado_laboral
 from domain.models import AuditoriaEgresado, Egresado, EgresadoSede, Medicion
 from infrastructure.database import get_db
 
@@ -47,12 +49,17 @@ class PerfilEgresadoResponse(BaseModel):
 
 
 class EgresadoManualRequest(BaseModel):
-    numero_documento: str = Field(min_length=3, max_length=50)
+    numero_documento: str = Field(min_length=5, max_length=40, description="Se normaliza: sin espacios, puntos ni guiones, en mayúsculas")
     primer_nombre: str = Field(min_length=1, max_length=100)
     primer_apellido: Optional[str] = Field(default=None, max_length=100)
     programa: str = Field(min_length=1, max_length=150)
     fecha_grado: Optional[str] = None
     motivo: str = Field(min_length=5, max_length=500)
+
+    @field_validator("numero_documento")
+    @classmethod
+    def normalizar_documento(cls, valor: str) -> str:
+        return normalizar_documento_obligatorio(valor)
 
 
 class EgresadoManualUpdate(BaseModel):
@@ -122,6 +129,7 @@ def obtener_programas_unicos(db: Session = Depends(get_db), current_user: dict =
 
 @router.get("/perfil/{documento}", response_model=PerfilEgresadoResponse)
 def obtener_perfil_egresado(documento: str, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
+    documento = normalizar_documento(documento) or ""
     egresado = db.query(Egresado).filter(Egresado.numero_documento == documento, Egresado.numero_documento.in_(_documentos_visibles(db, current_user["sede_id"]))).first()
     if not egresado:
         raise HTTPException(status_code=404, detail="Egresado no encontrado en su sede")
@@ -129,13 +137,13 @@ def obtener_perfil_egresado(documento: str, db: Session = Depends(get_db), curre
     encuestas = []
     for medicion in mediciones:
         respuestas = medicion.respuestas or {}
-        encuestas.append({"momento": medicion.momento, "anio": medicion.anio, "empleabilidad": respuestas.get("Situacion_Actual") or "No informa", "salario": respuestas.get("Ingreso_Mensual") or "No informa", "respuestas_completas": respuestas})
+        encuestas.append({"momento": medicion.momento, "anio": medicion.anio, "empleabilidad": ETIQUETAS_ESTADO.get(estado_laboral(respuestas), "No informa"), "salario": str(respuestas.get(clave_salario(respuestas) or "") or "No informa"), "respuestas_completas": respuestas})
     return {"documento": documento, "nombre_completo": f"{egresado.primer_nombre} {egresado.primer_apellido or ''}".strip(), "programa": egresado.programa, "fecha_grado": egresado.fecha_grado.strftime("%Y-%m-%d") if egresado.fecha_grado else "N/A", "encuestas": encuestas}
 
 
 @router.post("/egresados", response_model=OperacionEgresadoResponse, status_code=201)
 def crear_egresado(payload: EgresadoManualRequest, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
-    documento = payload.numero_documento.strip()
+    documento = payload.numero_documento
     if db.get(Egresado, documento):
         raise HTTPException(status_code=409, detail="El documento ya está registrado; si pertenece a su sede, use la edición del directorio")
     egresado = Egresado(numero_documento=documento, primer_nombre=payload.primer_nombre.strip(), primer_apellido=(payload.primer_apellido or "").strip() or None, programa=payload.programa.strip(), fecha_grado=_parse_fecha(payload.fecha_grado))
@@ -158,6 +166,7 @@ def _egresado_editable(db: Session, documento: str, sede_id: int) -> Egresado:
 
 @router.patch("/egresados/{documento}", response_model=OperacionEgresadoResponse)
 def editar_egresado(documento: str, payload: EgresadoManualUpdate, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
+    documento = normalizar_documento(documento) or ""
     egresado = _egresado_editable(db, documento, current_user["sede_id"])
     antes = {"primer_nombre": egresado.primer_nombre, "primer_apellido": egresado.primer_apellido, "programa": egresado.programa, "fecha_grado": egresado.fecha_grado.isoformat() if egresado.fecha_grado else None}
     cambios = payload.model_dump(exclude_none=True, exclude={"motivo"})
@@ -172,6 +181,7 @@ def editar_egresado(documento: str, payload: EgresadoManualUpdate, db: Session =
 
 @router.delete("/egresados/{documento}", response_model=OperacionEgresadoResponse)
 def eliminar_egresado(documento: str, payload: EliminarEgresadoRequest, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
+    documento = normalizar_documento(documento) or ""
     egresado = _egresado_editable(db, documento, current_user["sede_id"])
     if db.query(Medicion.id).filter(Medicion.egresado_documento == documento).first():
         raise HTTPException(status_code=409, detail="No se elimina un egresado con mediciones; retire primero la carga fuente")

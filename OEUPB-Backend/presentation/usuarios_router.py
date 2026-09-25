@@ -2,7 +2,7 @@ from typing import List, Literal, Optional
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
@@ -15,6 +15,7 @@ from application.auth_service import (
     get_current_user,
     get_password_hash,
 )
+from application.documentos import normalizar_documento_obligatorio
 from domain.models import AuditoriaCuenta, Egresado, Medicion, Sede, Usuario
 from infrastructure.database import get_db
 
@@ -27,12 +28,17 @@ ETIQUETAS = {"Rector", "Profesor", "Administrativo"}
 class UsuarioCreateRequest(BaseModel):
     nombre: str
     correo: str
-    numero_documento: str = Field(min_length=6, max_length=20, pattern=r"^[0-9]+$")
+    numero_documento: str = Field(min_length=5, max_length=40, description="Se normaliza: sin espacios, puntos ni guiones, en mayúsculas")
     rol: Literal["Coordinador_Sede", "Usuario_Consulta"]
     sede_id: Optional[int] = None
     etiqueta: Optional[Literal["Rector", "Profesor", "Administrativo"]] = None
     permisos: List[Literal["ver_reporte_general", "ver_tendencias", "ver_explorador", "ver_publicaciones"]] = Field(default_factory=list)
     programas: List[str] = Field(default_factory=list)
+
+    @field_validator("numero_documento")
+    @classmethod
+    def normalizar_documento(cls, valor: str) -> str:
+        return normalizar_documento_obligatorio(valor)
 
 
 class UsuarioUpdateRequest(BaseModel):
@@ -181,7 +187,7 @@ def create_usuario(user_data: UsuarioCreateRequest, db: Session = Depends(get_db
     else:
         raise HTTPException(status_code=403, detail="No puedes crear usuarios")
 
-    temporal = generar_credencial_inicial(user_data.numero_documento.strip())
+    temporal = generar_credencial_inicial(user_data.numero_documento)
     expira_en = expiracion_credencial_inicial()
     usuario = Usuario(
         nombre=user_data.nombre.strip(), correo=correo,

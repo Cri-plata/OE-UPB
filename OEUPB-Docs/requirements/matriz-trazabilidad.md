@@ -27,12 +27,12 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 | RF-18 | Dashboard interactivo | Reporte, Tendencias, Explorador y Chart.js | Implementado |
 | RF-19 | Situación laboral | KPI de empleabilidad y Tendencias | Implementado |
 | RF-20 | Estudios adicionales | pregunta genérica, sin indicador curado | Parcial |
-| RF-21 | Filtro por programa | filtro único en Explorador; sin multiselección en Reporte ni Tendencias (HU-09) | Parcial |
-| RF-22 | Filtro por cohorte | filtro `anio` único en Explorador; sin filtro en Reporte ni Tendencias (HU-09) | Parcial |
-| RF-23 | Cuatro situaciones laborales | cálculo actual simplifica empleado/no empleado | Parcial |
+| RF-21 | Filtro por programa | selección múltiple en Reporte General y Tendencias; filtro por bloque en el Explorador | Implementado |
+| RF-22 | Filtro por cohorte | selección múltiple de cohortes en Reporte General y Tendencias; filtro por bloque en el Explorador | Implementado |
+| RF-23 | Cuatro situaciones laborales | `estado_laboral` (ADR-016) y gráfica de estado laboral | Implementado |
 | RF-24 | Tendencias de empleo | `/api/reportes/tendencias`, momentos 0/1/5 | Implementado |
-| RF-25 | Trabajo formal | hay actividad remunerada, no formalidad fiable | Parcial |
-| RF-26 | Salario promedio/rango | promedio en Reporte y Tendencias; sin rango | Parcial |
+| RF-25 | Trabajo formal | tasa formal/informal por tipo de contrato en M1/M5 (ADR-016) | Implementado |
+| RF-26 | Salario promedio/rango | promedio y rango (mínimo, mediana, máximo) con SMLV/SMMLV | Implementado |
 | RF-27 | Sectores económicos | pregunta genérica, sin gráfica curada | Parcial |
 | RF-28 | Dispersión de datos | sin cálculo ni visualización de dispersión | No implementado |
 | RF-29 | Ciudades de residencia | pregunta genérica, sin mapa | Parcial |
@@ -67,7 +67,7 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 | RF-58 | Sectores y tamaños de empresa | exploración univariada genérica | Parcial |
 | RF-59 | Áreas por mejorar | pregunta genérica, sin resumen curado | Parcial |
 | RF-60 | Satisfacción laboral | algunos promedios, no todos los ejes | Parcial |
-| RF-61 | Comparar cuatro estados | cálculo binario actual | Parcial |
+| RF-61 | Comparar cuatro estados | gráfica de estado laboral con filtros, publicable | Implementado |
 | RF-62 | Dispersión salarial por programa | sin percentiles/desviación/gráfico | No implementado |
 | RF-63 | Efectividad de canales | pregunta graficable, sin efectividad | Parcial |
 | RF-64 | Utilidad de conocimientos | promedio de aplicación en Reporte | Implementado |
@@ -85,8 +85,8 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 
 | Estado | Cantidad |
 |---|---:|
-| Implementado | 28 |
-| Parcial | 37 |
+| Implementado | 34 |
+| Parcial | 31 |
 | No implementado | 7 |
 | En pausa | 1 |
 | **Total** | **73** |

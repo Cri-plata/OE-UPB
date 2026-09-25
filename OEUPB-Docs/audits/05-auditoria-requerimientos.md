@@ -357,3 +357,5 @@ Veredictos: **Confirmado** (el problema existía), **Parcial** (existía, pero e
 | B-21 | Documental | Se reactiva y edita la cuenta existente; el correo se normaliza en minúsculas al crearla. |
 
 Verificación: 37 pruebas de backend y 15 de frontend en verde, OpenAPI y tipos regenerados, y validadores de contratos, documentación y arquitectura sin errores.
+
+**Actualización 2026-09-25 (P2):** EXP-03, ANA-01, DB-03 y ETL-01 están cerrados. Con eso quedan resueltos C-10, C-12, B-11 (mínimo de pares), B-12 (rango del año), B-13, B-14 y B-17. Ver ADR-016, ADR-017 y `BACKLOG_ARCHIVE.md`.

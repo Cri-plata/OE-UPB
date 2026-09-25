@@ -33,10 +33,14 @@
 - Una gráfica publicada expone métricas agregadas, nunca datos fuente.
 - Un usuario con alcance profesor solo ve gráficas asociadas a sus programas.
 - Retirar una publicación revoca la vista externa sin borrar la gráfica privada.
+- Las métricas publicadas se recalculan en backend: los valores y programas enviados por el cliente se ignoran.
+- Ninguna celda publicada representa menos de 5 observaciones, y las variables personales o administrativas se rechazan (RN-31).
+- Eliminar una carga conserva los egresados del directorio manual.
+- En el frontend zoneless, las pruebas de vista deben esperar `fixture.whenStable()` sin llamar `detectChanges()` a mano, para detectar estado que no está en signals.
 
 ## Estado actual
 
-- Backend: 26 pruebas bajo `OEUPB-Backend/tests/` cubren autenticación, secreto productivo, expiración y reemisión auditada de credenciales, RBAC, sede, CRUD manual, exportación, NLP, cargas, reportes, publicaciones y OpenAPI.
-- Frontend: 15 pruebas Vitest cubren aplicación, login, interceptor, guards, visibilidad por rol, carga, directorio y cliente de publicaciones.
+- Backend: 52 pruebas bajo `OEUPB-Backend/tests/` cubren autenticación, secreto productivo, expiración y reemisión auditada de credenciales, RBAC, sede, CRUD manual, exportación, NLP, cargas (concurrencia, idempotencia, precedencia manual y limpieza de huérfanos), reportes, catálogo analítico, umbral de publicación, ciclo publicar → consultar → retirar, enmascaramiento de logs, taxonomía laboral, filtros, comparación de momentos, normalización del documento, límites y rechazo de cargas, y OpenAPI.
+- Frontend: 30 pruebas Vitest cubren aplicación, login, interceptor, guards, visibilidad por rol, carga, directorio, cliente de publicaciones, estado de publicación (éxito, error HTTP, error de red, duplicados y retiro) la vista de publicaciones (datos, vacío, error y reintento), filtros analíticos, Reporte General con filtros, comparación de Tendencias, varias gráficas en el Explorador y el rechazo de cargas con detalle por fila.
 - Contrato: el OpenAPI guardado se compara con FastAPI y los tipos TypeScript generados se verifican con `tools/validate_contracts.py`.
 - CI: `.github/workflows/quality.yml` ejecuta pruebas, build y validadores de contratos, documentación y arquitectura frontend.

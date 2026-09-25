@@ -579,8 +579,18 @@
           "409": {
             "description": "El archivo es idéntico a la versión vigente del mismo alcance"
           },
+          "413": {
+            "description": "El archivo supera 25 MB"
+          },
           "422": {
-            "description": "El momento o los parámetros no son válidos"
+            "description": "Parámetros inválidos o archivo rechazado; incluye el detalle por fila",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CargaRechazadaResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -689,20 +699,20 @@
         }
       }
     },
-    "/api/reportes/general": {
+    "/api/reportes/filtros": {
       "get": {
         "tags": [
           "Reportes"
         ],
-        "summary": "Get Reporte General",
-        "operationId": "get_reporte_general_api_reportes_general_get",
+        "summary": "Filtros Disponibles",
+        "operationId": "filtros_disponibles_api_reportes_filtros_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/KpisResponse"
+                  "$ref": "#/components/schemas/FiltrosDisponiblesResponse"
                 }
               }
             }
@@ -713,6 +723,90 @@
             "HTTPBearer": []
           }
         ]
+      }
+    },
+    "/api/reportes/general": {
+      "get": {
+        "tags": [
+          "Reportes"
+        ],
+        "summary": "Get Reporte General",
+        "operationId": "get_reporte_general_api_reportes_general_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "programas",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Programas (multiselección)",
+              "title": "Programas"
+            },
+            "description": "Programas (multiselección)"
+          },
+          {
+            "name": "anios",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "description": "Cohortes (multiselección)",
+              "title": "Anios"
+            },
+            "description": "Cohortes (multiselección)"
+          },
+          {
+            "name": "momento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Momento 0, 1 o 5",
+              "title": "Momento"
+            },
+            "description": "Momento 0, 1 o 5"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KpisResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/reportes/tendencias": {
@@ -742,6 +836,34 @@
               "default": "empleabilidad",
               "title": "Indicador"
             }
+          },
+          {
+            "name": "programas",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Programas (multiselección)",
+              "title": "Programas"
+            },
+            "description": "Programas (multiselección)"
+          },
+          {
+            "name": "anios",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "description": "Cohortes (multiselección)",
+              "title": "Anios"
+            },
+            "description": "Cohortes (multiselección)"
           }
         ],
         "responses": {
@@ -764,6 +886,101 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/reportes/comparacion": {
+      "get": {
+        "tags": [
+          "Reportes"
+        ],
+        "summary": "Get Comparacion",
+        "operationId": "get_comparacion_api_reportes_comparacion_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "momento_inicial",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Momento 0, 1 o 5",
+              "title": "Momento Inicial"
+            },
+            "description": "Momento 0, 1 o 5"
+          },
+          {
+            "name": "momento_final",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Momento 0, 1 o 5, distinto del inicial",
+              "title": "Momento Final"
+            },
+            "description": "Momento 0, 1 o 5, distinto del inicial"
+          },
+          {
+            "name": "indicador",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "empleabilidad",
+                "salario"
+              ],
+              "type": "string",
+              "default": "empleabilidad",
+              "title": "Indicador"
+            }
+          },
+          {
+            "name": "programas",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Programas (multiselección)",
+              "title": "Programas"
+            },
+            "description": "Programas (multiselección)"
+          },
+          {
+            "name": "anios",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "description": "Cohortes (multiselección)",
+              "title": "Anios"
+            },
+            "description": "Cohortes (multiselección)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComparacionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Momentos o indicador inválidos"
           }
         }
       }
@@ -1663,6 +1880,19 @@
         ],
         "title": "CambioContrasenaTemporalRequest"
       },
+      "CargaRechazadaResponse": {
+        "properties": {
+          "detail": {
+            "$ref": "#/components/schemas/DetalleCargaRechazada"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "CargaRechazadaResponse",
+        "description": "Cuerpo de un 422 de carga: el archivo completo se rechaza (RN-20)."
+      },
       "CargaResponse": {
         "properties": {
           "mensaje": {
@@ -1877,6 +2107,87 @@
         ],
         "title": "ChartDatasetResponse"
       },
+      "ComparacionProgramaResponse": {
+        "properties": {
+          "programa": {
+            "type": "string",
+            "title": "Programa"
+          },
+          "pares": {
+            "type": "integer",
+            "title": "Pares"
+          },
+          "suficiente": {
+            "type": "boolean",
+            "title": "Suficiente"
+          },
+          "valor_inicial": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valor Inicial"
+          },
+          "valor_final": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valor Final"
+          }
+        },
+        "type": "object",
+        "required": [
+          "programa",
+          "pares",
+          "suficiente"
+        ],
+        "title": "ComparacionProgramaResponse"
+      },
+      "ComparacionResponse": {
+        "properties": {
+          "momento_inicial": {
+            "type": "integer",
+            "title": "Momento Inicial"
+          },
+          "momento_final": {
+            "type": "integer",
+            "title": "Momento Final"
+          },
+          "indicador": {
+            "type": "string",
+            "title": "Indicador"
+          },
+          "minimo_pares": {
+            "type": "integer",
+            "title": "Minimo Pares"
+          },
+          "programas": {
+            "items": {
+              "$ref": "#/components/schemas/ComparacionProgramaResponse"
+            },
+            "type": "array",
+            "title": "Programas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "momento_inicial",
+          "momento_final",
+          "indicador",
+          "minimo_pares",
+          "programas"
+        ],
+        "title": "ComparacionResponse"
+      },
       "CompetenciaResponse": {
         "properties": {
           "categoria": {
@@ -2039,6 +2350,38 @@
               }
             ],
             "title": "Anio"
+          },
+          "programas": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "maxItems": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Programas",
+            "description": "Filtro multiselección de Reporte General y Tendencias"
+          },
+          "anios": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array",
+                "maxItems": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anios",
+            "description": "Filtro multiselección de cohortes"
           }
         },
         "type": "object",
@@ -2047,6 +2390,27 @@
           "tipo_visualizacion"
         ],
         "title": "DefinicionGrafica"
+      },
+      "DetalleCargaRechazada": {
+        "properties": {
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          },
+          "errores": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorFila"
+            },
+            "type": "array",
+            "title": "Errores"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mensaje",
+          "errores"
+        ],
+        "title": "DetalleCargaRechazada"
       },
       "DirectorioItem": {
         "properties": {
@@ -2123,9 +2487,10 @@
         "properties": {
           "numero_documento": {
             "type": "string",
-            "maxLength": 50,
-            "minLength": 3,
-            "title": "Numero Documento"
+            "maxLength": 40,
+            "minLength": 5,
+            "title": "Numero Documento",
+            "description": "Se normaliza: sin espacios, puntos ni guiones, en mayúsculas"
           },
           "primer_nombre": {
             "type": "string",
@@ -2383,6 +2748,38 @@
         ],
         "title": "ExploradorResponse"
       },
+      "FiltrosDisponiblesResponse": {
+        "properties": {
+          "programas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Programas"
+          },
+          "anios": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Anios"
+          },
+          "momentos": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Momentos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "programas",
+          "anios",
+          "momentos"
+        ],
+        "title": "FiltrosDisponiblesResponse"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -2468,13 +2865,60 @@
             "type": "integer",
             "title": "Total Egresados"
           },
+          "total_encuestados": {
+            "type": "integer",
+            "title": "Total Encuestados"
+          },
           "tasa_empleabilidad": {
             "type": "number",
             "title": "Tasa Empleabilidad"
           },
+          "tasa_formalidad": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasa Formalidad"
+          },
+          "tasa_informalidad": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasa Informalidad"
+          },
+          "observaciones_formalidad": {
+            "type": "integer",
+            "title": "Observaciones Formalidad"
+          },
           "promedio_salarial": {
             "type": "number",
             "title": "Promedio Salarial"
+          },
+          "rango_salarial": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RangoSalarialResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "distribucion_estado_laboral": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Distribucion Estado Laboral"
           },
           "distribucion_programas": {
             "additionalProperties": true,
@@ -2490,8 +2934,11 @@
         "type": "object",
         "required": [
           "total_egresados",
+          "total_encuestados",
           "tasa_empleabilidad",
+          "observaciones_formalidad",
           "promedio_salarial",
+          "distribucion_estado_laboral",
           "distribucion_programas",
           "nivel_satisfaccion"
         ],
@@ -2772,6 +3219,34 @@
         ],
         "title": "PublicacionResponse"
       },
+      "RangoSalarialResponse": {
+        "properties": {
+          "minimo": {
+            "type": "number",
+            "title": "Minimo"
+          },
+          "mediana": {
+            "type": "number",
+            "title": "Mediana"
+          },
+          "maximo": {
+            "type": "number",
+            "title": "Maximo"
+          },
+          "observaciones": {
+            "type": "integer",
+            "title": "Observaciones"
+          }
+        },
+        "type": "object",
+        "required": [
+          "minimo",
+          "mediana",
+          "maximo",
+          "observaciones"
+        ],
+        "title": "RangoSalarialResponse"
+      },
       "ReemisionCredencialRequest": {
         "properties": {
           "motivo": {
@@ -2869,10 +3344,10 @@
           },
           "numero_documento": {
             "type": "string",
-            "maxLength": 20,
-            "minLength": 6,
-            "pattern": "^[0-9]+$",
-            "title": "Numero Documento"
+            "maxLength": 40,
+            "minLength": 5,
+            "title": "Numero Documento",
+            "description": "Se normaliza: sin espacios, puntos ni guiones, en mayúsculas"
           },
           "rol": {
             "type": "string",

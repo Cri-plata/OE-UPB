@@ -36,19 +36,19 @@
 
 - **Actor:** Coordinador de Sede. El Usuario de Consulta solo ve las instantáneas publicadas de este origen (RN-24).
 - **Flujo:** solicitar KPIs → derivar la sede privada del JWT sin selector de sede → calcular indicadores → presentar gráficas. Las publicaciones de otras sedes se consultan en una vista separada.
-- **Implementación:** parcial; existen KPIs privados; faltan filtros de programa y cohorte, tasa formal/informal y rango salarial (ANA-01).
+- **Implementación:** implementada; KPIs con taxonomía RN-16, formalidad, rango salarial y gráfica de estado laboral, con filtros de selección múltiple de programa y cohorte y filtro de momento (ANA-01).
 
 ## CU-06 — Consultar tendencias
 
 - **Actor:** Coordinador de Sede. El Usuario de Consulta solo ve las instantáneas publicadas de este origen (RN-24).
 - **Flujo:** elegir indicador → agregar por año/momento → presentar línea o barras.
-- **Implementación:** parcial; existe un endpoint por indicador (`empleabilidad`, `salario`, `satisfaccion`) para los cinco programas con más datos; el contrato no representa todavía la comparación de dos momentos ni la cohorte común (ANA-01).
+- **Implementación:** implementada; tendencias por indicador para los cinco programas con más datos, con filtros, y comparación de dos momentos sobre los mismos egresados de la misma cohorte (`/api/reportes/comparacion`, mínimo de 5 pares).
 
 ## CU-07 — Explorar variables
 
 - **Actor:** Coordinador de Sede. El Usuario de Consulta solo ve las instantáneas publicadas de este origen (RN-24).
 - **Flujo:** obtener variables permitidas → seleccionar cruce → agregar respuestas en backend → graficar sin exponer respuestas individuales.
-- **Implementación:** parcial; el catálogo RN-31 se aplica en backend desde el 2026-09-25 (init, consulta y publicación, con pruebas). Falta permitir varias gráficas simultáneas (EXP-03).
+- **Implementación:** implementada; catálogo RN-31 en backend y varias gráficas simultáneas, cada una con estado propio (EXP-03).
 
 ## CU-08 — Buscar egresado
 
@@ -85,4 +85,4 @@ La capacidad predictiva de RF-71/HU-10 está en pausa por decisión de producto.
 - **Precondición:** coordinador activo con sede.
 - **Flujo:** abrir gráfica → pulsar `Publicar` y confirmar la revisión de privacidad → el backend valida la variable (RN-31), recalcula métricas y programas con los datos de la sede del JWT, aplica el umbral k = 5 y versiona → la audiencia se calcula al consultar. `Retirar publicación` valida la propiedad o el propietario inactivo o reasignado.
 - **Resultado:** los usuarios autorizados ven la gráfica y sus métricas agregadas; no obtienen filas, respuestas individuales ni datos personales.
-- **Implementación:** backend implementado en `/api/publicaciones` con recálculo y umbral (ADR-015); la interfaz aún presenta los problemas de estado de PUB-01 y PUB-02, por lo que RF-35 sigue parcial.
+- **Implementación:** backend implementado en `/api/publicaciones` con recálculo y umbral (ADR-015). La interfaz usa `PublicacionControl` (signals, bloqueo de duplicados y errores con reintento) y la vista de publicaciones resuelve datos, vacío y error. PUB-01 y PUB-02 están corregidos con pruebas; RF-35 sigue parcial hasta la validación manual.

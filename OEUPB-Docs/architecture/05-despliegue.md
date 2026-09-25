@@ -2,7 +2,7 @@
 
 **Estado:** objetivo; no verificado como desplegado en producción
 
-**Fecha:** 2026-09-24
+**Fecha:** 2026-09-25
 
 ## Topología propuesta
 

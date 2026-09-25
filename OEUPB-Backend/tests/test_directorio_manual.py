@@ -36,18 +36,18 @@ class DirectorioManualTest(unittest.TestCase):
     def test_crud_auditado_y_aislado_por_sede(self):
         bog = self.login("bog@upb.edu.co")
         med = self.login("med@upb.edu.co")
-        payload = {"numero_documento": "1001", "primer_nombre": "Carlos", "primer_apellido": "Ruiz", "programa": "Derecho", "fecha_grado": "2025-06-01", "motivo": "Registro solicitado"}
+        payload = {"numero_documento": "10.010-001", "primer_nombre": "Carlos", "primer_apellido": "Ruiz", "programa": "Derecho", "fecha_grado": "2025-06-01", "motivo": "Registro solicitado"}
         self.assertEqual(self.client.post("/api/directorio/egresados", headers=bog, json=payload).status_code, 201)
         self.assertEqual(self.client.get("/api/directorio/tabla", headers=bog).json()["total"], 1)
         self.assertEqual(self.client.get("/api/directorio/tabla", headers=med).json()["total"], 0)
         analitica = self.client.get("/api/analitica/resumen", headers=bog)
         self.assertEqual(analitica.status_code, 200)
         self.assertNotIn("respuestas", analitica.json())
-        self.assertEqual(self.client.patch("/api/directorio/egresados/1001", headers=bog, json={"programa": "Economía", "motivo": "Corrección aprobada"}).status_code, 200)
+        self.assertEqual(self.client.patch("/api/directorio/egresados/10010001", headers=bog, json={"programa": "Economía", "motivo": "Corrección aprobada"}).status_code, 200)
         excel = self.client.get("/api/directorio/exportar.xlsx", headers=bog)
         self.assertEqual(excel.status_code, 200)
         self.assertTrue(excel.content.startswith(b"PK"))
-        self.assertEqual(self.client.request("DELETE", "/api/directorio/egresados/1001", headers=bog, json={"motivo": "Registro duplicado"}).status_code, 200)
+        self.assertEqual(self.client.request("DELETE", "/api/directorio/egresados/10.010.001", headers=bog, json={"motivo": "Registro duplicado"}).status_code, 200)
         db = self.Session()
         self.assertEqual([a.accion for a in db.query(AuditoriaEgresado).order_by(AuditoriaEgresado.id)], ["crear", "editar", "eliminar"])
         db.close()

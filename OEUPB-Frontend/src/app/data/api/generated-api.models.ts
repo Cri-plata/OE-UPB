@@ -27,6 +27,10 @@ export interface CambioContrasenaTemporalRequest {
   "confirmarContrasena": string;
 }
 
+export interface CargaRechazadaResponse {
+  "detail": DetalleCargaRechazada;
+}
+
 export interface CargaResponse {
   "mensaje": string;
   "errores"?: Array<ErrorFila>;
@@ -52,6 +56,22 @@ export interface ChartDatasetResponse {
   "spanGaps"?: boolean | null;
 }
 
+export interface ComparacionProgramaResponse {
+  "programa": string;
+  "pares": number;
+  "suficiente": boolean;
+  "valor_inicial"?: number | null;
+  "valor_final"?: number | null;
+}
+
+export interface ComparacionResponse {
+  "momento_inicial": number;
+  "momento_final": number;
+  "indicador": string;
+  "minimo_pares": number;
+  "programas": Array<ComparacionProgramaResponse>;
+}
+
 export interface CompetenciaResponse {
   "categoria": string;
   "frecuencia": number;
@@ -72,6 +92,13 @@ export interface DefinicionGrafica {
   "momento"?: 0 | 1 | 5 | null;
   "programa"?: string | null;
   "anio"?: number | null;
+  "programas"?: Array<string> | null;
+  "anios"?: Array<number> | null;
+}
+
+export interface DetalleCargaRechazada {
+  "mensaje": string;
+  "errores": Array<ErrorFila>;
 }
 
 export interface DirectorioItem {
@@ -139,6 +166,12 @@ export interface ExploradorResponse {
   "valores": Array<number>;
 }
 
+export interface FiltrosDisponiblesResponse {
+  "programas": Array<string>;
+  "anios": Array<number>;
+  "momentos": Array<number>;
+}
+
 export interface HTTPValidationError {
   "detail"?: Array<ValidationError>;
 }
@@ -161,8 +194,14 @@ export interface HistorialCargaItem {
 
 export interface KpisResponse {
   "total_egresados": number;
+  "total_encuestados": number;
   "tasa_empleabilidad": number;
+  "tasa_formalidad"?: number | null;
+  "tasa_informalidad"?: number | null;
+  "observaciones_formalidad": number;
   "promedio_salarial": number;
+  "rango_salarial"?: RangoSalarialResponse | null;
+  "distribucion_estado_laboral": Record<string, number>;
   "distribucion_programas": Record<string, unknown>;
   "nivel_satisfaccion": Record<string, unknown>;
 }
@@ -225,6 +264,13 @@ export interface PublicacionResponse {
   "aprobada_privacidad": boolean;
   "fecha_publicacion": string;
   "fecha_retiro": string | null;
+}
+
+export interface RangoSalarialResponse {
+  "minimo": number;
+  "mediana": number;
+  "maximo": number;
+  "observaciones": number;
 }
 
 export interface ReemisionCredencialRequest {

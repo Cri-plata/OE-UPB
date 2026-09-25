@@ -4,28 +4,64 @@ from infrastructure.database import get_db
 from application.auth_service import require_roles
 from application.indicadores import (
     ETIQUETAS_MOMENTOS,
+    Filtros,
+    _mediciones,
+    comparacion_momentos,
     conteo_respuestas,
     distribucion_programas,
     es_variable_analitica,
-    extraer_salario,
     preguntas_analiticas,
     recortar_etiqueta,
+    resumen_laboral,
     satisfaccion_general,
     tendencias_por_programa,
 )
-from domain.models import Medicion
 from pydantic import BaseModel
-from typing import List, Literal, Optional
-from application.medicion_policy import seleccionar_intentos
+from typing import Dict, List, Literal, Optional
 
 router = APIRouter(prefix="/api/reportes", tags=["Reportes"])
 
+class RangoSalarialResponse(BaseModel):
+    minimo: float
+    mediana: float
+    maximo: float
+    observaciones: int
+
+
 class KpisResponse(BaseModel):
     total_egresados: int
+    total_encuestados: int
     tasa_empleabilidad: float
+    tasa_formalidad: Optional[float] = None
+    tasa_informalidad: Optional[float] = None
+    observaciones_formalidad: int
     promedio_salarial: float
+    rango_salarial: Optional[RangoSalarialResponse] = None
+    distribucion_estado_laboral: Dict[str, int]
     distribucion_programas: dict
     nivel_satisfaccion: dict
+
+
+class FiltrosDisponiblesResponse(BaseModel):
+    programas: List[str]
+    anios: List[int]
+    momentos: List[int]
+
+
+class ComparacionProgramaResponse(BaseModel):
+    programa: str
+    pares: int
+    suficiente: bool
+    valor_inicial: Optional[float] = None
+    valor_final: Optional[float] = None
+
+
+class ComparacionResponse(BaseModel):
+    momento_inicial: int
+    momento_final: int
+    indicador: str
+    minimo_pares: int
+    programas: List[ComparacionProgramaResponse]
 
 
 class ChartDatasetResponse(BaseModel):
@@ -68,57 +104,64 @@ COLORES_TENDENCIAS = [
     {"border": "#9B5DE5", "bg": "rgba(155, 93, 229, 0.2)"}
 ]
 
+def validar_momento_opcional(momento: Optional[int]) -> None:
+    if momento is not None and momento not in (0, 1, 5):
+        raise HTTPException(status_code=422, detail="El momento debe ser 0, 1 o 5")
+
+
+@router.get("/filtros", response_model=FiltrosDisponiblesResponse)
+def filtros_disponibles(db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
+    mediciones = _mediciones(db, current_user.get("sede_id"))
+    return {
+        "programas": sorted({programa for _, programa in mediciones if programa}),
+        "anios": sorted({medicion.anio for medicion, _ in mediciones if medicion.anio}),
+        "momentos": sorted({medicion.momento for medicion, _ in mediciones}),
+    }
+
+
 @router.get("/general", response_model=KpisResponse)
-def get_reporte_general(db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
-    
+def get_reporte_general(
+    programas: List[str] = Query(default_factory=list, description="Programas (multiselección)"),
+    anios: List[int] = Query(default_factory=list, description="Cohortes (multiselección)"),
+    momento: Optional[int] = Query(None, description="Momento 0, 1 o 5"),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_roles("Coordinador_Sede")),
+):
+    validar_momento_opcional(momento)
     sede_id = current_user.get("sede_id")
-    distribucion = distribucion_programas(db, sede_id)
-    mediciones = seleccionar_intentos(db.query(Medicion).filter(Medicion.sede_id == sede_id).all())
-
-    empleados_count = 0
-    respuestas_validas = 0
-    suma_salarios = 0
-    salarios_validos = 0
-
-    for m in mediciones:
-        resp = m.respuestas if m.respuestas else {}
-
-        # 1. Empleabilidad (Pregunta 22)
-        key_empleo = next((k for k in resp.keys() if "realiza alguna actividad remunerada?" in k.lower()), None)
-        if key_empleo:
-            val = str(resp[key_empleo]).strip().upper()
-            if val in ["SI", "SÍ", "NO"]:
-                respuestas_validas += 1
-                if val in ["SI", "SÍ"]:
-                    empleados_count += 1
-
-        # 2. Salario (Pregunta 55)
-        key_salario = next((k for k in resp.keys() if "ingreso mensual" in k.lower() and "smlv" in k.lower() and "realiza" in k.lower()), None)
-        if key_salario and resp[key_salario]:
-            val_sal = extraer_salario(str(resp[key_salario]))
-            if val_sal is not None:
-                suma_salarios += val_sal
-                salarios_validos += 1
-
-    tasa_empleabilidad = round((empleados_count / respuestas_validas) * 100, 1) if respuestas_validas > 0 else 0
-    promedio_salarial = round(suma_salarios / salarios_validos, 1) if salarios_validos > 0 else 0
+    filtros = Filtros(programas, anios, momento)
+    distribucion = distribucion_programas(db, sede_id, filtros)
+    mediciones = _mediciones(db, sede_id, filtros, incluir_anonimas=True)
+    laboral = resumen_laboral(mediciones)
     satisfaccion = {
         categoria: round(celda["suma"] / celda["count"], 1) if celda["count"] > 0 else 0
-        for categoria, celda in satisfaccion_general(db, sede_id).items()
+        for categoria, celda in satisfaccion_general(db, sede_id, filtros).items()
     }
-
     return {
         "total_egresados": sum(distribucion.values()),
-        "tasa_empleabilidad": tasa_empleabilidad,
-        "promedio_salarial": promedio_salarial,
+        "total_encuestados": len(mediciones),
+        "tasa_empleabilidad": laboral["tasa_empleabilidad"],
+        "tasa_formalidad": laboral["tasa_formalidad"],
+        "tasa_informalidad": laboral["tasa_informalidad"],
+        "observaciones_formalidad": laboral["observaciones_formalidad"],
+        "promedio_salarial": laboral["promedio_salarial"],
+        "rango_salarial": laboral["rango_salarial"],
+        "distribucion_estado_laboral": laboral["distribucion_estado_laboral"],
         "distribucion_programas": distribucion,
-        "nivel_satisfaccion": satisfaccion
+        "nivel_satisfaccion": satisfaccion,
     }
 
+
 @router.get("/tendencias", response_model=TendenciasResponse)
-def get_tendencias(indicador: Literal["empleabilidad", "salario", "satisfaccion"] = "empleabilidad", db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
+def get_tendencias(
+    indicador: Literal["empleabilidad", "salario", "satisfaccion"] = "empleabilidad",
+    programas: List[str] = Query(default_factory=list, description="Programas (multiselección)"),
+    anios: List[int] = Query(default_factory=list, description="Cohortes (multiselección)"),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_roles("Coordinador_Sede")),
+):
     datasets = []
-    for idx, (programa, celdas) in enumerate(tendencias_por_programa(db, current_user.get("sede_id"), indicador)):
+    for idx, (programa, celdas) in enumerate(tendencias_por_programa(db, current_user.get("sede_id"), indicador, Filtros(programas, anios))):
         color = COLORES_TENDENCIAS[idx % len(COLORES_TENDENCIAS)]
         datasets.append({
             "label": programa,
@@ -136,6 +179,29 @@ def get_tendencias(indicador: Literal["empleabilidad", "salario", "satisfaccion"
             "spanGaps": True
         })
     return {"labels": list(ETIQUETAS_MOMENTOS), "datasets": datasets}
+
+
+@router.get(
+    "/comparacion",
+    response_model=ComparacionResponse,
+    responses={422: {"description": "Momentos o indicador inválidos"}},
+)
+def get_comparacion(
+    momento_inicial: int = Query(..., description="Momento 0, 1 o 5"),
+    momento_final: int = Query(..., description="Momento 0, 1 o 5, distinto del inicial"),
+    indicador: Literal["empleabilidad", "salario"] = "empleabilidad",
+    programas: List[str] = Query(default_factory=list, description="Programas (multiselección)"),
+    anios: List[int] = Query(default_factory=list, description="Cohortes (multiselección)"),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_roles("Coordinador_Sede")),
+):
+    validar_momento_opcional(momento_inicial)
+    validar_momento_opcional(momento_final)
+    if momento_inicial == momento_final:
+        raise HTTPException(status_code=422, detail="Seleccione dos momentos distintos")
+    return comparacion_momentos(
+        db, current_user.get("sede_id"), momento_inicial, momento_final, indicador, Filtros(programas, anios)
+    )
 
 
 @router.get("/explorador/init", response_model=ExploradorInitResponse)
@@ -157,8 +223,7 @@ def explorador_data(
     db: Session = Depends(get_db),
     current_user: dict = Depends(require_roles("Coordinador_Sede"))
 ):
-    if momento is not None and momento not in (0, 1, 5):
-        raise HTTPException(status_code=422, detail="El momento debe ser 0, 1 o 5")
+    validar_momento_opcional(momento)
     if not es_variable_analitica(pregunta):
         raise HTTPException(status_code=422, detail="La variable solicitada no pertenece al catálogo analítico autorizado")
     conteo, _ = conteo_respuestas(db, current_user.get("sede_id"), pregunta, momento, programa or None, anio)

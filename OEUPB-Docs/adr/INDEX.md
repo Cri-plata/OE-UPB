@@ -19,3 +19,5 @@ Los ADR registran decisiones relevantes y sus consecuencias. Una decisión reemp
 | [013](013-ciclo-vida-credenciales-temporales.md) | Ciclo de vida, expiración y recuperación de credenciales temporales | Aceptado |
 | [014](014-alcance-identidad-egresado.md) | Sin custodia ni encuestas manuales; precedencia de cargas y protección de correcciones | Aceptado |
 | [015](015-recalculo-publicaciones-umbral.md) | Recálculo en backend, umbral k = 5 y autoaprobación explícita de publicaciones | Aceptado |
+| [016](016-taxonomia-laboral-cuestionarios.md) | Clasificación laboral, formalidad y salario a partir de los cuestionarios OLE | Aceptado |
+| [017](017-normalizacion-documento-limites-carga.md) | Normalización del documento de identidad y límites de carga | Aceptado |

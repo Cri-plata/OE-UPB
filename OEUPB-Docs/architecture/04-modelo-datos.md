@@ -2,7 +2,7 @@
 
 **Estado:** descripción del modelo SQLAlchemy actual
 
-**Verificado:** 2026-09-24
+**Verificado:** 2026-09-25
 
 **Esquema canónico:** [`../specs/db/oeupb-schema.sql`](../specs/db/oeupb-schema.sql)
 
@@ -107,7 +107,8 @@ erDiagram
 - Una medición almacena las respuestas dinámicas en JSON.
 - Las encuestas anónimas pueden producir mediciones sin egresado asociado.
 - `sede_id` está en `mediciones`; `egresados` no pertenece directamente a una sede.
-- `usuarios.sede_id` referencia el catálogo `sedes`. La regla de que solo `Admin_CTIC` puede no tener sede se aplica en backend al crear y editar cuentas; el esquema todavía no tiene un CHECK que la garantice (DB-03).
+- `usuarios.sede_id` referencia el catálogo `sedes`. Solo `Admin_CTIC` puede no tener sede: lo valida el backend y lo garantiza `CHECK ck_usuarios_sede_por_rol`.
+- `egresados.numero_documento` se almacena normalizado según ADR-017.
 - Cada archivo se registra como `cargas`; una recarga crea una versión nueva y marca la anterior como reemplazada dentro de la misma transacción.
 - `mediciones.anio` conserva el nombre físico legado, pero su significado vigente es año de grado o cohorte.
 - `carga_id` y `cargas.usuario_id` son obligatorios. Las cargas históricas se atribuyen a una cuenta técnica desactivada.

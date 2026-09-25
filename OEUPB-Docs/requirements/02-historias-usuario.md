@@ -67,7 +67,7 @@ Formato: **Como** [rol], **quiero** [acción], **para** [beneficio]. Incluye cri
 ### HU-07 — Resumen General de Empleabilidad (Dashboard Principal)
 **Como** Coordinador de Sede, **quiero** ver un panel de métricas de mi sede, **para** entender la situación laboral de sus egresados. El Usuario de Consulta no accede a este panel: consume las gráficas únicamente como instantáneas publicadas. *(RN-24, HU-13)*
 
-- CA1: El dashboard muestra tarjetas con el número total de egresados identificados de la sede, tasa de empleo formal e informal y salario promedio y rango. *(RF-25, RF-26, RF-61)* Hoy solo existen total, tasa de actividad remunerada y salario promedio (ver matriz).
+- CA1: El dashboard muestra tarjetas con el número total de egresados identificados de la sede, tasa de empleo formal e informal y salario promedio y rango. *(RF-25, RF-26, RF-61)* Implementado con la taxonomía de ADR-016.
 - CA2: Incluye una gráfica comparativa rápida del estado laboral actual frente al año anterior.
 - CA3: Los datos propios están limitados por sede; las gráficas de otras sedes solo aparecen en la vista separada de publicaciones. *(RN-06, RN-09, RN-10, RN-27)*
 

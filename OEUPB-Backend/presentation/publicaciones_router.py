@@ -28,6 +28,8 @@ class DefinicionGrafica(BaseModel):
     momento: Literal[0, 1, 5] | None = None
     programa: str | None = Field(default=None, max_length=150)
     anio: int | None = Field(default=None, ge=1900, le=2200)
+    programas: list[str] | None = Field(default=None, max_length=100, description="Filtro multiselección de Reporte General y Tendencias")
+    anios: list[int] | None = Field(default=None, max_length=100, description="Filtro multiselección de cohortes")
 
 
 class DatasetGrafica(BaseModel):

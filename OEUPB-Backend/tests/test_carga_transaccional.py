@@ -66,7 +66,7 @@ class CargaTransaccionalTest(unittest.TestCase):
         pd.DataFrame(
             [
                 {
-                    "NUMERO_DOCUMENTO": "CC-1",
+                    "NUMERO_DOCUMENTO": "cc-10.001",
                     "PRIMER NOMBRE": nombre,
                     "PRIMER_APELLIDO": "Prueba",
                     "PROGRAMA": "Ingeniería",
@@ -144,9 +144,9 @@ class CargaTransaccionalTest(unittest.TestCase):
     def test_eliminar_carga_conserva_egresados_del_directorio_manual(self):
         db = self.Session()
         coordinador = db.query(Usuario).one()
-        db.add(Egresado(numero_documento="MANUAL-1", primer_nombre="Manual", programa="Derecho"))
+        db.add(Egresado(numero_documento="MANUAL1", primer_nombre="Manual", programa="Derecho"))
         db.flush()
-        db.add(EgresadoSede(egresado_documento="MANUAL-1", sede_id=1, creado_por_id=coordinador.id))
+        db.add(EgresadoSede(egresado_documento="MANUAL1", sede_id=1, creado_por_id=coordinador.id))
         db.commit()
         db.close()
 
@@ -159,8 +159,8 @@ class CargaTransaccionalTest(unittest.TestCase):
         self.assertEqual(eliminacion.status_code, 200, eliminacion.text)
 
         db = self.Session()
-        self.assertIsNotNone(db.get(Egresado, "MANUAL-1"))
-        self.assertIsNone(db.get(Egresado, "CC-1"))
+        self.assertIsNotNone(db.get(Egresado, "MANUAL1"))
+        self.assertIsNone(db.get(Egresado, "CC10001"))
         db.close()
 
     def test_archivo_identico_a_la_version_vigente_se_rechaza(self):
@@ -175,8 +175,8 @@ class CargaTransaccionalTest(unittest.TestCase):
     def test_correccion_manual_prevalece_sobre_carga_posterior(self):
         db = self.Session()
         coordinador = db.query(Usuario).one()
-        db.add(Egresado(numero_documento="CC-1", primer_nombre="Corregido", programa="Ingeniería", fecha_grado=datetime(2020, 1, 1)))
-        db.add(AuditoriaEgresado(accion="editar", actor_id=coordinador.id, actor_correo=coordinador.correo, sede_id=1, egresado_documento="CC-1", cambios={}, motivo="Corrección manual"))
+        db.add(Egresado(numero_documento="CC10001", primer_nombre="Corregido", programa="Ingeniería", fecha_grado=datetime(2020, 1, 1)))
+        db.add(AuditoriaEgresado(accion="editar", actor_id=coordinador.id, actor_correo=coordinador.correo, sede_id=1, egresado_documento="CC10001", cambios={}, motivo="Corrección manual"))
         db.commit()
         db.close()
 
@@ -184,10 +184,36 @@ class CargaTransaccionalTest(unittest.TestCase):
         self.assertEqual(respuesta.status_code, 200, respuesta.text)
         self.assertIn("corrección manual", respuesta.json()["mensaje"])
         db = self.Session()
-        egresado = db.get(Egresado, "CC-1")
+        egresado = db.get(Egresado, "CC10001")
         self.assertEqual(egresado.primer_nombre, "Corregido")
         self.assertEqual(egresado.fecha_grado, datetime(2020, 1, 1))
         db.close()
+
+    def test_documento_invalido_rechaza_el_archivo_con_detalle_por_fila(self):
+        contenido = io.BytesIO()
+        pd.DataFrame([
+            {"NUMERO_DOCUMENTO": "1.098.765.432", "PRIMER NOMBRE": "Valido", "PROGRAMA": "Derecho", "FECHA_GRADO": "2024-06-01"},
+            {"NUMERO_DOCUMENTO": "12", "PRIMER NOMBRE": "Corto", "PROGRAMA": "Derecho", "FECHA_GRADO": "2024-06-01"},
+        ]).to_excel(contenido, index=False)
+        respuesta = self.cargar(("encuesta.xlsx", contenido.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+        self.assertEqual(respuesta.status_code, 422, respuesta.text)
+        self.assertEqual(respuesta.json()["detail"]["errores"][0]["fila"], 3)
+        db = self.Session()
+        self.assertEqual(db.query(Carga).count(), 0)
+        self.assertEqual(db.query(Egresado).count(), 0)
+        db.close()
+
+    def test_normaliza_documento_y_rechaza_columnas_faltantes(self):
+        self.assertEqual(self.cargar(self.archivo_excel("Primera")).status_code, 200)
+        db = self.Session()
+        self.assertIsNotNone(db.get(Egresado, "CC10001"))
+        db.close()
+
+        contenido = io.BytesIO()
+        pd.DataFrame([{"PRIMER NOMBRE": "Sin documento"}]).to_excel(contenido, index=False)
+        respuesta = self.cargar(("encuesta.xlsx", contenido.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"), anio="2023")
+        self.assertEqual(respuesta.status_code, 422)
+        self.assertIn("NUMERO_DOCUMENTO", [e["columna"] for e in respuesta.json()["detail"]["errores"]])
 
     def test_anio_fuera_de_rango_se_rechaza(self):
         respuesta = self.cargar(self.archivo_excel("Primera"), anio="1800")

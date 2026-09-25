@@ -20,7 +20,7 @@
 | Carpeta | Responsabilidad actual |
 |---|---|
 | `domain/` | Modelos ORM; actualmente dependen de SQLAlchemy, por lo que el dominio no es puro |
-| `application/` | Autenticación y JWT, política de intentos, cálculo de indicadores, catálogo analítico y umbral de publicación (`indicadores.py`), NLP local |
+| `application/` | Autenticación y JWT, política de intentos, indicadores, taxonomía laboral, filtros, comparación, catálogo analítico y umbral de publicación (`indicadores.py`), normalización del documento (`documentos.py`), NLP local |
 | `infrastructure/` | Engine, sesiones y Base de SQLAlchemy |
 | `presentation/` | Routers FastAPI, payloads y parte importante de la lógica de negocio |
 
@@ -33,7 +33,7 @@ La estructura usa nombres de Clean Architecture, pero los límites son parciales
 | `/api/auth` | Login y cambio de contraseña temporal |
 | `/api/usuarios` | Listado, alta, edición, desactivación/reactivación, reemisión de credencial, programas asignables y borrado físico auditado |
 | `/api/carga` | Carga versionada, historial por archivo y eliminación por `carga_id` |
-| `/api/reportes` | KPIs, tendencias y explorador |
+| `/api/reportes` | Filtros disponibles, KPIs con filtros, tendencias, comparación de momentos y explorador |
 | `/api/directorio` | Listado, programas, ficha individual, CRUD manual auditado y exportación Excel |
 | `/api/sedes` | Catálogo autenticado de sedes activas |
 | `/api/publicaciones` | Publicar (con recálculo), retirar, listar propias y catálogo autorizado |

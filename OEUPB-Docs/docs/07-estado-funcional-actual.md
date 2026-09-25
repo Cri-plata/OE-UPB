@@ -1,8 +1,8 @@
 # Estado funcional actual de OE UPB
 
-**Fecha de corte:** 2026-09-24  
+**Fecha de corte:** 2026-09-25  
 **Estado:** referencia funcional verificada contra código, pruebas y migraciones  
-**Versión de base de datos esperada:** `g4c82a9d1e30 (head)`
+**Versión de base de datos esperada:** `i6e04c1f3a52 (head)`
 
 ## 1. Propósito del proyecto
 
@@ -63,7 +63,8 @@ El coordinador debería poder cargar archivos `.xlsx` indicando momento y año d
 
 Durante la carga el backend:
 
-1. valida el tipo y el contenido del archivo;
+1. valida el tipo, el tamaño (25 MB como máximo) y el contenido del archivo (50.000 filas como máximo);
+1. normaliza el documento (ADR-017); un documento inválido rechaza el archivo con 422 y el detalle por fila;
 2. procesa las filas con Pandas;
 3. resuelve dobles titulaciones conservando el registro con fecha de grado más reciente dentro de la carga;
 4. guarda egresados y mediciones en una transacción; un documento existente no pierde nombre, apellido ni programa, y un egresado con corrección manual auditada conserva todos sus datos personales (ADR-014);
@@ -95,15 +96,20 @@ Un registro manual pertenece al directorio de la sede que lo creó y no debe apa
 
 Debería presentar, con datos de la sede autenticada:
 
-- total de egresados;
-- tasa descriptiva de empleabilidad;
-- promedio salarial cuando existan respuestas utilizables;
+- total de egresados y de encuestas;
+- tasa de empleabilidad y distribución en empleado, independiente, estudiante y sin empleo (ADR-016);
+- tasa de empleo formal e informal (solo en los cuestionarios de seguimiento);
+- promedio y rango salarial (mínimo, mediana y máximo en SMLV);
 - distribución por programa;
 - indicadores disponibles de satisfacción.
 
+Los filtros de selección múltiple de programa y cohorte, y el filtro de momento, se aplican a todas las tarjetas y gráficas. Las publicaciones conservan los filtros.
+
 ### Tendencias
 
-Debería comparar los momentos 0, 1 y 5 para los programas con mayor cantidad de datos. Permite alternar indicadores como empleabilidad, salario y satisfacción.
+Debería comparar los momentos 0, 1 y 5 para los programas con mayor cantidad de datos. Permite alternar indicadores como empleabilidad, salario y satisfacción, y filtrar por programas y cohortes.
+
+La sección de comparación contrasta dos momentos sobre los mismos egresados de la misma cohorte. Solo muestra los programas con al menos 5 pares y lista los que no alcanzan ese mínimo.
 
 ### Explorador de datos
 
@@ -111,7 +117,7 @@ Debería permitir seleccionar una pregunta y filtrar por momento, programa y añ
 
 El backend solo ofrece y acepta variables del catálogo analítico RN-31; documentos, nombres, correos, teléfonos, fechas, identificadores y códigos administrativos se excluyen y se rechazan con 422 (EXP-02, cerrado el 2026-09-25).
 
-**Desviación vigente:** solo mantiene una gráfica y no permite comparar varias visualizaciones simultáneamente (EXP-03).
+Permite crear varias gráficas en la misma pantalla (`Crear otra gráfica`). Cada una conserva su variable, filtros, tipo, carga, errores y publicación, y puede quitarse sin afectar a las demás.
 
 Cuando existen varios intentos identificados para una persona y alcance, los indicadores actuales usan el intento más reciente. Las mediciones anónimas permitidas se conservan en los agregados.
 
@@ -168,7 +174,7 @@ El repositorio contiene:
 - Nginx con redirección a HTTPS y HSTS;
 - CORS configurable mediante `CORS_ALLOWED_ORIGINS`;
 - endpoints `/api/health/live` y `/api/health/ready`;
-- identificador de petición, estado y duración en logs, sin registrar cuerpos ni datos personales;
+- identificador de petición, estado y duración en logs, sin registrar cuerpos ni datos personales; el documento se enmascara en las rutas del directorio y la imagen desactiva el access log de Uvicorn;
 - respaldo lógico mediante `backup_database.py`;
 - restauración con confirmación explícita mediante `restore_database.py`;
 - procedimiento de despliegue y rollback documentado.
@@ -177,15 +183,15 @@ La infraestructura Docker no se ejecutó en el equipo de desarrollo porque Docke
 
 ## 11. Verificación disponible
 
-La última revisión aprobó:
+La última revisión (2026-09-25) aprobó:
 
-- 26 pruebas de backend;
-- 15 pruebas de frontend;
+- 52 pruebas de backend;
+- 30 pruebas de frontend;
 - compilación productiva de Angular;
 - sincronización entre FastAPI, OpenAPI y tipos TypeScript;
 - validación de capas frontend, guards y tokens visuales;
 - validación de enlaces y documentación;
-- migración local aplicada hasta `g4c82a9d1e30`.
+- migraciones hasta `i6e04c1f3a52`; la base local debe actualizarse con `alembic upgrade head` (DB-03 y ETL-01).
 
 La compilación Angular mantiene advertencias no bloqueantes por tamaño del paquete inicial y del SCSS de carga de datos.
 
