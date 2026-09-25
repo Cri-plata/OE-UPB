@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>OE UPB · Ficha de egresado</title>
+    <link rel="stylesheet" href="mockups.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-input" />
+      <header class="mobile-header">
+        <div class="mobile-brand">
+          <div class="brand-mark">UPB</div>
+          <span>OEUPB</span>
+        </div>
+        <label for="sidebar-toggle" class="menu-toggle-btn" aria-label="Abrir menú de navegación"></label>
+      </header>
+      <label for="sidebar-toggle" class="sidebar-backdrop" aria-label="Cerrar menú"></label>
+      <aside class="sidebar">
+        <div class="sidebar-mobile-close">
+          <label for="sidebar-toggle" class="sidebar-close-btn" aria-label="Cerrar menú"></label>
+        </div>
+        <div class="brand">
+          <div class="brand-mark">UPB</div>
+          <h2 class="brand-title">OEUPB</h2>
+        </div>
+        <nav class="nav-menu">
+          <a class="nav-item" href="reporte-general.html" title="Reporte general"><span class="nav-item-text">Reporte general</span></a>
+          <a class="nav-item" href="tendencias.html" title="Tendencias"><span class="nav-item-text">Tendencias</span></a>
+          <a class="nav-item" href="explorador.html" title="Explorador de Datos"><span class="nav-item-text">Explorador de Datos</span></a>
+          <a class="nav-item" href="analitica.html" title="Analítica y alertas"><span class="nav-item-text">Analítica y alertas</span></a>
+          <a class="nav-item active" href="directorio.html" title="Directorio"><span class="nav-item-text">Directorio</span></a>
+          <a class="nav-item" href="publicaciones.html" title="Gráficas publicadas"><span class="nav-item-text">Gráficas publicadas</span></a>
+          <a class="nav-item" href="carga-datos.html" title="Cargar datos"><span class="nav-item-text">Cargar datos</span></a>
+          <a class="nav-item" href="gestion-usuarios.html" title="Administrar Usuarios"><span class="nav-item-text">Administrar Usuarios</span></a>
+          <a class="nav-item" href="mi-perfil.html" title="Mi Perfil"><span class="nav-item-text">Mi Perfil</span></a>
+        </nav>
+        <div class="bottom-menu">
+          <a class="logout-btn" href="login.html" title="Cerrar Sesión"><span>Cerrar Sesión</span></a>
+        </div>
+      </aside>
+      <main class="content">
+        <section class="page">
+          <header class="page-header">
+            <div class="page-header-content">
+              <div class="page-actions" class="page-actions mb-sm">
+                <a href="directorio.html" class="btn-secondary">
+                  <i data-lucide="arrow-left" aria-hidden="true"></i>
+                  Volver al Directorio
+                </a>
+              </div>
+              <h1>Ficha de Egresado</h1>
+              <p>Historial y trayectoria de respuestas en encuestas oficiales (OLE).</p>
+            </div>
+            <img
+              class="shield"
+              src="../../OEUPB-Frontend/public/escudo-upb.png"
+              alt="Escudo UPB"
+            />
+          </header>
+          <div class="profile-grid">
+            <article class="card identity-card">
+              <div class="avatar">E</div>
+              <h2>Egresada Demo 01</h2>
+              <p class="muted">C.C. 1000000001</p>
+              <hr />
+              <div class="info-row">
+                <span>Programa:</span>
+                <strong>Ingeniería Industrial</strong>
+              </div>
+              <div class="info-row">
+                <span>Fecha de Grado:</span>
+                <strong>2024-06-21</strong>
+              </div>
+              <div class="info-row">
+                <span>Sede:</span>
+                <strong>Medellín</strong>
+              </div>
+            </article>
+            <article class="card">
+              <h2 class="card-title text-brand">Trayectoria de Encuestas (OLE)</h2>
+              <p class="muted">
+                Resumen de respuestas proporcionadas por el egresado en los diferentes momentos evaluados.
+              </p>
+              <div class="timeline">
+                <div class="timeline-item">
+                  <div class="timeline-content">
+                    <h3>Momento 0 <span class="badge success">Completada</span></h3>
+                    <p><strong>Estado Laboral:</strong> Empleado formalmente</p>
+                    <p><strong>Salario Declarado:</strong> 3 a 4 SMLV</p>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-content">
+                    <h3>Momento 1 <span class="badge success">Completada</span></h3>
+                    <p><strong>Estado Laboral:</strong> Empleado en su área de formación</p>
+                    <p><strong>Salario Declarado:</strong> 4 a 5 SMLV</p>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-content">
+                    <h3>Momento 5 <span class="badge">Pendiente</span></h3>
+                    <p class="muted">Esta medición se programará al cumplirse 5 años de la graduación.</p>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>

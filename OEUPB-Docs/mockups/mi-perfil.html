@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>OE UPB · Mi perfil</title>
+    <link rel="stylesheet" href="mockups.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-input" />
+      <header class="mobile-header">
+        <div class="mobile-brand">
+          <div class="brand-mark">UPB</div>
+          <span>OEUPB</span>
+        </div>
+        <label for="sidebar-toggle" class="menu-toggle-btn" aria-label="Abrir menú de navegación"></label>
+      </header>
+      <label for="sidebar-toggle" class="sidebar-backdrop" aria-label="Cerrar menú"></label>
+      <aside class="sidebar">
+        <div class="sidebar-mobile-close">
+          <label for="sidebar-toggle" class="sidebar-close-btn" aria-label="Cerrar menú"></label>
+        </div>
+        <div class="brand">
+          <div class="brand-mark">UPB</div>
+          <h2 class="brand-title">OEUPB</h2>
+        </div>
+        <nav class="nav-menu">
+          <a class="nav-item" href="reporte-general.html" title="Reporte general"><span class="nav-item-text">Reporte general</span></a>
+          <a class="nav-item" href="tendencias.html" title="Tendencias"><span class="nav-item-text">Tendencias</span></a>
+          <a class="nav-item" href="explorador.html" title="Explorador de Datos"><span class="nav-item-text">Explorador de Datos</span></a>
+          <a class="nav-item" href="analitica.html" title="Analítica y alertas"><span class="nav-item-text">Analítica y alertas</span></a>
+          <a class="nav-item" href="directorio.html" title="Directorio"><span class="nav-item-text">Directorio</span></a>
+          <a class="nav-item" href="publicaciones.html" title="Gráficas publicadas"><span class="nav-item-text">Gráficas publicadas</span></a>
+          <a class="nav-item" href="carga-datos.html" title="Cargar datos"><span class="nav-item-text">Cargar datos</span></a>
+          <a class="nav-item" href="gestion-usuarios.html" title="Administrar Usuarios"><span class="nav-item-text">Administrar Usuarios</span></a>
+          <a class="nav-item active" href="mi-perfil.html" title="Mi Perfil"><span class="nav-item-text">Mi Perfil</span></a>
+        </nav>
+        <div class="bottom-menu">
+          <a class="logout-btn" href="login.html" title="Cerrar Sesión"><span>Cerrar Sesión</span></a>
+        </div>
+      </aside>
+      <main class="content">
+        <section class="page">
+          <header class="page-header">
+            <div class="page-header-content">
+              <h1>Mi Perfil</h1>
+              <p>Consulta de identidad institucional, sede asignada y alcance de permisos.</p>
+            </div>
+            <img
+              class="shield"
+              src="../../OEUPB-Frontend/public/escudo-upb.png"
+              alt="Escudo UPB"
+            />
+          </header>
+          <div class="profile-grid">
+            <article class="card identity-card">
+              <div class="avatar">C</div>
+              <h2>Coordinación de sede</h2>
+              <p>
+                <span class="badge badge-info">Coordinador_Sede</span>
+              </p>
+              <hr />
+              <div class="info-row">
+                <span>Correo Institucional:</span>
+                <strong>coordinacion@upb.edu.co</strong>
+              </div>
+              <div class="info-row">
+                <span>Sede Asignada:</span>
+                <strong>Medellín</strong>
+              </div>
+              <div class="info-row">
+                <span>ID de Sistema:</span>
+                <strong>#001</strong>
+              </div>
+            </article>
+            <article class="card security-card">
+              <h2 class="card-title text-brand">Información de Seguridad y Acceso</h2>
+              <p class="muted">
+                Detalles de acceso a tu cuenta dentro de la plataforma del
+                Observatorio de Egresados UPB.
+              </p>
+              <div class="security-box">
+                <h3>Estado de Cuenta</h3>
+                <span class="badge success">Activa</span>
+              </div>
+              <div class="security-box">
+                <h3>Permisos de Acceso</h3>
+                <p>
+                  Tienes permisos para cargar, validar, consultar reportes
+                  analíticos y administrar usuarios de consulta correspondientes a tu sede asignada.
+                </p>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

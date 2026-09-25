@@ -1,67 +1,69 @@
-﻿<div class="dashboard-container">
-    <app-sidebar></app-sidebar>
-    <div class="main-content">
-      
-      <div class="top-bar">
-        <button class="back-btn" (click)="volver()">
-          &#8592; Volver al Directorio
-        </button>
-        <img src="/escudo-upb.png" alt="UPB" class="logo-mini">
-      </div>
-  
-      <div class="loading-overlay" *ngIf="cargando">Cargando perfil...</div>
-      
-      <div class="error-msg" *ngIf="error">{{ error }}</div>
-  
-      <div class="profile-layout" *ngIf="perfil && !cargando">
-        
-        <!-- Tarjeta Izquierda: Info Básica -->
-        <div class="card basic-info-card">
-          <div class="avatar-circle">
-            {{ perfil.nombre_completo.charAt(0) }}
-          </div>
-          <h2>{{ perfil.nombre_completo }}</h2>
-          <p class="cedula">C.C. {{ perfil.documento }}</p>
-          
-          <hr>
-          
-          <div class="info-row">
-            <span class="label">Programa:</span>
-            <span class="value">{{ perfil.programa }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Fecha de Grado:</span>
-            <span class="value">{{ perfil.fecha_grado }}</span>
-          </div>
+<div class="dashboard-container">
+  <app-sidebar></app-sidebar>
+  <main class="main-content">
+    <header class="page-header">
+      <div class="page-header-content">
+        <div class="page-actions header-back-action">
+          <button class="btn-secondary table-action" (click)="volver()">
+            ← Volver al Directorio
+          </button>
         </div>
-  
-        <!-- Tarjeta Derecha: Historial Encuestas -->
-        <div class="card surveys-card">
-          <h3>Trayectoria de Encuestas (OLE)</h3>
-          <p class="subtitle">Resumen de respuestas proporcionadas por el egresado en los diferentes momentos.</p>
-  
-          <div class="timeline">
-            <div class="timeline-item" *ngFor="let m of perfil.encuestas">
-              <div class="timeline-dot"></div>
-              <div class="timeline-content">
-                <div class="moment-header">
-                  <h4>Momento {{ m.momento }}</h4>
-                  <span class="year-badge">{{ m.anio ? m.anio : 'N/A' }}</span>
-                </div>
-                <div class="survey-details">
-                  <p><strong>Estado Laboral:</strong> {{ m.empleabilidad }}</p>
-                  <p><strong>Salario Declarado:</strong> {{ m.salario }}</p>
-                </div>
+        <h1>Ficha de Egresado</h1>
+        <p>Historial y trayectoria de respuestas en encuestas oficiales (OLE).</p>
+      </div>
+      <img src="escudo-upb.png" alt="UPB" class="shield">
+    </header>
+
+    <div class="loading-overlay" *ngIf="cargando">Cargando perfil...</div>
+    
+    <div class="error-message" *ngIf="error">{{ error }}</div>
+
+    <div class="profile-grid" *ngIf="perfil && !cargando">
+      <!-- Tarjeta Izquierda: Info Básica -->
+      <article class="card identity-card">
+        <div class="avatar-circle">
+          {{ perfil.nombre_completo.charAt(0) }}
+        </div>
+        <h2>{{ perfil.nombre_completo }}</h2>
+        <p class="cedula">C.C. {{ perfil.documento }}</p>
+        
+        <hr>
+        
+        <div class="info-row">
+          <span class="label">Programa:</span>
+          <strong class="value">{{ perfil.programa }}</strong>
+        </div>
+        <div class="info-row">
+          <span class="label">Fecha de Grado:</span>
+          <strong class="value">{{ perfil.fecha_grado }}</strong>
+        </div>
+      </article>
+
+      <!-- Tarjeta Derecha: Historial Encuestas -->
+      <article class="card surveys-card">
+        <h2 class="card-title text-brand">Trayectoria de Encuestas (OLE)</h2>
+        <p class="subtitle">Resumen de respuestas proporcionadas por el egresado en los diferentes momentos.</p>
+
+        <div class="timeline">
+          <div class="timeline-item" *ngFor="let m of perfil.encuestas">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="moment-header">
+                <h3>Momento {{ m.momento }}</h3>
+                <span class="badge" [class.success]="m.empleabilidad">{{ m.anio ? m.anio : 'N/A' }}</span>
+              </div>
+              <div class="survey-details">
+                <p><strong>Estado Laboral:</strong> {{ m.empleabilidad }}</p>
+                <p><strong>Salario Declarado:</strong> {{ m.salario }}</p>
               </div>
             </div>
-            
-            <div class="empty-timeline" *ngIf="perfil.encuestas.length === 0">
-              No hay encuestas registradas para este egresado.
-            </div>
           </div>
-  
+          
+          <div class="empty-timeline" *ngIf="perfil.encuestas.length === 0">
+            No hay encuestas registradas para este egresado.
+          </div>
         </div>
-  
-      </div>
+      </article>
     </div>
-  </div>
+  </main>
+</div>

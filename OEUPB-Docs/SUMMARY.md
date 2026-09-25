@@ -24,7 +24,8 @@
   - [OpenAPI](specs/api/openapi.json)
   - [Esquema SQL](specs/db/oeupb-schema.sql)
 - Diseño
-  - [Design system](design/design-system.md)
+  - [Design system](design/design.md)
+  - [Mapa de pantallas](mockups/screen-map.md)
 - Decisiones
   - [Índice de ADR](adr/INDEX.md)
 - Operación

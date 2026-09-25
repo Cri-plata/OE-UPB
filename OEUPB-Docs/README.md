@@ -18,7 +18,8 @@ Documentación transversal del monorepo **OE UPB — Observatorio de Egresados U
 | Revisar requisitos y reglas | [`requirements/`](requirements/) |
 | Ver cobertura requisito–código | [`requirements/matriz-trazabilidad.md`](requirements/matriz-trazabilidad.md) |
 | Entender decisiones arquitectónicas | [`adr/INDEX.md`](adr/INDEX.md) |
-| Aplicar estilos y componentes | [`design/design-system.md`](design/design-system.md) |
+| Aplicar estilos y componentes | [`design/design.md`](design/design.md) |
+| Revisar pantallas y flujos antes de desarrollar UI | [`mockups/index.html`](mockups/index.html) y [`mockups/screen-map.md`](mockups/screen-map.md) |
 | Revisar hallazgos documentales | [`audits/01-auditoria-organizacion-documental.md`](audits/01-auditoria-organizacion-documental.md) y [`audits/02-auditoria-requerimientos.md`](audits/02-auditoria-requerimientos.md) |
 | Consultar el plan de organización | [`plans/04-plan-reorganizacion-documental.md`](plans/04-plan-reorganizacion-documental.md) |
 
