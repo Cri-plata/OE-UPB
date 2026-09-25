@@ -1,7 +1,7 @@
-﻿from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from domain.models import Carga, Egresado, EventoEliminacionCarga, Medicion, Usuario
+from domain.models import AuditoriaEgresado, Carga, Egresado, EgresadoSede, EventoEliminacionCarga, Medicion, Sede, Usuario
 from infrastructure.database import get_db
 from application.auth_service import get_current_user
 import pandas as pd
@@ -13,6 +13,8 @@ from typing import List, Optional
 router = APIRouter(prefix="/api/carga", tags=["Carga de Datos"])
 
 MOMENTOS_PERMITIDOS = {0, 1, 5}
+ANIO_MINIMO = 1900
+ANIO_MAXIMO = 2200
 
 
 def validar_coordinador_con_sede(current_user: dict) -> int:
@@ -37,6 +39,19 @@ def validar_momento(momento: int) -> None:
             status_code=422,
             detail="El momento debe ser 0, 1 o 5",
         )
+
+
+def validar_anio(anio: int) -> None:
+    if not ANIO_MINIMO <= anio <= ANIO_MAXIMO:
+        raise HTTPException(
+            status_code=422,
+            detail=f"El año de grado debe estar entre {ANIO_MINIMO} y {ANIO_MAXIMO}",
+        )
+
+
+def bloquear_sede(db: Session, sede_id: int) -> None:
+    """Serializa las operaciones de carga de una sede (SELECT ... FOR UPDATE en MySQL)."""
+    db.query(Sede).filter(Sede.id == sede_id).with_for_update().one()
 
 class ErrorFila(BaseModel):
     fila: int
@@ -78,18 +93,20 @@ class EliminarCargaRequest(BaseModel):
     responses={
         400: {"description": "El archivo no es .xlsx o su contenido no puede leerse"},
         403: {"description": "El usuario no es coordinador o no tiene sede asignada"},
+        409: {"description": "El archivo es idéntico a la versión vigente del mismo alcance"},
         422: {"description": "El momento o los parámetros no son válidos"},
     },
 )
 async def procesar_excel(
-    momento: int = Form(...),
-    anio: int = Form(..., description="Año de grado o cohorte"),
+    momento: int = Form(..., description="Momento 0, 1 o 5"),
+    anio: int = Form(..., description="Año de grado o cohorte (1900-2200)"),
     file: UploadFile = File(..., description="Archivo Excel en formato .xlsx"),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
     sede_coordinador_actual = validar_coordinador_con_sede(current_user)
     validar_momento(momento)
+    validar_anio(anio)
 
     nombre_archivo = (file.filename or "").lower()
     if not nombre_archivo.endswith(".xlsx"):
@@ -166,6 +183,7 @@ async def procesar_excel(
         if actor is None:
             raise HTTPException(status_code=403, detail="El usuario autenticado no existe")
 
+        bloquear_sede(db, sede_coordinador_actual)
         consulta_alcance = db.query(Carga).filter(
             Carga.sede_id == sede_coordinador_actual,
             Carga.momento == momento,
@@ -182,6 +200,15 @@ async def procesar_excel(
             EventoEliminacionCarga.momento == momento,
             EventoEliminacionCarga.anio_grado == anio,
         ).scalar() or 0
+        if carga_anterior and carga_anterior.hash_archivo == hash_archivo:
+            raise HTTPException(
+                status_code=409,
+                detail="El archivo es idéntico a la versión vigente; no se creó una nueva versión",
+            )
+        documentos_protegidos = {
+            documento for (documento,) in db.query(AuditoriaEgresado.egresado_documento).distinct().all()
+        }
+        registros_protegidos = 0
         version = max(ultima_carga.version if ultima_carga else 0, ultima_version_eliminada) + 1
 
         nueva_carga = Carga(
@@ -249,6 +276,9 @@ async def procesar_excel(
                         ),
                     )
                     db.add(egresado)
+                elif doc in documentos_protegidos:
+                    # RN-13: una corrección manual auditada prevalece sobre cargas posteriores.
+                    registros_protegidos += 1
                 elif pd.notnull(row.get("FECHA_GRADO")):
                     if (
                         not egresado.fecha_grado
@@ -290,6 +320,8 @@ async def procesar_excel(
     mensaje_exito = f"Archivo procesado exitosamente. Se guardaron {total_final} egresados."
     if casos_resueltos > 0:
         mensaje_exito += f" Se detectaron y resolvieron automáticamente {casos_resueltos} casos de Doble Titulación (se dejó la fecha más reciente)."
+    if registros_protegidos > 0:
+        mensaje_exito += f" {registros_protegidos} egresados con corrección manual conservaron sus datos personales."
 
     return CargaResponse(
         mensaje=mensaje_exito,
@@ -360,6 +392,8 @@ def eliminar_carga(
     )
     if carga is None:
         raise HTTPException(status_code=404, detail="Carga no encontrada")
+    bloquear_sede(db, sede_id)
+    db.refresh(carga)
     if carga.estado != "vigente":
         raise HTTPException(status_code=409, detail="La carga ya no está vigente")
 
@@ -393,10 +427,15 @@ def eliminar_carga(
         )
         db.delete(carga)
 
+        # Solo se eliminan identidades que quedan sin mediciones ni vínculo manual
+        # con alguna sede; los registros del directorio manual se conservan.
         db.query(Egresado).filter(
             ~exists().where(
                 Medicion.egresado_documento == Egresado.numero_documento
-            )
+            ),
+            ~exists().where(
+                EgresadoSede.egresado_documento == Egresado.numero_documento
+            ),
         ).delete(synchronize_session=False)
         db.commit()
     except Exception as exc:

@@ -1,12 +1,12 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
 import { ReportesApi } from '../../../../data/api/reportes.api';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
-import { PublicacionesApi } from '../../../../data/api/publicaciones.api';
-import { PublicacionCreate, PublicacionResponse } from '../../../../data/api/generated-api.models';
+import { PublicacionControl } from '../../../shared/publicacion-control';
+import { PublicacionCreate } from '../../../../data/api/generated-api.models';
 import { CHART_PALETTE } from '../../../shared/chart-palette';
 import { exportChart } from '../../../shared/export-chart';
 
@@ -14,6 +14,7 @@ import { exportChart } from '../../../shared/export-chart';
   selector: 'app-explorador',
   standalone: true,
   imports: [CommonModule, FormsModule, SidebarComponent, BaseChartDirective],
+  providers: [PublicacionControl],
   templateUrl: './explorador.html',
   styleUrls: ['./explorador.scss']
 })
@@ -34,8 +35,7 @@ export class ExploradorComponent implements OnInit {
 
   // Chart Data
   isChartReady = false;
-  publicaciones: Record<string, PublicacionResponse> = {};
-  publicando = false;
+  readonly publicacion = inject(PublicacionControl);
   chartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
   chartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -45,12 +45,10 @@ export class ExploradorComponent implements OnInit {
     }
   };
 
-  constructor(private reportesApi: ReportesApi, private cdr: ChangeDetectorRef, private publicacionesApi: PublicacionesApi) {}
+  constructor(private reportesApi: ReportesApi, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    this.publicacionesApi.listarPropias().subscribe(publicaciones => {
-      this.publicaciones = Object.fromEntries(publicaciones.map(publicacion => [publicacion.grafica_key, publicacion]));
-    });
+    this.publicacion.cargarPropias();
     this.cargarFiltrosIniciales();
   }
 
@@ -109,12 +107,10 @@ export class ExploradorComponent implements OnInit {
   }
 
   publicar() {
-    if (!confirm('Confirmo que esta gráfica contiene únicamente métricas agregadas y está aprobada para publicación.')) return;
-    const programas = this.programaSeleccionado ? [this.programaSeleccionado] : this.programasDisponibles;
+    if (!confirm('Confirmo que revisé la privacidad de esta gráfica. Se publicarán métricas agregadas recalculadas por el sistema; las categorías con menos de 5 observaciones se agrupan u omiten.')) return;
     const payload: PublicacionCreate = {
       grafica_key: this.graficaKey,
       titulo: `Explorador: ${this.preguntaSeleccionada.slice(0, 150)}`,
-      programas,
       definicion: {
         origen: 'explorador', tipo_visualizacion: this.tipoGrafico as PublicacionCreate['definicion']['tipo_visualizacion'],
         pregunta: this.preguntaSeleccionada,
@@ -122,31 +118,13 @@ export class ExploradorComponent implements OnInit {
         programa: this.programaSeleccionado || undefined,
         anio: this.anioSeleccionado === '' ? undefined : this.anioSeleccionado,
       },
-      metricas: {
-        labels: (this.chartData.labels ?? []).map(String),
-        datasets: this.chartData.datasets.map(dataset => ({
-          label: dataset.label || 'Respuestas',
-          data: dataset.data.map(valor => typeof valor === 'number' ? valor : null),
-          backgroundColor: Array.isArray(dataset.backgroundColor) ? dataset.backgroundColor.map(String) : (typeof dataset.backgroundColor === 'string' ? dataset.backgroundColor : undefined),
-          borderColor: typeof dataset.borderColor === 'string' ? dataset.borderColor : undefined,
-        }))
-      },
       aprobada_privacidad: true
     };
-    this.publicando = true;
-    this.publicacionesApi.publicar(payload).subscribe({
-      next: publicacion => { this.publicaciones[this.graficaKey] = publicacion; this.publicando = false; },
-      error: () => { alert('No fue posible publicar la gráfica.'); this.publicando = false; }
-    });
+    this.publicacion.publicar(payload.grafica_key, payload);
   }
 
   retirar() {
-    const publicacion = this.publicaciones[this.graficaKey];
-    if (!publicacion || !confirm('¿Retirar esta publicación?')) return;
-    this.publicando = true;
-    this.publicacionesApi.retirar(publicacion.id).subscribe({
-      next: () => { delete this.publicaciones[this.graficaKey]; this.publicando = false; },
-      error: () => { alert('No fue posible retirar la publicación.'); this.publicando = false; }
-    });
+    if (!confirm('¿Retirar esta publicación? Dejará de ser visible inmediatamente.')) return;
+    this.publicacion.retirar(this.graficaKey);
   }
 }

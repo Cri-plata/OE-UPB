@@ -66,7 +66,7 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-07 |
-| Descripción del requerimiento | El sistema debe permitir cargar información histórica desde bases de datos antiguas |
+| Descripción del requerimiento | El sistema debe permitir cargar información histórica de cohortes anteriores. Las bases de datos antiguas se exportan a `.xlsx` antes de cargarlas (RN-05); no existe un adaptador directo. |
 
 | Número de requisito | RF-09 |
 |---|---|
@@ -616,7 +616,7 @@
 |---|---|
 | Nombre de requisito | El modelo de IA debe... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☐ Media/Deseado | ☑ Baja/Opcional (en pausa) |
 | Requerimiento Ligado | RF-04 |
 | Descripción del requerimiento | **En pausa por decisión de producto.** No se implementará un modelo predictivo hasta aprobar la variable objetivo, las métricas, la población, el horizonte y los criterios de aceptación. |
 
@@ -642,7 +642,7 @@
 | Tipo | ☐ Requisito | ☑ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-72 |
-| Descripción del requerimiento | La IA debe sugerir competencias o habilidades demandadas en el mercado a partir de los sectores y cargos actuales de los egresados.El módulo de IA debe estar desacoplado (ej. mediante una API) para que sus procesos no bloqueen ni ralenticen el dashboard principal.(NF) |
+| Descripción del requerimiento | El módulo de IA debe estar desacoplado del dashboard principal para que sus procesos no lo bloqueen ni lo ralenticen, y debe procesar el texto localmente, sin servicios externos (NF). La sugerencia de competencias demandadas es un requisito funcional pendiente de priorizar como RF propio; hoy se cubre parcialmente con RF-72. |
 
 | Número de requisito | RNF-08 |
 |---|---|

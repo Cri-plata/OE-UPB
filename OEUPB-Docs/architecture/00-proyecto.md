@@ -2,9 +2,9 @@
 
 **Estado:** Vigente
 
-**Verificado contra el código:** 2026-09-23
+**Verificado contra el código:** 2026-09-25
 
-**Política objetivo actualizada:** 2026-09-23
+**Política objetivo actualizada:** 2026-09-25
 
 ## Propósito
 
@@ -22,22 +22,22 @@ OEUPB-Backend (FastAPI :8000)
 MySQL
 
 OEUPB-Contracts
-  DTO heredados; en transición hacia OpenAPI canónico
+  DTO heredados; no los importa ningún módulo
 ```
 
 | Módulo | Responsabilidad actual |
 |---|---|
-| Frontend | Login, gestión de usuarios, carga, reportes, tendencias, explorador, directorio y perfiles |
-| Backend | JWT, usuarios, ETL de Excel, consultas de reportes y directorio |
-| Base de datos | Usuarios, egresados y mediciones con respuestas JSON |
-| Contratos | Tipos manuales que deben sincronizarse con OpenAPI |
+| Frontend | Login, cuentas, carga, reportes, tendencias, explorador, publicaciones, analítica, directorio y perfiles |
+| Backend | JWT, cuentas y credenciales, ETL de Excel, reportes, directorio, sedes, publicaciones, analítica NLP y health checks |
+| Base de datos | Sedes, usuarios, egresados, vínculos manuales, cargas, mediciones JSON, publicaciones y auditorías |
+| Contratos | Tipos TypeScript generados desde OpenAPI (`generated-api.models.ts`); `OEUPB-Contracts` es histórico |
 
 ## Roles observados
 
 | Rol | Estado actual verificado | Estado normativo |
 |---|---|---|
 | `Admin_CTIC` | Crea coordinadores; no tiene sede en el modelo actual | Administra solo coordinadores y no accede a datos ni gráficas |
-| `Coordinador_Sede` | Opera datos de su sede y crea roles inferiores | Administra datos propios y usuarios de consulta; publica gráficas agregadas; ve todas las publicadas |
+| `Coordinador_Sede` | Opera datos de su sede y crea usuarios de consulta | Administra datos propios y usuarios de consulta; publica gráficas agregadas; ve todas las publicadas |
 | `Usuario_Consulta` | Implementado con etiqueta, permisos, programas, sede, estado y catálogo de publicaciones autorizado | Rol único de solo lectura; no accede a datos privados |
 
 La política normativa está definida en RN-03 y RN-06 a RN-11. RBAC, cuentas, aislamiento y publicación de gráficas agregadas están implementados.
@@ -48,7 +48,7 @@ La política normativa está definida en RN-03 y RN-06 a RN-11. RBAC, cuentas, a
 2. **Carga:** Excel + momento + año → validación y limpieza con Pandas → egresados y mediciones JSON.
 3. **Consulta:** frontend solicita indicadores/directorio → backend filtra según identidad JWT → MySQL responde.
 4. **Análisis:** endpoints agregan campos conocidos y respuestas JSON para gráficas.
-5. **Publicación:** coordinador publica una gráfica propia → backend guarda definición agregada, sede y programas → usuarios autorizados la consultan sin acceso a datos fuente.
+5. **Publicación:** coordinador publica una gráfica propia → backend recalcula métricas y programas con datos de su sede, aplica k = 5 y versiona → usuarios autorizados la consultan sin acceso a datos fuente.
 
 ## Principios vigentes
 

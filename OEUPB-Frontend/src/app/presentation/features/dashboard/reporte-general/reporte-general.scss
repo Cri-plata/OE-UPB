@@ -54,7 +54,9 @@
   transition: border-color 0.2s;
 }
 .chart-type-select:hover, .chart-type-select:focus { border-color: var(--color-brand); }
-.chart-actions { display: flex; gap: 8px; align-items: center; }
+.chart-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; align-items: center; }
+.publication-status { color: var(--color-success); font-weight: 700; font-size: 13px; }
+.publish-error { flex-basis: 100%; margin: 4px 0 0; color: var(--color-error); font-size: 13px; }
 .publish-btn, .withdraw-btn { border-radius: 6px; padding: 8px 12px; cursor: pointer; font-weight: 700; }
 .publish-btn { background: var(--color-brand); color: var(--color-surface); border: 1px solid var(--color-brand); }
 .withdraw-btn { background: var(--color-surface); color: var(--color-brand); border: 1px solid var(--color-brand); }

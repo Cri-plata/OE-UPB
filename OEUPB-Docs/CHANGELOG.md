@@ -2,6 +2,19 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-09-25] - Corrección del flujo de publicación
+
+* **PUB-01/PUB-02:** se documentó la causa (detección de cambios zoneless con estado fuera de signals), la corrección, las pruebas y la lista de validación manual. RF-35 sigue Parcial hasta esa validación.
+* **Arquitectura frontend:** se registró la convención de usar signals para el estado asíncrono.
+
+## [2026-09-25] - Auditoría de requerimientos 05
+
+* **Auditoría:** se ejecutó `audits/auditoria_requerimientos.md` (20 contradicciones y 21 casos de borde) y se verificó cada hallazgo contra código y ADR en `audits/05-auditoria-requerimientos.md`.
+* **Decisiones:** ADR-014 saca del alcance la custodia institucional y las encuestas manuales y fija la precedencia de cargas. ADR-015 exige recálculo en backend, umbral k = 5 y autoaprobación explícita de las publicaciones.
+* **Requisitos:** se alinearon RN-01, 07, 09, 12-15, 18, 22-24, 26, 28 y 31, HU-01, 05-09 y 11-13, y CU-02 a CU-12 con RN-24, ADR-013, ADR-014 y ADR-015. RF-21, RF-22 y RF-26 pasan a Parcial.
+* **Arquitectura y operación:** se completaron inventarios de routers y rutas, frontera de publicación, invariantes del modelo y enmascaramiento de logs.
+* **Backlog:** EXP-02 archivado; nuevos ítems ANA-01, DB-03, ETL-01, API-02, PRG-01, ANA-02 y DOC-03.
+
 ## [2026-09-25] - Hallazgos de Explorador y publicaciones
 
 * **Privacidad:** se documentó la exclusión obligatoria de PII y metadatos del catálogo graficable mediante RN-31 y EXP-02.

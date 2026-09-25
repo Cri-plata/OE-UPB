@@ -1,12 +1,22 @@
-﻿from fastapi import APIRouter, Depends
+﻿from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from infrastructure.database import get_db
 from application.auth_service import require_roles
-from domain.models import Egresado, Medicion
+from application.indicadores import (
+    ETIQUETAS_MOMENTOS,
+    conteo_respuestas,
+    distribucion_programas,
+    es_variable_analitica,
+    extraer_salario,
+    preguntas_analiticas,
+    recortar_etiqueta,
+    satisfaccion_general,
+    tendencias_por_programa,
+)
+from domain.models import Medicion
 from pydantic import BaseModel
-from typing import Any, Dict, List, Optional
+from typing import List, Literal, Optional
 from application.medicion_policy import seleccionar_intentos
-import re
 
 router = APIRouter(prefix="/api/reportes", tags=["Reportes"])
 
@@ -49,69 +59,30 @@ class ExploradorResponse(BaseModel):
     labels: List[str]
     valores: List[int]
 
-def extraer_salario(texto):
-    if not texto or not isinstance(texto, str):
-        return None
-    texto = texto.lower()
-    
-    # Extraer el patrón "entre X y Y smlv"
-    if "entre" in texto and "smlv" in texto:
-        match = re.search(r"entre ([\d,]+) y ([\d,]+)", texto)
-        if match:
-            v1 = float(match.group(1).replace(",", "."))
-            v2 = float(match.group(2).replace(",", "."))
-            return (v1 + v2) / 2.0
-    if "menos de 1" in texto:
-        return 0.8
-    if "más de 10" in texto or "mas de 10" in texto:
-        return 12.0
-    if "1 smlv" in texto:
-        return 1.0
-        
-    # Extraer primer número si es distinto
-    numeros = re.findall(r"([\d,]+)", texto.split("(")[0])
-    if numeros:
-        return float(numeros[0].replace(",", "."))
-    return None
+
+COLORES_TENDENCIAS = [
+    {"border": "#E63946", "bg": "rgba(230, 57, 70, 0.2)"},
+    {"border": "#1D3557", "bg": "rgba(29, 53, 87, 0.2)"},
+    {"border": "#2A9D8F", "bg": "rgba(42, 157, 143, 0.2)"},
+    {"border": "#F4A261", "bg": "rgba(244, 162, 97, 0.2)"},
+    {"border": "#9B5DE5", "bg": "rgba(155, 93, 229, 0.2)"}
+]
 
 @router.get("/general", response_model=KpisResponse)
 def get_reporte_general(db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
     
-    query_med = db.query(Medicion)
-    query_egresados = db.query(Egresado)
-    
-    query_med = query_med.filter(Medicion.sede_id == current_user.get('sede_id'))
-    query_egresados = query_egresados.filter(Egresado.numero_documento.in_(db.query(Medicion.egresado_documento).filter(Medicion.sede_id == current_user.get('sede_id'))))
+    sede_id = current_user.get("sede_id")
+    distribucion = distribucion_programas(db, sede_id)
+    mediciones = seleccionar_intentos(db.query(Medicion).filter(Medicion.sede_id == sede_id).all())
 
-    total = query_egresados.count()
-    programas = query_egresados.with_entities(Egresado.programa).all()
-
-    dist = {}
-    for p in programas:
-        prog = p[0]
-        if prog in dist:
-            dist[prog] += 1
-        else:
-            dist[prog] = 1
-            
-    mediciones = seleccionar_intentos(query_med.all())
-    
     empleados_count = 0
     respuestas_validas = 0
-    
     suma_salarios = 0
     salarios_validos = 0
-    
-    satisfaccion = {
-        "Aplicación Conocimientos": {"suma": 0, "count": 0},
-        "Retos Intelectuales": {"suma": 0, "count": 0},
-        "Estabilidad": {"suma": 0, "count": 0},
-        "Ascenso": {"suma": 0, "count": 0}
-    }
-    
+
     for m in mediciones:
         resp = m.respuestas if m.respuestas else {}
-        
+
         # 1. Empleabilidad (Pregunta 22)
         key_empleo = next((k for k in resp.keys() if "realiza alguna actividad remunerada?" in k.lower()), None)
         if key_empleo:
@@ -120,7 +91,7 @@ def get_reporte_general(db: Session = Depends(get_db), current_user: dict = Depe
                 respuestas_validas += 1
                 if val in ["SI", "SÍ"]:
                     empleados_count += 1
-                    
+
         # 2. Salario (Pregunta 55)
         key_salario = next((k for k in resp.keys() if "ingreso mensual" in k.lower() and "smlv" in k.lower() and "realiza" in k.lower()), None)
         if key_salario and resp[key_salario]:
@@ -128,138 +99,30 @@ def get_reporte_general(db: Session = Depends(get_db), current_user: dict = Depe
             if val_sal is not None:
                 suma_salarios += val_sal
                 salarios_validos += 1
-                
-        # 3. Satisfacción (Pregunta 54)
-        for key, val in resp.items():
-            if "califique su nivel de satisfacci" in key.lower() and val is not None:
-                try:
-                    num_val = float(val)
-                    if "aplicaci" in key.lower() and "conocimientos" in key.lower():
-                        satisfaccion["Aplicación Conocimientos"]["suma"] += num_val
-                        satisfaccion["Aplicación Conocimientos"]["count"] += 1
-                    elif "retos y desaf" in key.lower():
-                        satisfaccion["Retos Intelectuales"]["suma"] += num_val
-                        satisfaccion["Retos Intelectuales"]["count"] += 1
-                    elif "estabilidad" in key.lower():
-                        satisfaccion["Estabilidad"]["suma"] += num_val
-                        satisfaccion["Estabilidad"]["count"] += 1
-                    elif "ascenso" in key.lower():
-                        satisfaccion["Ascenso"]["suma"] += num_val
-                        satisfaccion["Ascenso"]["count"] += 1
-                except:
-                    pass
 
     tasa_empleabilidad = round((empleados_count / respuestas_validas) * 100, 1) if respuestas_validas > 0 else 0
     promedio_salarial = round(suma_salarios / salarios_validos, 1) if salarios_validos > 0 else 0
-    
-    resultado_satisfaccion = {}
-    for k, v in satisfaccion.items():
-        resultado_satisfaccion[k] = round(v["suma"] / v["count"], 1) if v["count"] > 0 else 0
+    satisfaccion = {
+        categoria: round(celda["suma"] / celda["count"], 1) if celda["count"] > 0 else 0
+        for categoria, celda in satisfaccion_general(db, sede_id).items()
+    }
 
     return {
-        "total_egresados": total,
+        "total_egresados": sum(distribucion.values()),
         "tasa_empleabilidad": tasa_empleabilidad,
         "promedio_salarial": promedio_salarial,
-        "distribucion_programas": dist,
-        "nivel_satisfaccion": resultado_satisfaccion
+        "distribucion_programas": distribucion,
+        "nivel_satisfaccion": satisfaccion
     }
 
 @router.get("/tendencias", response_model=TendenciasResponse)
-def get_tendencias(indicador: str = "empleabilidad", db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
-    query = db.query(Medicion, Egresado.programa).join(Egresado, Medicion.egresado_documento == Egresado.numero_documento)
-    query = query.filter(Medicion.sede_id == current_user.get('sede_id'))
-    mediciones = seleccionar_intentos(query.all())
-    
-    data_store = {}
-    
-    for m, programa in mediciones:
-        if programa not in data_store:
-            # Para empleabilidad: emp, total
-            # Para salario: suma, count
-            # Para satisfaccion: suma, count
-            data_store[programa] = {
-                0: {"emp": 0, "total": 0, "suma_salario": 0, "count_salario": 0, "suma_sat": 0, "count_sat": 0}, 
-                1: {"emp": 0, "total": 0, "suma_salario": 0, "count_salario": 0, "suma_sat": 0, "count_sat": 0}, 
-                5: {"emp": 0, "total": 0, "suma_salario": 0, "count_salario": 0, "suma_sat": 0, "count_sat": 0}
-            }
-            
-        momento = m.momento if m.momento in [0, 1, 5] else 1
-        resp = m.respuestas if m.respuestas else {}
-        
-        # 1. Empleabilidad
-        key_empleo = next((k for k in resp.keys() if "realiza alguna actividad remunerada?" in k.lower()), None)
-        if key_empleo:
-            val = str(resp[key_empleo]).strip().upper()
-            if val in ["SI", "SÍ", "NO"]:
-                data_store[programa][momento]["total"] += 1
-                if val in ["SI", "SÍ"]:
-                    data_store[programa][momento]["emp"] += 1
-                    
-        # 2. Salario
-        key_salario = next((k for k in resp.keys() if "ingreso mensual" in k.lower() and "smlv" in k.lower()), None)
-        if key_salario and resp[key_salario]:
-            val_sal = extraer_salario(str(resp[key_salario]))
-            if val_sal is not None:
-                data_store[programa][momento]["suma_salario"] += val_sal
-                data_store[programa][momento]["count_salario"] += 1
-                
-        # 3. Satisfacción Institucional (Pregunta 1 general o promedio de todo)
-        sat_sum = 0
-        sat_count = 0
-        for key, val in resp.items():
-            if "nivel de satisfacci" in key.lower() and val is not None:
-                try:
-                    sat_sum += float(val)
-                    sat_count += 1
-                except:
-                    pass
-        if sat_count > 0:
-            data_store[programa][momento]["suma_sat"] += (sat_sum / sat_count)
-            data_store[programa][momento]["count_sat"] += 1
-
-    labels = ["Momento 0 (Grado)", "Momento 1 (1 año)", "Momento 5 (5 años)"]
+def get_tendencias(indicador: Literal["empleabilidad", "salario", "satisfaccion"] = "empleabilidad", db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
     datasets = []
-    
-    # Elegir el criterio de ordenamiento basado en el indicador y filtrar top 5
-    if indicador == "salario":
-        programas_ordenados = sorted(data_store.keys(), key=lambda p: sum(data_store[p][m]["count_salario"] for m in [0,1,5]), reverse=True)[:5]
-    elif indicador == "satisfaccion":
-        programas_ordenados = sorted(data_store.keys(), key=lambda p: sum(data_store[p][m]["count_sat"] for m in [0,1,5]), reverse=True)[:5]
-    else:
-        programas_ordenados = sorted(data_store.keys(), key=lambda p: sum(data_store[p][m]["total"] for m in [0,1,5]), reverse=True)[:5]
-    
-    # Paleta de colores más vibrante
-    colores = [
-        {"border": "#E63946", "bg": "rgba(230, 57, 70, 0.2)"},
-        {"border": "#1D3557", "bg": "rgba(29, 53, 87, 0.2)"},
-        {"border": "#2A9D8F", "bg": "rgba(42, 157, 143, 0.2)"},
-        {"border": "#F4A261", "bg": "rgba(244, 162, 97, 0.2)"},
-        {"border": "#9B5DE5", "bg": "rgba(155, 93, 229, 0.2)"}
-    ]
-    
-    for idx, prog in enumerate(programas_ordenados):
-        valores_por_momento = []
-        for m in [0, 1, 5]:
-            valor = None
-            if indicador == "salario":
-                count = data_store[prog][m]["count_salario"]
-                suma = data_store[prog][m]["suma_salario"]
-                valor = round(suma / count, 2) if count > 0 else None
-            elif indicador == "satisfaccion":
-                count = data_store[prog][m]["count_sat"]
-                suma = data_store[prog][m]["suma_sat"]
-                valor = round(suma / count, 2) if count > 0 else None
-            else: # empleabilidad
-                total = data_store[prog][m]["total"]
-                emp = data_store[prog][m]["emp"]
-                valor = round((emp / total) * 100, 1) if total > 0 else None
-                
-            valores_por_momento.append(valor)
-            
-        color = colores[idx % len(colores)]
+    for idx, (programa, celdas) in enumerate(tendencias_por_programa(db, current_user.get("sede_id"), indicador)):
+        color = COLORES_TENDENCIAS[idx % len(COLORES_TENDENCIAS)]
         datasets.append({
-            "label": prog,
-            "data": valores_por_momento,
+            "label": programa,
+            "data": [valor for valor, _ in celdas],
             "borderColor": color["border"],
             "backgroundColor": color["bg"],
             "borderWidth": 3,
@@ -270,136 +133,37 @@ def get_tendencias(indicador: str = "empleabilidad", db: Session = Depends(get_d
             "pointHoverRadius": 7,
             "fill": True,
             "tension": 0.4,
-            "spanGaps": True # Conecta los puntos incluso si el momento 1 falta
+            "spanGaps": True
         })
-
-    return {
-        "labels": labels,
-        "datasets": datasets
-    }
-
-
-    
-    # Estructura para almacenar data real: programa -> momento -> valores
-    data_empleo = {}
-    
-    for m, programa in mediciones:
-        if programa not in data_empleo:
-            data_empleo[programa] = {0: {"emp": 0, "total": 0}, 1: {"emp": 0, "total": 0}, 5: {"emp": 0, "total": 0}}
-            
-        momento = m.momento if m.momento in [0, 1, 5] else 1 # Fallback seguro
-        resp = m.respuestas if m.respuestas else {}
-        
-        # Empleabilidad NLP
-        key_empleo = next((k for k in resp.keys() if "realiza alguna actividad remunerada?" in k.lower()), None)
-        if key_empleo:
-            val = str(resp[key_empleo]).strip().upper()
-            if val in ["SI", "SÍ", "NO"]:
-                data_empleo[programa][momento]["total"] += 1
-                if val in ["SI", "SÍ"]:
-                    data_empleo[programa][momento]["emp"] += 1
-    
-    # Formatear para Chart.js
-    labels = ["Momento 0 (Grado)", "Momento 1 (1 año)", "Momento 5 (5 años)"]
-    datasets = []
-    
-    # Para no saturar la gráfica de tendencias, tomamos los top 5 programas con más datos
-    programas_ordenados = sorted(data_empleo.keys(), key=lambda p: sum(data_empleo[p][m]["total"] for m in [0,1,5]), reverse=True)[:5]
-    
-    for prog in programas_ordenados:
-        valores_por_momento = []
-        for m in [0, 1, 5]:
-            total = data_empleo[prog][m]["total"]
-            emp = data_empleo[prog][m]["emp"]
-            tasa = round((emp / total) * 100, 1) if total > 0 else None
-            valores_por_momento.append(tasa)
-            
-        # Si algún momento está vacío (ej. no han subido Momento 5), interpolamos visualmente o dejamos null
-        # Para la demo, si es None, le ponemos un valor estético si los otros existen
-        
-        datasets.append({
-            "label": prog,
-            "data": valores_por_momento,
-            "tension": 0.4
-        })
-
-    return {
-        "labels": labels,
-        "datasets": datasets
-    }
-
+    return {"labels": list(ETIQUETAS_MOMENTOS), "datasets": datasets}
 
 
 @router.get("/explorador/init", response_model=ExploradorInitResponse)
 def explorador_init(db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
-    query = db.query(Medicion, Egresado.programa).join(Egresado, Medicion.egresado_documento == Egresado.numero_documento)
-    query = query.filter(Medicion.sede_id == current_user.get('sede_id'))
-    
-    mediciones = seleccionar_intentos(query.all())
-    
-    # Extraer preguntas únicas, programas y años
-    preguntas_set = set()
-    programas_set = set()
-    anios_set = set()
-    
-    for m, prog in mediciones:
-        programas_set.add(prog)
-        if m.anio:
-            anios_set.add(m.anio)
-        if m.respuestas:
-            for k in m.respuestas.keys():
-                preguntas_set.add(k)
-                
-    return {
-        "preguntas": sorted(list(preguntas_set)),
-        "programas": sorted(list(programas_set)),
-        "anios": sorted(list(anios_set))
-    }
+    preguntas, programas, anios = preguntas_analiticas(db, current_user.get("sede_id"))
+    return {"preguntas": preguntas, "programas": programas, "anios": anios}
 
-@router.get("/explorador", response_model=ExploradorResponse)
+
+@router.get(
+    "/explorador",
+    response_model=ExploradorResponse,
+    responses={422: {"description": "La variable no pertenece al catálogo analítico autorizado o los filtros son inválidos"}},
+)
 def explorador_data(
-    pregunta: str,
-    momento: str = None,
-    programa: str = None,
-    anio: str = None,
+    pregunta: str = Query(..., max_length=300),
+    momento: Optional[int] = Query(None, description="Momento 0, 1 o 5"),
+    programa: Optional[str] = Query(None, max_length=150),
+    anio: Optional[int] = Query(None, ge=1900, le=2200),
     db: Session = Depends(get_db),
     current_user: dict = Depends(require_roles("Coordinador_Sede"))
 ):
-    query = db.query(Medicion, Egresado).join(Egresado, Medicion.egresado_documento == Egresado.numero_documento)
-    
-    query = query.filter(Medicion.sede_id == current_user.get('sede_id'))
-        
-    if momento and momento != '':
-        query = query.filter(Medicion.momento == int(momento))
-    if programa and programa != '':
-        query = query.filter(Egresado.programa == programa)
-    if anio and anio != '':
-        query = query.filter(Medicion.anio == int(anio))
-        
-    resultados = seleccionar_intentos(query.all())
-    
-    # Agrupar las respuestas a la pregunta seleccionada
-    conteo_respuestas = {}
-    
-    for m, e in resultados:
-        if m.respuestas and pregunta in m.respuestas:
-            valor = str(m.respuestas[pregunta]).strip()
-            # Limpiar algunos datos si son None o "nan"
-            if valor.lower() in ["nan", "none", ""]:
-                valor = "Sin respuesta"
-            
-            if valor in conteo_respuestas:
-                conteo_respuestas[valor] += 1
-            else:
-                conteo_respuestas[valor] = 1
-                
-    # Ordenar resultados por conteo descendente
-    sorted_items = sorted(conteo_respuestas.items(), key=lambda x: x[1], reverse=True)
-    
-    labels = [item[0][:50] + ('...' if len(item[0]) > 50 else '') for item in sorted_items]
-    valores = [item[1] for item in sorted_items]
-    
+    if momento is not None and momento not in (0, 1, 5):
+        raise HTTPException(status_code=422, detail="El momento debe ser 0, 1 o 5")
+    if not es_variable_analitica(pregunta):
+        raise HTTPException(status_code=422, detail="La variable solicitada no pertenece al catálogo analítico autorizado")
+    conteo, _ = conteo_respuestas(db, current_user.get("sede_id"), pregunta, momento, programa or None, anio)
+    ordenados = sorted(conteo.items(), key=lambda item: item[1], reverse=True)
     return {
-        "labels": labels,
-        "valores": valores
+        "labels": [recortar_etiqueta(valor) for valor, _ in ordenados],
+        "valores": [cantidad for _, cantidad in ordenados],
     }

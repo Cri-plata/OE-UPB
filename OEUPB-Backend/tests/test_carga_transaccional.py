@@ -8,7 +8,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from application.auth_service import get_current_user
-from domain.models import Base, Carga, EventoEliminacionCarga, Medicion, Sede, Usuario
+from datetime import datetime
+
+from domain.models import AuditoriaEgresado, Base, Carga, Egresado, EgresadoSede, EventoEliminacionCarga, Medicion, Sede, Usuario
 from infrastructure.database import get_db
 from main import app
 
@@ -135,6 +137,61 @@ class CargaTransaccionalTest(unittest.TestCase):
         self.assertEqual(db.query(Medicion).count(), 1)
         db.close()
 
+
+    def cargar(self, archivo, anio="2024"):
+        return self.client.post("/api/carga/excel", data={"momento": "1", "anio": anio}, files={"file": archivo})
+
+    def test_eliminar_carga_conserva_egresados_del_directorio_manual(self):
+        db = self.Session()
+        coordinador = db.query(Usuario).one()
+        db.add(Egresado(numero_documento="MANUAL-1", primer_nombre="Manual", programa="Derecho"))
+        db.flush()
+        db.add(EgresadoSede(egresado_documento="MANUAL-1", sede_id=1, creado_por_id=coordinador.id))
+        db.commit()
+        db.close()
+
+        carga = self.cargar(self.archivo_excel("Primera"))
+        self.assertEqual(carga.status_code, 200, carga.text)
+        eliminacion = self.client.request(
+            "DELETE", f"/api/carga/archivo/{carga.json()['carga_id']}",
+            json={"motivo": "Retiro de carga de prueba"},
+        )
+        self.assertEqual(eliminacion.status_code, 200, eliminacion.text)
+
+        db = self.Session()
+        self.assertIsNotNone(db.get(Egresado, "MANUAL-1"))
+        self.assertIsNone(db.get(Egresado, "CC-1"))
+        db.close()
+
+    def test_archivo_identico_a_la_version_vigente_se_rechaza(self):
+        archivo = self.archivo_excel("Primera")
+        self.assertEqual(self.cargar(archivo).status_code, 200)
+        repetida = self.cargar(archivo)
+        self.assertEqual(repetida.status_code, 409, repetida.text)
+        db = self.Session()
+        self.assertEqual(db.query(Carga).count(), 1)
+        db.close()
+
+    def test_correccion_manual_prevalece_sobre_carga_posterior(self):
+        db = self.Session()
+        coordinador = db.query(Usuario).one()
+        db.add(Egresado(numero_documento="CC-1", primer_nombre="Corregido", programa="Ingeniería", fecha_grado=datetime(2020, 1, 1)))
+        db.add(AuditoriaEgresado(accion="editar", actor_id=coordinador.id, actor_correo=coordinador.correo, sede_id=1, egresado_documento="CC-1", cambios={}, motivo="Corrección manual"))
+        db.commit()
+        db.close()
+
+        respuesta = self.cargar(self.archivo_excel("Original"))
+        self.assertEqual(respuesta.status_code, 200, respuesta.text)
+        self.assertIn("corrección manual", respuesta.json()["mensaje"])
+        db = self.Session()
+        egresado = db.get(Egresado, "CC-1")
+        self.assertEqual(egresado.primer_nombre, "Corregido")
+        self.assertEqual(egresado.fecha_grado, datetime(2020, 1, 1))
+        db.close()
+
+    def test_anio_fuera_de_rango_se_rechaza(self):
+        respuesta = self.cargar(self.archivo_excel("Primera"), anio="1800")
+        self.assertEqual(respuesta.status_code, 422, respuesta.text)
 
 if __name__ == "__main__":
     unittest.main()

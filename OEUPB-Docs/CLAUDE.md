@@ -2,7 +2,7 @@
 
 **Estado:** Vigente
 
-**Última verificación:** 2026-09-24
+**Última verificación:** 2026-09-25
 
 **Alcance:** todo el monorepo OE UPB.
 
@@ -51,6 +51,7 @@ Cuando la documentación contradiga el código, no se debe ocultar la diferencia
 8. Nunca registrar secretos, contraseñas reales ni datos personales de egresados en documentación, fixtures o logs.
 9. Entre sedes solo se comparten gráficas y métricas agregadas que el coordinador propietario publique. Nunca se comparten filas, respuestas individuales, archivos, directorios o perfiles.
 10. La audiencia de gráficas se calcula en backend según permisos y programas; el coordinador no selecciona destinatarios manualmente por gráfica.
+11. Las métricas y programas de una publicación los recalcula el backend a partir de su definición (el cliente no los envía) y ninguna celda publicada representa menos de 5 observaciones (ADR-015).
 
 ## Arquitectura vigente
 

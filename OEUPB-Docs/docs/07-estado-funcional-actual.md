@@ -66,11 +66,11 @@ Durante la carga el backend:
 1. valida el tipo y el contenido del archivo;
 2. procesa las filas con Pandas;
 3. resuelve dobles titulaciones conservando el registro con fecha de grado más reciente dentro de la carga;
-4. guarda egresados y mediciones en una transacción;
+4. guarda egresados y mediciones en una transacción; un documento existente no pierde nombre, apellido ni programa, y un egresado con corrección manual auditada conserva todos sus datos personales (ADR-014);
 5. registra archivo, huella SHA-256, actor, sede, momento, cohorte, versión, estado y cantidad de registros;
-6. reemplaza transaccionalmente la versión vigente cuando se vuelve a cargar el mismo alcance.
+6. reemplaza transaccionalmente la versión vigente cuando se vuelve a cargar el mismo alcance, serializa las cargas de la sede y rechaza con 409 un archivo idéntico a la versión vigente.
 
-El historial solo debe mostrar las cargas de la sede autenticada. La eliminación se realiza por identificador de carga, exige un motivo y conserva un evento de auditoría aun después de eliminar físicamente la carga.
+El historial solo debe mostrar las cargas de la sede autenticada. La eliminación se realiza por identificador de carga, solo aplica a la versión vigente, exige un motivo y conserva un evento de auditoría aun después de eliminar físicamente la carga. La versión reemplazada no se reactiva, y los egresados del directorio manual se conservan.
 
 ## 6. Directorio y perfil del egresado
 
@@ -109,7 +109,9 @@ Debería comparar los momentos 0, 1 y 5 para los programas con mayor cantidad de
 
 Debería permitir seleccionar una pregunta y filtrar por momento, programa y año. El resultado se presenta como conteos agregados para Chart.js.
 
-**Desviaciones reportadas el 2026-09-25:** el selector incluye identificadores, datos personales y metadatos administrativos que RN-31 prohíbe; además, solo mantiene una gráfica y no permite comparar varias visualizaciones simultáneamente. Estas correcciones corresponden a EXP-02 y EXP-03.
+El backend solo ofrece y acepta variables del catálogo analítico RN-31; documentos, nombres, correos, teléfonos, fechas, identificadores y códigos administrativos se excluyen y se rechazan con 422 (EXP-02, cerrado el 2026-09-25).
+
+**Desviación vigente:** solo mantiene una gráfica y no permite comparar varias visualizaciones simultáneamente (EXP-03).
 
 Cuando existen varios intentos identificados para una persona y alcance, los indicadores actuales usan el intento más reciente. Las mediciones anónimas permitidas se conservan en los agregados.
 
@@ -125,13 +127,23 @@ Cada publicación conserva:
 - programas incluidos;
 - permiso requerido;
 - definición de visualización;
-- etiquetas y métricas numéricas;
+- etiquetas y métricas numéricas recalculadas por el backend;
 - versión, estado y fechas;
-- aprobación explícita de privacidad.
+- confirmación explícita de privacidad del coordinador propietario.
+
+El frontend envía solo la definición de la gráfica. El backend recalcula las métricas con los datos de la sede autenticada, deriva los programas de audiencia y agrupa u omite las celdas con menos de 5 observaciones; si no queda ninguna, rechaza la publicación con 422 (ADR-015). Por eso la gráfica publicada puede diferir de la privada.
 
 La publicación nunca debe contener documentos, nombres, correos, respuestas abiertas ni archivos fuente. Los coordinadores pueden consultar las publicaciones vigentes y los usuarios de consulta solo reciben aquellas compatibles con sus permisos y programas. Una actualización crea una versión nueva y conserva la anterior como reemplazada.
 
-**Desviaciones reportadas el 2026-09-25:** la acción de publicar puede quedar cargando aun cuando el backend haya cambiado el estado, y la vista de publicaciones puede permanecer cargando sin resolver datos, vacío o error. PUB-01 y PUB-02 registran la corrección y sus pruebas de regresión.
+**Corrección del 2026-09-25 (PUB-01/PUB-02), pendiente de validación manual:** publicar y retirar terminan siempre en éxito o error, el botón muestra `Publicando…`/`Retirando…`, no admite doble envío y, tras un error, ofrece `Reintentar publicación` con el motivo del backend (por ejemplo, datos insuficientes para el umbral). La vista de publicaciones resuelve datos, vacío o error con `Reintentar` y ofrece `Actualizar`.
+
+Validación manual sugerida:
+
+1. Como coordinador, publicar una gráfica: el botón cambia a `Publicando…` y luego muestra `Publicada vN` y `Retirar publicación` sin otra interacción.
+2. Publicar un filtro con pocos datos: aparece el mensaje de datos insuficientes y el botón `Reintentar publicación`.
+3. Detener el backend y publicar: aparece el mensaje de conexión y la acción puede reintentarse.
+4. Como usuario de consulta autorizado, abrir `Gráficas publicadas`: aparece la gráfica. Con un usuario sin permiso o programa aparece el estado vacío.
+5. Retirar la publicación y pulsar `Actualizar` como usuario de consulta: la gráfica deja de aparecer.
 
 ## 9. Analítica de textos y alertas
 

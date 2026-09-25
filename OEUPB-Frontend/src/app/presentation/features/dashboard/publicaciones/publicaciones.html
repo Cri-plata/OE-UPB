@@ -6,16 +6,20 @@
         <h1>Gráficas publicadas</h1>
         <p>Instantáneas agregadas autorizadas para tu cuenta.</p>
       </div>
+      <button type="button" class="retry-btn" [disabled]="cargando()" (click)="cargar()">Actualizar</button>
     </header>
 
     <section class="publicaciones-grid">
-      <p *ngIf="cargando">Cargando publicaciones…</p>
-      <p class="error" *ngIf="error">{{ error }}</p>
-      <div class="empty" *ngIf="!cargando && !error && publicaciones.length === 0">
+      <p class="estado" *ngIf="cargando()" role="status">Cargando publicaciones…</p>
+      <div class="empty error" *ngIf="!cargando() && error()" role="alert">
+        <p>{{ error() }}</p>
+        <button type="button" class="retry-btn" (click)="cargar()">Reintentar</button>
+      </div>
+      <div class="empty" *ngIf="!cargando() && !error() && publicaciones().length === 0">
         No hay gráficas publicadas compatibles con tus permisos y programas.
       </div>
 
-      <article class="publication-card" *ngFor="let publicacion of publicaciones">
+      <article class="publication-card" *ngFor="let publicacion of publicaciones()">
         <div class="publication-meta">
           <div>
             <span class="sede">{{ publicacion.sede_nombre }}</span>

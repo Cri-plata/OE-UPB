@@ -576,6 +576,9 @@
           "403": {
             "description": "El usuario no es coordinador o no tiene sede asignada"
           },
+          "409": {
+            "description": "El archivo es idéntico a la versión vigente del mismo alcance"
+          },
           "422": {
             "description": "El momento o los parámetros no son válidos"
           }
@@ -730,6 +733,11 @@
             "in": "query",
             "required": false,
             "schema": {
+              "enum": [
+                "empleabilidad",
+                "salario",
+                "satisfaccion"
+              ],
               "type": "string",
               "default": "empleabilidad",
               "title": "Indicador"
@@ -805,6 +813,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "maxLength": 300,
               "title": "Pregunta"
             }
           },
@@ -813,16 +822,33 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string",
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Momento 0, 1 o 5",
               "title": "Momento"
-            }
+            },
+            "description": "Momento 0, 1 o 5"
           },
           {
             "name": "programa",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 150
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "Programa"
             }
           },
@@ -831,7 +857,16 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string",
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2200,
+                  "minimum": 1900
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "Anio"
             }
           }
@@ -848,14 +883,7 @@
             }
           },
           "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
+            "description": "La variable no pertenece al catálogo analítico autorizado o los filtros son inválidos"
           }
         }
       }
@@ -1345,15 +1373,11 @@
               }
             }
           },
+          "403": {
+            "description": "El actor no es coordinador o no tiene sede"
+          },
           "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
+            "description": "Definición no publicable o sin celdas que superen el umbral mínimo de privacidad"
           }
         },
         "security": [
@@ -1598,12 +1622,13 @@
         "properties": {
           "momento": {
             "type": "integer",
-            "title": "Momento"
+            "title": "Momento",
+            "description": "Momento 0, 1 o 5"
           },
           "anio": {
             "type": "integer",
             "title": "Anio",
-            "description": "Año de grado o cohorte"
+            "description": "Año de grado o cohorte (1900-2200)"
           },
           "file": {
             "type": "string",
@@ -2639,37 +2664,25 @@
             "minLength": 3,
             "title": "Titulo"
           },
-          "programas": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "maxItems": 100,
-            "minItems": 1,
-            "title": "Programas"
-          },
           "definicion": {
             "$ref": "#/components/schemas/DefinicionGrafica"
-          },
-          "metricas": {
-            "$ref": "#/components/schemas/MetricasGrafica"
           },
           "aprobada_privacidad": {
             "type": "boolean",
             "const": true,
-            "title": "Aprobada Privacidad"
+            "title": "Aprobada Privacidad",
+            "description": "Confirmación explícita del coordinador propietario de que revisó la privacidad de la gráfica"
           }
         },
         "type": "object",
         "required": [
           "grafica_key",
           "titulo",
-          "programas",
           "definicion",
-          "metricas",
           "aprobada_privacidad"
         ],
-        "title": "PublicacionCreate"
+        "title": "PublicacionCreate",
+        "description": "Solicitud de publicación.\n\nEl cliente solo describe qué gráfica publicar. Las métricas y los programas de\naudiencia los recalcula el backend con los datos de la sede del JWT; cualquier\ncampo adicional enviado por el cliente se ignora."
       },
       "PublicacionResponse": {
         "properties": {

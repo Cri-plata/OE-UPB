@@ -3,6 +3,17 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Cambiado (2026-09-25)
+- **Publicaciones recalculadas en backend:** `POST /api/publicaciones` ignora métricas y programas del cliente, los recalcula con los datos de la sede del JWT y agrupa u omite las celdas con menos de 5 observaciones (ADR-015). El reporte general exige `definicion.indicador`.
+- **Catálogo analítico del Explorador (RN-31):** documentos, nombres, correos, teléfonos, fechas, identificadores y códigos administrativos ya no se ofrecen ni se aceptan (422).
+- **Cargas:** serialización por sede, 409 ante un archivo idéntico a la versión vigente, rango de año 1900-2200 y protección de egresados con corrección manual auditada (ADR-014).
+- **Retiro de publicaciones:** otro coordinador de la sede puede retirar la publicación si el propietario está inactivo o fue reasignado.
+
+### Corregido (2026-09-25)
+- **Publicación de gráficas (PUB-01/PUB-02):** publicar, retirar y consultar el catálogo ya no quedan cargando. La aplicación es zoneless y el estado pasó a signals mediante `PublicacionControl`; se bloquean envíos duplicados y los errores HTTP o de red se muestran con reintento. Se agregaron 8 pruebas de frontend y 1 de backend.
+- **Eliminación de cargas:** ya no borra los egresados del directorio manual de ninguna sede. Antes, en MySQL, cualquier eliminación fallaba mientras existiera un registro manual.
+- **Privacidad en logs:** el documento de identidad se enmascara en las rutas del directorio y la imagen Docker desactiva el access log de Uvicorn.
+
 ### Añadido (2026-09-24)
 - **Higiene del repositorio:** se retiraron 73 scripts históricos ad hoc, se organizó un generador Excel reproducible y se cerraron la trazabilidad RF y las decisiones documentales pendientes.
 - **Autenticación endurecida:** secreto obligatorio y robusto fuera de desarrollo, credenciales temporales con expiración, recuperación RBAC auditada y modo inicial aleatorio obligatorio en producción.

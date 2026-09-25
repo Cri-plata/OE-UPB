@@ -12,8 +12,10 @@ Los ADR registran decisiones relevantes y sus consecuencias. Una decisión reemp
 | [006](006-doble-titulacion.md) | Conservar la titulación más reciente por carga | Aceptado |
 | [007](007-openapi-canonico.md) | OpenAPI como contrato HTTP canónico | Aceptado |
 | [008](008-publicacion-graficas-permisos.md) | Publicar métricas agregadas con audiencia automática por permisos y programas | Aceptado |
-| [009](009-carga-y-gobierno-datos.md) | Carga auditable, reemplazo transaccional y gobierno de datos | Aceptado |
+| [009](009-carga-y-gobierno-datos.md) | Carga auditable, reemplazo transaccional y gobierno de datos | Aceptado; puntos 4, 5 y 8 modificados por ADR-014 y ADR-015 |
 | [010](010-contrasena-temporal.md) | Contraseña temporal aleatoria con cambio obligatorio | Reemplazado por ADR-013 |
 | [011](011-versionado-api-compatible.md) | Mantener `/api/*` con evolución compatible | Aceptado |
 | [012](012-modelo-egresado-medicion.md) | Conservar `Egresado`–`Medicion` y modelar intentos explícitos | Aceptado |
 | [013](013-ciclo-vida-credenciales-temporales.md) | Ciclo de vida, expiración y recuperación de credenciales temporales | Aceptado |
+| [014](014-alcance-identidad-egresado.md) | Sin custodia ni encuestas manuales; precedencia de cargas y protección de correcciones | Aceptado |
+| [015](015-recalculo-publicaciones-umbral.md) | Recálculo en backend, umbral k = 5 y autoaprobación explícita de publicaciones | Aceptado |

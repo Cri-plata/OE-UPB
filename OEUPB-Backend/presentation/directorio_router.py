@@ -137,7 +137,7 @@ def obtener_perfil_egresado(documento: str, db: Session = Depends(get_db), curre
 def crear_egresado(payload: EgresadoManualRequest, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
     documento = payload.numero_documento.strip()
     if db.get(Egresado, documento):
-        raise HTTPException(status_code=409, detail="El documento ya existe; use la edición o solicite resolución institucional")
+        raise HTTPException(status_code=409, detail="El documento ya está registrado; si pertenece a su sede, use la edición del directorio")
     egresado = Egresado(numero_documento=documento, primer_nombre=payload.primer_nombre.strip(), primer_apellido=(payload.primer_apellido or "").strip() or None, programa=payload.programa.strip(), fecha_grado=_parse_fecha(payload.fecha_grado))
     db.add(egresado)
     db.flush()
@@ -152,7 +152,7 @@ def _egresado_editable(db: Session, documento: str, sede_id: int) -> Egresado:
     if not egresado:
         raise HTTPException(status_code=404, detail="Egresado no encontrado en su sede")
     if db.query(Medicion.id).filter(Medicion.egresado_documento == documento, Medicion.sede_id != sede_id).first() or db.query(EgresadoSede.id).filter(EgresadoSede.egresado_documento == documento, EgresadoSede.sede_id != sede_id).first():
-        raise HTTPException(status_code=409, detail="El registro está vinculado a otra sede y requiere resolución institucional")
+        raise HTTPException(status_code=409, detail="El registro está vinculado a más de una sede; solo puede modificarse mediante cargas de cada sede")
     return egresado
 
 

@@ -35,10 +35,17 @@
 
       <div class="chart-card">
         <button (click)="exportarGrafica()">Exportar PNG</button>
+        <p class="publish-error" role="alert" *ngIf="publicacion.errorCarga()">{{ publicacion.errorCarga() }}</p>
         <div class="publication-header">
           <h2>Evolución Histórica: {{ currentIndicatorName }}</h2>
-          <button *ngIf="!publicaciones[graficaKey]" class="publish-btn" [disabled]="publicando || !isChartReady" (click)="publicar()">Publicar</button>
-          <button *ngIf="publicaciones[graficaKey]" class="withdraw-btn" [disabled]="publicando" (click)="retirar()">Retirar publicación</button>
+          <ng-container *ngIf="publicacion.estaPublicada(graficaKey); else accionPublicar">
+            <span class="publication-status">Publicada v{{ publicacion.publicacion(graficaKey)?.version }}</span>
+            <button class="withdraw-btn" [disabled]="publicacion.ocupado()" (click)="retirar()">{{ publicacion.procesando(graficaKey) ? 'Retirando…' : 'Retirar publicación' }}</button>
+          </ng-container>
+          <ng-template #accionPublicar>
+            <button class="publish-btn" [disabled]="publicacion.ocupado() || !isChartReady" (click)="publicar()">{{ publicacion.procesando(graficaKey) ? 'Publicando…' : (publicacion.error(graficaKey) ? 'Reintentar publicación' : 'Publicar') }}</button>
+          </ng-template>
+          <p class="publish-error" role="alert" *ngIf="publicacion.error(graficaKey)">{{ publicacion.error(graficaKey) }}</p>
         </div>
         <div id="grafica-tendencias" class="chart-wrapper line-chart" *ngIf="isChartReady">
           <canvas baseChart

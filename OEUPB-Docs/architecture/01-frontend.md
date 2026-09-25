@@ -2,7 +2,7 @@
 
 **Estado:** descripción del código actual
 
-**Verificado:** 2026-09-24
+**Verificado:** 2026-09-25
 
 ## Stack
 
@@ -12,6 +12,7 @@
 - Chart.js 4 + ng2-charts 10.
 - SSR configurado mediante `@angular/ssr`, con rutas servidas en modo cliente.
 - Pruebas mediante el builder unitario de Angular y Vitest instalado.
+- Detección de cambios **zoneless** (no se usa `zone.js`). El estado que cambia en callbacks asíncronos debe vivir en signals; asignar campos simples dentro de `subscribe` no refresca la vista. Algunos componentes anteriores compensan con `ChangeDetectorRef.detectChanges()`, pero el código nuevo debe usar signals. Esta fue la causa de PUB-01 y PUB-02.
 
 ## Estructura
 
@@ -42,6 +43,7 @@ La URL base está centralizada en `environments/environment.ts` y `data/api/api.
 | `/tendencias` | Tendencias históricas |
 | `/explorador` | Cruce dinámico de variables |
 | `/publicaciones` | Catálogo de instantáneas agregadas autorizadas |
+| `/analitica` | Clasificación NLP y alertas descriptivas (coordinador) |
 | `/carga` | Carga e historial de Excel |
 | `/directorio` | Directorio de egresados |
 | `/perfil/:cedula` | Ficha individual |
@@ -76,4 +78,4 @@ La URL base está centralizada en `environments/environment.ts` y `data/api/api.
 - `Usuario_Consulta` nunca recibe gráficas privadas, ni siquiera las de su propia sede; solo instantáneas publicadas compatibles con sus permisos y programas.
 - Rector, profesor y administrativo son etiquetas informativas: la interfaz no precarga ni bloquea privilegios por etiqueta. Permisos y programas se seleccionan manualmente.
 
-La administración de usuarios, el menú y los guards reflejan RBAC. Cada gráfica de Reporte General, Tendencias y Explorador ofrece publicación/retiro con aprobación explícita; `/publicaciones` renderiza únicamente el catálogo filtrado por el backend.
+La administración de usuarios, el menú y los guards reflejan RBAC. Cada gráfica de Reporte General, Tendencias y Explorador ofrece publicación/retiro con confirmación explícita de privacidad, mediante el controlador compartido `presentation/shared/publicacion-control.ts` (signals, bloqueo de duplicados, errores con reintento). El frontend envía solo la definición de la gráfica; las métricas publicadas las recalcula el backend (ADR-015) y pueden diferir de la vista privada por el umbral k = 5. `/publicaciones` renderiza únicamente el catálogo filtrado por el backend.

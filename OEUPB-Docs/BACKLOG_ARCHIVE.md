@@ -85,3 +85,13 @@ Los siguientes ítems figuraban como pendientes en el backlog de 2026-08-26, per
 - [x] **REPO-01 — Clasificar scripts temporales:** se revisaron y retiraron 73 scripts históricos de parches, diagnósticos y datos; las utilidades vigentes quedaron en `tools/` o `OEUPB-Backend/scripts/`, y Git conserva lo retirado.
 - [x] **DOC-01 — Auditar RF-01 a RF-73:** la matriz registra evidencia y estado individual para los 73 requisitos (32 implementados, 33 parciales, 7 no implementados y 1 en pausa).
 - [x] **DOC-02 — Resolver decisiones abiertas:** las ocho preguntas del plan fueron resueltas por ADR vigentes o delimitadas formalmente en `audits/03-cierre-decisiones-abiertas.md`.
+
+## Completado el 2026-09-25 — Auditoría de requerimientos 05
+
+- [x] **EXP-02 — Restringir variables graficables:** `application/indicadores.py` clasifica las columnas por nombre normalizado y excluye documentos, nombres, correos, teléfonos, fechas, identificadores, códigos, IES, nivel académico y país. Se aplica en `/api/reportes/explorador/init`, `/api/reportes/explorador` (422) y la publicación. Pruebas en `test_indicadores.py` y `test_publicaciones.py`.
+- [x] **PUB-03 — Recálculo de publicaciones en backend (ADR-015):** el cliente ya no envía métricas ni programas; el backend los recalcula con la sede del JWT, agrupa u omite las celdas con menos de 5 observaciones y rechaza con 422 las gráficas sin datos suficientes.
+- [x] **PUB-04 — Retiro por coordinador de la sede:** si el propietario está inactivo o fue reasignado, otro coordinador de la sede propietaria puede retirar la publicación.
+- [x] **ETL-02 — Egresados manuales al eliminar cargas:** la limpieza posterior a la eliminación ya no borra egresados con vínculo `egresados_sedes`. Antes eliminaba registros manuales de todas las sedes y, en MySQL, fallaba por la FK. Hay prueba de regresión.
+- [x] **ETL-03 — Precedencia y concurrencia de cargas (ADR-014):** la carga no modifica los datos personales de egresados con corrección manual auditada, serializa por sede con `SELECT ... FOR UPDATE`, rechaza con 409 un archivo idéntico a la versión vigente y valida el año de grado entre 1900 y 2200.
+- [x] **SEC-11 — Documento fuera de los logs:** el middleware enmascara el documento en las rutas del directorio y la imagen Docker desactiva el access log de Uvicorn.
+- [x] **DOC-04 — Conciliación documental:** requisitos, casos de uso, matriz, arquitectura y seguridad quedaron alineados con ADR-013, ADR-014 y ADR-015; la resolución de cada hallazgo está en `audits/05-auditoria-requerimientos.md`.

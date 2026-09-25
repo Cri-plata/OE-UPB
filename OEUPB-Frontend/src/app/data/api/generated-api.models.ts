@@ -206,9 +206,7 @@ export interface PerfilEgresadoResponse {
 export interface PublicacionCreate {
   "grafica_key": string;
   "titulo": string;
-  "programas": Array<string>;
   "definicion": DefinicionGrafica;
-  "metricas": MetricasGrafica;
   "aprobada_privacidad": boolean;
 }
 
