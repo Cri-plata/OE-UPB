@@ -1,180 +1,164 @@
-﻿.dashboard-container {
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--background);
+}
+
+.header-back-action {
+  margin-bottom: var(--space-xs);
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+.identity-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  .avatar-circle {
+    width: 88px;
+    height: 88px;
+    background: var(--brand);
+    color: white;
+    font-size: 38px;
+    font-weight: 700;
     display: flex;
-    min-height: 100vh;
-    background-color: var(--color-background);
-  }
-  
-  .main-content {
-    flex: 1;
-    padding: 30px;
-    margin-left: 250px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .top-bar {
-    display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    border-radius: var(--radius-full);
+    margin-bottom: var(--space-md);
   }
-  
-  .back-btn {
-    background: none;
-    border: none;
-    color: var(--color-brand);
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    &:hover {
-      text-decoration: underline;
-    }
+
+  h2 {
+    margin: 0 0 var(--space-2xs);
+    color: var(--heading);
   }
-  
-  .logo-mini {
-    height: 40px;
-    object-fit: contain;
+
+  .cedula {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 var(--space-md);
   }
-  
-  .profile-layout {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
+
+  hr {
+    width: 100%;
+    border: 0;
+    border-top: 1px solid var(--divider);
+    margin: var(--space-md) 0 var(--space-lg);
   }
-  
-  .card {
-    background: white;
-    border-radius: 8px;
-    padding: 30px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.info-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  font-size: 13px;
+
+  .label {
+    color: var(--muted);
+    font-weight: 600;
   }
-  
-  .basic-info-card {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  
-    .avatar-circle {
-      width: 100px;
-      height: 100px;
-      background: var(--color-brand);
-      color: white;
-      font-size: 3rem;
-      font-weight: bold;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 50%;
-      margin-bottom: 15px;
-    }
-  
-    h2 {
-      margin: 0;
-      color: var(--color-navigation-hover);
-    }
-  
-    .cedula {
-      color: var(--color-text-subtle);
-      margin-top: 5px;
-      margin-bottom: 20px;
-    }
-  
-    hr {
-      width: 100%;
-      border: 0;
-      border-top: 1px solid var(--color-divider);
-      margin-bottom: 20px;
-    }
-  
-    .info-row {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      font-size: 0.95rem;
-  
-      .label {
-        font-weight: bold;
-        color: var(--color-text-tertiary);
-      }
-      .value {
-        color: var(--color-navigation-hover);
-      }
-    }
+
+  .value {
+    color: var(--heading);
+    text-align: right;
   }
-  
-  .surveys-card {
-    flex: 2;
-  
-    h3 {
-      margin-top: 0;
-      color: var(--color-brand);
-    }
-    .subtitle {
-      color: var(--color-text-secondary);
-      font-size: 0.9rem;
-      margin-bottom: 30px;
-    }
+}
+
+.surveys-card {
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin: calc(-1 * var(--space-sm)) 0 var(--space-xl);
   }
-  
-  /* Estilos del Timeline */
-  .timeline {
-    position: relative;
-    padding-left: 20px;
-    border-left: 2px solid #e0e0e0;
+}
+
+.timeline {
+  position: relative;
+  padding-left: var(--space-xl);
+  border-left: 2px solid var(--border);
+  margin-left: var(--space-md);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: var(--space-xl);
+
+  &:last-child {
+    margin-bottom: 0;
   }
-  
-  .timeline-item {
-    position: relative;
-    margin-bottom: 30px;
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
+}
+
+.timeline-dot {
+  position: absolute;
+  left: calc(-1 * var(--space-xl) - 7px);
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  background: var(--brand);
+  border-radius: var(--radius-full);
+  border: 3px solid white;
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.timeline-content {
+  background: var(--background);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.moment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+
+  h3 {
+    margin: 0;
+    font-size: 15px;
+    color: var(--heading);
   }
-  
-  .timeline-dot {
-    position: absolute;
-    left: -27px;
-    top: 5px;
-    width: 12px;
-    height: 12px;
-    background: var(--color-brand);
-    border-radius: 50%;
-    border: 3px solid white;
+}
+
+.survey-details p {
+  margin: var(--space-2xs) 0;
+  font-size: 13px;
+  color: var(--body);
+}
+
+.empty-timeline {
+  color: var(--muted);
+  font-style: italic;
+  padding: var(--space-md) 0;
+}
+
+.loading-overlay {
+  padding: var(--space-2xl);
+  text-align: center;
+  color: var(--brand);
+  font-weight: 600;
+}
+
+.error-message {
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(186, 26, 26, 0.1);
+  color: var(--danger);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-md);
+}
+
+@media (max-width: 900px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
   }
-  
-  .timeline-content {
-    background: #f9f9f9;
-    padding: 15px;
-    border-radius: 6px;
-    border: 1px solid var(--color-divider);
-  }
-  
-  .moment-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  
-    h4 {
-      margin: 0;
-      color: var(--color-navigation-hover);
-    }
-    
-    .year-badge {
-      background: var(--color-navigation-hover);
-      color: white;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-    }
-  }
-  
-  .survey-details p {
-    margin: 5px 0;
-    font-size: 0.9rem;
-    color: #444;
-  }
+}

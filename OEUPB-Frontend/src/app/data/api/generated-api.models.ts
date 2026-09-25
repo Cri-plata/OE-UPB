@@ -28,6 +28,12 @@ export interface CambioContrasenaTemporalRequest {
   "confirmarContrasena": string;
 }
 
+export interface CandidataEmergente {
+  "termino": string;
+  "score_tfidf": number;
+  "frecuencia_documentos": number;
+}
+
 export interface CargaRechazadaResponse {
   "detail": DetalleCargaRechazada;
 }
@@ -165,6 +171,12 @@ export interface ErrorResponse {
   "detail": string | ErrorCodificado;
 }
 
+export interface EstadisticasAnalisis {
+  "total_respuestas_analizadas": number;
+  "respuestas_con_habilidad": number;
+  "respuestas_sin_habilidad": number;
+}
+
 export interface ExploradorInitResponse {
   "preguntas": Array<string>;
   "programas": Array<string>;
@@ -184,6 +196,18 @@ export interface FiltrosDisponiblesResponse {
 
 export interface HTTPValidationError {
   "detail"?: Array<ValidationError>;
+}
+
+export interface HabilidadReconocida {
+  "habilidad": string;
+  "tipo": string;
+  "menciones": number;
+}
+
+export interface HabilidadesDemandadasResponse {
+  "habilidades_reconocidas": Array<HabilidadReconocida>;
+  "candidatas_emergentes": Array<CandidataEmergente>;
+  "estadisticas": EstadisticasAnalisis;
 }
 
 export interface HealthResponse {
@@ -291,6 +315,23 @@ export interface ReemisionCredencialResponse {
   "usuario": UsuarioResponse;
   "contrasena_temporal": string;
   "credencial_temporal_expira_en": string;
+}
+
+export interface ReglaAsociacionItem {
+  "si_menciona": string;
+  "tambien_menciona": string;
+  "ocurrencias": number;
+  "soporte": number;
+  "confianza": number;
+  "lift": number;
+}
+
+export interface ReglasAsociacionResponse {
+  "total_respuestas": number;
+  "transacciones_validas": number;
+  "transacciones_insuficientes": number;
+  "total_reglas": number;
+  "reglas": Array<ReglaAsociacionItem>;
 }
 
 export interface SedeResponse {

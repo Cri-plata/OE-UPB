@@ -1,10 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { IaApi } from '../../../../data/api/ia.api';
+import { DirectorioApi } from '../../../../data/api/directorio.api';
 
 export interface HabilidadItem {
   habilidad: string;
@@ -114,9 +115,11 @@ export class HabilidadesDemandadasComponent implements OnInit {
   public blandasChartData: ChartData<'bar', number[], string> = { labels: [], datasets: [] };
   public durasChartData: ChartData<'bar', number[], string> = { labels: [], datasets: [] };
 
-  private readonly API_URL = 'http://localhost:8000/api/ia';
-
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private iaApi: IaApi,
+    private directorioApi: DirectorioApi,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.cargarProgramas();
@@ -124,7 +127,7 @@ export class HabilidadesDemandadasComponent implements OnInit {
   }
 
   cargarProgramas() {
-    this.http.get<string[]>('http://localhost:8000/api/directorio/programas').subscribe({
+    this.directorioApi.programas().subscribe({
       next: (data) => {
         this.programasDisponibles = data || [];
         this.cdr.detectChanges();
@@ -145,23 +148,25 @@ export class HabilidadesDemandadasComponent implements OnInit {
     this.isLoading = true;
     this.errorMensaje = '';
 
-    let paramsHabs = new HttpParams();
-    if (this.filtroMomento !== '') paramsHabs = paramsHabs.set('momento', this.filtroMomento);
-    if (this.filtroAnio !== '') paramsHabs = paramsHabs.set('anio', this.filtroAnio);
-    if (this.filtroPrograma !== '') paramsHabs = paramsHabs.set('programa', this.filtroPrograma);
-    paramsHabs = paramsHabs.set('top_emergentes', '15');
+    const filtrosHabs = {
+      momento: this.filtroMomento,
+      anio: this.filtroAnio,
+      programa: this.filtroPrograma,
+      top_emergentes: 15,
+    };
 
-    let paramsReglas = new HttpParams();
-    if (this.filtroMomento !== '') paramsReglas = paramsReglas.set('momento', this.filtroMomento);
-    if (this.filtroAnio !== '') paramsReglas = paramsReglas.set('anio', this.filtroAnio);
-    if (this.filtroPrograma !== '') paramsReglas = paramsReglas.set('programa', this.filtroPrograma);
-    paramsReglas = paramsReglas.set('min_soporte', '0.01');
-    paramsReglas = paramsReglas.set('min_confianza', this.filtroMinConfianza.toString());
-    paramsReglas = paramsReglas.set('min_ocurrencias', this.filtroMinOcurrencias.toString());
-    paramsReglas = paramsReglas.set('top_reglas', this.topReglas.toString());
+    const filtrosReglas = {
+      momento: this.filtroMomento,
+      anio: this.filtroAnio,
+      programa: this.filtroPrograma,
+      min_soporte: 0.01,
+      min_confianza: this.filtroMinConfianza,
+      min_ocurrencias: this.filtroMinOcurrencias,
+      top_reglas: this.topReglas,
+    };
 
     // Cargar habilidades y reglas en paralelo
-    this.http.get<any>(`${this.API_URL}/habilidades-demandadas`, { params: paramsHabs }).subscribe({
+    this.iaApi.habilidadesDemandadas(filtrosHabs).subscribe({
       next: (data) => {
         this.estadisticas = data.estadisticas;
         this.habilidadesReconocidas = data.habilidades_reconocidas || [];
@@ -175,13 +180,13 @@ export class HabilidadesDemandadasComponent implements OnInit {
       }
     });
 
-    this.http.get<any>(`${this.API_URL}/reglas-asociacion`, { params: paramsReglas }).subscribe({
+    this.iaApi.reglasAsociacion(filtrosReglas).subscribe({
       next: (data) => {
         this.totalRespuestasReglas = data.total_respuestas || 0;
         this.transaccionesValidas = data.transacciones_validas || 0;
         this.transaccionesInsuficientes = data.transacciones_insuficientes || 0;
         this.totalReglas = data.total_reglas || 0;
-        this.reglasAsociacion = data.reglas || [];
+        this.reglasAsociacion = (data.reglas as any[]) || [];
         this.isLoading = false;
         this.cdr.detectChanges();
       },

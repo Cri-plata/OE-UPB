@@ -1,37 +1,37 @@
 <div class="layout">
   <app-sidebar></app-sidebar>
   <main class="content">
-    <header class="top-banner">
-      <div>
+    <header class="page-header">
+      <div class="page-header-content">
         <h1>Gráficas publicadas</h1>
         <p>Instantáneas agregadas autorizadas para tu cuenta.</p>
       </div>
-      <button type="button" class="retry-btn" [disabled]="cargando()" (click)="cargar()">Actualizar</button>
+      <button type="button" class="btn-secondary" [disabled]="cargando()" (click)="cargar()">Actualizar</button>
     </header>
 
     <section class="publicaciones-grid">
-      <p class="estado" *ngIf="cargando()" role="status">Cargando publicaciones…</p>
-      <div class="empty error" *ngIf="!cargando() && error()" role="alert">
+      <p *ngIf="cargando()" class="loading-state" role="status">Cargando publicaciones…</p>
+      <div class="card error-message" *ngIf="!cargando() && error()" role="alert">
         <p>{{ error() }}</p>
-        <button type="button" class="retry-btn" (click)="cargar()">Reintentar</button>
+        <button type="button" class="btn-secondary" (click)="cargar()">Reintentar</button>
       </div>
-      <div class="empty" *ngIf="!cargando() && !error() && publicaciones().length === 0">
+      <div class="card empty-state" *ngIf="!cargando() && !error() && publicaciones().length === 0">
         No hay gráficas publicadas compatibles con tus permisos y programas.
       </div>
 
-      <article class="publication-card" *ngFor="let publicacion of publicaciones()">
+      <article class="card publication-card" *ngFor="let publicacion of publicaciones()">
         <div class="publication-meta">
           <div>
             <span class="sede">{{ publicacion.sede_nombre }}</span>
-            <h2>{{ publicacion.titulo }}</h2>
+            <h2 class="card-title">{{ publicacion.titulo }}</h2>
           </div>
-          <span class="version">v{{ publicacion.version }}</span>
+          <span class="badge">v{{ publicacion.version }}</span>
         </div>
         <p class="programas">Programas: {{ publicacion.programas.join(', ') }}</p>
         <div class="chart-wrapper">
           <canvas baseChart [data]="datos(publicacion)" [type]="tipo(publicacion)"></canvas>
         </div>
-        <small>Publicada el {{ publicacion.fecha_publicacion | date:'medium' }}</small>
+        <small class="cell-subtext">Publicada el {{ publicacion.fecha_publicacion | date:'medium' }}</small>
       </article>
     </section>
   </main>

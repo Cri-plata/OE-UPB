@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>OE UPB · Carga de datos</title>
+    <link rel="stylesheet" href="mockups.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-input" />
+      <header class="mobile-header">
+        <div class="mobile-brand">
+          <div class="brand-mark">UPB</div>
+          <span>OEUPB</span>
+        </div>
+        <label for="sidebar-toggle" class="menu-toggle-btn" aria-label="Abrir menú de navegación"></label>
+      </header>
+      <label for="sidebar-toggle" class="sidebar-backdrop" aria-label="Cerrar menú"></label>
+      <aside class="sidebar">
+        <div class="sidebar-mobile-close">
+          <label for="sidebar-toggle" class="sidebar-close-btn" aria-label="Cerrar menú"></label>
+        </div>
+        <div class="brand">
+          <div class="brand-mark">UPB</div>
+          <h2 class="brand-title">OEUPB</h2>
+        </div>
+        <nav class="nav-menu">
+          <a class="nav-item" href="reporte-general.html" title="Reporte general"><span class="nav-item-text">Reporte general</span></a>
+          <a class="nav-item" href="tendencias.html" title="Tendencias"><span class="nav-item-text">Tendencias</span></a>
+          <a class="nav-item" href="explorador.html" title="Explorador de Datos"><span class="nav-item-text">Explorador de Datos</span></a>
+          <a class="nav-item" href="analitica.html" title="Analítica y alertas"><span class="nav-item-text">Analítica y alertas</span></a>
+          <a class="nav-item" href="directorio.html" title="Directorio"><span class="nav-item-text">Directorio</span></a>
+          <a class="nav-item" href="publicaciones.html" title="Gráficas publicadas"><span class="nav-item-text">Gráficas publicadas</span></a>
+          <a class="nav-item active" href="carga-datos.html" title="Cargar datos"><span class="nav-item-text">Cargar datos</span></a>
+          <a class="nav-item" href="gestion-usuarios.html" title="Administrar Usuarios"><span class="nav-item-text">Administrar Usuarios</span></a>
+          <a class="nav-item" href="mi-perfil.html" title="Mi Perfil"><span class="nav-item-text">Mi Perfil</span></a>
+        </nav>
+        <div class="bottom-menu">
+          <a class="logout-btn" href="login.html" title="Cerrar Sesión"><span>Cerrar Sesión</span></a>
+        </div>
+      </aside>
+      <main class="content">
+        <section class="page">
+          <header class="page-header">
+            <div class="page-header-content">
+              <h1>Carga Masiva de Datos</h1>
+              <p>Importación y procesamiento seguro de encuestas de egresados.</p>
+            </div>
+            <img
+              class="shield"
+              src="../../OEUPB-Frontend/public/escudo-upb.png"
+              alt="Escudo UPB"
+            />
+          </header>
+          <div class="upload-grid">
+            <aside class="card">
+              <h2 class="card-title">Instrucciones de Uso</h2>
+              <ol class="steps">
+                <li>
+                  <strong>1.</strong> Selecciona el Momento de Medición correspondiente al archivo.
+                </li>
+                <li>
+                  <strong>2.</strong> Verifica las columnas obligatorias oficiales.
+                </li>
+                <li>
+                  <strong>3.</strong> Arrastra el archivo a la zona de carga (solo .xlsx).
+                </li>
+                <li>
+                  <strong>4.</strong> El sistema procesará automáticamente las dobles titulaciones.
+                </li>
+              </ol>
+              <div class="info-box">
+                La información de la Sede se extrae automáticamente de tu sesión activa por seguridad.
+              </div>
+            </aside>
+            <article class="card">
+              <h2>Cargar Datos (Excel)</h2>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Momento de Medición *</label>
+                  <select>
+                    <option>Seleccione...</option>
+                    <option>Momento 0</option>
+                    <option>Momento 1</option>
+                    <option>Momento 5</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Año de Grado / Cohorte *</label>
+                  <select>
+                    <option>Seleccione el año...</option>
+                    <option>2025</option>
+                    <option>2024</option>
+                    <option>2023</option>
+                  </select>
+                </div>
+              </div>
+              <div class="drop-zone">
+                <div>
+                  <strong>Arrastra y suelta tu archivo Excel aquí</strong>
+                  <span>o haz clic para explorar en tu equipo (Exclusivamente .xlsx)</span>
+                </div>
+              </div>
+              <button class="btn-primary w-full">Cargar y Procesar</button>
+            </article>
+            <article class="card history">
+              <h2>Historial de Cargas</h2>
+              <div class="table-scroll">
+                <table class="history-table">
+                  <thead>
+                    <tr>
+                      <th>Archivo Procesado</th>
+                      <th>Registros Totales</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <strong>encuesta-demo-m0-2025.xlsx</strong><br />
+                        <small class="muted">Momento 0 · versión 3</small>
+                      </td>
+                      <td>248 egresados</td>
+                      <td><span class="badge success">Vigente</span></td>
+                      <td>
+                        <div class="table-actions">
+                          <button class="btn-danger table-action">Retirar</button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong>encuesta-demo-m1-2024.xlsx</strong><br />
+                        <small class="muted">Momento 1 · versión 2</small>
+                      </td>
+                      <td>196 egresados</td>
+                      <td><span class="badge success">Vigente</span></td>
+                      <td>
+                        <div class="table-actions">
+                          <button class="btn-danger table-action">Retirar</button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong>encuesta-demo-m5-2020.xlsx</strong><br />
+                        <small class="muted">Momento 5 · versión 1</small>
+                      </td>
+                      <td>173 egresados</td>
+                      <td><span class="badge">Reemplazada</span></td>
+                      <td><span class="muted">Sin acciones</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -13,6 +13,10 @@
   - **Implementado el 2026-09-25, pendiente de validación manual.** La misma causa zoneless. `/publicaciones` usa signals, muestra los estados de datos, vacío y error con `Reintentar`, y tiene un botón `Actualizar`. Pruebas: `publicaciones.spec.ts`, más la prueba de backend `test_ciclo_publicar_consultar_retirar_para_consulta`.
   - **Para cerrar ambos:** validar el flujo en el entorno local (ver la lista de `docs/07-estado-funcional-actual.md`, sección 8) y archivarlos con la evidencia.
 
+## P1 — Alineación del sistema de diseño
+
+- [ ] **UI-01 — Migrar el frontend al sistema canónico.** Alinear tokens, tipografía, layout, estados e iconografía del frontend con `design/design.md` usando los mockups aprobados como contrato. Sustituir iconografía ad hoc por Lucide sin iniciar cambios visuales que carezcan de mockup y entrada en `mockups/screen-map.md`.
+
 ## P2 — Analítica
 
 - [ ] **ANA-03 — Verificar el mapeo laboral con datos de M5.** ADR-016 supone que el cuestionario de M5 usa la misma redacción que M1. Cuando exista una carga de M5, confirmar los nombres de las preguntas y sus opciones de respuesta (sin leer datos personales) y ajustar `application/indicadores.py` si difieren.

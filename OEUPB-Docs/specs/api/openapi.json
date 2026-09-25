@@ -2590,6 +2590,301 @@
         ]
       }
     },
+    "/api/ia/habilidades-demandadas": {
+      "get": {
+        "tags": [
+          "Inteligencia Artificial"
+        ],
+        "summary": "Get Habilidades Demandadas",
+        "description": "Analiza las respuestas abiertas de las encuestas de egresados y extrae\nlas habilidades blandas y duras más demandadas por el mercado laboral.",
+        "operationId": "get_habilidades_demandadas_api_ia_habilidades_demandadas_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "momento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por momento de encuesta (0, 1 o 5)",
+              "title": "Momento"
+            },
+            "description": "Filtrar por momento de encuesta (0, 1 o 5)"
+          },
+          {
+            "name": "anio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por año de carga",
+              "title": "Anio"
+            },
+            "description": "Filtrar por año de carga"
+          },
+          {
+            "name": "programa",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por programa académico del egresado",
+              "title": "Programa"
+            },
+            "description": "Filtrar por programa académico del egresado"
+          },
+          {
+            "name": "top_emergentes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "description": "Cantidad de candidatas emergentes a devolver",
+              "default": 15,
+              "title": "Top Emergentes"
+            },
+            "description": "Cantidad de candidatas emergentes a devolver"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HabilidadesDemandadasResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ia/reglas-asociacion": {
+      "get": {
+        "tags": [
+          "Inteligencia Artificial"
+        ],
+        "summary": "Get Reglas Asociacion",
+        "description": "Calcula reglas de asociación (Market Basket Analysis) sobre las habilidades demandadas.\nConstruye la 'canasta' consolidada por cada egresado (unificando todas las preguntas\nabiertas que respondió) y aplica Apriori con max_len=2 para pares 1 a 1.",
+        "operationId": "get_reglas_asociacion_api_ia_reglas_asociacion_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "momento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por momento de encuesta (0, 1 o 5)",
+              "title": "Momento"
+            },
+            "description": "Filtrar por momento de encuesta (0, 1 o 5)"
+          },
+          {
+            "name": "anio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por año de carga",
+              "title": "Anio"
+            },
+            "description": "Filtrar por año de carga"
+          },
+          {
+            "name": "programa",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por programa académico del egresado",
+              "title": "Programa"
+            },
+            "description": "Filtrar por programa académico del egresado"
+          },
+          {
+            "name": "min_soporte",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 1.0,
+              "minimum": 0.001,
+              "description": "Soporte mínimo para apriori (default 0.01)",
+              "default": 0.01,
+              "title": "Min Soporte"
+            },
+            "description": "Soporte mínimo para apriori (default 0.01)"
+          },
+          {
+            "name": "min_confianza",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 1.0,
+              "minimum": 0.01,
+              "description": "Confianza mínima para las reglas (default 0.4)",
+              "default": 0.4,
+              "title": "Min Confianza"
+            },
+            "description": "Confianza mínima para las reglas (default 0.4)"
+          },
+          {
+            "name": "min_ocurrencias",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Ocurrencias mínimas absolutas de egresados para respaldar la regla (default 2)",
+              "default": 2,
+              "title": "Min Ocurrencias"
+            },
+            "description": "Ocurrencias mínimas absolutas de egresados para respaldar la regla (default 2)"
+          },
+          {
+            "name": "top_reglas",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Cantidad máxima de reglas a devolver (default 20)",
+              "default": 20,
+              "title": "Top Reglas"
+            },
+            "description": "Cantidad máxima de reglas a devolver (default 20)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReglasAsociacionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/health/live": {
       "get": {
         "tags": [
@@ -2781,6 +3076,29 @@
           "confirmarContrasena"
         ],
         "title": "CambioContrasenaTemporalRequest"
+      },
+      "CandidataEmergente": {
+        "properties": {
+          "termino": {
+            "type": "string",
+            "title": "Termino"
+          },
+          "score_tfidf": {
+            "type": "number",
+            "title": "Score Tfidf"
+          },
+          "frecuencia_documentos": {
+            "type": "integer",
+            "title": "Frecuencia Documentos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "termino",
+          "score_tfidf",
+          "frecuencia_documentos"
+        ],
+        "title": "CandidataEmergente"
       },
       "CargaRechazadaResponse": {
         "properties": {
@@ -3632,6 +3950,29 @@
         ],
         "title": "ErrorResponse"
       },
+      "EstadisticasAnalisis": {
+        "properties": {
+          "total_respuestas_analizadas": {
+            "type": "integer",
+            "title": "Total Respuestas Analizadas"
+          },
+          "respuestas_con_habilidad": {
+            "type": "integer",
+            "title": "Respuestas Con Habilidad"
+          },
+          "respuestas_sin_habilidad": {
+            "type": "integer",
+            "title": "Respuestas Sin Habilidad"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_respuestas_analizadas",
+          "respuestas_con_habilidad",
+          "respuestas_sin_habilidad"
+        ],
+        "title": "EstadisticasAnalisis"
+      },
       "ExploradorInitResponse": {
         "properties": {
           "preguntas": {
@@ -3732,6 +4073,57 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HabilidadReconocida": {
+        "properties": {
+          "habilidad": {
+            "type": "string",
+            "title": "Habilidad"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "menciones": {
+            "type": "integer",
+            "title": "Menciones"
+          }
+        },
+        "type": "object",
+        "required": [
+          "habilidad",
+          "tipo",
+          "menciones"
+        ],
+        "title": "HabilidadReconocida"
+      },
+      "HabilidadesDemandadasResponse": {
+        "properties": {
+          "habilidades_reconocidas": {
+            "items": {
+              "$ref": "#/components/schemas/HabilidadReconocida"
+            },
+            "type": "array",
+            "title": "Habilidades Reconocidas"
+          },
+          "candidatas_emergentes": {
+            "items": {
+              "$ref": "#/components/schemas/CandidataEmergente"
+            },
+            "type": "array",
+            "title": "Candidatas Emergentes"
+          },
+          "estadisticas": {
+            "$ref": "#/components/schemas/EstadisticasAnalisis"
+          }
+        },
+        "type": "object",
+        "required": [
+          "habilidades_reconocidas",
+          "candidatas_emergentes",
+          "estadisticas"
+        ],
+        "title": "HabilidadesDemandadasResponse"
       },
       "HealthResponse": {
         "properties": {
@@ -4224,6 +4616,80 @@
           "credencial_temporal_expira_en"
         ],
         "title": "ReemisionCredencialResponse"
+      },
+      "ReglaAsociacionItem": {
+        "properties": {
+          "si_menciona": {
+            "type": "string",
+            "title": "Si Menciona"
+          },
+          "tambien_menciona": {
+            "type": "string",
+            "title": "Tambien Menciona"
+          },
+          "ocurrencias": {
+            "type": "integer",
+            "title": "Ocurrencias"
+          },
+          "soporte": {
+            "type": "number",
+            "title": "Soporte"
+          },
+          "confianza": {
+            "type": "number",
+            "title": "Confianza"
+          },
+          "lift": {
+            "type": "number",
+            "title": "Lift"
+          }
+        },
+        "type": "object",
+        "required": [
+          "si_menciona",
+          "tambien_menciona",
+          "ocurrencias",
+          "soporte",
+          "confianza",
+          "lift"
+        ],
+        "title": "ReglaAsociacionItem"
+      },
+      "ReglasAsociacionResponse": {
+        "properties": {
+          "total_respuestas": {
+            "type": "integer",
+            "title": "Total Respuestas"
+          },
+          "transacciones_validas": {
+            "type": "integer",
+            "title": "Transacciones Validas"
+          },
+          "transacciones_insuficientes": {
+            "type": "integer",
+            "title": "Transacciones Insuficientes"
+          },
+          "total_reglas": {
+            "type": "integer",
+            "title": "Total Reglas"
+          },
+          "reglas": {
+            "items": {
+              "$ref": "#/components/schemas/ReglaAsociacionItem"
+            },
+            "type": "array",
+            "title": "Reglas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_respuestas",
+          "transacciones_validas",
+          "transacciones_insuficientes",
+          "total_reglas",
+          "reglas"
+        ],
+        "title": "ReglasAsociacionResponse"
       },
       "SedeResponse": {
         "properties": {

@@ -33,7 +33,8 @@ OE UPB es el Observatorio de Egresados de la Universidad Pontificia Bolivariana.
 | Contrato HTTP | [`specs/api/openapi.json`](specs/api/openapi.json) |
 | Modelo persistente actual | [`specs/db/oeupb-schema.sql`](specs/db/oeupb-schema.sql) |
 | Decisiones arquitectónicas | [`adr/INDEX.md`](adr/INDEX.md) |
-| Diseño visual | [`design/design-system.md`](design/design-system.md) |
+| Diseño visual | [`design/design.md`](design/design.md) |
+| Inventario y flujo de pantallas | [`mockups/screen-map.md`](mockups/screen-map.md) |
 | Cambios de documentación | [`CHANGELOG.md`](CHANGELOG.md) |
 | Cambios globales del producto | [`../CHANGELOG.md`](../CHANGELOG.md) |
 
@@ -73,10 +74,19 @@ Cuando la documentación contradiga el código, no se debe ocultar la diferencia
 5. No editar artefactos archivados; crear una nota nueva o actualizar la fuente vigente.
 6. No crear scripts `patch_*`, `fix_*` o `check_*` en la raíz. Las herramientas reutilizables pertenecen a `tools/` o al directorio `scripts/` del componente.
 
+## Reglas obligatorias de interfaz
+
+1. [`design/design.md`](design/design.md) es la única fuente vigente para tokens, componentes, composición visual, estados e iconografía. Aplica tanto a los mockups como al frontend implementado.
+2. No se inicia ni se acepta un desarrollo de UI si la pantalla o el cambio visual no cuenta primero con un mockup correspondiente aprobado o actualizado en [`mockups/`](mockups/).
+3. [`mockups/screen-map.md`](mockups/screen-map.md) debe actualizarse en el mismo cambio cuando se crea, elimina, renombra o modifica una pantalla, variante, modal o transición de navegación.
+4. Está prohibido utilizar emojis como contenido, decoración o sustituto de iconos en mockups y frontend. La iconografía se toma exclusivamente de la librería estándar definida en `design/design.md` y debe incluir un nombre accesible cuando comunique una acción o estado.
+5. Todo cambio visual debe mantener sincronizados, en este orden: `design/design.md` cuando cambie el sistema, el mockup afectado, `mockups/screen-map.md`, la implementación Angular y sus pruebas pertinentes.
+6. Están estrictamente prohibidos los bordes de acento de color laterales (izquierdo o derecho) o superiores en tarjetas y paneles (`card`, `panel`, `box`). Toda tarjeta conserva su borde perimetral neutro uniforme (`1px solid rgba(26, 24, 24, 0.08)`); los estados de alerta, advertencia o seguimiento se comunican exclusivamente con badges, pills de estado o encabezados semánticos en el contenido interno.
+
 ## Lectura según el tipo de tarea
 
 - Arquitectura general: `architecture/00-proyecto.md`.
-- Frontend: `architecture/01-frontend.md` y `design/design-system.md`.
+- Frontend: `architecture/01-frontend.md`, `design/design.md` y `mockups/screen-map.md`.
 - Backend: `architecture/02-backend.md`.
 - API: `architecture/03-contratos.md` y `specs/api/openapi.json`.
 - Datos: `architecture/04-modelo-datos.md` y `specs/db/oeupb-schema.sql`.

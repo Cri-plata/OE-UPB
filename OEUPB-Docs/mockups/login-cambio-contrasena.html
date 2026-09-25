@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>OE UPB · Cambio obligatorio</title>
+    <link rel="stylesheet" href="mockups.css" />
+  </head>
+  <body>
+    <main class="login-container">
+      <section class="login-dual-card" aria-hidden="true">
+        <aside class="login-brand-pane">
+          <div class="login-brand-top">
+            <img
+              class="login-shield"
+              src="../../OEUPB-Frontend/public/escudo-upb.png"
+              alt="Escudo Universidad Pontificia Bolivariana"
+            />
+            <div>
+              <span class="login-institution-badge">Universidad Pontificia Bolivariana</span>
+              <h1 class="login-brand-title">OE UPB</h1>
+            </div>
+          </div>
+          <div class="login-brand-body">
+            <p>
+              Observatorio de Egresados para el seguimiento del impacto profesional,
+              trayectoria laboral y aseguramiento de la calidad académica.
+            </p>
+            <div class="login-milestones">
+              <span>Momento 0</span> · <span>Momento 1</span> · <span>Momento 5</span>
+            </div>
+          </div>
+          <footer class="login-brand-footer">
+            <p>Acceso y aislamiento de datos gobernado estrictamente por sede institucional.</p>
+          </footer>
+        </aside>
+        <article class="login-form-pane">
+          <header class="login-form-header">
+            <h2>Acceso Institucional</h2>
+            <p>Ingresa tus credenciales asignadas para acceder a la plataforma.</p>
+          </header>
+          <div class="form-group">
+            <label for="bg-email">Correo institucional</label>
+            <div class="input-icon-group">
+              <span class="input-icon mail" aria-hidden="true"></span>
+              <input id="bg-email" type="email" value="coordinacion.demo02@upb.edu.co" disabled />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="bg-password">Contraseña</label>
+            <div class="input-icon-group">
+              <span class="input-icon lock" aria-hidden="true"></span>
+              <input id="bg-password" type="password" value="••••••••••••" disabled />
+            </div>
+          </div>
+          <button class="btn-primary" disabled>Ingresar al Observatorio</button>
+        </article>
+      </section>
+    </main>
+    <div class="modal-backdrop">
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-change-title">
+        <h2 id="modal-change-title">Crea tu nueva contraseña</h2>
+        <p>
+          La contraseña temporal solo permite este primer ingreso. Debes
+          reemplazarla para continuar a la plataforma.
+        </p>
+        <div class="form-group">
+          <label for="new-password">Nueva contraseña *</label>
+          <input id="new-password" type="password" placeholder="Mínimo 10 caracteres" />
+        </div>
+        <div class="form-group">
+          <label for="confirm-password">Confirmar contraseña *</label>
+          <input id="confirm-password" type="password" placeholder="Repite la contraseña" />
+        </div>
+        <p class="muted">Requisitos: mínimo 10 caracteres, incluyendo mayúscula, minúscula y número.</p>
+        <div class="modal-actions">
+          <a href="login.html" class="btn-secondary">Cancelar</a>
+          <a href="reporte-general.html" class="btn-primary">
+            Guardar y continuar
+          </a>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

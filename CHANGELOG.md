@@ -3,6 +3,7 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+
 ### Cambiado (2026-09-25, P3)
 - **Contrato de errores (API-02):** esquema `ErrorResponse` con 401/403 en toda ruta protegida y códigos propios por endpoint; `DELETE /api/usuarios/{id}` queda marcado como obsoleto; patrón de correo institucional en el contrato.
 - **Programas (PRG-01):** la audiencia de publicaciones y las asignaciones comparan por clave normalizada; los programas sin datos actuales se conservan y se muestran en la administración de cuentas.
@@ -21,6 +22,8 @@ Este es el historial global del producto y el código del monorepo. Los cambios 
 - **Catálogo RN-31:** excluye además `USUARIO` y las columnas `Unnamed`.
 
 ### Cambiado (2026-09-25)
+- **Gobierno de UI:** `OEUPB-Docs/design/design.md` pasa a ser la fuente canónica para mockups y frontend; todo cambio visual requiere un mockup previo y la actualización del mapa de pantallas.
+- **Iconografía:** se prohíben emojis en la interfaz, se adopta Lucide como librería estándar y se retiró el emoji heredado de la pantalla de carga.
 - **Publicaciones recalculadas en backend:** `POST /api/publicaciones` ignora métricas y programas del cliente, los recalcula con los datos de la sede del JWT y agrupa u omite las celdas con menos de 5 observaciones (ADR-015). El reporte general exige `definicion.indicador`.
 - **Catálogo analítico del Explorador (RN-31):** documentos, nombres, correos, teléfonos, fechas, identificadores y códigos administrativos ya no se ofrecen ni se aceptan (422).
 - **Cargas:** serialización por sede, 409 ante un archivo idéntico a la versión vigente, rango de año 1900-2200 y protección de egresados con corrección manual auditada (ADR-014).
@@ -47,12 +50,6 @@ Este es el historial global del producto y el código del monorepo. Los cambios 
 - **Datos:** Se añadió el catálogo persistente de sedes, relaciones obligatorias y soporte explícito de intentos de medición con política de selección por indicador.
 - **Auditoría de cargas:** La eliminación física exige motivo, conserva un evento inmutable y evita reutilizar números de versión borrados.
 - **Calidad:** Se consolidaron 19 pruebas de backend y 11 de frontend, más validaciones de contratos, documentación y compilación en CI.
-
-### Añadido (2026-09-23)
-- **RBAC:** Se implementaron `Admin_CTIC`, `Coordinador_Sede` y `Usuario_Consulta` con administración jerárquica y denegaciones 403.
-- **Permisos:** Los usuarios de consulta almacenan etiqueta informativa, cuatro permisos y programas validados contra cargas visibles de su sede.
-- **Cuentas:** Se añadieron desactivación/reactivación, borrado físico excepcional auditado y revocación inmediata mediante versión de autorización.
-- **Aislamiento:** Directorio, perfiles, reportes, explorador y cargas restringen los datos privados al coordinador y a su sede.
 
 ### Añadido (2026-09-12)
 - **Módulo de IA (Habilidades Demandadas)**: Pipeline de PLN para extracción y clasificación de habilidades blandas y duras desde texto libre de encuestas con spaCy (`es_core_news_md`) y descubrimiento de emergentes con TF-IDF (`/api/ia/habilidades-demandadas`).
@@ -88,7 +85,6 @@ Este es el historial global del producto y el código del monorepo. Los cambios 
 - **Carga de Datos**: El algoritmo de extracción de Pandas fue flexibilizado para tolerar encuestas anónimas (estudiantes que no proveen documento) registrándolos en las métricas pero sin crear perfiles vacíos en el Directorio.
 - **Carga de Datos**: El algoritmo ahora filtra e ignora automáticamente las filas basura o de "sumatorias/totales" ubicadas al final de los archivos Excel oficiales.
 - **Enrutamiento**: Se migró de `RenderMode.Prerender` a `RenderMode.Client` en el servidor de Angular para prevenir errores de compilación con rutas paramétricas como `/perfil/:cedula`.
-
 
 ### Añadido
 - **Reporte General**: Paleta de colores predeterminada dinámica (15 colores) para la gráfica de distribución por programa.

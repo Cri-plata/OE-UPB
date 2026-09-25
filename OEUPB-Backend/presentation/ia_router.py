@@ -13,13 +13,15 @@ from typing import List, Optional, Set
 
 from infrastructure.database import get_db
 from domain.models import Medicion, Egresado
+from application.auth_service import require_roles
+from presentation.errores import RESPUESTAS_PROTEGIDAS
 from application.ia_service import (
     analizar_habilidades_demandadas,
     generar_reglas_asociacion,
     extraer_habilidades_por_respuesta,
 )
 
-router = APIRouter(prefix="/api/ia", tags=["Inteligencia Artificial"])
+router = APIRouter(prefix="/api/ia", tags=["Inteligencia Artificial"], responses=RESPUESTAS_PROTEGIDAS)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -155,6 +157,7 @@ def get_habilidades_demandadas(
     programa: Optional[str] = Query(None, description="Filtrar por programa académico del egresado"),
     top_emergentes: int = Query(15, ge=1, le=50, description="Cantidad de candidatas emergentes a devolver"),
     db: Session = Depends(get_db),
+    current_user: dict = Depends(require_roles("Coordinador_Sede")),
 ):
     """
     Analiza las respuestas abiertas de las encuestas de egresados y extrae
@@ -162,6 +165,8 @@ def get_habilidades_demandadas(
     """
     # 1. Consultar mediciones con filtros opcionales
     query = db.query(Medicion)
+    if current_user.get("sede_id"):
+        query = query.filter(Medicion.sede_id == current_user["sede_id"])
     if momento is not None:
         query = query.filter(Medicion.momento == momento)
     if anio is not None:
@@ -208,6 +213,7 @@ def get_reglas_asociacion(
     min_ocurrencias: int = Query(2, ge=1, description="Ocurrencias mínimas absolutas de egresados para respaldar la regla (default 2)"),
     top_reglas: int = Query(20, ge=1, le=100, description="Cantidad máxima de reglas a devolver (default 20)"),
     db: Session = Depends(get_db),
+    current_user: dict = Depends(require_roles("Coordinador_Sede")),
 ):
     """
     Calcula reglas de asociación (Market Basket Analysis) sobre las habilidades demandadas.
@@ -216,6 +222,8 @@ def get_reglas_asociacion(
     """
     # 1. Consultar mediciones con filtros opcionales
     query = db.query(Medicion)
+    if current_user.get("sede_id"):
+        query = query.filter(Medicion.sede_id == current_user["sede_id"])
     if momento is not None:
         query = query.filter(Medicion.momento == momento)
     if anio is not None:

@@ -1,108 +1,113 @@
-﻿.layout {
+.layout {
   display: flex;
   min-height: 100vh;
-  background-color: var(--color-background);
+  background-color: var(--background);
 }
-
-.content {
-  margin-left: 250px;
-  padding: 30px;
-  flex: 1;
-}
-
-.topbar h1 { margin-top: 0; margin-bottom: 30px; color: var(--color-navigation-hover); }
 
 .admin-grid {
   display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 30px;
+  grid-template-columns: 360px 1fr;
+  gap: var(--space-xl);
+  align-items: start;
 }
 
-.card {
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  
-  h2 { margin-top: 0; font-size: 18px; color: var(--color-navigation-hover); margin-bottom: 20px; border-bottom: 2px solid var(--color-border); padding-bottom: 10px; }
+.form-card {
+  position: sticky;
+  top: var(--space-lg);
 }
 
-.form-group {
-  margin-bottom: 20px;
-  label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--color-text-tertiary); }
-  input, select { width: 100%; padding: 12px; border: 1px solid var(--color-border-control); border-radius: var(--radius-md); outline: none; box-sizing: border-box; }
+.form-help-text {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
 }
 
-.btn-primary {
-  width: 100%; padding: 12px; background: var(--color-brand); color: var(--color-surface); border: none; border-radius: var(--radius-md); font-weight: bold; cursor: pointer;
-  &:disabled { background: var(--color-disabled-danger); cursor: not-allowed; }
+.form-legend {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--body);
+  margin-bottom: var(--space-2xs);
 }
 
-.users-table {
-  width: 100%; border-collapse: collapse;
-  th, td { padding: 12px; border-bottom: 1px solid var(--color-divider); text-align: left; }
-  th { background: var(--color-table-header); font-weight: 600; }
-  .badge { background: #e0f2f1; color: #00695c; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-}
-
-.btn-danger { background: var(--color-error); color: var(--color-surface); border: none; padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; font-size: 12px; font-weight: bold; } .btn-danger:hover { background: var(--color-error-strong); }
-
-.credential-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
+.check-option {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: rgba(18, 18, 18, 0.72);
+  gap: var(--space-xs);
+  font-size: 13px;
+  color: var(--body);
+  margin-bottom: var(--space-2xs);
+  cursor: pointer;
 }
 
-.credential-modal {
-  width: 100%;
-  max-width: 520px;
-  padding: 30px;
-  border-radius: 12px;
-  background: var(--color-surface);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+.form-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
 
-  h2 {
-    margin-top: 0;
+  button[type="submit"] {
+    flex: 1;
   }
+}
+
+.cell-primary {
+  font-weight: 600;
+  color: var(--heading);
+}
+
+.cell-subtext {
+  color: var(--muted);
+}
+
+.modal-description {
+  color: var(--muted);
+  margin: 0 0 var(--space-md);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.credential {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: var(--space-sm);
+  margin: var(--space-lg) 0;
+  align-items: center;
 
   dt {
-    margin-top: 12px;
-    color: var(--color-text-secondary);
+    color: var(--muted);
     font-size: 13px;
     font-weight: 700;
   }
 
   dd {
-    margin: 4px 0 0;
+    margin: 0;
   }
 }
 
 .temporary-password {
-  padding: 12px;
-  border-radius: 6px;
-  background: #f3f3f3;
-  font-family: Consolas, monospace;
-  font-size: 18px;
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  background: var(--banner);
+  font: 16px Consolas, monospace;
   letter-spacing: 1px;
   word-break: break-all;
+  border: 1px solid var(--border);
 }
 
-.credential-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 24px;
+.modal-notice {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: var(--space-lg);
 }
 
-.btn-secondary {
-  padding: 10px 16px;
-  border: 1px solid var(--color-text-secondary);
-  border-radius: 6px;
-  background: var(--color-surface);
-  cursor: pointer;
+@media (max-width: 1150px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-card {
+    position: static;
+  }
 }
 .sin-datos { color: var(--color-text-muted); font-style: italic; }

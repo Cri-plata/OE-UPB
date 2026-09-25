@@ -1,40 +1,181 @@
-﻿.sidebar {
-  width: 250px;
-  background-color: var(--color-navigation);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+.sidebar {
   position: fixed;
-  left: 0;
-  top: 0;
-  padding: 20px 0;
+  inset: 0 auto 0 0;
+  z-index: 1000;
+  display: flex;
+  width: var(--sidebar-width);
+  height: 100vh;
+  flex-direction: column;
+  padding: var(--space-lg) 0;
+  background: var(--navigation);
+  color: white;
+  overflow-y: auto;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  transition: width 0.2s ease, transform 0.25s ease-in-out;
 }
+
 .brand {
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  margin-bottom: 40px;
-  .logo { background: var(--color-brand); padding: 10px; border-radius: var(--radius-md); font-weight: bold; margin-right: 15px; }
-  h2 { margin: 0; font-size: 20px; }
+  gap: var(--space-md);
+  padding: 0 var(--space-lg);
+  margin-bottom: var(--space-2xl);
+
+  .brand-mark,
+  .logo {
+    display: grid;
+    width: 44px;
+    height: 40px;
+    flex: 0 0 44px;
+    place-items: center;
+    border-radius: var(--radius-md);
+    background: var(--brand);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -0.02em;
+  }
+
+  h2,
+  .brand-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    white-space: nowrap;
+    color: white;
+  }
 }
+
 .nav-menu {
   display: flex;
-  flex-direction: column;
   flex: 1;
+  flex-direction: column;
+  gap: var(--space-2xs);
 }
+
 .nav-item {
-  padding: 15px 20px;
-  color: var(--color-navigation-text);
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-lg);
+  color: var(--navigation-text);
   text-decoration: none;
-  font-size: 16px;
-  transition: 0.2s;
-  &:hover, &.active { background-color: var(--color-navigation-hover); color: var(--color-surface); border-left: 4px solid var(--color-brand); }
+  font-size: 13px;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease, border-left-color 0.15s ease;
+  white-space: nowrap;
+
+  &::before {
+    content: "";
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    background: currentColor;
+    mask: var(--nav-icon) center / contain no-repeat;
+    -webkit-mask: var(--nav-icon) center / contain no-repeat;
+  }
+
+  &.nav-reporte { --nav-icon: url("https://unpkg.com/lucide-static@0.468.0/icons/chart-no-axes-combined.svg"); }
+  &.nav-tendencias { --nav-icon: url("https://unpkg.com/lucide-static@0.468.0/icons/chart-spline.svg"); }
+  &.nav-explorador { --nav-icon: url("https://unpkg.com/lucide-static@0.468.0/icons/sliders-horizontal.svg"); }
+  &.nav-analitica { --nav-icon: url("https://unpkg.com/lucide-static@0.468.0/icons/triangle-alert.svg"); }
+  &.nav-directorio { --nav-icon: url("https://unpkg.com/lucide-static@0.468.0/icons/contact-round.svg"); }
+  &.nav-habilidades { --nav-icon: url("https://unpkg.com/lucide-static@0.468.0/icons/sparkles.svg"); }
+  &.nav-publicaciones { --nav-icon: url("https://unpkg.com/lucide-static@0.468.0/icons/send.svg"); }
+  &.nav-carga { --nav-icon: url("https://unpkg.com/lucide-static@0.468.0/icons/upload.svg"); }
+  &.nav-usuarios { --nav-icon: url("https://unpkg.com/lucide-static@0.468.0/icons/users.svg"); }
+  &.nav-perfil { --nav-icon: url("https://unpkg.com/lucide-static@0.468.0/icons/user-round.svg"); }
+
+  &:hover,
+  &.active {
+    color: white;
+    background: var(--navigation-hover);
+    border-left-color: var(--brand);
+  }
 }
-.bottom-menu { padding: 20px; }
+
+.bottom-menu {
+  padding: var(--space-lg);
+  margin-top: auto;
+}
+
 .logout-btn {
-  width: 100%; padding: 10px; background: transparent; border: 1px solid var(--color-brand); color: var(--color-brand);
-  border-radius: 6px; cursor: pointer; transition: 0.2s;
-  &:hover { background: var(--color-brand); color: var(--color-surface); }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  width: 100%;
+  min-height: 40px;
+  padding: var(--space-xs) var(--space-md);
+  border: 1px solid var(--brand);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &::before {
+    content: "";
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    background: currentColor;
+    mask: url("https://unpkg.com/lucide-static@0.468.0/icons/log-out.svg") center / contain no-repeat;
+    -webkit-mask: url("https://unpkg.com/lucide-static@0.468.0/icons/log-out.svg") center / contain no-repeat;
+  }
+
+  &:hover {
+    background: rgba(227, 30, 36, 0.12);
+  }
+}
+
+/* Tablet: Rail 72px conforme a design.md */
+@media (min-width: 768px) and (max-width: 1279px) {
+  .sidebar {
+    width: var(--rail-width);
+  }
+
+  .brand {
+    justify-content: center;
+    padding: 0 var(--space-xs);
+    margin-bottom: var(--space-xl);
+
+    h2,
+    .brand-title {
+      display: none;
+    }
+  }
+
+  .nav-item-text,
+  .logout-btn span {
+    display: none;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: var(--space-xs) 0;
+    border-left: 0;
+    border-right: 3px solid transparent;
+
+    &:hover,
+    &.active {
+      border-right-color: var(--brand);
+    }
+  }
+
+  .bottom-menu {
+    padding: var(--space-md) var(--space-xs);
+  }
+
+  .logout-btn {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    margin: 0 auto;
+  }
 }
 

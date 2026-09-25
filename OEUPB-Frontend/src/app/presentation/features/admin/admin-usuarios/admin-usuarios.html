@@ -1,29 +1,32 @@
-﻿<div class="layout">
+<div class="layout">
   <app-sidebar></app-sidebar>
   
   <main class="content">
-    <header class="topbar">
-      <h1>Gestión de Accesos y Usuarios</h1>
+    <header class="page-header">
+      <div class="page-header-content">
+        <h1>Gestión de Accesos y Usuarios</h1>
+        <p>Administración institucional de coordinadores de sede y usuarios de consulta.</p>
+      </div>
     </header>
 
     <div class="admin-grid">
       <!-- Formulario para crear coordinador -->
-      <div class="card form-card">
-        <h2>{{ usuarioEditandoId ? 'Editar usuario' : 'Crear nuevo usuario' }}</h2>
+      <article class="card form-card">
+        <h2 class="card-title">{{ usuarioEditandoId ? 'Editar usuario' : 'Crear nuevo usuario' }}</h2>
         <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
           <div class="form-group">
             <label>Nombre Completo</label>
-            <input type="text" formControlName="nombre" placeholder="Ej. Carlos Gómez">
+            <input type="text" formControlName="nombre" placeholder="Ej. Carlos Gómez" class="form-control">
           </div>
           
           <div class="form-group">
             <label>Correo Institucional</label>
-            <input type="email" formControlName="correo" placeholder="ejemplo@upb.edu.co" [readonly]="usuarioEditandoId !== null">
+            <input type="email" formControlName="correo" placeholder="ejemplo@upb.edu.co" [readonly]="usuarioEditandoId !== null" class="form-control">
           </div>
 
           <div class="form-group">
             <label>Rol del Usuario *</label>
-                        <select formControlName="rol">
+            <select formControlName="rol" class="form-control">
               <option value="">Seleccione un rol...</option>
               <option value="Coordinador_Sede" *ngIf="usuarioActual?.rol === 'Admin_CTIC'">Coordinador de Sede</option>
               <option value="Usuario_Consulta" *ngIf="usuarioActual?.rol === 'Coordinador_Sede'">Usuario de consulta</option>
@@ -32,14 +35,14 @@
 
           <div class="form-group" *ngIf="usuarioEditandoId === null">
             <label>Número de documento *</label>
-            <input type="text" formControlName="numero_documento" placeholder="Cédula, CE o pasaporte">
-            <small>En desarrollo se usa como credencial inicial; solo se almacena su hash.</small>
+            <input type="text" formControlName="numero_documento" placeholder="Cédula, CE o pasaporte" class="form-control">
+            <small class="form-help-text">En desarrollo se usa como credencial inicial; solo se almacena su hash.</small>
           </div>
 
           <ng-container *ngIf="usuarioActual?.rol === 'Coordinador_Sede'">
             <div class="form-group">
               <label>Etiqueta informativa *</label>
-              <select formControlName="etiqueta">
+              <select formControlName="etiqueta" class="form-control">
                 <option value="">Seleccione una etiqueta...</option>
                 <option value="Rector">Rector</option>
                 <option value="Profesor">Profesor</option>
@@ -47,75 +50,81 @@
               </select>
             </div>
             <fieldset class="form-group" formGroupName="permisos">
-              <legend>Permisos</legend>
+              <legend class="form-legend">Permisos</legend>
               <label *ngFor="let permiso of permisosDisponibles" class="check-option">
                 <input type="checkbox" [formControlName]="permiso.id"> {{ permiso.nombre }}
               </label>
             </fieldset>
             <div class="form-group">
               <label>Programas autorizados</label>
-              <select formControlName="programas" multiple size="5">
+              <select formControlName="programas" multiple size="5" class="form-control">
                 <option *ngFor="let programa of programasDisponibles" [value]="programa">{{ programa }}</option>
                 <option *ngFor="let programa of programasSinDatos" [value]="programa">{{ programa }} (sin datos actuales)</option>
               </select>
-              <small>Solo aparecen programas observados en cargas de tu sede.</small>
+              <small class="form-help-text">Solo aparecen programas observados en cargas de tu sede.</small>
             </div>
           </ng-container>
 
           <div class="form-group" *ngIf="usuarioActual?.rol === 'Admin_CTIC'">
             <label>Sede asignada *</label>
-                        <select formControlName="sede_id">
+            <select formControlName="sede_id" class="form-control">
               <option value="">Seleccione una sede...</option>
               <option *ngFor="let s of sedesDisponibles" [ngValue]="s.id">{{ s.nombre }}</option>
             </select>
           </div>
 
-          <button type="submit" class="btn-primary" [disabled]="userForm.invalid">{{ usuarioEditandoId ? 'Guardar cambios' : 'Crear usuario' }}</button>
-          <button *ngIf="usuarioEditandoId" type="button" class="btn-secondary" (click)="cancelarEdicion()">Cancelar</button>
+          <div class="form-actions">
+            <button *ngIf="usuarioEditandoId" type="button" class="btn-secondary" (click)="cancelarEdicion()">Cancelar</button>
+            <button type="submit" class="btn-primary" [disabled]="userForm.invalid">{{ usuarioEditandoId ? 'Guardar cambios' : 'Crear usuario' }}</button>
+          </div>
         </form>
-      </div>
+      </article>
 
       <!-- Lista de Usuarios -->
-      <div class="card list-card">
-        <h2>Usuarios Activos</h2>
-        <table class="users-table">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Correo</th>
-              <th>Rol</th>
-              <th>Sede</th>
-              <th>Alcance</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let u of usuarios">
-              <td>{{ u.nombre }}</td>
-              <td>{{ u.correo }}</td>
-              <td><span class="badge">{{ u.rol }}</span></td>
-              <td>{{ nombreSede(u.sede_id) }}</td>
-              <td>{{ u.etiqueta || '—' }}<br><small>{{ u.programas.join(', ') || 'Sin programas' }}</small><small class="sin-datos" *ngIf="u.programas_sin_datos?.length"><br>Sin datos actuales: {{ u.programas_sin_datos?.join(', ') }}</small></td>
-              <td>{{ u.activo ? 'Activa' : 'Inactiva' }}</td>
-              <td>
-                <button class="btn-secondary" (click)="editarUsuario(u)">Editar</button>
-                <button class="btn-secondary" (click)="regenerarCredencial(u)" [disabled]="!u.activo">Recuperar acceso</button>
-                <button class="btn-danger" (click)="cambiarEstado(u)">{{ u.activo ? 'Desactivar' : 'Reactivar' }}</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <article class="card list-card">
+        <h2 class="card-title">Usuarios Activos</h2>
+        <div class="table-scroll">
+          <table class="modern-table users-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Sede</th>
+                <th>Alcance</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of usuarios">
+                <td class="cell-primary">{{ u.nombre }}</td>
+                <td>{{ u.correo }}</td>
+                <td><span class="badge">{{ u.rol }}</span></td>
+                <td>{{ nombreSede(u.sede_id) }}</td>
+                <td>{{ u.etiqueta || '—' }}<br><small class="cell-subtext">{{ u.programas.join(', ') || 'Sin programas' }}</small><small class="sin-datos" *ngIf="u.programas_sin_datos?.length"><br>Sin datos actuales: {{ u.programas_sin_datos?.join(', ') }}</small></td>
+                <td><span class="badge" [class.success]="u.activo">{{ u.activo ? 'Activa' : 'Inactiva' }}</span></td>
+                <td>
+                  <div class="table-actions">
+                    <button class="btn-secondary table-action" (click)="editarUsuario(u)">Editar</button>
+                    <button class="btn-secondary table-action" (click)="regenerarCredencial(u)" [disabled]="!u.activo">Recuperar acceso</button>
+                    <button class="btn-danger table-action" (click)="cambiarEstado(u)">{{ u.activo ? 'Desactivar' : 'Reactivar' }}</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
     </div>
   </main>
 </div>
 
-<div class="credential-modal-backdrop" *ngIf="credencialTemporal">
-  <section class="credential-modal" role="dialog" aria-modal="true" aria-labelledby="credential-title">
+<div class="modal-backdrop" *ngIf="credencialTemporal">
+  <section class="modal" role="dialog" aria-modal="true" aria-labelledby="credential-title">
     <h2 id="credential-title">Cuenta creada</h2>
-    <p>Entrega esta credencial temporal al usuario por un canal seguro. Solo se mostrará en esta ventana.</p>
-    <dl>
+    <p class="modal-description">Entrega esta credencial temporal al usuario por un canal seguro. Solo se mostrará en esta ventana.</p>
+    <dl class="credential">
       <dt>Correo</dt>
       <dd>{{ credencialTemporal.correo }}</dd>
       <dt>Contraseña temporal</dt>
@@ -123,14 +132,10 @@
       <dt *ngIf="credencialTemporal.expiraEn">Vence</dt>
       <dd *ngIf="credencialTemporal.expiraEn">{{ credencialTemporal.expiraEn | date:'medium' }}</dd>
     </dl>
-    <p>En el primer ingreso, el sistema exigirá crear una contraseña nueva antes de permitir cualquier otra operación.</p>
-    <div class="credential-actions">
-      <button type="button" class="btn-primary" (click)="copiarContrasenaTemporal()">Copiar contraseña</button>
+    <p class="modal-notice">En el primer ingreso, el sistema exigirá crear una contraseña nueva antes de permitir cualquier otra operación.</p>
+    <div class="modal-actions">
       <button type="button" class="btn-secondary" (click)="cerrarCredencialTemporal()">Ya la guardé</button>
+      <button type="button" class="btn-primary" (click)="copiarContrasenaTemporal()">Copiar contraseña</button>
     </div>
   </section>
 </div>
-
-
-
-

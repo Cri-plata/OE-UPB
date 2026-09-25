@@ -1,128 +1,95 @@
-
 .layout {
   display: flex;
   min-height: 100vh;
+  background-color: var(--background);
 }
 
-.content {
-  flex: 1;
-  background-color: var(--color-background-subtle);
-  margin-left: 280px;
-}
-
-.top-banner {
-  background-color: var(--color-surface-muted);
-  padding: 2rem 3rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--color-border);
-  
-  .banner-text {
-    h1 {
-      margin: 0;
-      font-size: 1.8rem;
-      color: var(--color-chart-heading);
-      font-weight: 700;
-    }
-    p {
-      margin: 0.5rem 0 0 0;
-      color: var(--color-text-muted);
-      font-size: 1.1rem;
-    }
-  }
-
-  .upb-logo .escudo-img {
-    height: 60px;
-  }
-}
-
+.explorador-content,
 .dashboard-container {
-  padding: 2rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
 }
 
 .control-panel {
-  background: white;
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.03);
-  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 
   .filters-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5rem;
-    
-    &.mt-3 {
-      margin-top: 1.5rem;
-    }
-  }
-
-  .control-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    flex: 1;
-    min-width: 200px;
-
-    &.full-width {
-      flex: 100%;
-    }
-
-    label {
-      font-weight: 600;
-      color: var(--color-text-body);
-      font-size: 0.9rem;
-    }
-
-    .custom-select {
-      padding: 0.75rem 1rem;
-      border: 1px solid var(--color-border-control);
-      border-radius: 8px;
-      font-size: 1rem;
-      color: var(--color-text-heading);
-      background-color: var(--color-surface);
-      transition: all 0.2s;
-      
-      &:focus {
-        border-color: #e63946;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
-      }
-    }
+    gap: var(--space-md);
   }
 }
 
-.chart-container {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.03);
-  
-  h2 {
-    font-size: 1.3rem;
-    color: var(--color-chart-heading);
-    margin-bottom: 1.5rem;
-    border-bottom: 2px solid var(--color-surface-muted);
-    padding-bottom: 1rem;
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  flex: 1 1 200px;
+
+  &.full-width {
+    flex: 1 1 100%;
   }
 
-  .chart-wrapper {
-    height: 500px;
-    position: relative;
-    width: 100%;
+  label {
+    font-weight: 600;
+    color: var(--body);
+    font-size: 13px;
   }
+}
+
+.chart-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: var(--space-xs);
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+
+  .card-title {
+    margin: 0;
+    border: none;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+}
+
+.chart-actions {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 420px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .loading-state {
-  height: 500px;
+  height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-disabled);
+  color: var(--muted);
   font-style: italic;
-  font-size: 1.2rem;
+  background: var(--surface);
+  border-radius: var(--radius-md);
 }
+
 .publication-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
 .publication-status { color: var(--color-success); font-weight: 700; font-size: 13px; }
 .publish-error { flex-basis: 100%; margin: 4px 0 0; color: var(--color-error); font-size: 13px; }
@@ -130,9 +97,9 @@
 .publish-btn { background: var(--color-brand); color: var(--color-surface); border: 1px solid var(--color-brand); }
 .withdraw-btn { background: var(--color-surface); color: var(--color-brand); border: 1px solid var(--color-brand); }
 .publish-btn:disabled, .withdraw-btn:disabled { opacity: .55; cursor: wait; }
-.bloques { display: flex; flex-direction: column; gap: 40px; }
+.bloques { display: flex; flex-direction: column; gap: 32px; }
 .grafica-bloque { border-top: 3px solid var(--color-brand); padding-top: 20px; }
 .bloque-acciones { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .quitar-btn { background: var(--color-surface); color: var(--color-brand); border: 1px solid var(--color-brand); border-radius: 6px; padding: 8px 12px; cursor: pointer; }
-.crear-btn { margin-top: 30px; width: 100%; padding: 14px; border: 2px dashed var(--color-brand); border-radius: 12px; background: var(--color-surface); color: var(--color-brand); font-weight: 700; font-size: 15px; cursor: pointer; }
+.crear-btn { margin-top: 24px; width: 100%; padding: 14px; border: 2px dashed var(--color-brand); border-radius: 12px; background: var(--color-surface); color: var(--color-brand); font-weight: 700; font-size: 15px; cursor: pointer; transition: background 0.15s ease; }
 .crear-btn:hover { background: var(--color-background-subtle); }

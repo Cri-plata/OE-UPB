@@ -1,24 +1,22 @@
-﻿<div class="layout">
+<div class="layout">
   <app-sidebar></app-sidebar>
   
   <main class="content">
-    <div class="top-banner">
-      <div class="banner-text">
+    <header class="page-header">
+      <div class="page-header-content">
         <h1>Reporte General de Egresados</h1>
         <p>Visión global de los indicadores clave de empleabilidad.</p>
       </div>
-      <div class="upb-logo">
-        <img src="/escudo-upb.png" alt="Escudo UPB" class="escudo-img">
-      </div>
-    </div>
+      <img src="escudo-upb.png" alt="Escudo UPB" class="shield">
+    </header>
 
-    <div class="dashboard-container">
+    <div class="report-content dashboard-container">
       <app-filtros-analiticos [conMomento]="true" (aplicar)="aplicarFiltros($event)"></app-filtros-analiticos>
       <p class="publish-error" role="alert" *ngIf="errorCarga">{{ errorCarga }}</p>
 
       <!-- KPIs -->
       <div class="kpi-grid">
-        <div class="kpi-card">
+        <article class="card kpi-card">
           <div class="kpi-icon blue">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           </div>
@@ -27,9 +25,9 @@
             <h2>{{ kpis ? kpis.total_egresados : 'Cargando...' }}</h2>
             <span class="trend up">{{ kpis ? kpis.total_encuestados + ' encuestas en el filtro' : '' }}</span>
           </div>
-        </div>
-
-        <div class="kpi-card">
+        </article>
+        
+        <article class="card kpi-card">
           <div class="kpi-icon green">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
           </div>
@@ -38,9 +36,9 @@
             <h2>{{ kpis ? kpis.tasa_empleabilidad + '%' : '...' }}</h2>
             <span class="trend up">Empleados e independientes sobre clasificados</span>
           </div>
-        </div>
+        </article>
 
-        <div class="kpi-card">
+        <article class="card kpi-card">
           <div class="kpi-icon blue">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
           </div>
@@ -49,9 +47,9 @@
             <h2>{{ kpis?.tasa_formalidad != null ? kpis?.tasa_formalidad + '%' : 'Sin datos' }}</h2>
             <span class="trend">{{ kpis?.tasa_informalidad != null ? 'Informal ' + kpis?.tasa_informalidad + '% · ' + kpis?.observaciones_formalidad + ' respuestas de seguimiento' : 'Solo se pregunta en M1 y M5' }}</span>
           </div>
-        </div>
+        </article>
 
-        <div class="kpi-card">
+        <article class="card kpi-card">
           <div class="kpi-icon red">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
           </div>
@@ -60,19 +58,22 @@
             <h2>{{ kpis ? kpis.promedio_salarial + ' SMLV' : '...' }}</h2>
             <span class="trend">{{ kpis?.rango_salarial ? 'Rango ' + kpis?.rango_salarial?.minimo + '–' + kpis?.rango_salarial?.maximo + ' · mediana ' + kpis?.rango_salarial?.mediana : 'Sin respuestas de ingreso' }}</span>
           </div>
-        </div>
+        </article>
       </div>
 
       <!-- Gráficas -->
       <p class="publish-error" role="alert" *ngIf="publicacion.errorCarga()">{{ publicacion.errorCarga() }}</p>
       <div class="charts-grid">
-        <div class="chart-card">
+        <article class="card chart-card">
           <div class="chart-header">
-            <h2>Distribución por Programa</h2>
+            <h2 class="card-title">Distribución por Programa</h2>
             <div class="chart-actions">
-              <button (click)="exportarGrafica('#grafica-programas canvas', 'distribucion-programas.png')">PNG</button>
-              <select class="chart-type-select" (change)="changePieChartType($event)">
-                <option value="doughnut">Dona (Por defecto)</option><option value="pie">Pastel</option><option value="bar">Barras Verticales</option><option value="line">Líneas</option>
+              <button class="btn-secondary table-action" (click)="exportarGrafica('#grafica-programas canvas', 'distribucion-programas.png')">PNG</button>
+              <select class="form-control chart-type-select" (change)="changePieChartType($event)">
+                <option value="doughnut">Dona (Por defecto)</option>
+                <option value="pie">Pastel</option>
+                <option value="bar">Barras Verticales</option>
+                <option value="line">Líneas</option>
               </select>
               <ng-container *ngTemplateOutlet="acciones; context: { base: 'reporte_general_distribucion_programas', titulo: 'Distribución por Programa', indicador: 'distribucion_programas', tipo: pieChartType }"></ng-container>
             </div>
@@ -85,15 +86,17 @@
               [options]="pieChartOptions">
             </canvas>
           </div>
-        </div>
+        </article>
 
-        <div class="chart-card">
+        <article class="card chart-card">
           <div class="chart-header">
-            <h2>Nivel de Satisfacción (1 al 4)</h2>
+            <h2 class="card-title">Nivel de Satisfacción (1 al 4)</h2>
             <div class="chart-actions">
-              <button (click)="exportarGrafica('#grafica-satisfaccion canvas', 'satisfaccion.png')">PNG</button>
-              <select class="chart-type-select" (change)="changeBarChartType($event)">
-                <option value="bar">Barras (Por defecto)</option><option value="line">Líneas de Tendencia</option><option value="pie">Pastel</option>
+              <button class="btn-secondary table-action" (click)="exportarGrafica('#grafica-satisfaccion canvas', 'satisfaccion.png')">PNG</button>
+              <select class="form-control chart-type-select" (change)="changeBarChartType($event)">
+                <option value="bar">Barras (Por defecto)</option>
+                <option value="line">Líneas de Tendencia</option>
+                <option value="pie">Pastel</option>
               </select>
               <ng-container *ngTemplateOutlet="acciones; context: { base: 'reporte_general_satisfaccion', titulo: 'Nivel de Satisfacción', indicador: 'satisfaccion', tipo: barChartType }"></ng-container>
             </div>
@@ -106,21 +109,21 @@
               [options]="barChartOptions">
             </canvas>
           </div>
-        </div>
+        </article>
 
-        <div class="chart-card">
+        <article class="card chart-card">
           <div class="chart-header">
-            <h2>Estado Laboral</h2>
+            <h2 class="card-title">Estado Laboral</h2>
             <div class="chart-actions">
-              <button (click)="exportarGrafica('#grafica-estado canvas', 'estado-laboral.png')">PNG</button>
+              <button class="btn-secondary table-action" (click)="exportarGrafica('#grafica-estado canvas', 'estado-laboral.png')">PNG</button>
               <ng-container *ngTemplateOutlet="acciones; context: { base: 'reporte_general_estado_laboral', titulo: 'Estado Laboral', indicador: 'estado_laboral', tipo: 'bar' }"></ng-container>
             </div>
           </div>
           <div id="grafica-estado" class="chart-wrapper" *ngIf="isChartReady">
             <canvas baseChart [data]="estadoChartData" type="bar" [options]="estadoChartOptions"></canvas>
           </div>
-          <p class="nota">Empleado incluye empresa familiar; practicantes cuentan como estudiantes (RN-16).</p>
-        </div>
+          <p class="cell-subtext" style="margin-top: 8px;">Empleado incluye empresa familiar; practicantes cuentan como estudiantes (RN-16).</p>
+        </article>
       </div>
     </div>
   </main>
@@ -128,13 +131,11 @@
 
 <ng-template #acciones let-base="base" let-titulo="titulo" let-indicador="indicador" let-tipo="tipo">
   <ng-container *ngIf="publicacion.estaPublicada(clave(base)); else accionPublicar">
-    <span class="publication-status">Publicada v{{ publicacion.publicacion(clave(base))?.version }}</span>
-    <button class="withdraw-btn" [disabled]="publicacion.ocupado()" (click)="retirar(base)">{{ publicacion.procesando(clave(base)) ? 'Retirando…' : 'Retirar publicación' }}</button>
+    <span class="badge success">Publicada v{{ publicacion.publicacion(clave(base))?.version }}</span>
+    <button class="btn-secondary table-action" [disabled]="publicacion.ocupado()" (click)="retirar(base)">{{ publicacion.procesando(clave(base)) ? 'Retirando…' : 'Retirar publicación' }}</button>
   </ng-container>
   <ng-template #accionPublicar>
-    <button class="publish-btn" [disabled]="publicacion.ocupado() || !isChartReady" (click)="publicar(base, titulo, indicador, tipo)">{{ publicacion.procesando(clave(base)) ? 'Publicando…' : (publicacion.error(clave(base)) ? 'Reintentar publicación' : 'Publicar') }}</button>
+    <button class="btn-primary table-action" [disabled]="publicacion.ocupado() || !isChartReady" (click)="publicar(base, titulo, indicador, tipo)">{{ publicacion.procesando(clave(base)) ? 'Publicando…' : (publicacion.error(clave(base)) ? 'Reintentar' : 'Publicar') }}</button>
   </ng-template>
   <p class="publish-error" role="alert" *ngIf="publicacion.error(clave(base))">{{ publicacion.error(clave(base)) }}</p>
 </ng-template>
-
-

@@ -1,59 +1,100 @@
-﻿<div class="login-container">
-  <div class="login-card">
-    
-    <div class="logo-container">
-      <div class="logo-box">UPB</div>
-    </div>
-    
-    <h1 class="title">OEUPB</h1>
-    <p class="subtitle">Observatorio de Egresados UPB<br>Acceso para coordinadores</p>
-
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      
-      <!-- Correo Institucional -->
-      <div class="form-group">
-        <input 
-          type="email" 
-          formControlName="correo" 
-          placeholder="Correo institucional"
-          class="form-control"
-          [class.is-invalid]="loginForm.get('correo')?.invalid && loginForm.get('correo')?.touched">
-        <div class="error-msg" *ngIf="loginForm.get('correo')?.hasError('required') && loginForm.get('correo')?.touched">
-          El correo es obligatorio.
-        </div>
-        <div class="error-msg" *ngIf="loginForm.get('correo')?.hasError('email') && loginForm.get('correo')?.touched">
-          Debe ser un correo válido.
+<main class="login-container">
+  <section class="login-dual-card">
+    <aside class="login-brand-pane">
+      <div class="login-brand-top">
+        <img
+          class="login-shield"
+          src="escudo-upb.png"
+          alt="Escudo Universidad Pontificia Bolivariana"
+        />
+        <div>
+          <span class="login-institution-badge">Universidad Pontificia Bolivariana</span>
+          <h1 class="login-brand-title">OE UPB</h1>
         </div>
       </div>
-
-      <!-- Contraseña -->
-      <div class="form-group">
-        <input 
-          type="password" 
-          formControlName="contrasena" 
-          placeholder="Contraseña"
-          class="form-control"
-          [class.is-invalid]="loginForm.get('contrasena')?.invalid && loginForm.get('contrasena')?.touched">
-        <div class="error-msg" *ngIf="loginForm.get('contrasena')?.hasError('required') && loginForm.get('contrasena')?.touched">
-          La contraseña es obligatoria.
+      <div class="login-brand-body">
+        <p>
+          Observatorio de Egresados para el seguimiento del impacto profesional,
+          trayectoria laboral y aseguramiento de la calidad académica.
+        </p>
+        <div class="login-milestones">
+          <span>Momento 0</span> · <span>Momento 1</span> · <span>Momento 5</span>
         </div>
       </div>
+      <footer class="login-brand-footer">
+        <p>Acceso y aislamiento de datos gobernado estrictamente por sede institucional.</p>
+      </footer>
+    </aside>
 
-      <!-- Error Global -->
-      <div class="global-error" *ngIf="errorMessage">
-        {{ errorMessage }}
-      </div>
+    <article class="login-form-pane">
+      <header class="login-form-header">
+        <h2>Acceso Institucional</h2>
+        <p>Ingresa tus credenciales asignadas para acceder a la plataforma.</p>
+      </header>
 
-      <!-- Botón de Envío -->
-      <button type="submit" class="btn-primary" [disabled]="isLoading">
-        {{ isLoading ? 'Procesando...' : 'Iniciar sesión' }}
-      </button>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <!-- Correo Institucional -->
+        <div class="form-group">
+          <label for="correo">Correo institucional</label>
+          <div class="input-icon-group">
+            <span class="input-icon mail" aria-hidden="true"></span>
+            <input
+              id="correo"
+              type="email"
+              formControlName="correo"
+              placeholder="usuario@upb.edu.co"
+              class="form-control"
+              autocomplete="email"
+              [class.is-invalid]="loginForm.get('correo')?.invalid && loginForm.get('correo')?.touched"
+            />
+          </div>
+          <div class="error-msg" *ngIf="loginForm.get('correo')?.hasError('required') && loginForm.get('correo')?.touched">
+            El correo es obligatorio.
+          </div>
+          <div class="error-msg" *ngIf="loginForm.get('correo')?.hasError('email') && loginForm.get('correo')?.touched">
+            Debe ser un correo válido.
+          </div>
+        </div>
 
-      <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
-      
-    </form>
-  </div>
-</div>
+        <!-- Contraseña -->
+        <div class="form-group">
+          <label for="contrasena">Contraseña</label>
+          <div class="input-icon-group">
+            <span class="input-icon lock" aria-hidden="true"></span>
+            <input
+              id="contrasena"
+              type="password"
+              formControlName="contrasena"
+              placeholder="••••••••••••"
+              class="form-control"
+              autocomplete="current-password"
+              [class.is-invalid]="loginForm.get('contrasena')?.invalid && loginForm.get('contrasena')?.touched"
+            />
+          </div>
+          <div class="error-msg" *ngIf="loginForm.get('contrasena')?.hasError('required') && loginForm.get('contrasena')?.touched">
+            La contraseña es obligatoria.
+          </div>
+        </div>
+
+        <!-- Error Global -->
+        <div class="global-error" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <!-- Botón de Envío -->
+        <button type="submit" class="btn-primary" [disabled]="isLoading">
+          {{ isLoading ? 'Procesando...' : 'Ingresar al Observatorio' }}
+        </button>
+
+        <footer class="login-footer-links">
+          <span class="login-security-notice">
+            Sistema protegido bajo políticas de seguridad y privacidad UPB
+          </span>
+        </footer>
+      </form>
+    </article>
+  </section>
+</main>
 
 <div class="password-modal-backdrop" *ngIf="mostrarCambioObligatorio">
   <section class="password-modal" role="dialog" aria-modal="true" aria-labelledby="password-modal-title">

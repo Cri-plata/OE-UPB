@@ -2,15 +2,13 @@
   <app-sidebar></app-sidebar>
 
   <main class="content">
-    <div class="top-banner">
-      <div class="banner-text">
+    <header class="page-header">
+      <div class="page-header-content">
         <h1>Explorador Dinámico de Reportes</h1>
         <p>Cruza, filtra y compara varias preguntas de la encuesta oficial en la misma pantalla.</p>
       </div>
-      <div class="upb-logo">
-        <img src="/escudo-upb.png" alt="Escudo UPB" class="escudo-img">
-      </div>
-    </div>
+      <img src="escudo-upb.png" alt="Escudo UPB" class="shield">
+    </header>
 
     <div class="dashboard-container">
       @if (publicacion.errorCarga()) {
@@ -20,7 +18,7 @@
       @if (error()) {
         <div class="publish-error" role="alert">
           {{ error() }}
-          <button type="button" (click)="cargarOpciones()">Reintentar</button>
+          <button type="button" class="btn-secondary" (click)="cargarOpciones()">Reintentar</button>
         </div>
       } @else if (opciones(); as opciones) {
         @if (opciones.preguntas.length === 0) {

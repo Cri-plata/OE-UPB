@@ -1,1 +1,95 @@
-.dashboard-container{display:flex;min-height:100vh;background:var(--color-background)}.main-content{flex:1;padding:2rem}.card{background:var(--color-surface);border-radius:12px;padding:1.5rem;margin-top:1.5rem;box-shadow:0 4px 16px #0000000d}.bar,.alert{display:flex;justify-content:space-between;gap:1rem;padding:.85rem;border-left:4px solid var(--color-brand);background:var(--color-background);margin:.6rem 0}.alert{display:block;border-color:#d69e00}.alert.high{border-color:var(--color-danger);background:#fff1f2}.alert p{margin:.35rem 0}.error{color:var(--color-danger)}
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background: var(--background);
+}
+
+.two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+.section-subtitle {
+  color: var(--muted);
+  font-size: 13px;
+  margin: calc(-1 * var(--space-sm)) 0 var(--space-md);
+}
+
+.competencia-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xs);
+  font-size: 14px;
+  color: var(--heading);
+}
+
+.competencia-count {
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.alert-item {
+  display: block;
+  padding: var(--space-md);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-sm);
+
+  &.high {
+    background: rgba(186, 26, 26, 0.04);
+    border-color: rgba(186, 26, 26, 0.25);
+  }
+
+  p {
+    margin: var(--space-xs) 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--body);
+  }
+}
+
+.alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  strong {
+    color: var(--heading);
+    font-size: 14px;
+  }
+}
+
+.cell-subtext {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--space-xl);
+  color: var(--muted);
+  font-style: italic;
+}
+
+.error-message {
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(186, 26, 26, 0.1);
+  color: var(--danger);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-md);
+}
+
+@media (max-width: 900px) {
+  .two-column {
+    grid-template-columns: 1fr;
+  }
+}

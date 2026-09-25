@@ -1,27 +1,24 @@
-﻿<div class="layout">
+<div class="layout">
   <app-sidebar></app-sidebar>
   
   <main class="content">
-    <div class="top-banner">
-      <div class="banner-text">
+    <header class="page-header">
+      <div class="page-header-content">
         <h1>Análisis de Tendencias (Histórico)</h1>
         <p>Evolución de los indicadores de egresados a través de los momentos (0, 1 y 5 años).</p>
       </div>
-      <div class="upb-logo">
-        <img src="/escudo-upb.png" alt="Escudo UPB" class="escudo-img">
-      </div>
-    </div>
+      <img src="escudo-upb.png" alt="Escudo UPB" class="shield">
+    </header>
 
-    <div class="dashboard-container">
-      
+    <div class="tendencias-content dashboard-container">
       <app-filtros-analiticos (aplicar)="aplicarFiltros($event)"></app-filtros-analiticos>
       <p class="publish-error" role="alert" *ngIf="errorCarga">{{ errorCarga }}</p>
 
       <!-- Panel de Control -->
-      <div class="control-panel">
+      <div class="card control-panel">
         <div class="control-group">
           <label>Indicador a Analizar:</label>
-          <select class="custom-select" (change)="changeIndicator($event)">
+          <select class="form-control" (change)="changeIndicator($event)">
             <option value="empleabilidad">Tasa de Empleabilidad</option>
             <option value="salario">Promedio Salarial (SMLV)</option>
             <option value="satisfaccion">Nivel de Satisfacción General</option>
@@ -29,27 +26,30 @@
         </div>
         <div class="control-group">
           <label>Tipo de Gráfico:</label>
-          <select class="custom-select" (change)="changeChartType($event)">
+          <select class="form-control" (change)="changeChartType($event)">
             <option value="line">Líneas Suavizadas</option>
             <option value="bar">Barras Comparativas</option>
           </select>
         </div>
       </div>
 
-      <div class="chart-card">
-        <button (click)="exportarGrafica()">Exportar PNG</button>
-        <p class="publish-error" role="alert" *ngIf="publicacion.errorCarga()">{{ publicacion.errorCarga() }}</p>
-        <div class="publication-header">
-          <h2>Evolución Histórica: {{ currentIndicatorName }}</h2>
-          <ng-container *ngIf="publicacion.estaPublicada(graficaKey); else accionPublicar">
-            <span class="publication-status">Publicada v{{ publicacion.publicacion(graficaKey)?.version }}</span>
-            <button class="withdraw-btn" [disabled]="publicacion.ocupado()" (click)="retirar()">{{ publicacion.procesando(graficaKey) ? 'Retirando…' : 'Retirar publicación' }}</button>
-          </ng-container>
-          <ng-template #accionPublicar>
-            <button class="publish-btn" [disabled]="publicacion.ocupado() || !isChartReady" (click)="publicar()">{{ publicacion.procesando(graficaKey) ? 'Publicando…' : (publicacion.error(graficaKey) ? 'Reintentar publicación' : 'Publicar') }}</button>
-          </ng-template>
-          <p class="publish-error" role="alert" *ngIf="publicacion.error(graficaKey)">{{ publicacion.error(graficaKey) }}</p>
+      <article class="card chart-card">
+        <div class="chart-header">
+          <h2 class="card-title">Evolución Histórica: {{ currentIndicatorName }}</h2>
+          <div class="chart-actions">
+            <button class="btn-secondary table-action" (click)="exportarGrafica()">Exportar PNG</button>
+            <ng-container *ngIf="publicacion.estaPublicada(graficaKey); else accionPublicar">
+              <span class="badge success">Publicada v{{ publicacion.publicacion(graficaKey)?.version }}</span>
+              <button class="btn-secondary table-action" [disabled]="publicacion.ocupado()" (click)="retirar()">{{ publicacion.procesando(graficaKey) ? 'Retirando…' : 'Retirar publicación' }}</button>
+            </ng-container>
+            <ng-template #accionPublicar>
+              <button class="btn-primary table-action" [disabled]="publicacion.ocupado() || !isChartReady" (click)="publicar()">{{ publicacion.procesando(graficaKey) ? 'Publicando…' : (publicacion.error(graficaKey) ? 'Reintentar' : 'Publicar') }}</button>
+            </ng-template>
+          </div>
         </div>
+        <p class="publish-error" role="alert" *ngIf="publicacion.error(graficaKey)">{{ publicacion.error(graficaKey) }}</p>
+        <p class="publish-error" role="alert" *ngIf="publicacion.errorCarga()">{{ publicacion.errorCarga() }}</p>
+
         <div id="grafica-tendencias" class="chart-wrapper line-chart" *ngIf="isChartReady">
           <canvas baseChart
             [data]="lineChartData"
@@ -60,26 +60,28 @@
         <div class="loading-state" *ngIf="!isChartReady && !errorCarga">
           Calculando tendencias históricas en la base de datos...
         </div>
-      </div>
+      </article>
 
-      <section class="chart-card comparacion" aria-labelledby="titulo-comparacion">
-        <h2 id="titulo-comparacion">Comparación entre momentos (mismos egresados)</h2>
-        <div class="control-panel">
+      <article class="card chart-card comparacion" aria-labelledby="titulo-comparacion">
+        <div class="chart-header">
+          <h2 class="card-title" id="titulo-comparacion">Comparación entre momentos (mismos egresados)</h2>
+        </div>
+        <div class="control-panel" style="margin-bottom: var(--space-md);">
           <div class="control-group">
             <label for="momento-inicial">Momento inicial</label>
-            <select id="momento-inicial" class="custom-select" [value]="momentoInicial()" (change)="cambiarComparacion('inicial', $any($event.target).value)">
+            <select id="momento-inicial" class="form-control" [value]="momentoInicial()" (change)="cambiarComparacion('inicial', $any($event.target).value)">
               <option value="0">Momento 0</option><option value="1">Momento 1</option><option value="5">Momento 5</option>
             </select>
           </div>
           <div class="control-group">
             <label for="momento-final">Momento a comparar</label>
-            <select id="momento-final" class="custom-select" [value]="momentoFinal()" (change)="cambiarComparacion('final', $any($event.target).value)">
+            <select id="momento-final" class="form-control" [value]="momentoFinal()" (change)="cambiarComparacion('final', $any($event.target).value)">
               <option value="0">Momento 0</option><option value="1">Momento 1</option><option value="5">Momento 5</option>
             </select>
           </div>
           <div class="control-group">
             <label for="indicador-comparacion">Indicador</label>
-            <select id="indicador-comparacion" class="custom-select" [value]="indicadorComparacion()" (change)="cambiarComparacion('indicador', $any($event.target).value)">
+            <select id="indicador-comparacion" class="form-control" [value]="indicadorComparacion()" (change)="cambiarComparacion('indicador', $any($event.target).value)">
               <option value="empleabilidad">Tasa de empleabilidad (%)</option>
               <option value="salario">Promedio salarial (SMLV)</option>
             </select>
@@ -98,9 +100,9 @@
           </div>
         }
         @if (programasInsuficientes().length) {
-          <p class="nota">Sin pares suficientes: {{ programasInsuficientes().map(p => p.programa + ' (' + p.pares + ')').join(', ') }}.</p>
+          <p class="cell-subtext" style="margin-top: 8px;">Sin pares suficientes: {{ programasInsuficientes().map(p => p.programa + ' (' + p.pares + ')').join(', ') }}.</p>
         }
-      </section>
+      </article>
     </div>
   </main>
 </div>
