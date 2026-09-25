@@ -3,6 +3,12 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Cambiado (2026-09-25, P3)
+- **Contrato de errores (API-02):** esquema `ErrorResponse` con 401/403 en toda ruta protegida y códigos propios por endpoint; `DELETE /api/usuarios/{id}` queda marcado como obsoleto; patrón de correo institucional en el contrato.
+- **Programas (PRG-01):** la audiencia de publicaciones y las asignaciones comparan por clave normalizada; los programas sin datos actuales se conservan y se muestran en la administración de cuentas.
+- **Alertas (ANA-02):** por programa y momento de seguimiento, con la taxonomía laboral, muestra mínima de 5 y severidad enumerada.
+- **Formulario de cuentas:** acepta documentos alfanuméricos según ADR-017.
+
 ### Añadido (2026-09-25, P2)
 - **Dashboard analítico (ANA-01):** taxonomía laboral de cuatro estados, tasa formal/informal, rango salarial y gráfica publicable de estado laboral; filtros de selección múltiple de programa y cohorte en Reporte General y Tendencias; comparación de momentos con los mismos egresados y un mínimo de 5 pares.
 - **Explorador (EXP-03):** varias gráficas simultáneas e independientes.

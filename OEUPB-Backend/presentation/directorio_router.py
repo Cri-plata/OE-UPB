@@ -9,12 +9,14 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from application.auth_service import require_roles
+from presentation.errores import RESPUESTAS_PROTEGIDAS, errores
 from application.documentos import normalizar_documento, normalizar_documento_obligatorio
+from application.programas import limpiar_nombre_programa
 from application.indicadores import ETIQUETAS_ESTADO, clave_salario, estado_laboral
 from domain.models import AuditoriaEgresado, Egresado, EgresadoSede, Medicion
 from infrastructure.database import get_db
 
-router = APIRouter(prefix="/api/directorio", tags=["Directorio"])
+router = APIRouter(prefix="/api/directorio", tags=["Directorio"], responses=RESPUESTAS_PROTEGIDAS)
 
 
 class DirectorioItem(BaseModel):
@@ -127,7 +129,7 @@ def obtener_programas_unicos(db: Session = Depends(get_db), current_user: dict =
     return sorted(p[0] for p in filas if p[0])
 
 
-@router.get("/perfil/{documento}", response_model=PerfilEgresadoResponse)
+@router.get("/perfil/{documento}", response_model=PerfilEgresadoResponse, responses=errores(404, d404="Egresado no encontrado en su sede"))
 def obtener_perfil_egresado(documento: str, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
     documento = normalizar_documento(documento) or ""
     egresado = db.query(Egresado).filter(Egresado.numero_documento == documento, Egresado.numero_documento.in_(_documentos_visibles(db, current_user["sede_id"]))).first()
@@ -141,12 +143,12 @@ def obtener_perfil_egresado(documento: str, db: Session = Depends(get_db), curre
     return {"documento": documento, "nombre_completo": f"{egresado.primer_nombre} {egresado.primer_apellido or ''}".strip(), "programa": egresado.programa, "fecha_grado": egresado.fecha_grado.strftime("%Y-%m-%d") if egresado.fecha_grado else "N/A", "encuestas": encuestas}
 
 
-@router.post("/egresados", response_model=OperacionEgresadoResponse, status_code=201)
+@router.post("/egresados", response_model=OperacionEgresadoResponse, status_code=201, responses=errores(409, d409="El documento ya está registrado"))
 def crear_egresado(payload: EgresadoManualRequest, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
     documento = payload.numero_documento
     if db.get(Egresado, documento):
         raise HTTPException(status_code=409, detail="El documento ya está registrado; si pertenece a su sede, use la edición del directorio")
-    egresado = Egresado(numero_documento=documento, primer_nombre=payload.primer_nombre.strip(), primer_apellido=(payload.primer_apellido or "").strip() or None, programa=payload.programa.strip(), fecha_grado=_parse_fecha(payload.fecha_grado))
+    egresado = Egresado(numero_documento=documento, primer_nombre=payload.primer_nombre.strip(), primer_apellido=(payload.primer_apellido or "").strip() or None, programa=limpiar_nombre_programa(payload.programa), fecha_grado=_parse_fecha(payload.fecha_grado))
     db.add(egresado)
     db.flush()
     db.add(EgresadoSede(egresado_documento=documento, sede_id=current_user["sede_id"], creado_por_id=current_user["usuario_id"]))
@@ -164,7 +166,7 @@ def _egresado_editable(db: Session, documento: str, sede_id: int) -> Egresado:
     return egresado
 
 
-@router.patch("/egresados/{documento}", response_model=OperacionEgresadoResponse)
+@router.patch("/egresados/{documento}", response_model=OperacionEgresadoResponse, responses=errores(404, 409, d409="El egresado está vinculado a más de una sede"))
 def editar_egresado(documento: str, payload: EgresadoManualUpdate, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
     documento = normalizar_documento(documento) or ""
     egresado = _egresado_editable(db, documento, current_user["sede_id"])
@@ -173,13 +175,15 @@ def editar_egresado(documento: str, payload: EgresadoManualUpdate, db: Session =
     if "fecha_grado" in cambios:
         cambios["fecha_grado"] = _parse_fecha(cambios["fecha_grado"])
     for campo, valor in cambios.items():
+        if campo == "programa":
+            valor = limpiar_nombre_programa(valor)
         setattr(egresado, campo, valor.strip() if isinstance(valor, str) else valor)
     _auditar(db, current_user, documento, "editar", {"antes": antes, "despues": {k: v.isoformat() if isinstance(v, datetime) else v for k, v in cambios.items()}}, payload.motivo)
     db.commit()
     return {"documento": documento, "estado": "actualizado"}
 
 
-@router.delete("/egresados/{documento}", response_model=OperacionEgresadoResponse)
+@router.delete("/egresados/{documento}", response_model=OperacionEgresadoResponse, responses=errores(404, 409, d409="El egresado tiene mediciones o está vinculado a otra sede"))
 def eliminar_egresado(documento: str, payload: EliminarEgresadoRequest, db: Session = Depends(get_db), current_user: dict = Depends(require_roles("Coordinador_Sede"))):
     documento = normalizar_documento(documento) or ""
     egresado = _egresado_editable(db, documento, current_user["sede_id"])

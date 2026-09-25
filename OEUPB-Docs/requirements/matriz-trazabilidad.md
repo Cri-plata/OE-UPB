@@ -79,7 +79,7 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 | RF-70 | Exportar gráficas | PNG en Reporte, Tendencias y Explorador | Implementado |
 | RF-71 | Modelo predictivo | ADR-009 e IA-01 | En pausa |
 | RF-72 | Clasificar texto abierto | `nlp_service.py`, Analítica y pruebas | Implementado, NLP local anonimizado |
-| RF-73 | Alertas de patrones negativos | endpoint y vista Analítica | Implementado, descriptivo |
+| RF-73 | Alertas de patrones negativos | endpoint y vista Analítica; criterios ANA-02 (M1/M5, muestra ≥ 5, severidad enumerada) | Implementado, descriptivo |
 
 ## Resultado
 

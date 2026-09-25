@@ -32,7 +32,7 @@
 
           <div class="form-group" *ngIf="usuarioEditandoId === null">
             <label>Número de documento *</label>
-            <input type="text" inputmode="numeric" formControlName="numero_documento" placeholder="Solo números">
+            <input type="text" formControlName="numero_documento" placeholder="Cédula, CE o pasaporte">
             <small>En desarrollo se usa como credencial inicial; solo se almacena su hash.</small>
           </div>
 
@@ -56,6 +56,7 @@
               <label>Programas autorizados</label>
               <select formControlName="programas" multiple size="5">
                 <option *ngFor="let programa of programasDisponibles" [value]="programa">{{ programa }}</option>
+                <option *ngFor="let programa of programasSinDatos" [value]="programa">{{ programa }} (sin datos actuales)</option>
               </select>
               <small>Solo aparecen programas observados en cargas de tu sede.</small>
             </div>
@@ -95,7 +96,7 @@
               <td>{{ u.correo }}</td>
               <td><span class="badge">{{ u.rol }}</span></td>
               <td>{{ nombreSede(u.sede_id) }}</td>
-              <td>{{ u.etiqueta || '—' }}<br><small>{{ u.programas.join(', ') || 'Sin programas' }}</small></td>
+              <td>{{ u.etiqueta || '—' }}<br><small>{{ u.programas.join(', ') || 'Sin programas' }}</small><small class="sin-datos" *ngIf="u.programas_sin_datos?.length"><br>Sin datos actuales: {{ u.programas_sin_datos?.join(', ') }}</small></td>
               <td>{{ u.activo ? 'Activa' : 'Inactiva' }}</td>
               <td>
                 <button class="btn-secondary" (click)="editarUsuario(u)">Editar</button>

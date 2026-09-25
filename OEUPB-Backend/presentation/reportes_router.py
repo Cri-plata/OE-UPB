@@ -2,6 +2,7 @@
 from sqlalchemy.orm import Session
 from infrastructure.database import get_db
 from application.auth_service import require_roles
+from presentation.errores import RESPUESTAS_PROTEGIDAS, ErrorResponse
 from application.indicadores import (
     ETIQUETAS_MOMENTOS,
     Filtros,
@@ -19,7 +20,7 @@ from application.indicadores import (
 from pydantic import BaseModel
 from typing import Dict, List, Literal, Optional
 
-router = APIRouter(prefix="/api/reportes", tags=["Reportes"])
+router = APIRouter(prefix="/api/reportes", tags=["Reportes"], responses=RESPUESTAS_PROTEGIDAS)
 
 class RangoSalarialResponse(BaseModel):
     minimo: float
@@ -184,7 +185,7 @@ def get_tendencias(
 @router.get(
     "/comparacion",
     response_model=ComparacionResponse,
-    responses={422: {"description": "Momentos o indicador inválidos"}},
+    responses={422: {"model": ErrorResponse, "description": "Momentos o indicador inválidos"}},
 )
 def get_comparacion(
     momento_inicial: int = Query(..., description="Momento 0, 1 o 5"),
@@ -213,7 +214,7 @@ def explorador_init(db: Session = Depends(get_db), current_user: dict = Depends(
 @router.get(
     "/explorador",
     response_model=ExploradorResponse,
-    responses={422: {"description": "La variable no pertenece al catálogo analítico autorizado o los filtros son inválidos"}},
+    responses={422: {"model": ErrorResponse, "description": "La variable no pertenece al catálogo analítico autorizado o los filtros son inválidos"}},
 )
 def explorador_data(
     pregunta: str = Query(..., max_length=300),

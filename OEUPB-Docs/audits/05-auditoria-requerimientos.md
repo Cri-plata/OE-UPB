@@ -359,3 +359,5 @@ Veredictos: **Confirmado** (el problema existía), **Parcial** (existía, pero e
 Verificación: 37 pruebas de backend y 15 de frontend en verde, OpenAPI y tipos regenerados, y validadores de contratos, documentación y arquitectura sin errores.
 
 **Actualización 2026-09-25 (P2):** EXP-03, ANA-01, DB-03 y ETL-01 están cerrados. Con eso quedan resueltos C-10, C-12, B-11 (mínimo de pares), B-12 (rango del año), B-13, B-14 y B-17. Ver ADR-016, ADR-017 y `BACKLOG_ARCHIVE.md`.
+
+**Actualización 2026-09-25 (P3):** API-02, PRG-01, ANA-02 y DOC-03 están cerrados. Con eso quedan resueltos C-11, C-17, C-18, C-19, B-07, B-08, B-18 y B-20 (las prioridades y los criterios RNF quedan como propuesta en PRD-01). Todos los hallazgos de la auditoría 05 tienen resolución o un ítem de backlog asignado.

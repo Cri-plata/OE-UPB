@@ -4,14 +4,16 @@ from sqlalchemy import func
 from domain.models import AuditoriaEgresado, Carga, Egresado, EgresadoSede, EventoEliminacionCarga, Medicion, Sede, Usuario
 from infrastructure.database import get_db
 from application.auth_service import get_current_user
+from presentation.errores import RESPUESTAS_PROTEGIDAS, errores
 from application.documentos import MENSAJE_INVALIDO, es_documento_valido, normalizar_documento
+from application.programas import limpiar_nombre_programa
 import pandas as pd
 import io
 import hashlib
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
-router = APIRouter(prefix="/api/carga", tags=["Carga de Datos"])
+router = APIRouter(prefix="/api/carga", tags=["Carga de Datos"], responses=RESPUESTAS_PROTEGIDAS)
 
 MOMENTOS_PERMITIDOS = {0, 1, 5}
 ANIO_MINIMO = 1900
@@ -111,10 +113,12 @@ class EliminarCargaRequest(BaseModel):
     "/excel",
     response_model=CargaResponse,
     responses={
-        400: {"description": "El archivo no es .xlsx o su contenido no puede leerse"},
-        403: {"description": "El usuario no es coordinador o no tiene sede asignada"},
-        409: {"description": "El archivo es idéntico a la versión vigente del mismo alcance"},
-        413: {"description": "El archivo supera 25 MB"},
+        **errores(
+            400, 409, 413, 500,
+            d400="El archivo no es .xlsx o su contenido no puede leerse",
+            d409="El archivo es idéntico a la versión vigente del mismo alcance",
+            d413="El archivo supera 25 MB",
+        ),
         422: {"model": CargaRechazadaResponse, "description": "Parámetros inválidos o archivo rechazado; incluye el detalle por fila"},
     },
 )
@@ -295,10 +299,10 @@ async def procesar_excel(
                         else ""
                     )
                     programa = (
-                        str(row.get("PROGRAMA", ""))
+                        limpiar_nombre_programa(row.get("PROGRAMA"))
                         if not pd.isna(row.get("PROGRAMA"))
-                        else "Sin Programa"
-                    )
+                        else None
+                    ) or "Sin Programa"
                     egresado = Egresado(
                         numero_documento=doc,
                         primer_nombre=p_nombre,
@@ -376,7 +380,7 @@ async def procesar_excel(
 @router.get(
     "/historial",
     response_model=List[HistorialCargaItem],
-    responses={403: {"description": "El usuario no es coordinador o no tiene sede asignada"}},
+    responses=errores(403, d403="El usuario no es coordinador o no tiene sede asignada"),
 )
 def get_historial(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     sede_id = validar_coordinador_con_sede(current_user)
@@ -405,11 +409,11 @@ def get_historial(db: Session = Depends(get_db), current_user: dict = Depends(ge
 @router.delete(
     "/archivo/{carga_id}",
     response_model=MensajeResponse,
-    responses={
-        403: {"description": "El usuario no es coordinador o no tiene sede asignada"},
-        404: {"description": "La carga no existe dentro de la sede autorizada"},
-        409: {"description": "La carga ya no está vigente"},
-    },
+    responses=errores(
+        404, 409, 500,
+        d404="La carga no existe dentro de la sede autorizada",
+        d409="La carga ya no está vigente o está referenciada por una versión posterior",
+    ),
 )
 def eliminar_carga(
     carga_id: int,

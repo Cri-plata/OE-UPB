@@ -12,6 +12,7 @@ from application.auth_service import (
 from domain.models import Usuario
 from pydantic import BaseModel
 from typing import Literal
+from presentation.errores import errores
 
 router = APIRouter(prefix="/api/auth", tags=["Autenticación"])
 
@@ -65,9 +66,7 @@ def construir_respuesta_login(user: Usuario) -> dict:
 @router.post(
     "/login",
     response_model=LoginResponse,
-    responses={
-        401: {"description": "Correo o contraseña incorrectos"},
-    },
+    responses=errores(401, d401="Correo o contraseña incorrectos, o credencial temporal vencida (`detail.codigo = CREDENCIAL_TEMPORAL_VENCIDA`)"),
 )
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = authenticate_user(db, request.correoInstitucional, request.contrasena)
@@ -92,11 +91,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 @router.post(
     "/cambiar-contrasena-temporal",
     response_model=LoginResponse,
-    responses={
-        400: {"description": "La contraseña no cumple la política"},
-        401: {"description": "Token inválido o vencido"},
-        409: {"description": "La cuenta no requiere cambio inicial"},
-    },
+    responses=errores(400, 401, 409, d400="La contraseña no cumple la política", d409="La cuenta no requiere cambio inicial"),
 )
 def cambiar_contrasena_temporal(
     request: CambioContrasenaTemporalRequest,

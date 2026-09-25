@@ -2,6 +2,14 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-09-25] - P3 Calidad de contrato y documentación
+
+* **Modelo:** el diagrama ER coincide con el esquema SQL (auditorías, eventos de eliminación y columnas de publicaciones).
+* **Requisitos:** prioridad propuesta para los 81 RF/RNF, `Requerimiento Ligado` corregidos y criterios verificables propuestos para RNF-01 a RNF-06 (validación pendiente en PRD-01).
+* **Reglas:** RN-29 define la clave normalizada de programas y el tratamiento de programas sin datos actuales.
+* **Contratos:** 03-contratos documenta `ErrorResponse`, los códigos por endpoint y las operaciones obsoletas.
+* **Backlog:** API-02, PRG-01, ANA-02 y DOC-03 se archivaron; se agregó PRD-01.
+
 ## [2026-09-25] - P2 Analítica y contratos
 
 * **ADR-016:** mapeo de los cuestionarios OLE a la taxonomía laboral, la formalidad, el salario y la comparación de momentos.

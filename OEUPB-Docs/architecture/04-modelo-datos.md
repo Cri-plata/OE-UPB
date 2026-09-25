@@ -16,7 +16,7 @@ erDiagram
         string correo UK
         string contrasena_hash
         string rol
-        int sede_id "nullable"
+        int sede_id "nullable solo para Admin_CTIC (CHECK)"
         boolean debe_cambiar_contrasena
         datetime credencial_temporal_expira_en
         boolean activo
@@ -87,8 +87,10 @@ erDiagram
     PUBLICACIONES_GRAFICAS {
         int id PK
         string grafica_key
+        string titulo
         int sede_id FK
         int coordinador_id FK
+        string coordinador_correo
         json programas
         string permiso_requerido
         json definicion
@@ -96,8 +98,51 @@ erDiagram
         int version
         boolean aprobada_privacidad
         string estado
+        datetime fecha_creacion
         datetime fecha_publicacion
         datetime fecha_retiro
+        int retirado_por_id FK "nullable"
+    }
+    EVENTOS_ELIMINACION_CARGA {
+        int id PK
+        int carga_id_eliminada "sin FK: la carga ya no existe"
+        int actor_id FK
+        string actor_correo
+        int sede_id FK
+        int momento
+        int anio_grado
+        int version
+        int registros
+        string nombre_archivo
+        string hash_archivo
+        string motivo
+        datetime fecha
+    }
+    USUARIOS ||--o{ AUDITORIA_CUENTAS : "actúa sobre"
+    AUDITORIA_CUENTAS {
+        int id PK
+        string accion
+        int actor_id FK
+        string actor_correo
+        int objetivo_id "sin FK: sobrevive al borrado físico"
+        string objetivo_correo
+        string objetivo_rol
+        int sede_id "nullable"
+        string motivo
+        datetime fecha
+    }
+    USUARIOS ||--o{ AUDITORIA_EGRESADOS : registra
+    SEDES ||--o{ AUDITORIA_EGRESADOS : delimita
+    AUDITORIA_EGRESADOS {
+        int id PK
+        string accion
+        int actor_id FK
+        string actor_correo
+        int sede_id FK
+        string egresado_documento "sin FK: sobrevive a la eliminación"
+        json cambios
+        string motivo
+        datetime fecha
     }
 ```
 

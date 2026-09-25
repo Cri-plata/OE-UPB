@@ -4,6 +4,8 @@
 
 **Convención:** `Requerimiento Ligado` identifica dependencias funcionales directas; no sustituye la cobertura HU/CU/RN de la matriz de trazabilidad.
 
+**Prioridad (propuesta del 2026-09-25, pendiente de validación de producto):** *Alta* = núcleo de carga e identidad, directorio, panel principal con sus filtros e indicadores laborales, seguridad, RBAC, publicación y requisitos de privacidad; *Media* = analítica curada de preguntas específicas, exportación de tablas e IA descriptiva; *Baja* = cruces avanzados, dispersión, recomendaciones y capacidades en pausa. Los criterios verificables de RNF-01 a RNF-06 también son una propuesta.
+
 | Número de requisito | RF-01 |
 |---|---|
 | Nombre de requisito | El sistema debe permitir subir... |
@@ -104,7 +106,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe permitir organizar... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
 | Descripción del requerimiento | El sistema debe permitir organizar a los egresados según su ceremonia de grado |
 
@@ -136,7 +138,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe permitir actualizar... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
 | Descripción del requerimiento | El sistema debe permitir actualizar el estado principal del egresado usando el catálogo: empleado, independiente, estudiante o sin empleo. Cuando aplique, la formalidad del empleo se registra como un atributo separado. |
 
@@ -160,7 +162,7 @@
 |---|---|
 | Nombre de requisito | El panel debe mostrar gráficos... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-19 |
 | Descripción del requerimiento | El panel debe mostrar gráficos sobre los estudios adicionales que realizan los egresados. El estado laboral se presenta por separado conforme al catálogo definido en RF-17. |
 
@@ -216,7 +218,7 @@
 |---|---|
 | Nombre de requisito | El panel debe mostrar un... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-26 |
 | Descripción del requerimiento | El panel debe mostrar un gráfico con los sectores económicos donde trabajan los egresados. |
 
@@ -224,7 +226,7 @@
 |---|---|
 | Nombre de requisito | El panel debe mostrar de... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☐ Media/Deseado | ☑ Baja/Opcional |
 | Requerimiento Ligado | RF-27 |
 | Descripción del requerimiento | El panel debe mostrar de forma visual cómo se distribuyen los datos (dispersión). |
 
@@ -232,7 +234,7 @@
 |---|---|
 | Nombre de requisito | El panel debe mostrar un... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-28 |
 | Descripción del requerimiento | El panel debe mostrar un mapa o gráfico con las ciudades donde viven los egresados. |
 
@@ -250,13 +252,13 @@
 | Tipo | ☐ Requisito | ☑ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-18 |
-| Descripción del requerimiento | El panel debe ser fácil de entender para ayudar a la universidad a tomar decisiones. |
+| Descripción del requerimiento | El panel debe ser fácil de entender para ayudar a la universidad a tomar decisiones. **Criterio verificable (propuesto):** En una prueba con al menos 5 coordinadores, 4 identifican sin ayuda la tasa de empleabilidad y el filtro aplicado en menos de 1 minuto; cada tarjeta y gráfica muestra título y unidad. |
 
 | Número de requisito | RF-31 |
 |---|---|
 | Nombre de requisito | El sistema debe sugerir tendencias... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☐ Media/Deseado | ☑ Baja/Opcional |
 | Requerimiento Ligado | RF-18, RF-67 |
 | Descripción del requerimiento | El sistema debe sugerir tendencias de cursos o programas nuevos basados en los datos |
 
@@ -265,16 +267,16 @@
 | Nombre de requisito | El sistema debe poder usarse... |
 | Tipo | ☐ Requisito | ☑ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-04 |
-| Descripción del requerimiento | El sistema debe poder usarse desde los navegadores de internet definidos como compatibles en la estrategia de pruebas (versión web). |
+| Requerimiento Ligado | RF-18 |
+| Descripción del requerimiento | El sistema debe poder usarse desde los navegadores de internet definidos como compatibles en la estrategia de pruebas (versión web). **Criterio verificable (propuesto):** Los flujos de la lista de verificación funcional se completan sin errores de consola en Chrome, Edge y Firefox, en sus dos últimas versiones estables. |
 
 | Número de requisito | RNF-03 |
 |---|---|
 | Nombre de requisito | El sistema debe verse y... |
 | Tipo | ☐ Requisito | ☑ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-04 |
-| Descripción del requerimiento | El sistema debe verse y funcionar correctamente en teléfonos celulares (versión móvil). |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
+| Requerimiento Ligado | RF-18 |
+| Descripción del requerimiento | El sistema debe verse y funcionar correctamente en teléfonos celulares (versión móvil). **Criterio verificable (propuesto):** A 375 px de ancho, las vistas de inicio de sesión, publicaciones, reporte general y directorio no tienen desplazamiento horizontal, y los controles táctiles miden al menos 44 px. |
 
 | Número de requisito | RF-32 |
 |---|---|
@@ -296,9 +298,9 @@
 |---|---|
 | Nombre de requisito | El sistema debe tener menús... |
 | Tipo | ☐ Requisito | ☑ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-01 |
-| Descripción del requerimiento | El sistema debe tener menús sencillos y botones claros. |
+| Descripción del requerimiento | El sistema debe tener menús sencillos y botones claros. **Criterio verificable (propuesto):** Toda vista principal está a 2 clics o menos del menú lateral, y cada botón de acción usa un verbo que describe su efecto. |
 
 | Número de requisito | RNF-05 |
 |---|---|
@@ -306,7 +308,7 @@
 | Tipo | ☐ Requisito | ☑ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-01 |
-| Descripción del requerimiento | El sistema debe estar diseñado para poder crecer y usarse en otras sedes de la universidad. |
+| Descripción del requerimiento | El sistema debe estar diseñado para poder crecer y usarse en otras sedes de la universidad. **Criterio verificable (propuesto):** Una sede nueva se habilita solo con un registro en el catálogo `sedes`, sin cambios de código; las pruebas de aislamiento cubren al menos 2 sedes. |
 
 | Número de requisito | RF-34 |
 |---|---|
@@ -321,8 +323,8 @@
 | Nombre de requisito | El sistema debe soportar el... |
 | Tipo | ☐ Requisito | ☑ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-33 |
-| Descripción del requerimiento | El sistema debe soportar el almacenamiento de miles de encuestas nuevas cada año sin ponerse lento. |
+| Requerimiento Ligado | RF-05 |
+| Descripción del requerimiento | El sistema debe soportar el almacenamiento de miles de encuestas nuevas cada año sin ponerse lento. **Criterio verificable (propuesto):** Con 50.000 mediciones por sede, el percentil 95 de `/api/reportes/general` y `/api/reportes/tendencias` es menor de 2 s, y una carga de 50.000 filas termina en menos de 120 s. |
 
 | Número de requisito | RF-35 |
 |---|---|
@@ -352,7 +354,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe guardar el... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04, RF-05 |
 | Descripción del requerimiento | El sistema debe guardar el nivel de satisfacción del estudiante con sus profesores. |
 
@@ -360,7 +362,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe registrar si... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
 | Descripción del requerimiento | El sistema debe registrar si el egresado tuvo que trabajar mientras estudiaba. |
 
@@ -368,7 +370,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe guardar la... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04, RF-05 |
 | Descripción del requerimiento | El sistema debe guardar la opinión del estudiante sobre las instalaciones (salones, biblioteca). |
 
@@ -376,7 +378,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe registrar las... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
 | Descripción del requerimiento | El sistema debe registrar las habilidades que el estudiante siente que mejoró |
 
@@ -384,7 +386,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe guardar los... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04, RF-05 |
 | Descripción del requerimiento | El sistema debe guardar los planes que tenía el estudiante justo al graduarse. |
 
@@ -392,31 +394,31 @@
 |---|---|
 | Nombre de requisito | El sistema debe registrar si... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-42 |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
+| Requerimiento Ligado | RF-05 |
 | Descripción del requerimiento | El sistema debe registrar si el egresado vive en una ciudad diferente a donde estudió. |
 
 | Número de requisito | RF-44 |
 |---|---|
 | Nombre de requisito | El sistema debe guardar el... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-04, RF-05 |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
+| Requerimiento Ligado | RF-43 |
 | Descripción del requerimiento | El sistema debe guardar el motivo principal por el cual un egresado cambió de ciudad. |
 
 | Número de requisito | RF-45 |
 |---|---|
 | Nombre de requisito | El sistema debe registrar el... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-44 |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
+| Requerimiento Ligado | RF-05 |
 | Descripción del requerimiento | El sistema debe registrar el tiempo (en meses) que tardó en conseguir su primer empleo. |
 
 | Número de requisito | RF-46 |
 |---|---|
 | Nombre de requisito | El sistema debe almacenar el... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-45 |
 | Descripción del requerimiento | El sistema debe almacenar el tipo de contrato que tiene el egresado en su trabajo. |
 
@@ -424,7 +426,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe registrar en... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-46 |
 | Descripción del requerimiento | El sistema debe registrar en qué medida le sirvió lo aprendido en la universidad para su trabajo. |
 
@@ -432,7 +434,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe guardar información... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04, RF-05 |
 | Descripción del requerimiento | El sistema debe guardar información sobre negocios o empresas creadas por el egresado. |
 
@@ -440,7 +442,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe registrar la... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-48 |
 | Descripción del requerimiento | El sistema debe registrar la principal dificultad del egresado al buscar trabajo. |
 
@@ -448,7 +450,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe registrar si... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
 | Descripción del requerimiento | El sistema debe registrar si el egresado ha viajado al exterior por motivos académicos. |
 
@@ -456,7 +458,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe guardar el... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04, RF-05 |
 | Descripción del requerimiento | El sistema debe guardar el medio o canal por el cual el egresado consiguió su empleo |
 
@@ -472,7 +474,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe analizar los... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☐ Media/Deseado | ☑ Baja/Opcional |
 | Requerimiento Ligado | RF-02 |
 | Descripción del requerimiento | El sistema debe analizar los cambios de ciudad o país entre el momento de estudio, el primer empleo y la residencia actual. |
 
@@ -480,7 +482,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe comparar el... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☐ Media/Deseado | ☑ Baja/Opcional |
 | Requerimiento Ligado | RF-53 |
 | Descripción del requerimiento | El sistema debe comparar el nivel de formación del egresado con el nivel de estudio que realmente le exige su trabajo actual. |
 
@@ -488,7 +490,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe relacionar las... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☐ Media/Deseado | ☑ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
 | Descripción del requerimiento | El sistema debe relacionar las fuentes de financiación de la carrera con la situación laboral actual. |
 
@@ -496,7 +498,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe crear tablas... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-55 |
 | Descripción del requerimiento | El sistema debe crear tablas que cuenten la cantidad de egresados por programa y año de grado |
 
@@ -504,7 +506,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe generar una... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☐ Media/Deseado | ☑ Baja/Opcional |
 | Requerimiento Ligado | RF-56 |
 | Descripción del requerimiento | El sistema debe generar una tabla que calcule el promedio de meses que tardan los egresados en conseguir su primer empleo. |
 
@@ -512,7 +514,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe agrupar en... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-57 |
 | Descripción del requerimiento | El sistema debe agrupar en una tabla los sectores económicos y tamaños de empresa donde más trabajan los egresados. |
 
@@ -520,7 +522,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe mostrar tablas... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-58 |
 | Descripción del requerimiento | El sistema debe mostrar tablas resumen con las principales áreas de conocimiento que los egresados sienten que deben mejorar. |
 
@@ -528,7 +530,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe calcular y... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-59 |
 | Descripción del requerimiento | El sistema debe calcular y tabular los promedios de satisfacción laboral (ingreso, horas, estabilidad, retos). |
 
@@ -544,7 +546,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe aplicar cálculos... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☐ Media/Deseado | ☑ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
 | Descripción del requerimiento | El sistema debe aplicar cálculos de dispersión para graficar qué tan variados son los ingresos salariales entre egresados de un mismo programa. |
 
@@ -552,7 +554,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe graficar los... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
 | Descripción del requerimiento | El sistema debe graficar los canales de búsqueda de empleo para identificar los más efectivos (redes sociales, conocidos, portales web). |
 
@@ -560,7 +562,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe generar gráficas... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-18 |
 | Descripción del requerimiento | El sistema debe generar gráficas que muestren qué tan útiles resultaron los conocimientos aprendidos en la universidad para el trabajo actual. |
 
@@ -568,7 +570,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe mostrar en... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-18 |
 | Descripción del requerimiento | El sistema debe mostrar en gráficas de barras las razones principales por las que los egresados recomiendan o no la universidad. |
 
@@ -576,7 +578,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe graficar las... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
 | Descripción del requerimiento | El sistema debe graficar las herramientas institucionales que más ayudaron a quienes decidieron crear su propia empresa. |
 
@@ -584,7 +586,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe resaltar en... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
 | Descripción del requerimiento | El sistema debe resaltar en el panel visual las tendencias de los nuevos estudios o cursos que están tomando los egresados. |
 
@@ -592,7 +594,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe identificar y... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-18 |
 | Descripción del requerimiento | El sistema debe identificar y mostrar gráficamente hacia qué ciudades o países se están yendo los egresados a trabajar o estudiar. |
 
@@ -600,8 +602,8 @@
 |---|---|
 | Nombre de requisito | El sistema debe permitir descargar... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
-| Requerimiento Ligado | RF-01 |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
+| Requerimiento Ligado | RF-56 |
 | Descripción del requerimiento | El sistema debe permitir descargar estas tablas de análisis en formato Excel. |
 
 | Número de requisito | RF-70 |
@@ -624,7 +626,7 @@
 |---|---|
 | Nombre de requisito | La IA debe clasificar automáticamente... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
 | Descripción del requerimiento | La IA debe clasificar automáticamente las respuestas de texto abierto |
 
@@ -632,7 +634,7 @@
 |---|---|
 | Nombre de requisito | El sistema debe generar alertas... |
 | Tipo | ☑ Requisito | ☐ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-72 |
 | Descripción del requerimiento | El sistema debe generar alertas visuales para el coordinador cuando detecte patrones negativos en la empleabilidad. |
 
@@ -640,7 +642,7 @@
 |---|---|
 | Nombre de requisito | La IA debe sugerir competencias... |
 | Tipo | ☐ Requisito | ☑ Restricción |
-| Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
+| Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-72 |
 | Descripción del requerimiento | El módulo de IA debe estar desacoplado del dashboard principal para que sus procesos no lo bloqueen ni lo ralenticen, y debe procesar el texto localmente, sin servicios externos (NF). La sugerencia de competencias demandadas es un requisito funcional pendiente de priorizar como RF propio; hoy se cubre parcialmente con RF-72. |
 

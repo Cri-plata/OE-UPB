@@ -161,7 +161,7 @@ El flujo implementado:
 2. anonimiza correos, números que puedan identificar a una persona y datos conocidos del egresado;
 3. clasifica localmente menciones de comunicación, liderazgo, trabajo en equipo, tecnología y datos, idiomas, gestión de proyectos y adaptabilidad;
 4. muestra únicamente conteos agregados;
-5. genera alertas descriptivas cuando un programa tiene al menos tres respuestas válidas y empleabilidad inferior al 70 %, o cuando se repiten al menos tres expresiones negativas de inserción laboral.
+5. genera alertas descriptivas por programa y momento de seguimiento (M1/M5): con al menos 5 respuestas clasificadas, empleabilidad por debajo del 70 % (severidad media) o del 50 % (alta), según la taxonomía de ADR-016; y alertas de texto cuando, entre al menos 5 textos, se repiten 3 o más expresiones negativas.
 
 Este procesamiento no envía texto a servicios externos y no devuelve las respuestas originales. Las alertas no son predicciones ni decisiones automáticas.
 
@@ -185,8 +185,8 @@ La infraestructura Docker no se ejecutó en el equipo de desarrollo porque Docke
 
 La última revisión (2026-09-25) aprobó:
 
-- 52 pruebas de backend;
-- 30 pruebas de frontend;
+- 59 pruebas de backend;
+- 31 pruebas de frontend;
 - compilación productiva de Angular;
 - sincronización entre FastAPI, OpenAPI y tipos TypeScript;
 - validación de capas frontend, guards y tokens visuales;

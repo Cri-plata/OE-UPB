@@ -38,6 +38,8 @@ export class AdminUsuariosComponent implements OnInit {
   sedesDisponibles: SedeDto[] = [];
   credencialTemporal: { correo: string; contrasena: string; expiraEn?: string | null } | null = null;
   programasDisponibles: string[] = [];
+  /** Programas de la cuenta en edición que ya no se observan en cargas (PRG-01); se conservan como opción. */
+  programasSinDatos: string[] = [];
   usuarioEditandoId: number | null = null;
   readonly permisosDisponibles: ReadonlyArray<{ id: PermisoConsulta; nombre: string }> = [
     { id: 'ver_reporte_general', nombre: 'Reporte general' },
@@ -50,7 +52,8 @@ export class AdminUsuariosComponent implements OnInit {
     this.userForm = this.fb.group({
       nombre: ['', Validators.required],
       correo: ['', [Validators.required, Validators.email, upbEmailValidator]],
-      numero_documento: ['', [Validators.pattern(/^\d{6,20}$/)]],
+      // ADR-017: letras y números; el backend ignora espacios, puntos y guiones.
+      numero_documento: ['', [Validators.pattern(/^[A-Za-z0-9 .-]{5,40}$/)]],
       sede_id: [null],
       rol: ['', Validators.required],
       etiqueta: [''],
@@ -180,6 +183,7 @@ export class AdminUsuariosComponent implements OnInit {
 
   editarUsuario(usuario: UsuarioResponseDto) {
     this.usuarioEditandoId = usuario.id;
+    this.programasSinDatos = usuario.programas_sin_datos ?? [];
     this.userForm.patchValue({
       nombre: usuario.nombre,
       correo: usuario.correo,
@@ -198,6 +202,7 @@ export class AdminUsuariosComponent implements OnInit {
   }
 
   private restablecerFormulario() {
+    this.programasSinDatos = [];
     this.userForm.reset({
       numero_documento: '',
       sede_id: this.sedesDisponibles.length === 1 ? this.sedesDisponibles[0].id : null,

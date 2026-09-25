@@ -16,18 +16,24 @@ from application.auth_service import (
     get_password_hash,
 )
 from application.documentos import normalizar_documento_obligatorio
+from presentation.errores import RESPUESTAS_PROTEGIDAS, errores
+from application.programas import clave_programa, claves_programas
 from domain.models import AuditoriaCuenta, Egresado, Medicion, Sede, Usuario
 from infrastructure.database import get_db
 
-router = APIRouter(prefix="/api/usuarios", tags=["Usuarios"])
+router = APIRouter(prefix="/api/usuarios", tags=["Usuarios"], responses=RESPUESTAS_PROTEGIDAS)
 
 PERMISOS_CONSULTA = {"ver_reporte_general", "ver_tendencias", "ver_explorador", "ver_publicaciones"}
 ETIQUETAS = {"Rector", "Profesor", "Administrativo"}
 
 
+PATRON_CORREO_INSTITUCIONAL = r"^[^@\s]+@[Uu][Pp][Bb]\.[Ee][Dd][Uu]\.[Cc][Oo]$"
+
+
 class UsuarioCreateRequest(BaseModel):
     nombre: str
-    correo: str
+    # El patrón documenta RN-19 en el contrato; el backend lo vuelve a validar (400) sin distinguir mayúsculas.
+    correo: str = Field(json_schema_extra={"pattern": PATRON_CORREO_INSTITUCIONAL, "format": "email"})
     numero_documento: str = Field(min_length=5, max_length=40, description="Se normaliza: sin espacios, puntos ni guiones, en mayúsculas")
     rol: Literal["Coordinador_Sede", "Usuario_Consulta"]
     sede_id: Optional[int] = None
@@ -62,6 +68,7 @@ class UsuarioResponse(BaseModel):
     etiqueta: Optional[Literal["Rector", "Profesor", "Administrativo"]] = None
     permisos: List[Literal["ver_reporte_general", "ver_tendencias", "ver_explorador", "ver_publicaciones"]]
     programas: List[str]
+    programas_sin_datos: List[str] = Field(default_factory=list, description="Programas asignados que ya no se observan en cargas de la sede")
 
 
 class UsuarioCreateResponse(UsuarioResponse):
@@ -87,7 +94,8 @@ class MensajeResponse(BaseModel):
     mensaje: str
 
 
-def _serializar(usuario: Usuario) -> dict:
+def _serializar(usuario: Usuario, observados: Optional[set[str]] = None) -> dict:
+    programas = list(usuario.programas or [])
     return {
         "id": usuario.id, "nombre": usuario.nombre, "correo": usuario.correo,
         "rol": usuario.rol, "sede_id": usuario.sede_id,
@@ -95,7 +103,8 @@ def _serializar(usuario: Usuario) -> dict:
         "credencial_temporal_expira_en": usuario.credencial_temporal_expira_en,
         "activo": usuario.activo, "version_autorizacion": usuario.version_autorizacion,
         "etiqueta": usuario.etiqueta, "permisos": list(usuario.permisos or []),
-        "programas": list(usuario.programas or []),
+        "programas": programas,
+        "programas_sin_datos": [p for p in programas if observados is not None and clave_programa(p) not in observados],
     }
 
 
@@ -121,15 +130,31 @@ def _programas_sede(db: Session, sede_id: int) -> set[str]:
     return {fila[0] for fila in filas if fila[0]}
 
 
-def _validar_alcance_consulta(db: Session, sede_id: int, etiqueta: Optional[str], permisos: List[str], programas: List[str]) -> None:
+def _validar_alcance_consulta(db: Session, sede_id: int, etiqueta: Optional[str], permisos: List[str], programas: List[str], actuales: Optional[List[str]] = None) -> List[str]:
+    """Valida el alcance y devuelve los programas con el nombre observado en la sede.
+
+    La comparación usa la clave normalizada (PRG-01). Un programa ya asignado que
+    dejó de observarse se conserva para no bloquear la edición de la cuenta.
+    """
     if etiqueta not in ETIQUETAS:
         raise HTTPException(status_code=422, detail="Etiqueta de perfil inválida")
     invalidos = set(permisos) - PERMISOS_CONSULTA
     if invalidos:
         raise HTTPException(status_code=422, detail=f"Permisos inválidos: {sorted(invalidos)}")
-    no_disponibles = set(programas) - _programas_sede(db, sede_id)
+    observados = {clave_programa(p): p for p in _programas_sede(db, sede_id)}
+    asignados = {clave_programa(p): p for p in actuales or []}
+    resultado, no_disponibles = [], []
+    for programa in programas:
+        clave = clave_programa(programa)
+        if clave in observados:
+            resultado.append(observados[clave])
+        elif clave in asignados:
+            resultado.append(asignados[clave])
+        else:
+            no_disponibles.append(programa)
     if no_disponibles:
         raise HTTPException(status_code=422, detail=f"Programas fuera del alcance de la sede: {sorted(no_disponibles)}")
+    return sorted(set(resultado))
 
 
 def _validar_sede(db: Session, sede_id: Optional[int]) -> int:
@@ -158,10 +183,11 @@ def get_usuarios(incluir_inactivos: bool = Query(True), db: Session = Depends(ge
         raise HTTPException(status_code=403, detail="No puedes administrar usuarios")
     if not incluir_inactivos:
         query = query.filter(Usuario.activo.is_(True))
-    return [_serializar(usuario) for usuario in query.order_by(Usuario.nombre).all()]
+    observados = claves_programas(_programas_sede(db, current_user["sede_id"])) if current_user.get("rol") == "Coordinador_Sede" else None
+    return [_serializar(usuario, observados) for usuario in query.order_by(Usuario.nombre).all()]
 
 
-@router.post("/", response_model=UsuarioCreateResponse)
+@router.post("/", response_model=UsuarioCreateResponse, responses=errores(400, d400="Correo fuera de @upb.edu.co o ya registrado"))
 def create_usuario(user_data: UsuarioCreateRequest, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     correo = user_data.correo.strip().lower()
     if not correo.endswith("@upb.edu.co"):
@@ -182,8 +208,8 @@ def create_usuario(user_data: UsuarioCreateRequest, db: Session = Depends(get_db
             raise HTTPException(status_code=403, detail="El coordinador no tiene sede asignada")
         if user_data.sede_id is not None and user_data.sede_id != sede_id:
             raise HTTPException(status_code=403, detail="Solo puedes crear usuarios de tu propia sede")
-        _validar_alcance_consulta(db, sede_id, user_data.etiqueta, user_data.permisos, user_data.programas)
-        etiqueta, permisos, programas = user_data.etiqueta, sorted(set(user_data.permisos)), sorted(set(user_data.programas))
+        programas = _validar_alcance_consulta(db, sede_id, user_data.etiqueta, user_data.permisos, user_data.programas)
+        etiqueta, permisos = user_data.etiqueta, sorted(set(user_data.permisos))
     else:
         raise HTTPException(status_code=403, detail="No puedes crear usuarios")
 
@@ -200,7 +226,7 @@ def create_usuario(user_data: UsuarioCreateRequest, db: Session = Depends(get_db
     return {**_serializar(usuario), "contrasena_temporal": temporal, "modo_credencial": INITIAL_CREDENTIAL_MODE}
 
 
-@router.post("/{usuario_id}/regenerar-credencial-temporal", response_model=ReemisionCredencialResponse)
+@router.post("/{usuario_id}/regenerar-credencial-temporal", response_model=ReemisionCredencialResponse, responses=errores(404, 409))
 def regenerar_credencial_temporal(
     usuario_id: int,
     solicitud: ReemisionCredencialRequest,
@@ -242,7 +268,7 @@ def regenerar_credencial_temporal(
     }
 
 
-@router.patch("/{usuario_id}", response_model=UsuarioResponse)
+@router.patch("/{usuario_id}", response_model=UsuarioResponse, responses=errores(404))
 def actualizar_usuario(usuario_id: int, cambios: UsuarioUpdateRequest, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if usuario is None:
@@ -256,8 +282,8 @@ def actualizar_usuario(usuario_id: int, cambios: UsuarioUpdateRequest, db: Sessi
         etiqueta = cambios.etiqueta if cambios.etiqueta is not None else usuario.etiqueta
         permisos = cambios.permisos if cambios.permisos is not None else list(usuario.permisos or [])
         programas = cambios.programas if cambios.programas is not None else list(usuario.programas or [])
-        _validar_alcance_consulta(db, usuario.sede_id, etiqueta, permisos, programas)
-        usuario.etiqueta, usuario.permisos, usuario.programas = etiqueta, sorted(set(permisos)), sorted(set(programas))
+        programas = _validar_alcance_consulta(db, usuario.sede_id, etiqueta, permisos, programas, actuales=list(usuario.programas or []))
+        usuario.etiqueta, usuario.permisos, usuario.programas = etiqueta, sorted(set(permisos)), programas
     elif any(value is not None for value in (cambios.etiqueta, cambios.permisos, cambios.programas)):
         raise HTTPException(status_code=422, detail="Los coordinadores no usan permisos de consulta")
     usuario.version_autorizacion += 1
@@ -276,23 +302,23 @@ def _cambiar_estado(usuario_id: int, activo: bool, db: Session, current_user: di
     return _serializar(usuario)
 
 
-@router.post("/{usuario_id}/desactivar", response_model=UsuarioResponse)
+@router.post("/{usuario_id}/desactivar", response_model=UsuarioResponse, responses=errores(404))
 def desactivar_usuario(usuario_id: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     return _cambiar_estado(usuario_id, False, db, current_user)
 
 
-@router.post("/{usuario_id}/reactivar", response_model=UsuarioResponse)
+@router.post("/{usuario_id}/reactivar", response_model=UsuarioResponse, responses=errores(404))
 def reactivar_usuario(usuario_id: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     return _cambiar_estado(usuario_id, True, db, current_user)
 
 
-@router.delete("/{usuario_id}", response_model=UsuarioResponse)
+@router.delete("/{usuario_id}", response_model=UsuarioResponse, responses=errores(404), deprecated=True)
 def delete_usuario(usuario_id: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
-    """La eliminación ordinaria es una desactivación recuperable."""
+    """Alias obsoleto de `POST /{usuario_id}/desactivar`; se conserva por compatibilidad (API-02)."""
     return _cambiar_estado(usuario_id, False, db, current_user)
 
 
-@router.delete("/{usuario_id}/permanente", response_model=MensajeResponse)
+@router.delete("/{usuario_id}/permanente", response_model=MensajeResponse, responses=errores(404, 409, d409="La cuenta sigue activa o conserva relaciones"))
 def borrar_usuario_permanentemente(usuario_id: int, solicitud: MotivoRequest, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if usuario is None:

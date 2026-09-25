@@ -35,7 +35,14 @@
             }
           },
           "401": {
-            "description": "Correo o contraseña incorrectos"
+            "description": "Correo o contraseña incorrectos, o credencial temporal vencida (`detail.codigo = CREDENCIAL_TEMPORAL_VENCIDA`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -79,13 +86,34 @@
             }
           },
           "400": {
-            "description": "La contraseña no cumple la política"
+            "description": "La contraseña no cumple la política",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "401": {
-            "description": "Token inválido o vencido"
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "409": {
-            "description": "La cuenta no requiere cambio inicial"
+            "description": "La cuenta no requiere cambio inicial",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -123,6 +151,26 @@
                   },
                   "type": "array",
                   "title": "Response Programas Asignables Api Usuarios Programas Asignables Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -174,6 +222,26 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -214,6 +282,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UsuarioCreateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Correo fuera de @upb.edu.co o ya registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -275,6 +373,46 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe dentro del alcance autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "La operación entra en conflicto con el estado actual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -332,6 +470,36 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe dentro del alcance autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -349,8 +517,9 @@
           "Usuarios"
         ],
         "summary": "Delete Usuario",
-        "description": "La eliminación ordinaria es una desactivación recuperable.",
+        "description": "Alias obsoleto de `POST /{usuario_id}/desactivar`; se conserva por compatibilidad (API-02).",
         "operationId": "delete_usuario_api_usuarios__usuario_id__delete",
+        "deprecated": true,
         "security": [
           {
             "HTTPBearer": []
@@ -374,6 +543,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UsuarioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe dentro del alcance autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -425,6 +624,36 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe dentro del alcance autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -468,6 +697,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UsuarioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe dentro del alcance autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -529,6 +788,46 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe dentro del alcance autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "La cuenta sigue activa o conserva relaciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -570,17 +869,65 @@
               }
             }
           },
-          "400": {
-            "description": "El archivo no es .xlsx o su contenido no puede leerse"
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "403": {
-            "description": "El usuario no es coordinador o no tiene sede asignada"
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El archivo no es .xlsx o su contenido no puede leerse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "409": {
-            "description": "El archivo es idéntico a la versión vigente del mismo alcance"
+            "description": "El archivo es idéntico a la versión vigente del mismo alcance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "413": {
-            "description": "El archivo supera 25 MB"
+            "description": "El archivo supera 25 MB",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno; la operación no aplicó cambios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "422": {
             "description": "Parámetros inválidos o archivo rechazado; incluye el detalle por fila",
@@ -622,8 +969,25 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "403": {
-            "description": "El usuario no es coordinador o no tiene sede asignada"
+            "description": "El usuario no es coordinador o no tiene sede asignada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -677,14 +1041,55 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "403": {
-            "description": "El usuario no es coordinador o no tiene sede asignada"
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "404": {
-            "description": "La carga no existe dentro de la sede autorizada"
+            "description": "La carga no existe dentro de la sede autorizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "409": {
-            "description": "La carga ya no está vigente"
+            "description": "La carga ya no está vigente o está referenciada por una versión posterior",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno; la operación no aplicó cambios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -713,6 +1118,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FiltrosDisponiblesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -796,6 +1221,26 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -873,6 +1318,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TendenciasResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -979,8 +1444,35 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
-            "description": "Momentos o indicador inválidos"
+            "description": "Momentos o indicador inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -999,6 +1491,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ExploradorInitResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1099,8 +1611,35 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
-            "description": "La variable no pertenece al catálogo analítico autorizado o los filtros son inválidos"
+            "description": "La variable no pertenece al catálogo analítico autorizado o los filtros son inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -1185,6 +1724,26 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1216,6 +1775,26 @@
                   },
                   "type": "array",
                   "title": "Response Obtener Programas Unicos Api Directorio Programas Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1262,6 +1841,36 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Egresado no encontrado en su sede",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1299,6 +1908,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperacionEgresadoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El documento ya está registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1365,6 +2004,46 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe dentro del alcance autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El egresado está vinculado a más de una sede",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1416,6 +2095,46 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperacionEgresadoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe dentro del alcance autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El egresado tiene mediciones o está vinculado a otra sede",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1491,6 +2210,26 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1525,6 +2264,26 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1552,6 +2311,26 @@
                   },
                   "type": "array",
                   "title": "Response Listar Publicaciones Autorizadas Api Publicaciones  Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1590,11 +2369,35 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "403": {
-            "description": "El actor no es coordinador o no tiene sede"
+            "description": "El actor no es coordinador o no tiene sede",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "422": {
-            "description": "Definición no publicable o sin celdas que superen el umbral mínimo de privacidad"
+            "description": "Definición no publicable o sin celdas que superen el umbral mínimo de privacidad",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1638,6 +2441,46 @@
               }
             }
           },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe dentro del alcance autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "La publicación ya no está activa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1672,6 +2515,26 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1695,6 +2558,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AnaliticaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1772,14 +2655,33 @@
         "properties": {
           "tipo": {
             "type": "string",
+            "enum": [
+              "empleabilidad",
+              "texto_abierto"
+            ],
             "title": "Tipo"
           },
           "programa": {
             "type": "string",
             "title": "Programa"
           },
+          "momento": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Momento"
+          },
           "severidad": {
             "type": "string",
+            "enum": [
+              "media",
+              "alta"
+            ],
             "title": "Severidad"
           },
           "mensaje": {
@@ -2669,6 +3571,24 @@
         ],
         "title": "EncuestaPerfilResponse"
       },
+      "ErrorCodificado": {
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "title": "Codigo"
+          },
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          }
+        },
+        "type": "object",
+        "required": [
+          "codigo",
+          "mensaje"
+        ],
+        "title": "ErrorCodificado"
+      },
       "ErrorFila": {
         "properties": {
           "fila": {
@@ -2691,6 +3611,26 @@
           "error"
         ],
         "title": "ErrorFila"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/ErrorCodificado"
+              }
+            ],
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorResponse"
       },
       "ExploradorInitResponse": {
         "properties": {
@@ -3340,6 +4280,8 @@
           },
           "correo": {
             "type": "string",
+            "pattern": "^[^@\\s]+@[Uu][Pp][Bb]\\.[Ee][Dd][Uu]\\.[Cc][Oo]$",
+            "format": "email",
             "title": "Correo"
           },
           "numero_documento": {
@@ -3507,6 +4449,14 @@
             },
             "type": "array",
             "title": "Programas"
+          },
+          "programas_sin_datos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Programas Sin Datos",
+            "description": "Programas asignados que ya no se observan en cargas de la sede"
           },
           "contrasena_temporal": {
             "type": "string",
@@ -3680,6 +4630,14 @@
             },
             "type": "array",
             "title": "Programas"
+          },
+          "programas_sin_datos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Programas Sin Datos",
+            "description": "Programas asignados que ya no se observan en cargas de la sede"
           }
         },
         "type": "object",

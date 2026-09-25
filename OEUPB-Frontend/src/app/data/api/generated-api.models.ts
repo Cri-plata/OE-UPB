@@ -2,9 +2,10 @@
 // No editar manualmente; ejecute: npm run generate:api
 
 export interface AlertaResponse {
-  "tipo": string;
+  "tipo": "empleabilidad" | "texto_abierto";
   "programa": string;
-  "severidad": string;
+  "momento"?: number | null;
+  "severidad": "media" | "alta";
   "mensaje": string;
   "valor": number;
   "muestra": number;
@@ -149,10 +150,19 @@ export interface EncuestaPerfilResponse {
   "respuestas_completas": Record<string, unknown>;
 }
 
+export interface ErrorCodificado {
+  "codigo": string;
+  "mensaje": string;
+}
+
 export interface ErrorFila {
   "fila": number;
   "columna": string;
   "error": string;
+}
+
+export interface ErrorResponse {
+  "detail": string | ErrorCodificado;
 }
 
 export interface ExploradorInitResponse {
@@ -318,6 +328,7 @@ export interface UsuarioCreateResponse {
   "etiqueta"?: "Rector" | "Profesor" | "Administrativo" | null;
   "permisos": Array<"ver_reporte_general" | "ver_tendencias" | "ver_explorador" | "ver_publicaciones">;
   "programas": Array<string>;
+  "programas_sin_datos"?: Array<string>;
   "contrasena_temporal": string;
   "modo_credencial": "documento" | "random";
 }
@@ -344,6 +355,7 @@ export interface UsuarioResponse {
   "etiqueta"?: "Rector" | "Profesor" | "Administrativo" | null;
   "permisos": Array<"ver_reporte_general" | "ver_tendencias" | "ver_explorador" | "ver_publicaciones">;
   "programas": Array<string>;
+  "programas_sin_datos"?: Array<string>;
 }
 
 export interface UsuarioUpdateRequest {

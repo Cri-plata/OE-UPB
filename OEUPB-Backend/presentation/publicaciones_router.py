@@ -6,12 +6,14 @@ from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.orm import Session
 
 from application.auth_service import get_current_user, require_roles
+from presentation.errores import RESPUESTAS_PROTEGIDAS, ErrorResponse, errores
 from application.indicadores import construir_publicacion
+from application.programas import claves_programas
 from domain.models import PublicacionGrafica, Sede, Usuario
 from infrastructure.database import get_db
 
 
-router = APIRouter(prefix="/api/publicaciones", tags=["Publicaciones"])
+router = APIRouter(prefix="/api/publicaciones", tags=["Publicaciones"], responses=RESPUESTAS_PROTEGIDAS)
 
 PERMISOS_POR_ORIGEN = {
     "reporte_general": "ver_reporte_general",
@@ -112,8 +114,8 @@ def _serializar(publicacion: PublicacionGrafica, sede_nombre: str) -> dict:
     response_model=PublicacionResponse,
     status_code=status.HTTP_201_CREATED,
     responses={
-        403: {"description": "El actor no es coordinador o no tiene sede"},
-        422: {"description": "Definición no publicable o sin celdas que superen el umbral mínimo de privacidad"},
+        **errores(403, d403="El actor no es coordinador o no tiene sede"),
+        422: {"model": ErrorResponse, "description": "Definición no publicable o sin celdas que superen el umbral mínimo de privacidad"},
     },
 )
 def publicar_grafica(
@@ -169,7 +171,7 @@ def publicar_grafica(
     return _serializar(publicacion, sede.nombre)
 
 
-@router.delete("/{publicacion_id}", response_model=PublicacionResponse)
+@router.delete("/{publicacion_id}", response_model=PublicacionResponse, responses=errores(404, 409, d409="La publicación ya no está activa"))
 def retirar_publicacion(
     publicacion_id: int,
     db: Session = Depends(get_db),
@@ -233,7 +235,7 @@ def listar_publicaciones_autorizadas(
         query = query.filter(PublicacionGrafica.sede_id != current_user.get("sede_id"))
     else:
         permisos = set(current_user.get("permisos") or [])
-        programas = set(current_user.get("programas") or [])
+        programas = claves_programas(current_user.get("programas"))
         if "ver_publicaciones" not in permisos or not programas:
             return []
         query = query.filter(PublicacionGrafica.permiso_requerido.in_(permisos))
@@ -242,6 +244,6 @@ def listar_publicaciones_autorizadas(
     if rol == "Usuario_Consulta":
         filas = [
             fila for fila in filas
-            if programas.intersection(set(fila[0].programas or []))
+            if programas.intersection(claves_programas(fila[0].programas))
         ]
     return [_serializar(publicacion, sede_nombre) for publicacion, sede_nombre in filas]

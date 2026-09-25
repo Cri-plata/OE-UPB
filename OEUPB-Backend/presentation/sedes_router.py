@@ -7,8 +7,9 @@ from sqlalchemy.orm import Session
 from application.auth_service import get_current_user
 from domain.models import Sede
 from infrastructure.database import get_db
+from presentation.errores import RESPUESTAS_PROTEGIDAS
 
-router = APIRouter(prefix="/api/sedes", tags=["Sedes"])
+router = APIRouter(prefix="/api/sedes", tags=["Sedes"], responses=RESPUESTAS_PROTEGIDAS)
 
 
 class SedeResponse(BaseModel):

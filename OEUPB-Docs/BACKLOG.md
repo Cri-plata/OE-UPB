@@ -17,12 +17,9 @@
 
 - [ ] **ANA-03 — Verificar el mapeo laboral con datos de M5.** ADR-016 supone que el cuestionario de M5 usa la misma redacción que M1. Cuando exista una carga de M5, confirmar los nombres de las preguntas y sus opciones de respuesta (sin leer datos personales) y ajustar `application/indicadores.py` si difieren.
 
-## P3 — Calidad de contrato y documentación
+## P3 — Validación de producto
 
-- [ ] **API-02 — Completar el contrato de errores.** Declarar el esquema `{detail}` y los códigos 401/403/404/409 por endpoint, añadir el patrón `@upb.edu.co` al correo y marcar `DELETE /api/usuarios/{id}` como alias obsoleto de `POST /{id}/desactivar` (auditoría 05: C-11, C-18).
-- [ ] **PRG-01 — Catálogo normalizado de programas.** La visibilidad entre sedes depende de que los nombres de programa coincidan como texto. Definir la normalización o una tabla de equivalencias, y el tratamiento de programas asignados que dejan de observarse (auditoría 05: B-07, B-08).
-- [ ] **ANA-02 — Criterios de alertas.** Enumerar la severidad y fijar umbrales y muestra mínima de las alertas descriptivas de `/api/analitica/resumen`. Además, `analitica_router.py` todavía detecta el empleo con la pregunta SI/NO; debe usar la taxonomía de ADR-016 para coincidir con el Reporte General (auditoría 05: B-18).
-- [ ] **DOC-03 — Completar el modelo y el catálogo de requisitos.** Añadir al diagrama ER `auditoria_cuentas`, `auditoria_egresados`, los atributos de `eventos_eliminacion_carga` y las columnas faltantes de `publicaciones_graficas`. Priorizar los RF/RNF, corregir los `Requerimiento Ligado` sin dependencia funcional y dar métricas verificables a los RNF-01 a RNF-06 (auditoría 05: C-17, C-19, B-20).
+- [ ] **PRD-01 — Validar las prioridades y los criterios RNF propuestos.** El 2026-09-25 se propusieron la prioridad de los RF/RNF y los criterios verificables de RNF-01 a RNF-06 (`requirements/01-requerimientos.md`). Producto debe confirmarlos o ajustarlos, y después hay que automatizar la medición de RNF-06 (rendimiento con 50.000 mediciones).
 
 ## P2 — Decisión de producto en pausa
 
