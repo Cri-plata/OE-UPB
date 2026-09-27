@@ -13,6 +13,7 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install -r OEUPB-Backend/requirements.txt
+      - run: python -m spacy download es_core_news_md
       - name: Backend tests
         working-directory: OEUPB-Backend
         env:

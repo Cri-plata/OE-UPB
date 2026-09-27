@@ -266,8 +266,18 @@ def _compilar_taxonomia() -> Tuple[Dict[str, List[str]], Dict[str, str], list]:
     return taxonomia_prep, tipos_habilidad, patrones
 
 
-# Compilación al importar el módulo (una sola vez)
-_TAXONOMIA_PREP, _TIPOS_HABILIDAD, _PATRONES_COMPILADOS = _compilar_taxonomia()
+# Variables globales para cachear la compilación de la taxonomía (carga lazy)
+_TAXONOMIA_PREP = None
+_TIPOS_HABILIDAD = None
+_PATRONES_COMPILADOS = None
+
+
+def _asegurar_taxonomia():
+    """Compila la taxonomía de forma lazy la primera vez que se requiere."""
+    global _TAXONOMIA_PREP, _TIPOS_HABILIDAD, _PATRONES_COMPILADOS
+    if _PATRONES_COMPILADOS is None:
+        _TAXONOMIA_PREP, _TIPOS_HABILIDAD, _PATRONES_COMPILADOS = _compilar_taxonomia()
+    return _TAXONOMIA_PREP, _TIPOS_HABILIDAD, _PATRONES_COMPILADOS
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -289,10 +299,11 @@ def _extraer_habilidades_y_residual(texto_preprocesado: str) -> Tuple[Set[str], 
       - detalles_matches: Lista de dicts con evidencia, ordenada por posición en el texto (span[0])
       - texto_residual: Texto con los tramos ocupados enmascarados, listo para TF-IDF
     """
+    _, _, patrones_compilados = _asegurar_taxonomia()
     ocupados = [False] * len(texto_preprocesado)
     matches = []
 
-    for _, regex, etiqueta, variante in _PATRONES_COMPILADOS:
+    for _, regex, etiqueta, variante in patrones_compilados:
         for m in regex.finditer(texto_preprocesado):
             s, e = m.start(), m.end()
             # Si algún carácter del match ya fue tomado por un patrón más largo, ignorar
@@ -448,11 +459,12 @@ def analizar_habilidades_demandadas(
     emergentes = _extraer_emergentes_tfidf(textos_residuales, top_n=top_emergentes)
 
     # 5. Formatear resultado de habilidades reconocidas ordenado por menciones
+    _, tipos_habilidad, _ = _asegurar_taxonomia()
     habilidades_resultado = []
     for etiqueta, menciones in conteo_global.most_common():
         habilidades_resultado.append({
             "habilidad": etiqueta,
-            "tipo": _TIPOS_HABILIDAD.get(etiqueta, "desconocido"),
+            "tipo": tipos_habilidad.get(etiqueta, "desconocido"),
             "menciones": menciones,
         })
 
