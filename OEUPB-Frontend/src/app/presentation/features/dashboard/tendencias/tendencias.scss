@@ -79,8 +79,12 @@
   border-radius: var(--radius-md);
 }
 
-.publication-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
-.publication-status { color: var(--color-success); font-weight: 700; font-size: 13px; }
-.publish-error { flex-basis: 100%; margin: 4px 0 0; color: var(--color-error); font-size: 13px; }
+/* Estado de publicación por gráfica (PublicacionControl). */
+.publication-status { color: var(--success); font-weight: 700; font-size: 13px; }
+.publish-error { flex-basis: 100%; margin: var(--space-2xs) 0 0; color: var(--danger); font-size: 13px; }
+
+.publication-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-md); }
+/* Comparación entre momentos (HU-08). */
 .comparacion { margin-top: var(--space-xl); }
-.empty-state { color: var(--muted); font-size: 14px; padding: var(--space-md); }
+.empty-state { color: var(--muted); font-size: 15px; }
+.nota { margin: var(--space-sm) 0 0; font-size: 12px; color: var(--muted); }

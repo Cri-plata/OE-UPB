@@ -13,7 +13,8 @@
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  // Cuatro indicadores (ANA-01): una fila en escritorio, dos en tablet y una columna en móvil.
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-xl);
 }
 
@@ -40,7 +41,7 @@
   flex-shrink: 0;
 
   &.blue {
-    background: rgba(2, 136, 209, 1);
+    background: var(--ai-indigo);
   }
 
   &.green {
@@ -53,6 +54,8 @@
 }
 
 .kpi-data {
+  min-width: 0;
+
   h3 {
     margin: 0;
     font-size: 12px;
@@ -64,10 +67,11 @@
 
   h2 {
     margin: 4px 0;
-    font-size: 26px;
+    font-size: 28px;
+    line-height: 34px;
+    letter-spacing: -0.03em;
     color: var(--heading);
-    font-weight: 800;
-    line-height: 1.2;
+    font-weight: 700;
   }
 
   .trend {
@@ -78,7 +82,7 @@
 
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-xl);
 }
 
@@ -126,19 +130,27 @@
   flex-wrap: wrap;
 }
 
-.publish-error {
-  flex-basis: 100%;
-  margin: 4px 0 0;
-  color: var(--danger);
-  font-size: 13px;
-}
-
-@media (max-width: 1024px) {
+@media (max-width: 1439px) {
   .kpi-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .charts-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+@media (max-width: 1100px) {
+  .charts-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Estado de publicación por gráfica (PublicacionControl). */
+.publication-status { color: var(--success); font-weight: 700; font-size: 13px; }
+.publish-error { flex-basis: 100%; margin: var(--space-2xs) 0 0; color: var(--danger); font-size: 13px; }
+
+.chart-actions { flex-wrap: wrap; justify-content: flex-end; }
+.nota { margin: var(--space-sm) 0 0; font-size: 12px; color: var(--muted); }

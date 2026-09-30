@@ -53,7 +53,42 @@
               alt="Escudo UPB"
             />
           </header>
-          <div class="kpi-grid">
+          <section class="card filtros-card" aria-label="Filtros analíticos">
+            <div class="control-group">
+              <label>Programa académico</label>
+              <details class="selector">
+                <summary>Todos los programas</summary>
+                <div class="selector-opciones">
+                  <label><input type="checkbox" /> Programa Demo A</label>
+                  <label><input type="checkbox" /> Programa Demo B</label>
+                </div>
+              </details>
+            </div>
+            <div class="control-group">
+              <label>Cohorte (año de grado)</label>
+              <details class="selector">
+                <summary>Todas las cohortes</summary>
+                <div class="selector-opciones">
+                  <label><input type="checkbox" /> 2024</label>
+                  <label><input type="checkbox" /> 2023</label>
+                </div>
+              </details>
+            </div>
+            <div class="control-group momento">
+              <label>Momento</label>
+              <select>
+                <option>Todos</option>
+                <option>Momento 0</option>
+                <option>Momento 1</option>
+                <option>Momento 5</option>
+              </select>
+            </div>
+            <div class="filtros-acciones">
+              <button class="btn-primary">Aplicar filtros</button>
+              <button class="btn-secondary" disabled>Limpiar filtros</button>
+            </div>
+          </section>
+          <div class="kpi-grid kpi-grid-4">
             <article class="kpi-card">
               <div class="kpi-icon blue">
                 <i data-lucide="users" aria-hidden="true"></i>
@@ -71,7 +106,17 @@
               <div>
                 <h3>Tasa de Empleabilidad</h3>
                 <strong>...%</strong>
-                <small>Actualmente trabajando</small>
+                <small>Empleados e independientes sobre clasificados</small>
+              </div>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-icon blue">
+                <i data-lucide="file-text" aria-hidden="true"></i>
+              </div>
+              <div>
+                <h3>Empleo Formal</h3>
+                <strong>...%</strong>
+                <small>Informal ...% · solo M1 y M5</small>
               </div>
             </article>
             <article class="kpi-card">
@@ -81,7 +126,7 @@
               <div>
                 <h3>Promedio Salarial</h3>
                 <strong>... SMLV</strong>
-                <small>Salarios Mínimos Legales Vigentes</small>
+                <small>Rango ... – ... · mediana ...</small>
               </div>
             </article>
           </div>
@@ -113,6 +158,18 @@
                 </div>
               </div>
               <div class="chart-placeholder">Cargando indicadores...</div>
+            </article>
+            <article class="card chart-card">
+              <div class="chart-header">
+                <h2>Estado Laboral</h2>
+                <div class="chart-actions">
+                  <button class="btn-secondary">PNG</button>
+                  <span class="publication-status">Publicada v1</span>
+                  <button class="btn-secondary">Retirar publicación</button>
+                </div>
+              </div>
+              <div class="chart-placeholder">Cargando indicadores...</div>
+              <p class="nota">Empleado incluye empresa familiar; practicantes cuentan como estudiantes (RN-16).</p>
             </article>
           </div>
         </section>

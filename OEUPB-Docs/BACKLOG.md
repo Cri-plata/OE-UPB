@@ -17,6 +17,9 @@
 
 - [ ] **UI-01 — Migrar el frontend al sistema canónico.** Alinear tokens, tipografía, layout, estados e iconografía del frontend con `design/design.md` usando los mockups aprobados como contrato. Sustituir iconografía ad hoc por Lucide sin iniciar cambios visuales que carezcan de mockup y entrada en `mockups/screen-map.md`.
 
+- [ ] **UI-02 — Migrar la iconografía a `lucide-angular`.** Sustituir las máscaras CSS que cargan Lucide desde `unpkg.com` (barra lateral) y los SVG escritos a mano (KPI y carga) por `lucide-angular`, con el mapeo de iconos de `design.md`. Requiere añadir la dependencia (auditoría 06).
+- [ ] **UI-03 — Pasar a signals el estado asíncrono restante.** Reporte General, Tendencias, Carga, Administración y Directorio refrescan la vista con un `ChangeDetectorRef` inyectado, que queda inválido tras un reemplazo en caliente (HMR) y deja la pantalla en "Cargando…". Migrar su estado a signals, como el Explorador y Publicaciones (auditoría 06, U-12/UI-03).
+
 ## P2 — Analítica
 
 - [ ] **ANA-03 — Verificar el mapeo laboral con datos de M5.** ADR-016 supone que el cuestionario de M5 usa la misma redacción que M1. Cuando exista una carga de M5, confirmar los nombres de las preguntas y sus opciones de respuesta (sin leer datos personales) y ajustar `application/indicadores.py` si difieren.

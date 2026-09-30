@@ -28,6 +28,15 @@
   flex-direction: column;
   gap: var(--space-2xs);
   flex: 1 1 200px;
+  min-width: 0;
+
+  // Las preguntas del OLE son largas: el select no puede tomar el ancho de su opción más larga.
+  select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    text-overflow: ellipsis;
+  }
 
   &.full-width {
     flex: 1 1 100%;
@@ -90,16 +99,17 @@
   border-radius: var(--radius-md);
 }
 
-.publication-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
-.publication-status { color: var(--color-success); font-weight: 700; font-size: 13px; }
-.publish-error { flex-basis: 100%; margin: 4px 0 0; color: var(--color-error); font-size: 13px; }
-.publish-btn, .withdraw-btn { flex: 0 0 auto; border-radius: 6px; padding: 9px 14px; cursor: pointer; font-weight: 700; }
-.publish-btn { background: var(--color-brand); color: var(--color-surface); border: 1px solid var(--color-brand); }
-.withdraw-btn { background: var(--color-surface); color: var(--color-brand); border: 1px solid var(--color-brand); }
-.publish-btn:disabled, .withdraw-btn:disabled { opacity: .55; cursor: wait; }
-.bloques { display: flex; flex-direction: column; gap: 32px; }
-.grafica-bloque { border-top: 3px solid var(--color-brand); padding-top: 20px; }
-.bloque-acciones { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-.quitar-btn { background: var(--color-surface); color: var(--color-brand); border: 1px solid var(--color-brand); border-radius: 6px; padding: 8px 12px; cursor: pointer; }
-.crear-btn { margin-top: 24px; width: 100%; padding: 14px; border: 2px dashed var(--color-brand); border-radius: 12px; background: var(--color-surface); color: var(--color-brand); font-weight: 700; font-size: 15px; cursor: pointer; transition: background 0.15s ease; }
-.crear-btn:hover { background: var(--color-background-subtle); }
+/* Estado de publicación por gráfica (PublicacionControl). */
+.publication-status { color: var(--success); font-weight: 700; font-size: 13px; }
+.publish-error { flex-basis: 100%; margin: var(--space-2xs) 0 0; color: var(--danger); font-size: 13px; }
+
+/* Varias gráficas simultáneas (EXP-03). */
+.bloques { display: flex; flex-direction: column; gap: var(--space-2xl); }
+.bloque-acciones { display: flex; justify-content: flex-end; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+.crear-btn { margin-top: var(--space-xl); width: 100%; }
+
+:host,
+app-explorador-grafica {
+  display: block;
+  min-width: 0;
+}

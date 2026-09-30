@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "CLAUDE.md",
+                "file": "OEUPB-Docs/BACKLOG.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "CLAUDE"
+              "title": "BACKLOG"
             }
           }
         ]
@@ -188,24 +188,46 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "3c378acf07aa65f9",
+  "active": "8ee4e98f932a25d6",
   "lastOpenFiles": [
-    "OEUPB-Frontend/node_modules/@angular/cdk/text-field/_index.scss",
-    "OEUPB-Frontend/node_modules/@angular/cdk/text-field",
-    "OEUPB-Frontend/node_modules/@angular/cdk/overlay/_index.scss",
-    "OEUPB-Frontend/node_modules/@angular/cdk/overlay",
-    "OEUPB-Frontend/node_modules/@angular/cdk/a11y/_index.scss",
-    "OEUPB-Frontend/node_modules/@angular/cdk/a11y",
-    "OEUPB-Frontend/node_modules/ng2-charts/types/ng2-charts.d.ts",
-    "OEUPB-Frontend/node_modules/ng2-charts/types",
-    "OEUPB-Frontend/node_modules/es-toolkit/src/compat/_internal/RejectReadonly.d.ts",
-    "OEUPB-Frontend/node_modules/es-toolkit/src/compat/_internal/MutableList.d.ts",
-    "OEUPB-Frontend/node_modules/es-toolkit/src/compat/_internal/IsWritable.d.ts",
-    "OEUPB-Frontend/node_modules/ng2-charts/schematics/README.md",
-    "OEUPB-Frontend/node_modules/es-toolkit/CHANGELOG.md",
+    "OEUPB-Docs/audits/06-auditoria-ui.md",
+    "OEUPB-Frontend/dist/front-oeupb/server/chunk-XTS2ABQU.mjs",
+    "OEUPB-Frontend/dist/front-oeupb/server/chunk-TLLC3OUG.mjs",
+    "OEUPB-Frontend/dist/front-oeupb/server/chunk-NT2WE753.mjs",
+    "OEUPB-Frontend/dist/front-oeupb/server/chunk-MAMUGO3K.mjs",
+    "OEUPB-Frontend/dist/front-oeupb/server/chunk-AV75ZCAY.mjs",
+    "OEUPB-Frontend/dist/front-oeupb/server/assets-chunks/styles-NKFVJYPU_css.mjs",
+    "OEUPB-Frontend/dist/front-oeupb/browser/styles-NKFVJYPU.css",
+    "OEUPB-Frontend/dist/front-oeupb/browser/chunk-VxkRaNVi.js",
+    "OEUPB-Frontend/dist/front-oeupb/browser/chunk-PgpOZAyN.js",
+    "OEUPB-Docs/mockups/tendencias.html",
+    "OEUPB-Docs/mockups/screen-map.md",
+    "OEUPB-Docs/adr/017-normalizacion-documento-limites-carga.md",
+    "OEUPB-Docs/adr/016-taxonomia-laboral-cuestionarios.md",
+    "OEUPB-Docs/BACKLOG_ARCHIVE.md",
+    "OEUPB-Docs/adr/015-recalculo-publicaciones-umbral.md",
+    "OEUPB-Docs/adr/014-alcance-identidad-egresado.md",
+    "OEUPB-Docs/audits/05-auditoria-requerimientos.md",
+    "OEUPB-Docs/BACKLOG.md",
+    "OEUPB-Docs/audits/04-hallazgos-explorador-publicaciones.md",
+    "OEUPB-Docs/audits/03-cierre-decisiones-abiertas.md",
+    "OEUPB-Docs/docs/05-inventario-scripts.md",
+    "OEUPB-Docs/requirements/matriz-trazabilidad.md",
+    "OEUPB-Backend/scripts/README.md",
+    "OEUPB-Docs/adr/013-ciclo-vida-credenciales-temporales.md",
+    "OEUPB-Docs/docs/07-estado-funcional-actual.md",
+    "OEUPB-Frontend/dist/front-oeupb/browser/escudo-upb.png",
+    "OEUPB-Docs/docs/06-runbook-despliegue.md",
+    "CHANGELOG.md",
+    "OEUPB-Docs/CHANGELOG.md",
+    "OEUPB-Docs/adr/012-modelo-egresado-medicion.md",
+    "OEUPB-Docs/adr/011-versionado-api-compatible.md",
+    "OEUPB-Docs/CLAUDE.md",
+    "CLAUDE.md",
+    "OEUPB-Docs/adr/010-contrasena-temporal.md",
+    "OEUPB-Docs/adr/009-carga-y-gobierno-datos.md",
+    "OEUPB-Docs/audits/03-formulario-decisiones.md",
     "OEUPB-Frontend/public/escudo-upb.png",
-    "OEUPB-Frontend/src/assets/escudo-upb.png",
-    "README.md",
-    "CLAUDE.md"
+    "OEUPB-Frontend/src/assets/escudo-upb.png"
   ]
 }

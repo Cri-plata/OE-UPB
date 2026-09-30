@@ -43,6 +43,7 @@
   - [Cierre de decisiones abiertas](audits/03-cierre-decisiones-abiertas.md)
   - [Hallazgos del Explorador y publicaciones](audits/04-hallazgos-explorador-publicaciones.md)
   - [Auditoría de requerimientos 05 y su resolución](audits/05-auditoria-requerimientos.md)
+  - [Auditoría de diseño UI 06](audits/06-auditoria-ui.md)
   - [Prompt de auditoría de requerimientos](audits/auditoria_requerimientos.md)
 - Planes
   - [Backend — histórico](plans/01-plan-backend.md)

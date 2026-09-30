@@ -1,5 +1,6 @@
 import re
 import unicodedata
+from functools import lru_cache
 from collections import Counter
 
 PII = [
@@ -19,6 +20,8 @@ NEGATIVOS = ("desemple", "sin empleo", "no encuentro", "dificil conseguir", "poc
 CLAVES_ABIERTAS = ("coment", "observ", "competenc", "habilidad", "suger", "porque", "por que", "abierta")
 
 
+# Los nombres de pregunta se repiten en cada medición; memoizar evita normalizarlos miles de veces.
+@lru_cache(maxsize=16384)
 def normalizar(texto: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFD", texto.lower()) if unicodedata.category(c) != "Mn")
 

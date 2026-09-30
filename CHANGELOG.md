@@ -3,6 +3,10 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Corregido (2026-09-25, auditoría UI)
+- **Desbordes:** Reporte General (gráficas), Administración de usuarios, Carga de datos y Explorador ya no desbordan en 1440, 1024 ni 375 px.
+- **Alineación con los mockups:** controles de la cabecera de gráfica, casillas de permisos, grilla de 4 KPI, filtros analíticos con el patrón canónico, paleta de gráficas de `design.md` (frontend y publicaciones) y eliminación del pictograma "✕".
+- **Rendimiento:** la inicialización del Explorador baja de 20 s a menos de 1 s, la Analítica de 9 s a 0,7 s y el Reporte General de 2,1 s a menos de 1,4 s, gracias a la memoización de la normalización y a una sola consulta por reporte.
 
 ### Cambiado (2026-09-25, P3)
 - **Contrato de errores (API-02):** esquema `ErrorResponse` con 401/403 en toda ruta protegida y códigos propios por endpoint; `DELETE /api/usuarios/{id}` queda marcado como obsoleto; patrón de correo institucional en el contrato.
@@ -33,6 +37,7 @@ Este es el historial global del producto y el código del monorepo. Los cambios 
 - **Publicación de gráficas (PUB-01/PUB-02):** publicar, retirar y consultar el catálogo ya no quedan cargando. La aplicación es zoneless y el estado pasó a signals mediante `PublicacionControl`; se bloquean envíos duplicados y los errores HTTP o de red se muestran con reintento. Se agregaron 8 pruebas de frontend y 1 de backend.
 - **Eliminación de cargas:** ya no borra los egresados del directorio manual de ninguna sede. Antes, en MySQL, cualquier eliminación fallaba mientras existiera un registro manual.
 - **Privacidad en logs:** el documento de identidad se enmascara en las rutas del directorio y la imagen Docker desactiva el access log de Uvicorn.
+
 
 ### Añadido (2026-09-24)
 - **Higiene del repositorio:** se retiraron 73 scripts históricos ad hoc, se organizó un generador Excel reproducible y se cerraron la trazabilidad RF y las decisiones documentales pendientes.

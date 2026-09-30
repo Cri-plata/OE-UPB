@@ -20,16 +20,16 @@
 |---|---|---|---|
 | **Inicio de sesión** | [`login.html`](login.html) | Tarjeta bipartita Dual-Zone (`width: min(880px, 100%)`) con panel de marca institucional oscuro y formulario daylight; colapso vertical fluido en móvil (`< 768 px`) | **Base**: Formulario de credenciales con iconos de apoyo, etiquetas accesibles y contexto institucional UPB. |
 | **Inicio de sesión (Cambio)** | [`login-cambio-contrasena.html`](login-cambio-contrasena.html) | Modal accesible con scroll interno (`max-height: calc(100vh - 48px)`) sobre tarjeta base Dual-Zone | **Modal**: Cambio obligatorio tras primer ingreso con credencial temporal y jerarquía de acciones. |
-| **Reporte general** | [`reporte-general.html`](reporte-general.html) | KPIs colapsan a 1 columna; gráficas colapsan a 1 columna en <= 1100 px | **Carga/Base**: Visualización de carga de indicadores y cabeceras con wrap. |
-| **Tendencias** | [`tendencias.html`](tendencias.html) | Controles en cuadrícula auto-fit; gráficas responsivas | **Carga/Base**: Selección de indicador y cálculo dinámico de tendencias. |
-| **Explorador** | [`explorador.html`](explorador.html) | Panel de filtros de 2 filas con botones alineados; gráfica fluida | **Vacío/Base**: Estado inicial esperando selección de variable para graficar. |
+| **Reporte general** | [`reporte-general.html`](reporte-general.html) | Tarjeta de filtros con wrap; 4 KPIs en una fila (>= 1440 px), 2×2 (< 1440 px) y 1 columna (< 768 px); gráficas en `minmax(0, 1fr)` que colapsan a 1 columna en <= 1100 px | **Carga/Base**: filtros de programa, cohorte y momento; KPIs de total, empleabilidad, empleo formal y salario con rango; gráficas de programas, satisfacción y estado laboral con estado de publicación. |
+| **Tendencias** | [`tendencias.html`](tendencias.html) | Tarjeta de filtros con wrap; controles en cuadrícula auto-fit; gráficas responsivas | **Carga/Base/Vacío**: filtros de programa y cohorte, selección de indicador y comparación entre momentos con el estado de datos insuficientes y la nota de programas sin pares. |
+| **Explorador** | [`explorador.html`](explorador.html) | Panel de filtros de 2 filas con botones alineados; gráficas fluidas apiladas; selects contenidos en su columna (`min-width: 0`) | **Vacío/Base/Error**: varias gráficas simultáneas con `Quitar gráfica`, error de publicación con reintento y `Crear otra gráfica`. |
 | **Analítica y alertas** | [`analitica.html`](analitica.html) | KPIs colapsables; dos columnas a una en <= 1100 px | **Base / Vacío**: Resumen analítico y alerta de seguimiento sin incidencias. |
 | **Directorio** | [`directorio.html`](directorio.html) | Contenedor `.table-scroll` con tabla `min-width: 900px`; paginación apilable | **Base**: Listado de egresados, badges de momentos, acciones con jerarquía segura. |
 | **Co-relaciones (IA)** | [`habilidades.html`](habilidades.html) | KPIs colapsan a 2 y 1 columna; tabla en `.table-scroll` (`min-width: 900px`); pestañas interactivas | **Base**: Reglas de asociación (co-ocurrencias), catálogo de habilidades duras/blandas y competencias emergentes por TF-IDF. |
 | **Ficha de egresado** | [`ficha-egresado.html`](ficha-egresado.html) | Grid de perfil adaptable; línea de tiempo vertical | **Base / Detalle**: Datos individuales y trayectoria en encuestas oficiales (OLE). |
 | **Gráficas publicadas** | [`publicaciones.html`](publicaciones.html) | Tarjetas `repeat(auto-fit, minmax(320px, 1fr))` | **Base**: Catálogo de instantáneas agregadas autorizadas por sede (v1). |
 | **Carga de datos** | [`carga-datos.html`](carga-datos.html) | Grid adaptable; historial en `.table-scroll` con `min-width: 650px` | **Base**: Subida de .xlsx (zona de arrastre con icono) e historial de vigencia. |
-| **Gestión de usuarios** | [`gestion-usuarios.html`](gestion-usuarios.html) | Admin-grid pasa a 1 col en <= 1150 px; tabla en `.table-scroll` (`1000px`) | **Base**: Alta institucional de coordinadores y tabla de usuarios activos con acciones outline. |
+| **Gestión de usuarios** | [`gestion-usuarios.html`](gestion-usuarios.html) | Admin-grid `minmax(320px, 380px) minmax(0, 1fr)` que pasa a 1 col en <= 1150 px; tabla en `.table-scroll` (`1000px`) | **Base**: Alta institucional de coordinadores y tabla de usuarios activos con acciones outline; programas asignados sin datos actuales en cursiva. |
 | **Gestión de usuarios (Alta)** | [`gestion-usuarios-credencial.html`](gestion-usuarios-credencial.html) | Modal responsive con acción secundaria primero y primaria al final | **Modal**: Visualización única de contraseña temporal de 24 horas. |
 | **Mi Perfil** | [`mi-perfil.html`](mi-perfil.html) | Grid colapsable; filas de información con wrap (`.info-row`) | **Base**: Identidad, sede asignada y alcance de permisos. |
 
@@ -42,6 +42,7 @@
 - Las variantes de carga, vacío, error y modal deben conservar la geometría final de la pantalla.
 - Las tablas usan exclusivamente datos sintéticos identificables como `Demo`; nunca contienen datos personales, archivos o credenciales reales.
 - Las tablas deben estar siempre contenidas en contenedores `.table-scroll` con anchos mínimos declarados para garantizar lectura sin truncado a 320 px.
+- Toda columna de grilla que contenga tablas, gráficas o selects largos usa `minmax(0, 1fr)`: una pista `1fr` toma el ancho mínimo de su contenido y desborda la página (auditoría UI del 2026-09-25).
 - Las tarjetas y paneles conservan siempre un borde perimetral neutro uniforme; se prohíbe el uso de bordes de color laterales (izquierdo o derecho) o superiores como franjas de alerta o decoración.
 
 ## Alcance por rol

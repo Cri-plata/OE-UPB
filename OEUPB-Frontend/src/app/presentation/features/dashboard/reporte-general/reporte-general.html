@@ -1,6 +1,6 @@
 <div class="layout">
   <app-sidebar></app-sidebar>
-  
+
   <main class="content">
     <header class="page-header">
       <div class="page-header-content">
@@ -10,7 +10,7 @@
       <img src="escudo-upb.png" alt="Escudo UPB" class="shield">
     </header>
 
-    <div class="report-content dashboard-container">
+    <div class="report-content">
       <app-filtros-analiticos [conMomento]="true" (aplicar)="aplicarFiltros($event)"></app-filtros-analiticos>
       <p class="publish-error" role="alert" *ngIf="errorCarga">{{ errorCarga }}</p>
 
@@ -26,7 +26,7 @@
             <span class="trend up">{{ kpis ? kpis.total_encuestados + ' encuestas en el filtro' : '' }}</span>
           </div>
         </article>
-        
+
         <article class="card kpi-card">
           <div class="kpi-icon green">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
@@ -122,7 +122,7 @@
           <div id="grafica-estado" class="chart-wrapper" *ngIf="isChartReady">
             <canvas baseChart [data]="estadoChartData" type="bar" [options]="estadoChartOptions"></canvas>
           </div>
-          <p class="cell-subtext" style="margin-top: 8px;">Empleado incluye empresa familiar; practicantes cuentan como estudiantes (RN-16).</p>
+          <p class="nota">Empleado incluye empresa familiar; practicantes cuentan como estudiantes (RN-16).</p>
         </article>
       </div>
     </div>
@@ -131,11 +131,11 @@
 
 <ng-template #acciones let-base="base" let-titulo="titulo" let-indicador="indicador" let-tipo="tipo">
   <ng-container *ngIf="publicacion.estaPublicada(clave(base)); else accionPublicar">
-    <span class="badge success">Publicada v{{ publicacion.publicacion(clave(base))?.version }}</span>
+    <span class="publication-status">Publicada v{{ publicacion.publicacion(clave(base))?.version }}</span>
     <button class="btn-secondary table-action" [disabled]="publicacion.ocupado()" (click)="retirar(base)">{{ publicacion.procesando(clave(base)) ? 'Retirando…' : 'Retirar publicación' }}</button>
   </ng-container>
   <ng-template #accionPublicar>
-    <button class="btn-primary table-action" [disabled]="publicacion.ocupado() || !isChartReady" (click)="publicar(base, titulo, indicador, tipo)">{{ publicacion.procesando(clave(base)) ? 'Publicando…' : (publicacion.error(clave(base)) ? 'Reintentar' : 'Publicar') }}</button>
+    <button class="btn-primary table-action" [disabled]="publicacion.ocupado() || !isChartReady" (click)="publicar(base, titulo, indicador, tipo)">{{ publicacion.procesando(clave(base)) ? 'Publicando…' : (publicacion.error(clave(base)) ? 'Reintentar publicación' : 'Publicar') }}</button>
   </ng-template>
   <p class="publish-error" role="alert" *ngIf="publicacion.error(clave(base))">{{ publicacion.error(clave(base)) }}</p>
 </ng-template>

@@ -11,9 +11,9 @@
 
     <section class="publicaciones-grid">
       <p *ngIf="cargando()" class="loading-state" role="status">Cargando publicaciones…</p>
-      <div class="card error-message" *ngIf="!cargando() && error()" role="alert">
-        <p>{{ error() }}</p>
-        <button type="button" class="btn-secondary" (click)="cargar()">Reintentar</button>
+      <div class="error-message" *ngIf="!cargando() && error()" role="alert">
+        {{ error() }}
+        <button type="button" class="btn-secondary table-action" (click)="cargar()">Reintentar</button>
       </div>
       <div class="card empty-state" *ngIf="!cargando() && !error() && publicaciones().length === 0">
         No hay gráficas publicadas compatibles con tus permisos y programas.

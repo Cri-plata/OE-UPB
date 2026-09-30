@@ -1,6 +1,6 @@
 <div class="layout">
   <app-sidebar></app-sidebar>
-  
+
   <main class="content">
     <header class="page-header">
       <div class="page-header-content">
@@ -10,7 +10,7 @@
       <img src="escudo-upb.png" alt="Escudo UPB" class="shield">
     </header>
 
-    <div class="tendencias-content dashboard-container">
+    <div class="tendencias-content">
       <app-filtros-analiticos (aplicar)="aplicarFiltros($event)"></app-filtros-analiticos>
       <p class="publish-error" role="alert" *ngIf="errorCarga">{{ errorCarga }}</p>
 
@@ -34,20 +34,21 @@
       </div>
 
       <article class="card chart-card">
+        <p class="publish-error" role="alert" *ngIf="publicacion.errorCarga()">{{ publicacion.errorCarga() }}</p>
         <div class="chart-header">
           <h2 class="card-title">Evolución Histórica: {{ currentIndicatorName }}</h2>
           <div class="chart-actions">
             <button class="btn-secondary table-action" (click)="exportarGrafica()">Exportar PNG</button>
             <ng-container *ngIf="publicacion.estaPublicada(graficaKey); else accionPublicar">
-              <span class="badge success">Publicada v{{ publicacion.publicacion(graficaKey)?.version }}</span>
+              <span class="publication-status">Publicada v{{ publicacion.publicacion(graficaKey)?.version }}</span>
               <button class="btn-secondary table-action" [disabled]="publicacion.ocupado()" (click)="retirar()">{{ publicacion.procesando(graficaKey) ? 'Retirando…' : 'Retirar publicación' }}</button>
             </ng-container>
             <ng-template #accionPublicar>
-              <button class="btn-primary table-action" [disabled]="publicacion.ocupado() || !isChartReady" (click)="publicar()">{{ publicacion.procesando(graficaKey) ? 'Publicando…' : (publicacion.error(graficaKey) ? 'Reintentar' : 'Publicar') }}</button>
+              <button class="btn-primary table-action" [disabled]="publicacion.ocupado() || !isChartReady" (click)="publicar()">{{ publicacion.procesando(graficaKey) ? 'Publicando…' : (publicacion.error(graficaKey) ? 'Reintentar publicación' : 'Publicar') }}</button>
             </ng-template>
+            <p class="publish-error" role="alert" *ngIf="publicacion.error(graficaKey)">{{ publicacion.error(graficaKey) }}</p>
           </div>
         </div>
-        <p class="publish-error" role="alert" *ngIf="publicacion.error(graficaKey)">{{ publicacion.error(graficaKey) }}</p>
         <p class="publish-error" role="alert" *ngIf="publicacion.errorCarga()">{{ publicacion.errorCarga() }}</p>
 
         <div id="grafica-tendencias" class="chart-wrapper line-chart" *ngIf="isChartReady">
@@ -66,7 +67,7 @@
         <div class="chart-header">
           <h2 class="card-title" id="titulo-comparacion">Comparación entre momentos (mismos egresados)</h2>
         </div>
-        <div class="control-panel" style="margin-bottom: var(--space-md);">
+        <div class="control-panel">
           <div class="control-group">
             <label for="momento-inicial">Momento inicial</label>
             <select id="momento-inicial" class="form-control" [value]="momentoInicial()" (change)="cambiarComparacion('inicial', $any($event.target).value)">

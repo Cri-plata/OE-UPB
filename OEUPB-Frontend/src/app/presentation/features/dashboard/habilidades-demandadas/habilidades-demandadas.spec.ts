@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideRouter } from '@angular/router';
 
 import { HabilidadesDemandadasComponent } from './habilidades-demandadas';
+import { CHART_PALETTE } from '../../../shared/chart-palette';
 
 const API = 'http://localhost:8000/api';
 
@@ -90,8 +91,8 @@ describe('HabilidadesDemandadasComponent', () => {
     // Los colores deben provenir de CHART_PALETTE, no ser hex arbitrarios
     const bgBlandas = comp.blandasChartData.datasets[0].backgroundColor as string;
     const bgDuras = comp.durasChartData.datasets[0].backgroundColor as string;
-    expect(bgBlandas).toBe('#2a9d8f'); // CHART_PALETTE[2]
-    expect(bgDuras).toBe('#c8102e');   // CHART_PALETTE[0]
+    expect(bgBlandas).toBe(CHART_PALETTE[2]);
+    expect(bgDuras).toBe(CHART_PALETTE[0]);
   });
 
   it('clasifica el Lift correctamente', () => {

@@ -7,6 +7,7 @@ la sede autenticada y nunca de métricas enviadas por el cliente (RN-11, RN-14).
 
 import re
 import unicodedata
+from functools import lru_cache
 
 from sqlalchemy.orm import Session
 
@@ -27,7 +28,8 @@ CATEGORIAS_SATISFACCION = (
     "Estabilidad",
     "Ascenso",
 )
-PALETA = ["#c8102e", "#1d3557", "#2a9d8f", "#f4a261", "#9b5de5", "#0077b6", "#00b4d8", "#90e0ef", "#e9c46a", "#457b9d"]
+# Paleta de design.md (rojo, índigo, verde, amarillo, grafito y variantes); igual a CHART_PALETTE del frontend.
+PALETA = ["#e31e24", "#6366f1", "#137a47", "#ffc20e", "#5e5b5a", "#93000d", "#a5a8f7", "#5fb08a", "#b38600", "#a19d9c"]
 
 # RN-31: familias de columnas que nunca son variables analíticas. Se comparan
 # contra el nombre normalizado (minúsculas, sin tildes, separado por "_").
@@ -47,11 +49,19 @@ class DatosInsuficientesError(ValueError):
     """La gráfica no conserva ninguna celda publicable tras aplicar el umbral."""
 
 
-def normalizar_columna(nombre: str) -> str:
-    sin_tildes = unicodedata.normalize("NFKD", str(nombre)).encode("ascii", "ignore").decode("ascii")
+def normalizar_columna(nombre) -> str:
+    return _normalizar_texto(str(nombre))
+
+
+# Los nombres de pregunta y las opciones cerradas se repiten en cada medición:
+# memoizar evita repetir la normalización miles de veces por petición (RNF-06).
+@lru_cache(maxsize=16384)
+def _normalizar_texto(texto: str) -> str:
+    sin_tildes = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode("ascii")
     return re.sub(r"[^a-z0-9]+", "_", sin_tildes.lower()).strip("_")
 
 
+@lru_cache(maxsize=4096)
 def es_variable_analitica(nombre: str) -> bool:
     normalizado = normalizar_columna(nombre)
     if not normalizado:
@@ -96,10 +106,16 @@ def _mediciones_identificadas(db: Session, sede_id: int, momento=None, programa=
     return _mediciones(db, sede_id, Filtros([programa] if programa else None, [anio] if anio is not None else None, momento))
 
 
-def distribucion_programas(db: Session, sede_id: int, filtros: Filtros = SIN_FILTROS) -> dict[str, int]:
-    """Egresados identificados distintos por programa."""
+def distribucion_programas(db: Session, sede_id: int, filtros: Filtros = SIN_FILTROS, mediciones=None) -> dict[str, int]:
+    """Egresados identificados distintos por programa.
+
+    `mediciones` permite reutilizar una consulta ya hecha (las anónimas se ignoran).
+    """
     documentos_por_programa: dict[str, set[str]] = {}
-    for medicion, programa in _mediciones(db, sede_id, filtros):
+    fuente = _mediciones(db, sede_id, filtros) if mediciones is None else mediciones
+    for medicion, programa in fuente:
+        if medicion.egresado_documento is None:
+            continue
         documentos_por_programa.setdefault(programa, set()).add(medicion.egresado_documento)
     return {programa: len(documentos) for programa, documentos in documentos_por_programa.items()}
 
@@ -228,10 +244,14 @@ def resumen_laboral(mediciones) -> dict:
     }
 
 
-def satisfaccion_general(db: Session, sede_id: int, filtros: Filtros = SIN_FILTROS) -> dict[str, dict[str, float]]:
-    """Devuelve suma y conteo por categoría de satisfacción (pregunta 54)."""
+def satisfaccion_general(db: Session, sede_id: int, filtros: Filtros = SIN_FILTROS, mediciones=None) -> dict[str, dict[str, float]]:
+    """Devuelve suma y conteo por categoría de satisfacción (pregunta 54).
+
+    `mediciones` permite reutilizar la consulta con anónimas ya hecha.
+    """
     acumulado = {categoria: {"suma": 0.0, "count": 0} for categoria in CATEGORIAS_SATISFACCION}
-    for medicion, _ in _mediciones(db, sede_id, filtros, incluir_anonimas=True):
+    fuente = _mediciones(db, sede_id, filtros, incluir_anonimas=True) if mediciones is None else mediciones
+    for medicion, _ in fuente:
         for clave, valor in (medicion.respuestas or {}).items():
             clave_min = clave.lower()
             if "califique su nivel de satisfacci" not in clave_min or valor is None:

@@ -1,14 +1,130 @@
-.filtros { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; margin-bottom: 30px; }
-.filtro { position: relative; background: var(--color-surface); border: 1px solid var(--color-border-control); border-radius: 6px; min-width: 220px; }
-.filtro summary { cursor: pointer; padding: 9px 12px; font-size: 14px; color: var(--color-text-body); display: flex; justify-content: space-between; gap: 12px; }
-.contador { color: var(--color-brand); font-weight: 700; }
-.opciones { position: absolute; z-index: 5; top: 100%; left: 0; min-width: 100%; max-height: 260px; overflow-y: auto; background: var(--color-surface); border: 1px solid var(--color-border-control); border-radius: 6px; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 18px rgba(0, 0, 0, .08); }
-.opciones label { display: flex; gap: 8px; align-items: center; font-size: 14px; white-space: nowrap; }
-.vacio { color: var(--color-text-muted); font-size: 13px; }
-.momento { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--color-text-body); }
-.momento select { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--color-border-control); }
-.aplicar, .limpiar { border-radius: 6px; padding: 9px 14px; font-weight: 700; cursor: pointer; border: 1px solid var(--color-brand); }
-.aplicar { background: var(--color-brand); color: var(--color-surface); }
-.limpiar { background: var(--color-surface); color: var(--color-brand); }
-.limpiar:disabled { opacity: .5; cursor: default; }
-.error { flex-basis: 100%; margin: 0; color: var(--color-error); font-size: 13px; }
+// Mismo patrón que los filtros del Directorio: tarjeta de filtros con grupos
+// etiqueta + control de 40 px alineados al pie (design.md, "Page Composition").
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-md);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  flex: 1 1 220px;
+  min-width: 0;
+  margin: 0;
+
+  &.momento {
+    flex: 0 1 160px;
+  }
+}
+
+.filtro-label,
+.filter-group label {
+  color: var(--body);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.selector {
+  position: relative;
+
+  summary {
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 8px var(--space-sm);
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--heading);
+    font-size: 14px;
+    cursor: pointer;
+    list-style: none;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    &::-webkit-details-marker { display: none; }
+
+    &:focus-visible {
+      outline: 2px solid var(--brand);
+      outline-offset: 2px;
+    }
+  }
+
+  &[open] summary {
+    border-color: var(--brand);
+  }
+}
+
+.opciones {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + var(--space-2xs));
+  left: 0;
+  min-width: 100%;
+  max-width: min(420px, 80vw);
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface);
+  border: 1px solid rgba(26, 24, 24, 0.08);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(26, 24, 24, 0.06);
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 13px;
+    color: var(--body);
+    cursor: pointer;
+  }
+
+  input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    flex: 0 0 16px;
+    accent-color: var(--brand);
+  }
+}
+
+.vacio {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.acciones {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.error {
+  flex-basis: 100%;
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  background: rgba(186, 26, 26, 0.1);
+  color: var(--danger);
+  font-size: 13px;
+}
+
+@media (max-width: 767px) {
+  .filter-group,
+  .filter-group.momento,
+  .acciones {
+    flex: 1 1 100%;
+  }
+
+  .acciones button {
+    flex: 1;
+  }
+}

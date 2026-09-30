@@ -102,7 +102,7 @@
                 <td>{{ u.correo }}</td>
                 <td><span class="badge">{{ u.rol }}</span></td>
                 <td>{{ nombreSede(u.sede_id) }}</td>
-                <td>{{ u.etiqueta || '—' }}<br><small class="cell-subtext">{{ u.programas.join(', ') || 'Sin programas' }}</small><small class="sin-datos" *ngIf="u.programas_sin_datos?.length"><br>Sin datos actuales: {{ u.programas_sin_datos?.join(', ') }}</small></td>
+                <td>{{ u.etiqueta || '—' }}<br><small class="cell-subtext">{{ u.programas.join(', ') || 'Sin programas' }}</small><small class="cell-subtext sin-datos" *ngIf="u.programas_sin_datos?.length"><br>Sin datos actuales: {{ u.programas_sin_datos?.join(', ') }}</small></td>
                 <td><span class="badge" [class.success]="u.activo">{{ u.activo ? 'Activa' : 'Inactiva' }}</span></td>
                 <td>
                   <div class="table-actions">
