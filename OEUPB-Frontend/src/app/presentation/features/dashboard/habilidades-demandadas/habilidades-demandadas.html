@@ -2,23 +2,22 @@
   <app-sidebar></app-sidebar>
 
   <main class="content">
-    <!-- Top Banner Institucional -->
-    <div class="top-banner">
-      <div class="banner-text">
+    <header class="page-header">
+      <div class="page-header-content">
         <h1>Análisis de Co-relaciones de Habilidades</h1>
         <p>Extracción de competencias demandadas y reglas de co-ocurrencia del mercado laboral a partir de encuestas de egresados.</p>
       </div>
-      <div class="upb-logo">
-        <img src="/escudo-upb.png" alt="Escudo UPB" class="escudo-img">
-      </div>
-    </div>
+      <img src="escudo-upb.png" alt="Escudo UPB" class="shield">
+    </header>
 
-    <div class="dashboard-container">
+    <div class="habilidades-content dashboard-container">
       <!-- Tarjetas KPI Resumen -->
       <div class="kpi-grid">
         <div class="kpi-card">
           <div class="kpi-header">
-            <span class="kpi-icon">📋</span>
+            <span class="kpi-icon blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+            </span>
             <span class="kpi-label">Respuestas Analizadas</span>
           </div>
           <div class="kpi-value">{{ estadisticas?.total_respuestas_analizadas || totalRespuestasReglas || 0 }}</div>
@@ -27,7 +26,9 @@
 
         <div class="kpi-card">
           <div class="kpi-header">
-            <span class="kpi-icon">🎯</span>
+            <span class="kpi-icon green">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            </span>
             <span class="kpi-label">Habilidades Catalogadas</span>
           </div>
           <div class="kpi-value">{{ habilidadesReconocidas.length }}</div>
@@ -36,7 +37,9 @@
 
         <div class="kpi-card">
           <div class="kpi-header">
-            <span class="kpi-icon">🔗</span>
+            <span class="kpi-icon brand">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg>
+            </span>
             <span class="kpi-label">Reglas de Asociación</span>
           </div>
           <div class="kpi-value highlight">{{ totalReglas }}</div>
@@ -45,7 +48,9 @@
 
         <div class="kpi-card">
           <div class="kpi-header">
-            <span class="kpi-icon">💡</span>
+            <span class="kpi-icon amber">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+            </span>
             <span class="kpi-label">Habilidades Emergentes</span>
           </div>
           <div class="kpi-value">{{ candidatasEmergentes.length }}</div>
@@ -59,15 +64,19 @@
           class="tab-btn" 
           [class.active]="activeTab === 'reglas'" 
           (click)="setTab('reglas')">
-          <span class="tab-icon">🔄</span>
+          <span class="tab-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg>
+          </span>
           Reglas de Asociación (Co-ocurrencias)
         </button>
         <button 
           class="tab-btn" 
           [class.active]="activeTab === 'habilidades'" 
           (click)="setTab('habilidades')">
-          <span class="tab-icon">📊</span>
-          Catálogo de Habilidades & Emergentes
+          <span class="tab-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+          </span>
+          Catálogo de Habilidades &amp; Emergentes
         </button>
       </div>
 
@@ -135,7 +144,9 @@
       <!-- ═══════════════════════════════════════════════════════════════════ -->
       <div class="tab-content" *ngIf="activeTab === 'reglas' && !isLoading">
         <div class="info-card">
-          <div class="info-icon">💡</div>
+          <div class="info-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+          </div>
           <div class="info-text">
             <strong>¿Qué representan estas reglas? (Market Basket Analysis):</strong>
             Muestran qué competencias se exigen conjuntamente en las mismas respuestas.
@@ -202,7 +213,9 @@
 
           <!-- Empty State -->
           <div class="empty-state" *ngIf="reglasAsociacion.length === 0">
-            <div class="empty-icon">🔍</div>
+            <div class="empty-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </div>
             <h3>No se encontraron reglas con los umbrales actuales</h3>
             <p>
               Con el filtro de <strong>&ge; {{ filtroMinOcurrencias }} egresados</strong> y <strong>{{ (filtroMinConfianza * 100) }}% de confianza</strong> no hay combinaciones que califiquen.
@@ -223,9 +236,12 @@
           <div class="chart-card half-card">
             <div class="chart-header">
               <h2>Top Habilidades Blandas</h2>
-              <span class="badge-tag blanda">Interpersonales</span>
+              <div class="chart-actions">
+                <button type="button" class="btn-secondary table-action" (click)="exportarGrafica('#grafica-habilidades-blandas canvas', 'habilidades-blandas.png')" [disabled]="!isChartReady" title="Exportar gráfica como PNG">PNG</button>
+                <span class="badge-tag blanda">Interpersonales</span>
+              </div>
             </div>
-            <div class="chart-wrapper" *ngIf="isChartReady">
+            <div id="grafica-habilidades-blandas" class="chart-wrapper" *ngIf="isChartReady">
               <canvas baseChart
                 [data]="blandasChartData"
                 [type]="barChartType"
@@ -237,9 +253,12 @@
           <div class="chart-card half-card">
             <div class="chart-header">
               <h2>Top Habilidades Duras / Técnicas</h2>
-              <span class="badge-tag dura">Técnicas</span>
+              <div class="chart-actions">
+                <button type="button" class="btn-secondary table-action" (click)="exportarGrafica('#grafica-habilidades-duras canvas', 'habilidades-duras.png')" [disabled]="!isChartReady" title="Exportar gráfica como PNG">PNG</button>
+                <span class="badge-tag dura">Técnicas</span>
+              </div>
             </div>
-            <div class="chart-wrapper" *ngIf="isChartReady">
+            <div id="grafica-habilidades-duras" class="chart-wrapper" *ngIf="isChartReady">
               <canvas baseChart
                 [data]="durasChartData"
                 [type]="barChartType"

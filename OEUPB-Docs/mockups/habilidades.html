@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>OE UPB · Análisis de Co-relaciones de Habilidades</title>
+    <link rel="stylesheet" href="mockups.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-input" />
+      <header class="mobile-header">
+        <div class="mobile-brand">
+          <div class="brand-mark">UPB</div>
+          <span>OEUPB</span>
+        </div>
+        <label for="sidebar-toggle" class="menu-toggle-btn" aria-label="Abrir menú de navegación"></label>
+      </header>
+      <label for="sidebar-toggle" class="sidebar-backdrop" aria-label="Cerrar menú"></label>
+      <aside class="sidebar">
+        <div class="sidebar-mobile-close">
+          <label for="sidebar-toggle" class="sidebar-close-btn" aria-label="Cerrar menú"></label>
+        </div>
+        <div class="brand">
+          <div class="brand-mark">UPB</div>
+          <h2 class="brand-title">OEUPB</h2>
+        </div>
+        <nav class="nav-menu">
+          <a class="nav-item" href="reporte-general.html" title="Reporte general"><span class="nav-item-text">Reporte general</span></a>
+          <a class="nav-item" href="tendencias.html" title="Tendencias"><span class="nav-item-text">Tendencias</span></a>
+          <a class="nav-item" href="explorador.html" title="Explorador de Datos"><span class="nav-item-text">Explorador de Datos</span></a>
+          <a class="nav-item" href="analitica.html" title="Analítica y alertas"><span class="nav-item-text">Analítica y alertas</span></a>
+          <a class="nav-item" href="directorio.html" title="Directorio"><span class="nav-item-text">Directorio</span></a>
+          <a class="nav-item active" href="habilidades.html" title="Co-relaciones"><span class="nav-item-text">Co-relaciones</span></a>
+          <a class="nav-item" href="publicaciones.html" title="Gráficas publicadas"><span class="nav-item-text">Gráficas publicadas</span></a>
+          <a class="nav-item" href="carga-datos.html" title="Cargar datos"><span class="nav-item-text">Cargar datos</span></a>
+          <a class="nav-item" href="gestion-usuarios.html" title="Administrar Usuarios"><span class="nav-item-text">Administrar Usuarios</span></a>
+          <a class="nav-item" href="mi-perfil.html" title="Mi Perfil"><span class="nav-item-text">Mi Perfil</span></a>
+        </nav>
+        <div class="bottom-menu">
+          <a class="logout-btn" href="login.html" title="Cerrar Sesión"><span>Cerrar Sesión</span></a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="page">
+          <header class="page-header">
+            <div class="page-header-content">
+              <h1>Análisis de Co-relaciones de Habilidades</h1>
+              <p>Extracción de competencias demandadas y reglas de co-ocurrencia del mercado laboral a partir de encuestas de egresados.</p>
+            </div>
+            <img
+              class="shield"
+              src="../../OEUPB-Frontend/public/escudo-upb.png"
+              alt="Escudo UPB"
+            />
+          </header>
+
+          <!-- Tarjetas KPI Resumen -->
+          <div class="kpi-grid four-columns">
+            <article class="kpi-card">
+              <div class="kpi-icon blue">
+                <i data-lucide="clipboard" aria-hidden="true"></i>
+              </div>
+              <div>
+                <h3>Respuestas Analizadas</h3>
+                <strong>420</strong>
+                <small>Texto libre de encuestas (Demo)</small>
+              </div>
+            </article>
+
+            <article class="kpi-card">
+              <div class="kpi-icon green">
+                <i data-lucide="target" aria-hidden="true"></i>
+              </div>
+              <div>
+                <h3>Habilidades Catalogadas</h3>
+                <strong>22</strong>
+                <small>Categorías detectadas (Demo)</small>
+              </div>
+            </article>
+
+            <article class="kpi-card">
+              <div class="kpi-icon brand">
+                <i data-lucide="sparkles" aria-hidden="true"></i>
+              </div>
+              <div>
+                <h3>Reglas de Asociación</h3>
+                <strong class="highlight">15</strong>
+                <small>Pares con Lift &ge; 1.0 (Demo)</small>
+              </div>
+            </article>
+
+            <article class="kpi-card">
+              <div class="kpi-icon amber">
+                <i data-lucide="lightbulb" aria-hidden="true"></i>
+              </div>
+              <div>
+                <h3>Habilidades Emergentes</h3>
+                <strong>8</strong>
+                <small>Descubiertas por TF-IDF (Demo)</small>
+              </div>
+            </article>
+          </div>
+
+          <!-- Barra de Navegación de Pestañas -->
+          <div class="tabs-container">
+            <button id="btn-reglas" class="tab-btn active" onclick="switchTab('reglas')">
+              <i data-lucide="git-branch" aria-hidden="true"></i>
+              <span>Reglas de Asociación (Co-ocurrencias)</span>
+            </button>
+            <button id="btn-catalogo" class="tab-btn" onclick="switchTab('catalogo')">
+              <i data-lucide="chart-column" aria-hidden="true"></i>
+              <span>Catálogo de Habilidades &amp; Emergentes</span>
+            </button>
+          </div>
+
+          <!-- Panel de Filtros Compartido -->
+          <div class="control-panel">
+            <div class="control-row-secondary">
+              <div class="control-group">
+                <label>Momento de Medición:</label>
+                <select>
+                  <option selected>Todos los momentos</option>
+                  <option>Momento 0 (Graduación)</option>
+                  <option>Momento 1 (1 año)</option>
+                  <option>Momento 5 (5 años)</option>
+                </select>
+              </div>
+
+              <div class="control-group">
+                <label>Año de Encuesta:</label>
+                <select>
+                  <option selected>Todos los años</option>
+                  <option>2024</option>
+                  <option>2023</option>
+                  <option>2022</option>
+                </select>
+              </div>
+
+              <div class="control-group">
+                <label>Programa Académico:</label>
+                <select>
+                  <option selected>Todos los programas</option>
+                  <option>Ingeniería de Sistemas</option>
+                  <option>Ingeniería Industrial</option>
+                  <option>Administración de Empresas</option>
+                  <option>Derecho</option>
+                </select>
+              </div>
+
+              <div class="control-group">
+                <label>Ocurrencias Mínimas:</label>
+                <select>
+                  <option>&ge; 1 egresado (Sin filtro)</option>
+                  <option>&ge; 2 egresados (Muestras pequeñas)</option>
+                  <option selected>&ge; 3 egresados (Estándar de calidad)</option>
+                  <option>&ge; 5 egresados (Alta significancia)</option>
+                </select>
+              </div>
+
+              <div class="control-group">
+                <label>Confianza Mínima:</label>
+                <select>
+                  <option>40% o superior</option>
+                  <option selected>50% o superior (Recomendado)</option>
+                  <option>60% o superior</option>
+                  <option>75% o superior (Fuerte)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- =============================================================== -->
+          <!-- PESTAÑA 1: REGLAS DE ASOCIACIÓN -->
+          <!-- =============================================================== -->
+          <div id="tab-reglas" class="tab-pane active">
+            <div class="info-card">
+              <div class="info-icon">
+                <i data-lucide="lightbulb" aria-hidden="true"></i>
+              </div>
+              <div class="info-text">
+                <strong>¿Qué representan estas reglas? (Market Basket Analysis):</strong>
+                Muestran qué competencias se exigen conjuntamente en las mismas respuestas.
+                Un <em>Lift &gt; 1.0</em> indica una correlación positiva superior al azar; mientras más alto sea el Lift, más indisociables son ambas habilidades en el perfil laboral demandado.
+              </div>
+            </div>
+
+            <article class="card table-card">
+              <div style="padding: var(--space-lg); border-bottom: 1px solid var(--divider); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-xs);">
+                <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Patrones de Co-ocurrencia Identificados (6 reglas activas de muestra)</h2>
+                <span class="meta-tag">Respaldado en 380 encuestas con &ge; 2 habilidades detectadas</span>
+              </div>
+
+              <div class="table-scroll">
+                <table class="association-table">
+                  <thead>
+                    <tr>
+                      <th>Si la empresa menciona...</th>
+                      <th>También exige...</th>
+                      <th style="text-align: center;">Egresados</th>
+                      <th style="text-align: center;">Soporte</th>
+                      <th style="text-align: center;">Confianza</th>
+                      <th style="text-align: center;">Lift</th>
+                      <th>Insight Interpretativo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span class="skill-pill antecedent">Trabajo en equipo</span></td>
+                      <td><span class="skill-pill consequent">Comunicación asertiva</span></td>
+                      <td style="text-align: center;"><span class="count-badge">28</span></td>
+                      <td style="text-align: center;">6.7%</td>
+                      <td style="text-align: center;">
+                        <div class="progress-cell">
+                          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 82%;"></div></div>
+                          <span class="progress-text">82%</span>
+                        </div>
+                      </td>
+                      <td style="text-align: center;">
+                        <span class="lift-badge badge-alto">2.45 &bull; Fuerte</span>
+                      </td>
+                      <td class="insight-cell">Cuando se exige trabajo en equipo, la probabilidad de exigir comunicación asertiva se incrementa 2.45 veces.</td>
+                    </tr>
+                    <tr>
+                      <td><span class="skill-pill antecedent">Liderazgo</span></td>
+                      <td><span class="skill-pill consequent">Gestión de proyectos</span></td>
+                      <td style="text-align: center;"><span class="count-badge">21</span></td>
+                      <td style="text-align: center;">5.0%</td>
+                      <td style="text-align: center;">
+                        <div class="progress-cell">
+                          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 75%;"></div></div>
+                          <span class="progress-text">75%</span>
+                        </div>
+                      </td>
+                      <td style="text-align: center;">
+                        <span class="lift-badge badge-alto">2.10 &bull; Fuerte</span>
+                      </td>
+                      <td class="insight-cell">Fuerte complementariedad entre toma de decisiones directivas y control de iniciativas.</td>
+                    </tr>
+                    <tr>
+                      <td><span class="skill-pill antecedent">Python</span></td>
+                      <td><span class="skill-pill consequent">SQL / Bases de Datos</span></td>
+                      <td style="text-align: center;"><span class="count-badge">19</span></td>
+                      <td style="text-align: center;">4.5%</td>
+                      <td style="text-align: center;">
+                        <div class="progress-cell">
+                          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 71%;"></div></div>
+                          <span class="progress-text">71%</span>
+                        </div>
+                      </td>
+                      <td style="text-align: center;">
+                        <span class="lift-badge badge-medio">1.95 &bull; Moderado</span>
+                      </td>
+                      <td class="insight-cell">Correlación técnica clásica en desarrollo backend y análisis cuantitativo de datos.</td>
+                    </tr>
+                    <tr>
+                      <td><span class="skill-pill antecedent">Resolución de problemas</span></td>
+                      <td><span class="skill-pill consequent">Pensamiento crítico</span></td>
+                      <td style="text-align: center;"><span class="count-badge">18</span></td>
+                      <td style="text-align: center;">4.3%</td>
+                      <td style="text-align: center;">
+                        <div class="progress-cell">
+                          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 68%;"></div></div>
+                          <span class="progress-text">68%</span>
+                        </div>
+                      </td>
+                      <td style="text-align: center;">
+                        <span class="lift-badge badge-medio">1.80 &bull; Moderado</span>
+                      </td>
+                      <td class="insight-cell">Habilidades cognitivas concurrentes en vacantes de nivel intermedio y directivo.</td>
+                    </tr>
+                    <tr>
+                      <td><span class="skill-pill antecedent">Excel avanzado</span></td>
+                      <td><span class="skill-pill consequent">Análisis financiero</span></td>
+                      <td style="text-align: center;"><span class="count-badge">16</span></td>
+                      <td style="text-align: center;">3.8%</td>
+                      <td style="text-align: center;">
+                        <div class="progress-cell">
+                          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 65%;"></div></div>
+                          <span class="progress-text">65%</span>
+                        </div>
+                      </td>
+                      <td style="text-align: center;">
+                        <span class="lift-badge badge-medio">1.72 &bull; Moderado</span>
+                      </td>
+                      <td class="insight-cell">Dominio instrumental vinculado a modelado económico y evaluación presupuestal.</td>
+                    </tr>
+                    <tr>
+                      <td><span class="skill-pill antecedent">Inglés profesional</span></td>
+                      <td><span class="skill-pill consequent">Negociación internacional</span></td>
+                      <td style="text-align: center;"><span class="count-badge">14</span></td>
+                      <td style="text-align: center;">3.3%</td>
+                      <td style="text-align: center;">
+                        <div class="progress-cell">
+                          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 62%;"></div></div>
+                          <span class="progress-text">62%</span>
+                        </div>
+                      </td>
+                      <td style="text-align: center;">
+                        <span class="lift-badge badge-base">1.60 &bull; Moderado</span>
+                      </td>
+                      <td class="insight-cell">Requerimiento transversal de idiomas orientado a interacción comercial global.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <!-- =============================================================== -->
+          <!-- PESTAÑA 2: CATÁLOGO & HABILIDADES EMERGENTES -->
+          <!-- =============================================================== -->
+          <div id="tab-catalogo" class="tab-pane">
+            <div class="two-column">
+              <!-- Gráfico Blandas -->
+              <article class="card chart-card">
+                <div class="chart-header">
+                  <h2>Top Habilidades Blandas</h2>
+                  <div class="chart-actions">
+                    <button class="btn-secondary table-action">PNG</button>
+                    <span class="badge-tag blanda">Interpersonales</span>
+                  </div>
+                </div>
+                <div style="padding: var(--space-md) 0;">
+                  <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+                    <div>
+                      <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                        <span>Trabajo en equipo</span>
+                        <strong>142 menciones</strong>
+                      </div>
+                      <div style="height: 10px; background: var(--border); border-radius: var(--radius-full); overflow: hidden;">
+                        <div style="width: 95%; height: 100%; background: #2a9d8f; border-radius: var(--radius-full);"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                        <span>Comunicación asertiva</span>
+                        <strong>118 menciones</strong>
+                      </div>
+                      <div style="height: 10px; background: var(--border); border-radius: var(--radius-full); overflow: hidden;">
+                        <div style="width: 79%; height: 100%; background: #2a9d8f; border-radius: var(--radius-full);"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                        <span>Liderazgo</span>
+                        <strong>94 menciones</strong>
+                      </div>
+                      <div style="height: 10px; background: var(--border); border-radius: var(--radius-full); overflow: hidden;">
+                        <div style="width: 63%; height: 100%; background: #2a9d8f; border-radius: var(--radius-full);"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                        <span>Resolución de problemas</span>
+                        <strong>88 menciones</strong>
+                      </div>
+                      <div style="height: 10px; background: var(--border); border-radius: var(--radius-full); overflow: hidden;">
+                        <div style="width: 59%; height: 100%; background: #2a9d8f; border-radius: var(--radius-full);"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                        <span>Pensamiento crítico</span>
+                        <strong>72 menciones</strong>
+                      </div>
+                      <div style="height: 10px; background: var(--border); border-radius: var(--radius-full); overflow: hidden;">
+                        <div style="width: 48%; height: 100%; background: #2a9d8f; border-radius: var(--radius-full);"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Gráfico Duras -->
+              <article class="card chart-card">
+                <div class="chart-header">
+                  <h2>Top Habilidades Duras / Técnicas</h2>
+                  <div class="chart-actions">
+                    <button class="btn-secondary table-action">PNG</button>
+                    <span class="badge-tag dura">Técnicas</span>
+                  </div>
+                </div>
+                <div style="padding: var(--space-md) 0;">
+                  <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+                    <div>
+                      <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                        <span>Gestión de proyectos</span>
+                        <strong>130 menciones</strong>
+                      </div>
+                      <div style="height: 10px; background: var(--border); border-radius: var(--radius-full); overflow: hidden;">
+                        <div style="width: 90%; height: 100%; background: #ba0c2f; border-radius: var(--radius-full);"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                        <span>Inglés profesional</span>
+                        <strong>110 menciones</strong>
+                      </div>
+                      <div style="height: 10px; background: var(--border); border-radius: var(--radius-full); overflow: hidden;">
+                        <div style="width: 76%; height: 100%; background: #ba0c2f; border-radius: var(--radius-full);"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                        <span>Excel avanzado</span>
+                        <strong>102 menciones</strong>
+                      </div>
+                      <div style="height: 10px; background: var(--border); border-radius: var(--radius-full); overflow: hidden;">
+                        <div style="width: 70%; height: 100%; background: #ba0c2f; border-radius: var(--radius-full);"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                        <span>Python / Análisis de datos</span>
+                        <strong>76 menciones</strong>
+                      </div>
+                      <div style="height: 10px; background: var(--border); border-radius: var(--radius-full); overflow: hidden;">
+                        <div style="width: 52%; height: 100%; background: #ba0c2f; border-radius: var(--radius-full);"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                        <span>SQL y modelado de datos</span>
+                        <strong>64 menciones</strong>
+                      </div>
+                      <div style="height: 10px; background: var(--border); border-radius: var(--radius-full); overflow: hidden;">
+                        <div style="width: 44%; height: 100%; background: #ba0c2f; border-radius: var(--radius-full);"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <!-- Sección de Emergentes (TF-IDF) -->
+            <article class="card" style="margin-top: var(--space-xl);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--divider); padding-bottom: var(--space-sm); flex-wrap: wrap; gap: var(--space-xs);">
+                <div>
+                  <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Habilidades Emergentes del Mercado (No Catalogadas)</h2>
+                  <p class="section-subtitle">
+                    Términos y bigramas técnicos descubiertos automáticamente en el texto residual mediante TF-IDF. Candidatas para incluir en futuros planes curriculares.
+                  </p>
+                </div>
+                <span class="meta-tag emergente">Detección No Supervisada (TF-IDF)</span>
+              </div>
+
+              <div class="emergentes-grid">
+                <div class="emergente-chip">
+                  <span class="emergente-name">Docker / Kubernetes</span>
+                  <div class="emergente-metrics">
+                    <span class="metric-badge score" title="Score TF-IDF">Score: 0.842</span>
+                    <span class="metric-badge docs" title="Documentos donde aparece">14 doc(s)</span>
+                  </div>
+                </div>
+                <div class="emergente-chip">
+                  <span class="emergente-name">Power BI</span>
+                  <div class="emergente-metrics">
+                    <span class="metric-badge score" title="Score TF-IDF">Score: 0.785</span>
+                    <span class="metric-badge docs" title="Documentos donde aparece">18 doc(s)</span>
+                  </div>
+                </div>
+                <div class="emergente-chip">
+                  <span class="emergente-name">Scrum / Metodologías Ágiles</span>
+                  <div class="emergente-metrics">
+                    <span class="metric-badge score" title="Score TF-IDF">Score: 0.710</span>
+                    <span class="metric-badge docs" title="Documentos donde aparece">12 doc(s)</span>
+                  </div>
+                </div>
+                <div class="emergente-chip">
+                  <span class="emergente-name">Machine Learning</span>
+                  <div class="emergente-metrics">
+                    <span class="metric-badge score" title="Score TF-IDF">Score: 0.680</span>
+                    <span class="metric-badge docs" title="Documentos donde aparece">9 doc(s)</span>
+                  </div>
+                </div>
+                <div class="emergente-chip">
+                  <span class="emergente-name">Ciberseguridad</span>
+                  <div class="emergente-metrics">
+                    <span class="metric-badge score" title="Score TF-IDF">Score: 0.655</span>
+                    <span class="metric-badge docs" title="Documentos donde aparece">8 doc(s)</span>
+                  </div>
+                </div>
+                <div class="emergente-chip">
+                  <span class="emergente-name">Cloud AWS / Azure</span>
+                  <div class="emergente-metrics">
+                    <span class="metric-badge score" title="Score TF-IDF">Score: 0.620</span>
+                    <span class="metric-badge docs" title="Documentos donde aparece">11 doc(s)</span>
+                  </div>
+                </div>
+                <div class="emergente-chip">
+                  <span class="emergente-name">Design Thinking</span>
+                  <div class="emergente-metrics">
+                    <span class="metric-badge score" title="Score TF-IDF">Score: 0.590</span>
+                    <span class="metric-badge docs" title="Documentos donde aparece">7 doc(s)</span>
+                  </div>
+                </div>
+                <div class="emergente-chip">
+                  <span class="emergente-name">Inteligencia Artificial</span>
+                  <div class="emergente-metrics">
+                    <span class="metric-badge score" title="Score TF-IDF">Score: 0.575</span>
+                    <span class="metric-badge docs" title="Documentos donde aparece">10 doc(s)</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+
+        </section>
+      </main>
+    </div>
+
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <script>
+      lucide.createIcons();
+
+      function switchTab(tab) {
+        var btnReglas = document.getElementById('btn-reglas');
+        var btnCatalogo = document.getElementById('btn-catalogo');
+        var paneReglas = document.getElementById('tab-reglas');
+        var paneCatalogo = document.getElementById('tab-catalogo');
+
+        if (tab === 'reglas') {
+          btnReglas.classList.add('active');
+          btnCatalogo.classList.remove('active');
+          paneReglas.classList.add('active');
+          paneCatalogo.classList.remove('active');
+        } else {
+          btnCatalogo.classList.add('active');
+          btnReglas.classList.remove('active');
+          paneCatalogo.classList.add('active');
+          paneReglas.classList.remove('active');
+        }
+      }
+    </script>
+  </body>
+</html>

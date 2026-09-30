@@ -6,31 +6,35 @@
 }
 
 .content {
-  margin-left: var(--sidebar-width, 250px);
   flex: 1;
-  padding: 0;
-  overflow-y: auto;
+  min-width: 0;
+  margin-left: var(--sidebar-width, 280px);
+  padding: var(--canvas-padding, 32px);
   background-color: var(--background);
   min-height: 100vh;
-}
+  overflow-y: auto;
+  box-sizing: border-box;
 
-.top-banner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: var(--banner);
-  padding: var(--space-xl) var(--space-2xl);
-  border-bottom: 1px solid var(--border);
-
-  .banner-text {
-    h1 { margin: 0; font-size: 22px; color: var(--heading); font-weight: 700; }
-    p { margin: var(--space-2xs) 0 0; color: var(--muted); font-size: 14px; max-width: 750px; line-height: 1.4; }
+  @media (max-width: 1024px) {
+    padding: var(--space-lg);
   }
 
-  .escudo-img { width: 50px; height: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+  @media (max-width: 768px) {
+    margin-left: 0;
+    padding: var(--space-md);
+  }
 }
 
-.dashboard-container { padding: var(--space-xl) var(--space-2xl); }
+.habilidades-content,
+.dashboard-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: var(--space-xl);
+  width: 100%;
+  padding: 0 !important;
+  min-height: auto;
+  box-sizing: border-box;
+}
 
 // KPI Cards
 .kpi-grid {
@@ -38,6 +42,8 @@
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-md);
   margin-bottom: var(--space-xl);
+  width: 100%;
+  box-sizing: border-box;
 
   @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
   @media (max-width: 768px) { grid-template-columns: 1fr; }
@@ -47,9 +53,10 @@
   background: var(--surface);
   border-radius: var(--radius-md);
   padding: var(--space-md) var(--space-lg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  box-shadow: 0 1px 3px rgba(26, 24, 24, 0.04);
   border: 1px solid var(--border);
   transition: transform 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 
   &:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
 
@@ -58,7 +65,20 @@
     align-items: center;
     gap: var(--space-xs);
     margin-bottom: var(--space-xs);
-    .kpi-icon { font-size: 18px; }
+    .kpi-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      flex-shrink: 0;
+      &.blue { background: rgba(2, 136, 209, 1); }
+      &.green { background: var(--success); }
+      &.brand { background: var(--brand); }
+      &.amber { background: #f4a261; }
+    }
     .kpi-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
   }
 
@@ -79,6 +99,8 @@
   gap: var(--space-xs);
   margin-bottom: var(--space-lg);
   border-bottom: 2px solid var(--border);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tab-btn {
@@ -114,9 +136,19 @@
   padding: var(--space-md) var(--space-lg);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-xl);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  box-shadow: 0 1px 3px rgba(26, 24, 24, 0.04);
   border: 1px solid var(--border);
   align-items: flex-end;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tab-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  box-sizing: border-box;
 }
 
 .control-group {
@@ -323,6 +355,11 @@
     padding-bottom: var(--space-xs);
     margin-bottom: var(--space-md);
     h2 { margin: 0; font-size: 16px; color: var(--heading); font-weight: 700; }
+    .chart-actions {
+      display: flex;
+      gap: var(--space-xs);
+      align-items: center;
+    }
   }
 
   .chart-wrapper { position: relative; height: 300px; width: 100%; }
@@ -384,8 +421,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   padding: var(--space-3xl) var(--space-lg);
   color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 3px rgba(26, 24, 24, 0.04);
+  width: 100%;
+  box-sizing: border-box;
 
   .spinner {
     width: 36px;
@@ -394,9 +438,9 @@
     border-top: 3px solid var(--brand);
     border-radius: 50%;
     animation: spin 0.9s linear infinite;
-    margin-bottom: var(--space-xs);
+    margin-bottom: var(--space-sm);
   }
-  p { font-size: 14px; font-style: italic; margin: 0; }
+  p { font-size: 14px; font-style: italic; margin: 0; color: var(--body); }
 }
 
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }

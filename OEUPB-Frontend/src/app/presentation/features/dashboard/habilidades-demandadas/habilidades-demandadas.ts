@@ -6,6 +6,8 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { IaApi } from '../../../../data/api/ia.api';
 import { DirectorioApi } from '../../../../data/api/directorio.api';
+import { CHART_PALETTE } from '../../../shared/chart-palette';
+import { exportChart } from '../../../shared/export-chart';
 
 export interface HabilidadItem {
   habilidad: string;
@@ -42,6 +44,10 @@ export interface EstadisticasIA {
   styleUrls: ['./habilidades-demandadas.scss']
 })
 export class HabilidadesDemandadasComponent implements OnInit {
+  exportarGrafica(selector: string, nombre: string): void {
+    exportChart(selector, nombre);
+  }
+
   activeTab: 'reglas' | 'habilidades' = 'reglas';
   isLoading = false;
   errorMensaje = '';
@@ -138,6 +144,7 @@ export class HabilidadesDemandadasComponent implements OnInit {
 
   setTab(tab: 'reglas' | 'habilidades') {
     this.activeTab = tab;
+    this.cdr.detectChanges();
   }
 
   aplicarFiltros() {
@@ -207,8 +214,8 @@ export class HabilidadesDemandadasComponent implements OnInit {
       datasets: [
         {
           data: blandas.map(h => h.menciones),
-          backgroundColor: '#2a9d8f',
-          hoverBackgroundColor: '#21867a',
+          backgroundColor: CHART_PALETTE[2],
+          hoverBackgroundColor: CHART_PALETTE[9],
           borderRadius: 6
         }
       ]
@@ -219,8 +226,8 @@ export class HabilidadesDemandadasComponent implements OnInit {
       datasets: [
         {
           data: duras.map(h => h.menciones),
-          backgroundColor: '#ba0c2f',
-          hoverBackgroundColor: '#960a26',
+          backgroundColor: CHART_PALETTE[0],
+          hoverBackgroundColor: CHART_PALETTE[1],
           borderRadius: 6
         }
       ]

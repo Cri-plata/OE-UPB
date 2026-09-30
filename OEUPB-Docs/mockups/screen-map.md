@@ -25,6 +25,7 @@
 | **Explorador** | [`explorador.html`](explorador.html) | Panel de filtros de 2 filas con botones alineados; gráfica fluida | **Vacío/Base**: Estado inicial esperando selección de variable para graficar. |
 | **Analítica y alertas** | [`analitica.html`](analitica.html) | KPIs colapsables; dos columnas a una en <= 1100 px | **Base / Vacío**: Resumen analítico y alerta de seguimiento sin incidencias. |
 | **Directorio** | [`directorio.html`](directorio.html) | Contenedor `.table-scroll` con tabla `min-width: 900px`; paginación apilable | **Base**: Listado de egresados, badges de momentos, acciones con jerarquía segura. |
+| **Co-relaciones (IA)** | [`habilidades.html`](habilidades.html) | KPIs colapsan a 2 y 1 columna; tabla en `.table-scroll` (`min-width: 900px`); pestañas interactivas | **Base**: Reglas de asociación (co-ocurrencias), catálogo de habilidades duras/blandas y competencias emergentes por TF-IDF. |
 | **Ficha de egresado** | [`ficha-egresado.html`](ficha-egresado.html) | Grid de perfil adaptable; línea de tiempo vertical | **Base / Detalle**: Datos individuales y trayectoria en encuestas oficiales (OLE). |
 | **Gráficas publicadas** | [`publicaciones.html`](publicaciones.html) | Tarjetas `repeat(auto-fit, minmax(320px, 1fr))` | **Base**: Catálogo de instantáneas agregadas autorizadas por sede (v1). |
 | **Carga de datos** | [`carga-datos.html`](carga-datos.html) | Grid adaptable; historial en `.table-scroll` con `min-width: 650px` | **Base**: Subida de .xlsx (zona de arrastre con icono) e historial de vigencia. |
@@ -48,7 +49,7 @@
 | Rol | Inicio tras autenticación | Pantallas disponibles |
 |---|---|---|
 | `Admin_CTIC` | Gestión de accesos | Administrar usuarios, Mi Perfil |
-| `Coordinador_Sede` | Reporte general | Reporte, Tendencias, Explorador, Analítica, Directorio, Publicaciones, Carga, Administración de usuarios, Mi Perfil, Ficha de egresado |
+| `Coordinador_Sede` | Reporte general | Reporte, Tendencias, Explorador, Analítica, Directorio, Co-relaciones, Publicaciones, Carga, Administración de usuarios, Mi Perfil, Ficha de egresado |
 | `Usuario_Consulta` | Gráficas publicadas | Publicaciones, Mi Perfil |
 
 La aplicación real protege cada ruta mediante `authGuard` o `rolesGuard`; el mockup representa las pantallas para la revisión de diseño y no sustituye esa autorización.
@@ -66,6 +67,7 @@ flowchart TD
     D --> H[Analítica]
     D --> I[Directorio]
     I --> J[Ficha de egresado]
+    D --> M[Co-relaciones]
     D --> K[Carga de datos]
     D --> E
     C --> L[Mi Perfil]

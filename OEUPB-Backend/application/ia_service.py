@@ -18,22 +18,51 @@ from collections import Counter
 
 import numpy as np
 import pandas as pd
-import spacy
-from sklearn.feature_extraction.text import TfidfVectorizer
-from mlxtend.preprocessing import TransactionEncoder
-from mlxtend.frequent_patterns import apriori, association_rules
+
+try:
+    import spacy
+except Exception:
+    spacy = None
+
+try:
+    from sklearn.feature_extraction.text import TfidfVectorizer
+except Exception:
+    TfidfVectorizer = None
+
+try:
+    from mlxtend.preprocessing import TransactionEncoder
+    from mlxtend.frequent_patterns import apriori, association_rules
+except Exception:
+    TransactionEncoder = None
+    apriori = None
+    association_rules = None
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 1. MODELO SPACY (carga lazy para no bloquear el arranque del servidor)
+# 1. MODELO SPACY (carga lazy y fallback resiliente)
 # ─────────────────────────────────────────────────────────────────────────────
+_STOPWORDS_ES = {
+    "de", "la", "que", "el", "en", "y", "a", "los", "del", "se", "las", "por", "un", "para", "con", "no",
+    "una", "su", "al", "lo", "como", "mas", "pero", "sus", "le", "ya", "o", "este", "si", "porque", "esta",
+    "entre", "cuando", "muy", "sin", "sobre", "tambien", "me", "hasta", "hay", "donde", "quien", "desde",
+    "todo", "nos", "durante", "todos", "uno", "les", "ni", "contra", "otros", "ese", "eso", "ante", "ellos",
+    "e", "esto", "mi", "antes", "algunos", "que", "unos", "yo", "otro", "otras", "otra", "el", "tanto",
+    "esa", "estos", "mucho", "quienes", "nada", "muchos", "cual", "sea", "poco", "ella", "estar", "haber"
+}
+
 _nlp = None
 
 def _get_nlp():
     """Carga el modelo de spaCy en español de forma lazy (solo la primera vez)."""
     global _nlp
     if _nlp is None:
-        _nlp = spacy.load("es_core_news_md")
-    return _nlp
+        if spacy is not None:
+            try:
+                _nlp = spacy.load("es_core_news_md")
+            except Exception:
+                _nlp = False
+        else:
+            _nlp = False
+    return _nlp if _nlp is not False else None
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -60,27 +89,37 @@ def preprocesar_texto(texto: str) -> str:
         return ""
 
     nlp = _get_nlp()
-    # Se conservan las mayúsculas originales para que spaCy etiquete correctamente los PROPN
-    doc = nlp(texto.strip())
-    tokens = []
+    if nlp is not None:
+        doc = nlp(texto.strip())
+        tokens = []
 
-    for token in doc:
-        if token.is_stop or token.is_punct or token.is_space or token.like_num or len(token.text.strip()) <= 1:
-            continue
+        for token in doc:
+            if token.is_stop or token.is_punct or token.is_space or token.like_num or len(token.text.strip()) <= 1:
+                continue
 
-        # Regla PROPN: preservar texto original en minúsculas sin lematizar
-        if token.pos_ == "PROPN":
-            valor = token.text.lower()
-        else:
-            valor = token.lemma_.lower()
+            # Regla PROPN: preservar texto original en minúsculas sin lematizar
+            if token.pos_ == "PROPN":
+                valor = token.text.lower()
+            else:
+                valor = token.lemma_.lower()
 
-        valor = _quitar_tildes(valor)
-        valor = re.sub(r"[^a-zA-Z0-9]", "", valor)
+            valor = _quitar_tildes(valor)
+            valor = re.sub(r"[^a-zA-Z0-9]", "", valor)
 
-        if valor and len(valor) > 1 and not valor.isdigit():
-            tokens.append(valor)
+            if valor and len(valor) > 1 and not valor.isdigit():
+                tokens.append(valor)
 
-    return " ".join(tokens)
+        return " ".join(tokens)
+    else:
+        palabras = re.findall(r"\b[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9]+\b", texto)
+        tokens = []
+        for p in palabras:
+            p_limpia = _quitar_tildes(p.lower())
+            p_limpia = re.sub(r"[^a-zA-Z0-9]", "", p_limpia)
+            if p_limpia in _STOPWORDS_ES or p_limpia.isdigit() or len(p_limpia) <= 1:
+                continue
+            tokens.append(p_limpia)
+        return " ".join(tokens)
 
 
 def _preprocesar_crudo(texto: str) -> str:
@@ -99,22 +138,33 @@ def _preprocesar_crudo(texto: str) -> str:
         return ""
 
     nlp = _get_nlp()
-    doc = nlp(texto.strip())
-    tokens = []
+    if nlp is not None:
+        doc = nlp(texto.strip())
+        tokens = []
 
-    for token in doc:
-        if token.is_stop or token.is_punct or token.is_space or token.like_num or len(token.text.strip()) <= 1:
-            continue
+        for token in doc:
+            if token.is_stop or token.is_punct or token.is_space or token.like_num or len(token.text.strip()) <= 1:
+                continue
 
-        # Siempre usar text.lower(), nunca lemma_
-        valor = token.text.lower()
-        valor = _quitar_tildes(valor)
-        valor = re.sub(r"[^a-zA-Z0-9]", "", valor)
+            # Siempre usar text.lower(), nunca lemma_
+            valor = token.text.lower()
+            valor = _quitar_tildes(valor)
+            valor = re.sub(r"[^a-zA-Z0-9]", "", valor)
 
-        if valor and len(valor) > 1 and not valor.isdigit():
-            tokens.append(valor)
+            if valor and len(valor) > 1 and not valor.isdigit():
+                tokens.append(valor)
 
-    return " ".join(tokens)
+        return " ".join(tokens)
+    else:
+        palabras = re.findall(r"\b[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9]+\b", texto)
+        tokens = []
+        for p in palabras:
+            p_limpia = _quitar_tildes(p.lower())
+            p_limpia = re.sub(r"[^a-zA-Z0-9]", "", p_limpia)
+            if p_limpia in _STOPWORDS_ES or p_limpia.isdigit() or len(p_limpia) <= 1:
+                continue
+            tokens.append(p_limpia)
+        return " ".join(tokens)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -355,39 +405,69 @@ def _extraer_emergentes_tfidf(textos_residuales: List[str], top_n: int = 15) -> 
     if not textos_validos:
         return []
 
-    vectorizer = TfidfVectorizer(
-        ngram_range=(1, 2),
-        token_pattern=r"(?u)\b\w+\b",
-        stop_words=_STOPWORDS_ENCUESTA,
-        min_df=1,
-    )
+    if TfidfVectorizer is not None:
+        try:
+            vectorizer = TfidfVectorizer(
+                ngram_range=(1, 2),
+                token_pattern=r"(?u)\b\w+\b",
+                stop_words=_STOPWORDS_ENCUESTA,
+                min_df=1,
+            )
+            X = vectorizer.fit_transform(textos_validos)
+            feature_names = vectorizer.get_feature_names_out()
+            matriz = X.toarray()
 
-    try:
-        X = vectorizer.fit_transform(textos_validos)
-    except ValueError:
-        # Si tras filtrar stopwords no queda vocabulario
-        return []
+            # Score máximo que alcanza cada término en los documentos
+            scores_max = matriz.max(axis=0)
+            # Frecuencia documental (en cuántas respuestas aparece)
+            doc_freq = (matriz > 0).sum(axis=0)
 
-    feature_names = vectorizer.get_feature_names_out()
-    matriz = X.toarray()
+            # Ordenar por score descendente
+            ranking = np.argsort(scores_max)[::-1]
 
-    # Score máximo que alcanza cada término en los documentos
-    scores_max = matriz.max(axis=0)
-    # Frecuencia documental (en cuántas respuestas aparece)
-    doc_freq = (matriz > 0).sum(axis=0)
+            emergentes = []
+            for idx in ranking[:top_n]:
+                emergentes.append({
+                    "termino": str(feature_names[idx]),
+                    "score_tfidf": round(float(scores_max[idx]), 4),
+                    "frecuencia_documentos": int(doc_freq[idx]),
+                })
 
-    # Ordenar por score descendente
-    ranking = np.argsort(scores_max)[::-1]
+            return emergentes
+        except Exception:
+            pass
 
-    emergentes = []
-    for idx in ranking[:top_n]:
-        emergentes.append({
-            "termino": str(feature_names[idx]),
-            "score_tfidf": round(float(scores_max[idx]), 4),
-            "frecuencia_documentos": int(doc_freq[idx]),
-        })
+    # Fallback puro Python para TF-IDF si TfidfVectorizer no está disponible
+    import math
+    stopwords_set = set(_STOPWORDS_ENCUESTA)
+    doc_words = []
+    df_counter = Counter()
+    for t in textos_validos:
+        words = [w for w in re.findall(r"\b\w+\b", t.lower()) if w not in stopwords_set and len(w) > 2]
+        ngrams = words + [f"{words[i]} {words[i+1]}" for i in range(len(words)-1)]
+        doc_words.append(ngrams)
+        df_counter.update(set(ngrams))
 
-    return emergentes
+    n_docs = len(textos_validos)
+    scores = {}
+    for ngrams in doc_words:
+        tf = Counter(ngrams)
+        total_terms = len(ngrams) or 1
+        for term, count in tf.items():
+            idf = math.log((1 + n_docs) / (1 + df_counter[term])) + 1
+            score = (count / total_terms) * idf
+            if term not in scores or score > scores[term]:
+                scores[term] = score
+
+    sorted_terms = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:top_n]
+    return [
+        {
+            "termino": term,
+            "score_tfidf": round(float(score), 4),
+            "frecuencia_documentos": int(df_counter[term]),
+        }
+        for term, score in sorted_terms
+    ]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -564,68 +644,81 @@ def generar_reglas_asociacion(
             "reglas": [],
         }
 
-    # 3. Construir matriz binaria con TransactionEncoder
-    te = TransactionEncoder()
-    te_ary = te.fit(transacciones_validas).transform(transacciones_validas)
-    df = pd.DataFrame(te_ary, columns=te.columns_)
-
-    # 4. Apriori con max_len=2 (estrictamente pares: un antecedente y un consecuente)
-    try:
-        frequent_itemsets = apriori(
-            df,
-            min_support=min_soporte,
-            use_colnames=True,
-            max_len=2,
-        )
-    except Exception:
-        frequent_itemsets = pd.DataFrame()
-
-    if frequent_itemsets.empty:
-        return {
-            "total_respuestas": total_respuestas,
-            "transacciones_validas": total_validas,
-            "transacciones_insuficientes": insuficientes,
-            "total_reglas": 0,
-            "reglas": [],
-        }
-
-    # 5. Generar reglas de asociación filtrando por confianza mínima
-    try:
-        rules = association_rules(
-            frequent_itemsets,
-            metric="confidence",
-            min_threshold=min_confianza,
-        )
-    except Exception:
-        rules = pd.DataFrame()
-
-    if rules.empty:
-        return {
-            "total_respuestas": total_respuestas,
-            "transacciones_validas": total_validas,
-            "transacciones_insuficientes": insuficientes,
-            "total_reglas": 0,
-            "reglas": [],
-        }
-
-    # 6. Filtrar por ocurrencias mínimas absolutas (soporte * total_transacciones >= min_ocurrencias)
     reglas_formateadas = []
-    for _, row in rules.iterrows():
-        ocurrencias = int(round(row["support"] * total_validas))
-        if ocurrencias < min_ocurrencias:
-            continue
 
-        antecedente = list(row["antecedents"])[0]
-        consecuente = list(row["consequents"])[0]
+    # 3. Intentar con mlxtend si está disponible
+    if TransactionEncoder is not None and apriori is not None and association_rules is not None:
+        try:
+            te = TransactionEncoder()
+            te_ary = te.fit(transacciones_validas).transform(transacciones_validas)
+            df = pd.DataFrame(te_ary, columns=te.columns_)
 
-        reglas_formateadas.append({
-            "si_menciona": antecedente,
-            "tambien_menciona": consecuente,
-            "ocurrencias": ocurrencias,
-            "soporte": round(float(row["support"]), 4),
-            "confianza": round(float(row["confidence"]), 4),
-            "lift": round(float(row["lift"]), 4),
-        })
+            frequent_itemsets = apriori(
+                df,
+                min_support=min_soporte,
+                use_colnames=True,
+                max_len=2,
+            )
+
+            if not frequent_itemsets.empty:
+                rules = association_rules(
+                    frequent_itemsets,
+                    metric="confidence",
+                    min_threshold=min_confianza,
+                )
+                if not rules.empty:
+                    for _, row in rules.iterrows():
+                        ocurrencias = int(round(row["support"] * total_validas))
+                        if ocurrencias < min_ocurrencias:
+                            continue
+
+                        antecedente = list(row["antecedents"])[0]
+                        consecuente = list(row["consequents"])[0]
+
+                        reglas_formateadas.append({
+                            "si_menciona": antecedente,
+                            "tambien_menciona": consecuente,
+                            "ocurrencias": ocurrencias,
+                            "soporte": round(float(row["support"]), 4),
+                            "confianza": round(float(row["confidence"]), 4),
+                            "lift": round(float(row["lift"]), 4),
+                        })
+        except Exception:
+            reglas_formateadas = []
+
+    # Fallback puro Python para pares 1 a 1 si mlxtend no está disponible o falló
+    if not reglas_formateadas:
+        pair_counts = Counter()
+        item_counts = Counter()
+        for trans in transacciones_validas:
+            habs = sorted(set(trans))
+            for h in habs:
+                item_counts[h] += 1
+            for i in range(len(habs)):
+                for j in range(i + 1, len(habs)):
+                    pair_counts[(habs[i], habs[j])] += 1
+                    pair_counts[(habs[j], habs[i])] += 1
+
+        for (ant, con), count in pair_counts.items():
+            if count < min_ocurrencias:
+                continue
+            sup = count / total_validas
+            if sup < min_soporte:
+                continue
+            conf = count / item_counts[ant]
+            if conf < min_confianza:
+                continue
+            p_con = item_counts[con] / total_validas
+            lift = conf / p_con if p_con > 0 else 0
+            if lift >= 1.0:
+                reglas_formateadas.append({
+                    "si_menciona": ant,
+                    "tambien_menciona": con,
+                    "ocurrencias": count,
+                    "soporte": round(float(sup), 4),
+                    "confianza": round(float(conf), 4),
+                    "lift": round(float(lift), 4),
+                })
 
     # 7. Ordenar por lift descendente (desempate por confianza y soporte)
     reglas_formateadas.sort(
