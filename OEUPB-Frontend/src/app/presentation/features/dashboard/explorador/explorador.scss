@@ -27,6 +27,15 @@
   flex-direction: column;
   gap: var(--space-2xs);
   flex: 1 1 200px;
+  min-width: 0;
+
+  // Las preguntas del OLE son largas: el select no puede tomar el ancho de su opción más larga.
+  select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    text-overflow: ellipsis;
+  }
 
   &.full-width {
     flex: 1 1 100%;
@@ -97,3 +106,9 @@
 .bloques { display: flex; flex-direction: column; gap: var(--space-2xl); }
 .bloque-acciones { display: flex; justify-content: flex-end; gap: var(--space-sm); margin-bottom: var(--space-sm); }
 .crear-btn { margin-top: var(--space-xl); width: 100%; }
+
+:host,
+app-explorador-grafica {
+  display: block;
+  min-width: 0;
+}

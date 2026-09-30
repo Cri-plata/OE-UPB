@@ -887,14 +887,14 @@ table,
    ========================================================================== */
 .admin-grid {
   display: grid;
-  grid-template-columns: minmax(320px, 380px) 1fr;
+  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
   gap: var(--space-xl);
   align-items: start;
 }
 
 .upload-grid {
   display: grid;
-  grid-template-columns: 350px 1fr;
+  grid-template-columns: 350px minmax(0, 1fr);
   gap: var(--space-2xl);
   align-items: start;
 }
@@ -1426,7 +1426,7 @@ table,
 /* 1. Transición de grids anchos */
 @media (max-width: 1150px) {
   .admin-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -1440,7 +1440,7 @@ table,
 @media (max-width: 1050px) {
   .upload-grid,
   .profile-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .history {
     grid-column: auto;
@@ -1642,5 +1642,122 @@ table,
   .table-action {
     min-height: 38px;
     height: 38px;
+  }
+}
+
+/* ==========================================================================
+   Filtros analíticos, comparación y varias gráficas (ANA-01, EXP-03, PRG-01)
+   ========================================================================== */
+.filtros-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.filtros-card .control-group {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.filtros-card .control-group.momento {
+  flex: 0 1 160px;
+}
+
+.filtros-acciones {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.selector {
+  position: relative;
+}
+
+.selector summary {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px var(--space-sm);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  color: var(--heading);
+  font-size: 14px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.selector-opciones {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  display: grid;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: #fff;
+  border: 1px solid rgba(26, 24, 24, 0.08);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(26, 24, 24, 0.06);
+  font-size: 13px;
+}
+
+.kpi-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.two-column {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.publication-status {
+  color: var(--success);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.publish-error {
+  margin: var(--space-sm) 0 0;
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.nota,
+.sin-datos {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.sin-datos {
+  font-style: italic;
+}
+
+.comparacion,
+.crear-btn {
+  margin-top: var(--space-xl);
+}
+
+.crear-btn {
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .two-column {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1439px) {
+  .kpi-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .kpi-grid-4 {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

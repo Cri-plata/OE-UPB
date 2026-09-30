@@ -52,7 +52,7 @@
 
               <div *ngIf="mostrarInputAnioManual" class="manual-year-group">
                 <input type="number" formControlName="anio" placeholder="Ej. 2019" class="form-control">
-                <button type="button" class="btn-secondary" (click)="mostrarInputAnioManual = false; uploadForm.get('anio')?.setValue('')">✕</button>
+                <button type="button" class="btn-secondary" (click)="mostrarInputAnioManual = false; uploadForm.get('anio')?.setValue('')">Cancelar</button>
               </div>
             </div>
           </div>

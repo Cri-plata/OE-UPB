@@ -98,11 +98,11 @@ class ExploradorResponse(BaseModel):
 
 
 COLORES_TENDENCIAS = [
-    {"border": "#E63946", "bg": "rgba(230, 57, 70, 0.2)"},
-    {"border": "#1D3557", "bg": "rgba(29, 53, 87, 0.2)"},
-    {"border": "#2A9D8F", "bg": "rgba(42, 157, 143, 0.2)"},
-    {"border": "#F4A261", "bg": "rgba(244, 162, 97, 0.2)"},
-    {"border": "#9B5DE5", "bg": "rgba(155, 93, 229, 0.2)"}
+    {"border": "#e31e24", "bg": "rgba(227, 30, 36, 0.2)"},
+    {"border": "#6366f1", "bg": "rgba(99, 102, 241, 0.2)"},
+    {"border": "#137a47", "bg": "rgba(19, 122, 71, 0.2)"},
+    {"border": "#ffc20e", "bg": "rgba(255, 194, 14, 0.2)"},
+    {"border": "#5e5b5a", "bg": "rgba(94, 91, 90, 0.2)"}
 ]
 
 def validar_momento_opcional(momento: Optional[int]) -> None:
@@ -131,12 +131,13 @@ def get_reporte_general(
     validar_momento_opcional(momento)
     sede_id = current_user.get("sede_id")
     filtros = Filtros(programas, anios, momento)
-    distribucion = distribucion_programas(db, sede_id, filtros)
+    # Una sola consulta alimenta todos los indicadores del reporte (RNF-06).
     mediciones = _mediciones(db, sede_id, filtros, incluir_anonimas=True)
+    distribucion = distribucion_programas(db, sede_id, filtros, mediciones)
     laboral = resumen_laboral(mediciones)
     satisfaccion = {
         categoria: round(celda["suma"] / celda["count"], 1) if celda["count"] > 0 else 0
-        for categoria, celda in satisfaccion_general(db, sede_id, filtros).items()
+        for categoria, celda in satisfaccion_general(db, sede_id, filtros, mediciones).items()
     }
     return {
         "total_egresados": sum(distribucion.values()),

@@ -53,6 +53,32 @@
               alt="Escudo UPB"
             />
           </header>
+          <section class="card filtros-card" aria-label="Filtros analíticos">
+            <div class="control-group">
+              <label>Programa académico</label>
+              <details class="selector">
+                <summary>Todos los programas</summary>
+                <div class="selector-opciones">
+                  <label><input type="checkbox" /> Programa Demo A</label>
+                  <label><input type="checkbox" /> Programa Demo B</label>
+                </div>
+              </details>
+            </div>
+            <div class="control-group">
+              <label>Cohorte (año de grado)</label>
+              <details class="selector">
+                <summary>Todas las cohortes</summary>
+                <div class="selector-opciones">
+                  <label><input type="checkbox" /> 2024</label>
+                  <label><input type="checkbox" /> 2023</label>
+                </div>
+              </details>
+            </div>
+            <div class="filtros-acciones">
+              <button class="btn-primary">Aplicar filtros</button>
+              <button class="btn-secondary" disabled>Limpiar filtros</button>
+            </div>
+          </section>
           <div class="control-panel">
             <div class="control-row-secondary">
               <div class="control-group">
@@ -83,6 +109,31 @@
             <div class="chart-placeholder">
               Calculando tendencias históricas en la base de datos...
             </div>
+          </article>
+          <article class="card chart-card comparacion">
+            <div class="chart-header">
+              <h2>Comparación entre momentos (mismos egresados)</h2>
+            </div>
+            <div class="control-panel">
+              <div class="control-row-secondary">
+                <div class="control-group">
+                  <label>Momento inicial</label>
+                  <select><option>Momento 0</option><option>Momento 1</option><option>Momento 5</option></select>
+                </div>
+                <div class="control-group">
+                  <label>Momento a comparar</label>
+                  <select><option>Momento 1</option><option>Momento 0</option><option>Momento 5</option></select>
+                </div>
+                <div class="control-group">
+                  <label>Indicador</label>
+                  <select><option>Tasa de empleabilidad (%)</option><option>Promedio salarial (SMLV)</option></select>
+                </div>
+              </div>
+            </div>
+            <div class="chart-placeholder">
+              Datos insuficientes para la comparación seleccionada. Se requieren al menos 5 egresados de la misma cohorte con respuesta en ambos momentos.
+            </div>
+            <p class="nota">Sin pares suficientes: Programa Demo B (2).</p>
           </article>
         </section>
       </main>

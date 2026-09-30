@@ -2,6 +2,12 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-09-25] - Auditoría de diseño UI 06
+
+* **Auditoría:** `audits/06-auditoria-ui.md` mide la app y los mockups en 1440, 1024 y 375 px contra `design/design.md`; 13 hallazgos resueltos.
+* **Mockups:** Reporte General, Tendencias, Explorador y Gestión de usuarios incluyen filtros, comparación de momentos, varias gráficas, formalidad, estado laboral y programas sin datos. `mockups.css` corrige los desbordes de `admin-grid` y `upload-grid` y agrega las clases nuevas; `screen-map.md` registra las variantes y la regla `minmax(0, 1fr)`.
+* **Backlog:** nuevos UI-02 (`lucide-angular`) y UI-03 (estado asíncrono en signals).
+
 ## [2026-09-25] - P3 Calidad de contrato y documentación
 
 * **Modelo:** el diagrama ER coincide con el esquema SQL (auditorías, eventos de eliminación y columnas de publicaciones).

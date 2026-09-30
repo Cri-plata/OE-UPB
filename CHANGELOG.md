@@ -3,6 +3,11 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Corregido (2026-09-25, auditoría UI)
+- **Desbordes:** Reporte General (gráficas), Administración de usuarios, Carga de datos y Explorador ya no desbordan en 1440, 1024 ni 375 px.
+- **Alineación con los mockups:** controles de la cabecera de gráfica, casillas de permisos, grilla de 4 KPI, filtros analíticos con el patrón canónico, paleta de gráficas de `design.md` (frontend y publicaciones) y eliminación del pictograma "✕".
+- **Rendimiento:** la inicialización del Explorador baja de 20 s a menos de 1 s, la Analítica de 9 s a 0,7 s y el Reporte General de 2,1 s a menos de 1,4 s, gracias a la memoización de la normalización y a una sola consulta por reporte.
+
 ### Cambiado (2026-09-25, P3)
 - **Contrato de errores (API-02):** esquema `ErrorResponse` con 401/403 en toda ruta protegida y códigos propios por endpoint; `DELETE /api/usuarios/{id}` queda marcado como obsoleto; patrón de correo institucional en el contrato.
 - **Programas (PRG-01):** la audiencia de publicaciones y las asignaciones comparan por clave normalizada; los programas sin datos actuales se conservan y se muestran en la administración de cuentas.

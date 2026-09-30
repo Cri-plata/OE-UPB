@@ -24,6 +24,7 @@
   --divider: #ecece8;
   --success: #137a47;
   --warning: #ffc20e;
+  --ai-indigo: #6366f1;
   --warning-dark: #785a00;
   --info-bg: #e6f0fa;
   --info-text: #0056b3;
@@ -430,7 +431,7 @@ table.history-table { min-width: 650px; }
     line-height: 18px;
   }
 
-  input, select, textarea,
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea,
   .form-control, .modern-input {
     width: 100%;
     min-height: 40px;
@@ -521,4 +522,56 @@ table.history-table { min-width: 650px; }
     gap: var(--space-xs);
     button, a { width: 100%; }
   }
+}
+
+/* ==========================================================================
+   Ajustes de la auditoría UI (2026-09-25) — alineación con mockups.css
+   ========================================================================== */
+
+/* Las tarjetas y los ítems de grilla nunca imponen su ancho mínimo al canvas:
+   un <canvas> de Chart.js o una tabla con min-width desbordaban la página. */
+.card,
+.kpi-card,
+.chart-card {
+  min-width: 0;
+}
+
+/* Controles de la cabecera de una gráfica (mockups.css: .chart-actions). Se
+   distinguen de las acciones de fila en tablas (.table-action, 32 px). */
+.chart-actions {
+  .btn-primary,
+  .btn-secondary,
+  select {
+    min-height: 34px;
+    height: auto;
+    width: auto;
+    padding: 6px var(--space-sm);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+  }
+
+  .btn-secondary,
+  select {
+    border: 1px solid var(--control-border);
+    background: var(--background-subtle);
+    font-weight: 500;
+  }
+
+  .btn-primary {
+    font-weight: 600;
+  }
+}
+
+.kpi-card h2,
+.kpi-card strong,
+.modern-table td {
+  font-variant-numeric: tabular-nums;
+}
+
+.checkbox-group input[type="checkbox"],
+.check-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--brand);
 }
