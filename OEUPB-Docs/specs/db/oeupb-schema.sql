@@ -181,3 +181,23 @@ CREATE TABLE publicaciones_graficas (
     CONSTRAINT fk_publicaciones_coordinador FOREIGN KEY (coordinador_id) REFERENCES usuarios (id),
     CONSTRAINT fk_publicaciones_retirado_por FOREIGN KEY (retirado_por_id) REFERENCES usuarios (id)
 );
+
+CREATE TABLE habilidades_curadas (
+    id INT NOT NULL AUTO_INCREMENT,
+    termino_original VARCHAR(100) NOT NULL,
+    etiqueta_canonica VARCHAR(100) NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
+    variantes JSON NOT NULL,
+    estado VARCHAR(20) NOT NULL,
+    creado_por_id INT NOT NULL,
+    creado_por_correo VARCHAR(100) NOT NULL,
+    fecha_creacion DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_habilidad_curada_termino (termino_original),
+    KEY ix_habilidades_curadas_id (id),
+    KEY ix_habilidades_curadas_termino_original (termino_original),
+    CONSTRAINT ck_habilidades_curadas_tipo CHECK (tipo IN ('blanda', 'dura')),
+    CONSTRAINT ck_habilidades_curadas_estado CHECK (estado IN ('aprobada', 'descartada')),
+    CONSTRAINT fk_habilidades_curadas_usuario FOREIGN KEY (creado_por_id) REFERENCES usuarios (id)
+);
+
