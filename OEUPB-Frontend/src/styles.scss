@@ -155,6 +155,17 @@ button {
 .badge-info { background: var(--info-bg) !important; color: var(--info-text) !important; }
 .muted { color: var(--muted); }
 .bold-text { font-weight: 600; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
 
 .table-link {
   color: inherit;
@@ -294,13 +305,28 @@ button {
   color: #fff;
   font-size: 14px;
   font-weight: 600;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, transform 0.1s ease;
   text-decoration: none;
+  cursor: pointer;
 
-  &:hover { background: var(--brand-dark); }
-  &:disabled {
+  &:hover:not(:disabled) {
+    background: var(--brand-dark);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  &:disabled,
+  &[disabled] {
     background: var(--color-disabled-danger);
     cursor: not-allowed;
+    opacity: 0.75;
   }
 }
 
@@ -317,12 +343,31 @@ button {
   color: var(--heading);
   font-size: 14px;
   font-weight: 500;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
   text-decoration: none;
+  cursor: pointer;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: var(--background);
     border-color: rgba(26, 24, 24, 0.25);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  &:disabled,
+  &[disabled] {
+    background: var(--background);
+    border-color: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 }
 
@@ -339,6 +384,27 @@ button {
   color: #fff;
   font-size: 13px;
   font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+
+  &:hover:not(:disabled) {
+    background: #961313;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--danger);
+    outline-offset: 2px;
+  }
+
+  &:disabled,
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 /* Acciones en tabla: 32px de altura, outline sutil para destructivas */
@@ -368,17 +434,38 @@ button {
 
 /* Badges y Pills */
 .badge {
-  display: inline-block;
-  padding: 4px var(--space-xs);
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
   border-radius: var(--radius-full);
   background: var(--banner);
   color: var(--body);
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.4;
 
   &.success {
     color: var(--success);
-    background: #d4edda;
+    background: rgba(19, 122, 71, 0.1);
+    border: 1px solid rgba(19, 122, 71, 0.2);
+  }
+
+  &.danger {
+    color: var(--danger);
+    background: rgba(186, 26, 26, 0.1);
+    border: 1px solid rgba(186, 26, 26, 0.2);
+  }
+
+  &.warning {
+    color: var(--warning-dark);
+    background: rgba(255, 194, 14, 0.18);
+    border: 1px solid rgba(255, 194, 14, 0.35);
+  }
+
+  &.info {
+    color: var(--info-text);
+    background: var(--info-bg);
+    border: 1px solid rgba(0, 86, 179, 0.2);
   }
 }
 
@@ -431,36 +518,97 @@ table.directory-table { min-width: 900px; }
 table.users-table { min-width: 1000px; }
 table.history-table { min-width: 650px; }
 
-/* Controles de Formulario */
+/* Controles de Formulario Canónicos (design.md) */
 .form-group,
-.filter-group {
-  display: grid;
+.filter-group,
+.control-group {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-2xs);
   margin-bottom: var(--space-md);
 
-  label {
+  label,
+  .form-label {
     color: var(--body);
     font-size: 13px;
     font-weight: 600;
     line-height: 18px;
   }
+}
 
-  input:not([type="checkbox"]):not([type="radio"]), select, textarea,
-  .form-control, .modern-input {
-    width: 100%;
-    min-height: 40px;
-    padding: 8px var(--space-sm);
-    border: 1px solid var(--control-border);
-    border-radius: var(--radius-md);
-    background: #fff;
-    color: var(--heading);
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+.form-control,
+.modern-input,
+.form-group input:not([type="checkbox"]):not([type="radio"]),
+.form-group select,
+.form-group textarea,
+.filter-group input:not([type="checkbox"]):not([type="radio"]),
+.filter-group select,
+.filter-group textarea,
+.control-group select,
+.control-group input:not([type="checkbox"]):not([type="radio"]) {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px var(--space-sm);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  color: var(--heading);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+
+  &:hover:not(:disabled):not(:focus) {
+    border-color: rgba(26, 24, 24, 0.3);
+  }
+
+  &:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 2px rgba(227, 30, 36, 0.15);
+  }
+
+  &:disabled,
+  &[disabled] {
+    background-color: var(--background);
+    color: var(--muted);
+    border-color: var(--border);
+    cursor: not-allowed;
+    opacity: 0.75;
+  }
+
+  &.is-invalid,
+  &.has-error {
+    border-color: var(--danger);
+    background-color: rgba(186, 26, 26, 0.04);
 
     &:focus {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 2px rgba(227, 30, 36, 0.15);
+      border-color: var(--danger);
+      box-shadow: 0 0 0 2px rgba(186, 26, 26, 0.2);
+    }
+  }
+}
+
+select.form-control,
+select.modern-input {
+  cursor: pointer;
+
+  &[multiple] {
+    height: auto;
+    min-height: 120px;
+    padding: var(--space-2xs);
+
+    option {
+      padding: 6px var(--space-sm);
+      border-radius: var(--radius-sm);
+      margin-bottom: 2px;
+      font-size: 13px;
+      color: var(--body);
+
+      &:checked {
+        background: rgba(227, 30, 36, 0.12);
+        color: var(--heading);
+        font-weight: 600;
+      }
     }
   }
 }
@@ -582,10 +730,125 @@ table.history-table { min-width: 650px; }
   font-variant-numeric: tabular-nums;
 }
 
-.checkbox-group input[type="checkbox"],
-.check-option input[type="checkbox"] {
+/* ==========================================================================
+   Checkboxes Canónicos y Contenedores (design.md)
+   ========================================================================== */
+input[type="checkbox"] {
   width: 16px;
   height: 16px;
   margin: 0;
   accent-color: var(--brand);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  vertical-align: middle;
+
+  &:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 }
+
+/* Contenedores de checkboxes en bloques/tarjetas */
+.checkbox-group,
+.checkbox-container,
+fieldset.form-group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--background-subtle);
+  padding: var(--space-sm) var(--space-md);
+  margin: 0 0 var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+
+  legend,
+  .form-legend,
+  .checkbox-group-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--heading);
+    padding: 0 var(--space-2xs);
+    margin-bottom: var(--space-2xs);
+  }
+}
+
+.check-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 6px var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--body);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  user-select: none;
+
+  &:hover {
+    background: var(--surface);
+    color: var(--heading);
+  }
+
+  &:has(input:checked) {
+    color: var(--heading);
+    font-weight: 500;
+  }
+
+  &:has(input:disabled) {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+/* ==========================================================================
+   Mensajes de Estado y Publicación (design.md)
+   ========================================================================== */
+.success-message {
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(19, 122, 71, 0.08);
+  color: var(--success);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(19, 122, 71, 0.2);
+  margin-bottom: var(--space-md);
+  font-size: 13px;
+}
+
+.error-message {
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(186, 26, 26, 0.08);
+  color: var(--danger);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(186, 26, 26, 0.2);
+  margin-bottom: var(--space-md);
+  font-size: 13px;
+}
+
+.publication-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(19, 122, 71, 0.1);
+  color: var(--success);
+  font-weight: 600;
+  font-size: 12px;
+  border: 1px solid rgba(19, 122, 71, 0.2);
+}
+
+.publish-error {
+  flex-basis: 100%;
+  margin: var(--space-2xs) 0 0;
+  color: var(--danger);
+  font-size: 13px;
+  background: rgba(186, 26, 26, 0.08);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(186, 26, 26, 0.2);
+}
+
