@@ -729,6 +729,234 @@ body.sidebar-collapsed .sidebar .logout-btn:hover .sidebar-floating-tooltip {
   background: rgba(186, 26, 26, 0.08);
 }
 
+.users-table .col-actions,
+.users-table .cell-actions {
+  text-align: center;
+}
+
+.users-table .table-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xs);
+  margin: 0 auto;
+}
+
+.users-table .table-actions .table-action {
+  width: 140px;
+  justify-content: center;
+  text-align: center;
+}
+
+.list-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+  padding-bottom: var(--space-xs);
+  border-bottom: 2px solid var(--border);
+  margin-bottom: var(--space-lg);
+  gap: var(--space-sm);
+}
+
+.list-card-header .card-title {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.users-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--divider);
+}
+
+.search-box {
+  flex: 1 1 260px;
+  min-width: 220px;
+  max-width: 380px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-input-wrapper i,
+.search-input-wrapper svg {
+  position: absolute;
+  left: var(--space-sm);
+  color: var(--muted);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-input-wrapper .search-input {
+  width: 100%;
+  height: 40px;
+  padding-left: 36px;
+  padding-right: 36px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--heading);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-input-wrapper .search-input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px rgba(227, 30, 36, 0.15);
+}
+
+.search-input-wrapper .btn-clear-search {
+  position: absolute;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.filters-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-sm);
+  flex: 2 1 auto;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  min-width: 140px;
+  flex: 1 1 140px;
+}
+
+.filter-item .filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.filter-item .filter-select {
+  height: 40px;
+  padding: 8px var(--space-sm);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  background-color: var(--surface);
+  color: var(--heading);
+  outline: none;
+  cursor: pointer;
+}
+
+.filter-item .filter-select:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px rgba(227, 30, 36, 0.15);
+}
+
+.btn-clear-filters {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  height: 40px;
+  padding: 0 var(--space-md);
+  white-space: nowrap;
+  font-size: 13px;
+  align-self: flex-end;
+}
+
+.empty-state {
+  padding: var(--space-3xl) var(--space-md);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--background-subtle);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-sm);
+}
+
+.empty-state-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  max-width: 360px;
+}
+
+.empty-state-message {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 767px) {
+  .list-card-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-md);
+  }
+
+  .search-box {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .filters-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: var(--space-sm);
+  }
+
+  .filter-item {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .btn-clear-filters {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+}
+
 /* ==========================================================================
    Badges y Pills
    ========================================================================== */
@@ -1057,9 +1285,16 @@ table,
    Grids de Administración y Carga
    ========================================================================== */
 .admin-grid {
-  display: grid;
-  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: var(--space-xl);
+  width: 100%;
+}
+
+.user-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md) var(--space-xl);
   align-items: start;
 }
 
@@ -1678,9 +1913,10 @@ table,
    ========================================================================== */
 
 /* 1. Transición de grids anchos */
-@media (max-width: 1150px) {
-  .admin-grid {
+@media (max-width: 767px) {
+  .user-form-grid {
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-md);
   }
 }
 
@@ -2119,13 +2355,8 @@ table,
   font-style: italic;
 }
 
-.comparacion,
-.crear-btn {
+.comparacion {
   margin-top: var(--space-xl);
-}
-
-.crear-btn {
-  width: 100%;
 }
 
 @media (max-width: 1100px) {

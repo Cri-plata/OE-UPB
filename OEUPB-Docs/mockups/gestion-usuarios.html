@@ -86,41 +86,93 @@
           <div class="admin-grid">
             <article class="card">
               <h2 class="card-title">Crear nuevo usuario</h2>
-              <div class="form-group">
-                <label>Nombre Completo</label>
-                <input placeholder="Ej. Carlos Gómez" />
+              <div class="user-form-grid">
+                <div class="form-group">
+                  <label>Nombre Completo</label>
+                  <input placeholder="Ej. Carlos Gómez" />
+                </div>
+                <div class="form-group">
+                  <label>Correo Institucional</label>
+                  <input type="email" placeholder="ejemplo@upb.edu.co" />
+                </div>
+                <div class="form-group">
+                  <label>Rol del Usuario *</label>
+                  <select>
+                    <option>Seleccione un rol...</option>
+                    <option>Coordinador de Sede</option>
+                    <option>Usuario de Consulta</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Número de documento *</label>
+                  <input placeholder="Solo números" />
+                  <small class="muted">En desarrollo se usa como credencial inicial; solo se almacena su hash.</small>
+                </div>
+                <div class="form-group">
+                  <label>Sede asignada *</label>
+                  <select>
+                    <option>Seleccione una sede...</option>
+                    <option>Medellín</option>
+                    <option>Bucaramanga</option>
+                    <option>Montería</option>
+                    <option>Palmira</option>
+                  </select>
+                </div>
               </div>
-              <div class="form-group">
-                <label>Correo Institucional</label>
-                <input type="email" placeholder="ejemplo@upb.edu.co" />
+              <div class="form-actions">
+                <a href="gestion-usuarios-credencial.html" class="btn-primary">Crear usuario</a>
               </div>
-              <div class="form-group">
-                <label>Rol del Usuario *</label>
-                <select>
-                  <option>Seleccione un rol...</option>
-                  <option>Coordinador de Sede</option>
-                  <option>Usuario de Consulta</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Número de documento *</label>
-                <input placeholder="Solo números" />
-                <small class="muted">En desarrollo se usa como credencial inicial; solo se almacena su hash.</small>
-              </div>
-              <div class="form-group">
-                <label>Sede asignada *</label>
-                <select>
-                  <option>Seleccione una sede...</option>
-                  <option>Medellín</option>
-                  <option>Bucaramanga</option>
-                  <option>Montería</option>
-                  <option>Palmira</option>
-                </select>
-              </div>
-              <a href="gestion-usuarios-credencial.html" class="btn-primary w-full">Crear usuario</a>
             </article>
             <article class="card">
-              <h2 class="card-title">Usuarios Activos</h2>
+              <div class="list-card-header">
+                <h2 class="card-title">Usuarios Activos</h2>
+                <span class="badge info users-count">3 usuarios</span>
+              </div>
+
+              <!-- Barra de búsqueda y filtros -->
+              <div class="table-toolbar">
+                <div class="search-box">
+                  <div class="search-input-wrapper">
+                    <i data-lucide="search"></i>
+                    <input type="search" class="search-input" placeholder="Buscar usuarios…" aria-label="Buscar usuarios…" />
+                  </div>
+                </div>
+                <div class="filters-group">
+                  <div class="filter-item">
+                    <label class="filter-label" for="mock-filter-rol">Rol</label>
+                    <select id="mock-filter-rol" class="filter-select">
+                      <option value="">Todos los roles</option>
+                      <option value="Coordinador_Sede">Coordinador de Sede</option>
+                      <option value="Usuario_Consulta">Usuario de consulta</option>
+                    </select>
+                  </div>
+                  <div class="filter-item">
+                    <label class="filter-label" for="mock-filter-sede">Sede</label>
+                    <select id="mock-filter-sede" class="filter-select">
+                      <option value="">Todas las sedes</option>
+                      <option value="1">Medellín</option>
+                      <option value="2">Bucaramanga</option>
+                    </select>
+                  </div>
+                  <div class="filter-item">
+                    <label class="filter-label" for="mock-filter-alcance">Alcance</label>
+                    <select id="mock-filter-alcance" class="filter-select">
+                      <option value="">Todos los alcances</option>
+                      <option value="Profesor">Profesor</option>
+                      <option value="Administrativo">Administrativo</option>
+                    </select>
+                  </div>
+                  <div class="filter-item">
+                    <label class="filter-label" for="mock-filter-estado">Estado</label>
+                    <select id="mock-filter-estado" class="filter-select">
+                      <option value="">Todos los estados</option>
+                      <option value="activo">Activa</option>
+                      <option value="inactivo">Inactiva</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
               <div class="table-scroll">
                 <table class="users-table">
                   <thead>
@@ -131,7 +183,7 @@
                       <th>Sede</th>
                       <th>Alcance</th>
                       <th>Estado</th>
-                      <th>Acciones</th>
+                      <th class="col-actions">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -142,7 +194,7 @@
                       <td>Medellín</td>
                       <td>Gestión de sede</td>
                       <td><span class="badge success">Activa</span></td>
-                      <td>
+                      <td class="cell-actions">
                         <div class="table-actions">
                           <button class="btn-secondary table-action">Editar</button>
                           <button class="btn-danger table-action">Desactivar</button>
@@ -156,7 +208,7 @@
                       <td>Medellín</td>
                       <td>Profesor<br /><small class="muted">Derecho, Psicología</small><br /><small class="cell-subtext sin-datos">Sin datos actuales: Programa Demo Retirado</small></td>
                       <td><span class="badge success">Activa</span></td>
-                      <td>
+                      <td class="cell-actions">
                         <div class="table-actions">
                           <button class="btn-secondary table-action">Editar</button>
                           <button class="btn-danger table-action">Desactivar</button>
@@ -170,7 +222,7 @@
                       <td>Bucaramanga</td>
                       <td>Administrativo<br /><small class="muted">Ingeniería Industrial</small></td>
                       <td><span class="badge">Inactiva</span></td>
-                      <td>
+                      <td class="cell-actions">
                         <div class="table-actions">
                           <button class="btn-secondary table-action">Editar</button>
                           <button class="btn-primary table-action">Reactivar</button>
