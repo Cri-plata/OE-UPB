@@ -5,20 +5,25 @@ import { BaseChartDirective } from 'ng2-charts';
 
 import { PublicacionesApi } from '../../../../data/api/publicaciones.api';
 import { PublicacionResponse } from '../../../../data/api/generated-api.models';
+import { AuthRepository } from '../../../../domain/repositories/auth.repository';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
 import { CHART_PALETTE } from '../../../shared/chart-palette';
 import { mensajeDeError } from '../../../shared/mensaje-error';
+import { PublicacionControl } from '../../../shared/publicacion-control';
 
 
 @Component({
   selector: 'app-publicaciones',
   standalone: true,
   imports: [CommonModule, BaseChartDirective, SidebarComponent],
+  providers: [PublicacionControl],
   templateUrl: './publicaciones.html',
   styleUrls: ['./publicaciones.scss']
 })
 export class PublicacionesComponent implements OnInit {
   private readonly api = inject(PublicacionesApi);
+  readonly propias = inject(PublicacionControl);
+  readonly esCoordinador = inject(AuthRepository).getUsuarioActual()?.rol === 'Coordinador_Sede';
   // Signals: la aplicación es zoneless y la vista debe reflejar la respuesta sin otra interacción.
   readonly publicaciones = signal<PublicacionResponse[]>([]);
   readonly cargando = signal(true);
@@ -29,6 +34,7 @@ export class PublicacionesComponent implements OnInit {
   }
 
   cargar(): void {
+    if (this.esCoordinador) this.propias.cargarPropias();
     this.cargando.set(true);
     this.error.set('');
     this.api.listarAutorizadas().subscribe({
@@ -42,6 +48,11 @@ export class PublicacionesComponent implements OnInit {
         this.cargando.set(false);
       }
     });
+  }
+
+  retirar(publicacion: PublicacionResponse): void {
+    if (!confirm(`¿Retirar "${publicacion.titulo}"? Dejará de estar disponible para todos inmediatamente.`)) return;
+    this.propias.retirar(publicacion.grafica_key);
   }
 
   tipo(publicacion: PublicacionResponse): ChartType {

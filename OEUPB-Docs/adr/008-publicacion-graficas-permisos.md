@@ -1,6 +1,6 @@
 # ADR-008 — Publicación de gráficas y permisos de consulta
 
-**Estado:** Aceptado
+**Estado:** Aceptado. El punto 5 fue modificado por [ADR-018](018-catalogo-publicaciones-coordinador.md) en el alcance del coordinador.
 
 **Fecha de decisión:** 2026-09-23
 

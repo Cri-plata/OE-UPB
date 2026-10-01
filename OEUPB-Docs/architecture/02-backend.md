@@ -83,6 +83,6 @@ La publicación entre sedes no habilita consultas a `egresados`, `mediciones.res
 
 La autorización de lectura se calcula en backend con el rol, los permisos y los programas asignados manualmente al usuario. Las etiquetas rector, profesor y administrativo no participan en la decisión. El cliente no envía destinatarios, métricas ni programas: los programas de audiencia se derivan del cálculo y `permiso_requerido` del origen de la gráfica.
 
-`Usuario_Consulta` solo puede consultar instantáneas publicadas compatibles con su alcance; no obtiene gráficas privadas de su sede. El dashboard privado deriva la sede del JWT y las publicaciones de otras sedes se exponen mediante una vista y endpoints separados.
+`Usuario_Consulta` solo puede consultar instantáneas publicadas compatibles con su alcance; no obtiene gráficas privadas de su sede. El dashboard privado deriva la sede del JWT y las publicaciones se exponen mediante una vista y endpoints separados: para un coordinador, `GET /api/publicaciones/mias` devuelve las propias y `GET /api/publicaciones/` las de los demás coordinadores de cualquier sede (ADR-018).
 
 El catálogo inicial de permisos contiene `ver_reporte_general`, `ver_tendencias`, `ver_explorador` y `ver_publicaciones`. Los programas asignables se calculan en backend a partir de los nombres distintos presentes en cargas visibles de la sede del coordinador; cualquier valor enviado debe validarse contra esa lista.

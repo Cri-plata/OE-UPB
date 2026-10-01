@@ -1,6 +1,6 @@
 # Estado funcional actual de OE UPB
 
-**Fecha de corte:** 2026-09-25  
+**Fecha de corte:** 2026-09-30  
 **Estado:** referencia funcional verificada contra código, pruebas y migraciones  
 **Versión de base de datos esperada:** `i6e04c1f3a52 (head)`
 
@@ -139,11 +139,11 @@ Cada publicación conserva:
 
 El frontend envía solo la definición de la gráfica. El backend recalcula las métricas con los datos de la sede autenticada, deriva los programas de audiencia y agrupa u omite las celdas con menos de 5 observaciones; si no queda ninguna, rechaza la publicación con 422 (ADR-015). Por eso la gráfica publicada puede diferir de la privada.
 
-La publicación nunca debe contener documentos, nombres, correos, respuestas abiertas ni archivos fuente. Los coordinadores pueden consultar las publicaciones vigentes y los usuarios de consulta solo reciben aquellas compatibles con sus permisos y programas. Una actualización crea una versión nueva y conserva la anterior como reemplazada.
+La publicación nunca debe contener documentos, nombres, correos, respuestas abiertas ni archivos fuente. En `Gráficas publicadas`, el coordinador ve la sección "Mis publicaciones", desde la que puede retirarlas, y la sección "Publicadas por otros coordinadores", de su sede y de las demás (ADR-018). Los usuarios de consulta solo reciben las publicaciones compatibles con sus permisos y programas. Una actualización crea una versión nueva y conserva la anterior como reemplazada.
 
-**Corrección del 2026-09-25 (PUB-01/PUB-02), pendiente de validación manual:** publicar y retirar terminan siempre en éxito o error, el botón muestra `Publicando…`/`Retirando…`, no admite doble envío y, tras un error, ofrece `Reintentar publicación` con el motivo del backend (por ejemplo, datos insuficientes para el umbral). La vista de publicaciones resuelve datos, vacío o error con `Reintentar` y ofrece `Actualizar`.
+**Corrección del 2026-09-25 (PUB-01/PUB-02), validada manualmente el 2026-09-30:** publicar y retirar terminan siempre en éxito o error, el botón muestra `Publicando…`/`Retirando…`, no admite doble envío y, tras un error, ofrece `Reintentar publicación` con el motivo del backend (por ejemplo, datos insuficientes para el umbral). La vista de publicaciones resuelve datos, vacío o error con `Reintentar` y ofrece `Actualizar`.
 
-Validación manual sugerida:
+Validación manual (aprobada el 2026-09-30; la evidencia está en `BACKLOG_ARCHIVE.md`):
 
 1. Como coordinador, publicar una gráfica: el botón cambia a `Publicando…` y luego muestra `Publicada vN` y `Retirar publicación` sin otra interacción.
 2. Publicar un filtro con pocos datos: aparece el mensaje de datos insuficientes y el botón `Reintentar publicación`.
@@ -183,10 +183,10 @@ La infraestructura Docker no se ejecutó en el equipo de desarrollo porque Docke
 
 ## 11. Verificación disponible
 
-La última revisión (2026-09-25) aprobó:
+La última revisión (2026-09-30) aprobó:
 
-- 59 pruebas de backend;
-- 31 pruebas de frontend;
+- 60 pruebas de backend;
+- 34 pruebas de frontend;
 - compilación productiva de Angular;
 - sincronización entre FastAPI, OpenAPI y tipos TypeScript;
 - validación de capas frontend, guards y tokens visuales;

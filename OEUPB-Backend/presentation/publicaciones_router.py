@@ -232,7 +232,8 @@ def listar_publicaciones_autorizadas(
         .filter(PublicacionGrafica.estado == "publicada")
     )
     if rol == "Coordinador_Sede":
-        query = query.filter(PublicacionGrafica.sede_id != current_user.get("sede_id"))
+        # Las propias se listan en /mias; aquí van las de los demás coordinadores, de cualquier sede (ADR-018).
+        query = query.filter(PublicacionGrafica.coordinador_id != current_user.get("usuario_id"))
     else:
         permisos = set(current_user.get("permisos") or [])
         programas = claves_programas(current_user.get("programas"))

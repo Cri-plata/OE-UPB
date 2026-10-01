@@ -76,7 +76,7 @@ La URL base está centralizada en `environments/environment.ts` y `data/api/api.
 - Las gráficas publicables muestran una acción `Publicar`/`Retirar publicación` únicamente al coordinador propietario.
 - La pantalla de carga no selecciona una sede para ampliar alcance y no contiene la acción de compartir encuestas.
 - `Usuario_Consulta` recibe un dashboard de solo lectura; el frontend muestra las gráficas autorizadas por la respuesta del backend y no intenta reconstruir permisos localmente.
-- El dashboard privado no ofrece selector de sede: usa exclusivamente la sede derivada de la sesión. Una vista separada presenta las instantáneas publicadas por otras sedes.
+- El dashboard privado no ofrece selector de sede: usa exclusivamente la sede derivada de la sesión. Una vista separada presenta las instantáneas publicadas; al coordinador le muestra la sección "Mis publicaciones", con `Retirar publicación` (estado en `PublicacionControl`), y la sección "Publicadas por otros coordinadores" (ADR-018).
 - `Usuario_Consulta` nunca recibe gráficas privadas, ni siquiera las de su propia sede; solo instantáneas publicadas compatibles con sus permisos y programas.
 - Rector, profesor y administrativo son etiquetas informativas: la interfaz no precarga ni bloquea privilegios por etiqueta. Permisos y programas se seleccionan manualmente.
 

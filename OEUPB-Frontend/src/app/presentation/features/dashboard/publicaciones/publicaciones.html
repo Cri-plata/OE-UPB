@@ -4,35 +4,76 @@
     <header class="page-header">
       <div class="page-header-content">
         <h1>Gráficas publicadas</h1>
-        <p>Instantáneas agregadas autorizadas para tu cuenta.</p>
+        <p>{{ esCoordinador ? 'Instantáneas agregadas publicadas por los coordinadores de la institución.' : 'Instantáneas agregadas autorizadas para tu cuenta.' }}</p>
       </div>
-      <button type="button" class="btn-secondary" [disabled]="cargando()" (click)="cargar()">Actualizar</button>
+      <button type="button" class="btn-secondary" [disabled]="cargando() || propias.cargandoPropias()" (click)="cargar()">Actualizar</button>
     </header>
 
-    <section class="publicaciones-grid">
-      <p *ngIf="cargando()" class="loading-state" role="status">Cargando publicaciones…</p>
-      <div class="error-message" *ngIf="!cargando() && error()" role="alert">
-        {{ error() }}
-        <button type="button" class="btn-secondary table-action" (click)="cargar()">Reintentar</button>
+    <section *ngIf="esCoordinador" class="publicaciones-section" aria-labelledby="mis-publicaciones">
+      <header class="publicaciones-section-header">
+        <h2 id="mis-publicaciones">Mis publicaciones</h2>
+        <p>Gráficas que publicaste. Al retirarlas dejan de estar disponibles para todos.</p>
+      </header>
+      <div class="publicaciones-grid">
+        <p *ngIf="propias.cargandoPropias()" class="loading-state" role="status">Cargando tus publicaciones…</p>
+        <div class="error-message" *ngIf="!propias.cargandoPropias() && propias.errorCarga()" role="alert">
+          {{ propias.errorCarga() }}
+          <button type="button" class="btn-secondary table-action" (click)="propias.cargarPropias()">Reintentar</button>
+        </div>
+        <div class="card empty-state" *ngIf="!propias.cargandoPropias() && !propias.errorCarga() && propias.propias().length === 0">
+          Aún no has publicado gráficas. Publícalas desde Reporte general, Tendencias o el Explorador.
+        </div>
+        <ng-container *ngIf="!propias.cargandoPropias() && !propias.errorCarga()">
+          <ng-container *ngFor="let publicacion of propias.propias()">
+            <ng-container *ngTemplateOutlet="tarjeta; context: { $implicit: publicacion, propia: true }"></ng-container>
+          </ng-container>
+        </ng-container>
       </div>
-      <div class="card empty-state" *ngIf="!cargando() && !error() && publicaciones().length === 0">
-        No hay gráficas publicadas compatibles con tus permisos y programas.
-      </div>
+    </section>
 
-      <article class="card publication-card" *ngFor="let publicacion of publicaciones()">
-        <div class="publication-meta">
-          <div>
-            <span class="sede">{{ publicacion.sede_nombre }}</span>
-            <h2 class="card-title">{{ publicacion.titulo }}</h2>
-          </div>
-          <span class="badge">v{{ publicacion.version }}</span>
+    <section class="publicaciones-section" [attr.aria-labelledby]="esCoordinador ? 'otras-publicaciones' : null">
+      <header class="publicaciones-section-header" *ngIf="esCoordinador">
+        <h2 id="otras-publicaciones">Publicadas por otros coordinadores</h2>
+        <p>Incluye otros coordinadores de tu sede y de las demás sedes.</p>
+      </header>
+      <div class="publicaciones-grid">
+        <p *ngIf="cargando()" class="loading-state" role="status">Cargando publicaciones…</p>
+        <div class="error-message" *ngIf="!cargando() && error()" role="alert">
+          {{ error() }}
+          <button type="button" class="btn-secondary table-action" (click)="cargar()">Reintentar</button>
         </div>
-        <p class="programas">Programas: {{ publicacion.programas.join(', ') }}</p>
-        <div class="chart-wrapper">
-          <canvas baseChart [data]="datos(publicacion)" [type]="tipo(publicacion)"></canvas>
+        <div class="card empty-state" *ngIf="!cargando() && !error() && publicaciones().length === 0">
+          {{ esCoordinador ? 'No hay gráficas publicadas por otros coordinadores.' : 'No hay gráficas publicadas compatibles con tus permisos y programas.' }}
         </div>
-        <small class="cell-subtext">Publicada el {{ publicacion.fecha_publicacion | date:'medium' }}</small>
-      </article>
+        <ng-container *ngFor="let publicacion of publicaciones()">
+          <ng-container *ngTemplateOutlet="tarjeta; context: { $implicit: publicacion, propia: false }"></ng-container>
+        </ng-container>
+      </div>
     </section>
   </main>
 </div>
+
+<ng-template #tarjeta let-publicacion let-propia="propia">
+  <article class="card publication-card">
+    <div class="publication-meta">
+      <div>
+        <span class="sede">{{ publicacion.sede_nombre }}</span>
+        <h3 class="card-title">{{ publicacion.titulo }}</h3>
+      </div>
+      <span class="badge">v{{ publicacion.version }}</span>
+    </div>
+    <p class="programas">Programas: {{ publicacion.programas.join(', ') }}</p>
+    <div class="chart-wrapper">
+      <canvas baseChart [data]="datos(publicacion)" [type]="tipo(publicacion)"></canvas>
+    </div>
+    <small class="cell-subtext">Publicada el {{ publicacion.fecha_publicacion | date:'medium' }}</small>
+    <ng-container *ngIf="propia">
+      <div class="publication-actions">
+        <button type="button" class="btn-secondary table-action" [disabled]="propias.ocupado()" (click)="retirar(publicacion)">
+          {{ propias.procesando(publicacion.grafica_key) ? 'Retirando…' : 'Retirar publicación' }}
+        </button>
+      </div>
+      <p class="publish-error" role="alert" *ngIf="propias.error(publicacion.grafica_key)">{{ propias.error(publicacion.grafica_key) }}</p>
+    </ng-container>
+  </article>
+</ng-template>

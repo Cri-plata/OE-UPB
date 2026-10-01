@@ -11,7 +11,7 @@ Los ADR registran decisiones relevantes y sus consecuencias. Una decisión reemp
 | [005](005-respuestas-json.md) | Respuestas dinámicas almacenadas en JSON | Aceptado |
 | [006](006-doble-titulacion.md) | Conservar la titulación más reciente por carga | Aceptado |
 | [007](007-openapi-canonico.md) | OpenAPI como contrato HTTP canónico | Aceptado |
-| [008](008-publicacion-graficas-permisos.md) | Publicar métricas agregadas con audiencia automática por permisos y programas | Aceptado |
+| [008](008-publicacion-graficas-permisos.md) | Publicar métricas agregadas con audiencia automática por permisos y programas | Aceptado; punto 5 modificado por ADR-018 |
 | [009](009-carga-y-gobierno-datos.md) | Carga auditable, reemplazo transaccional y gobierno de datos | Aceptado; puntos 4, 5 y 8 modificados por ADR-014 y ADR-015 |
 | [010](010-contrasena-temporal.md) | Contraseña temporal aleatoria con cambio obligatorio | Reemplazado por ADR-013 |
 | [011](011-versionado-api-compatible.md) | Mantener `/api/*` con evolución compatible | Aceptado |
@@ -21,3 +21,4 @@ Los ADR registran decisiones relevantes y sus consecuencias. Una decisión reemp
 | [015](015-recalculo-publicaciones-umbral.md) | Recálculo en backend, umbral k = 5 y autoaprobación explícita de publicaciones | Aceptado |
 | [016](016-taxonomia-laboral-cuestionarios.md) | Clasificación laboral, formalidad y salario a partir de los cuestionarios OLE | Aceptado |
 | [017](017-normalizacion-documento-limites-carga.md) | Normalización del documento de identidad y límites de carga | Aceptado |
+| [018](018-catalogo-publicaciones-coordinador.md) | Catálogo del coordinador: sus publicaciones con retiro y las de los demás coordinadores | Aceptado |

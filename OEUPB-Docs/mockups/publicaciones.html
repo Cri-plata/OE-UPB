@@ -45,41 +45,80 @@
           <header class="page-header">
             <div class="page-header-content">
               <h1>Gráficas publicadas</h1>
-              <p>Instantáneas agregadas autorizadas por coordinadores de otras sedes según audiencia.</p>
+              <p>Instantáneas agregadas publicadas por los coordinadores de la institución.</p>
             </div>
+            <button type="button" class="btn-secondary">Actualizar</button>
           </header>
-          <div class="publications-grid">
-            <article class="card publication-card">
-              <div class="publication-meta">
-                <div>
-                  <span class="sede">Sede Medellín</span>
-                  <h2>Distribución por Programa</h2>
+
+          <!-- Solo Coordinador_Sede: sus publicaciones vigentes, con la acción de retiro. -->
+          <section class="publications-section" aria-labelledby="mis-publicaciones">
+            <header class="publications-section-header">
+              <h2 id="mis-publicaciones">Mis publicaciones</h2>
+              <p class="muted">Gráficas que publicaste. Al retirarlas dejan de estar disponibles para todos.</p>
+            </header>
+            <div class="publications-grid">
+              <article class="card publication-card">
+                <div class="publication-meta">
+                  <div>
+                    <span class="sede">Sede Bucaramanga</span>
+                    <h3>Distribución por Programa</h3>
+                  </div>
+                  <span class="badge success">Publicada · v2</span>
                 </div>
-                <span class="badge success">Publicada · v1</span>
-              </div>
-              <p class="muted">
-                Visualización agregada autorizada para coordinadores y usuarios de consulta asignados.
-              </p>
-              <div class="chart-placeholder">
-                Cargando visualización agregada de Sede Medellín...
-              </div>
-            </article>
-            <article class="card publication-card">
-              <div class="publication-meta">
-                <div>
-                  <span class="sede">Sede Bucaramanga</span>
-                  <h2>Evolución de Empleabilidad</h2>
+                <p class="muted">Programas: Demo Derecho, Demo Ingeniería Civil</p>
+                <div class="chart-placeholder">Visualización agregada de Sede Bucaramanga</div>
+                <div class="publication-actions">
+                  <button type="button" class="btn-secondary">Retirar publicación</button>
                 </div>
-                <span class="badge success">Publicada · v1</span>
-              </div>
-              <p class="muted">
-                Instantánea histórica correspondiente a los momentos 0, 1 y 5 años.
-              </p>
-              <div class="chart-placeholder">
-                Cargando visualización agregada de Sede Bucaramanga...
-              </div>
-            </article>
-          </div>
+              </article>
+              <article class="card publication-card">
+                <div class="publication-meta">
+                  <div>
+                    <span class="sede">Sede Bucaramanga</span>
+                    <h3>Estado Laboral</h3>
+                  </div>
+                  <span class="badge success">Publicada · v1</span>
+                </div>
+                <p class="muted">Programas: Demo Derecho</p>
+                <div class="chart-placeholder">Visualización agregada de Sede Bucaramanga</div>
+                <div class="publication-actions">
+                  <button type="button" class="btn-secondary" disabled>Retirando…</button>
+                </div>
+                <p class="publish-error" role="alert">Variante de error: No fue posible retirar la publicación.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="publications-section" aria-labelledby="otras-publicaciones">
+            <header class="publications-section-header">
+              <h2 id="otras-publicaciones">Publicadas por otros coordinadores</h2>
+              <p class="muted">Incluye otros coordinadores de tu sede y de las demás sedes.</p>
+            </header>
+            <div class="publications-grid">
+              <article class="card publication-card">
+                <div class="publication-meta">
+                  <div>
+                    <span class="sede">Sede Medellín</span>
+                    <h3>Distribución por Programa</h3>
+                  </div>
+                  <span class="badge success">Publicada · v1</span>
+                </div>
+                <p class="muted">Programas: Demo Arquitectura</p>
+                <div class="chart-placeholder">Visualización agregada de Sede Medellín</div>
+              </article>
+              <article class="card publication-card">
+                <div class="publication-meta">
+                  <div>
+                    <span class="sede">Sede Bucaramanga</span>
+                    <h3>Evolución de Empleabilidad</h3>
+                  </div>
+                  <span class="badge success">Publicada · v1</span>
+                </div>
+                <p class="muted">Programas: Demo Derecho</p>
+                <div class="chart-placeholder">Visualización agregada de Sede Bucaramanga</div>
+              </article>
+            </div>
+          </section>
         </section>
       </main>
     </div>

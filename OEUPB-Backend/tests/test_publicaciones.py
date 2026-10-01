@@ -180,6 +180,20 @@ class PublicacionesTest(unittest.TestCase):
         retiro = self.client.delete(f"/api/publicaciones/{creada['id']}", headers=coord1b)
         self.assertEqual(retiro.status_code, 200, retiro.text)
 
+    def test_coordinador_ve_publicaciones_de_los_demas_coordinadores_y_las_propias_aparte(self):
+        db = self.Session()
+        db.add(Usuario(nombre="Coord 1b", correo="coord1b@upb.edu.co", contrasena_hash=get_password_hash("ClaveSegura2026"), rol="Coordinador_Sede", sede_id=1))
+        db.commit()
+        db.close()
+        coord1 = self.login("coord1@upb.edu.co")
+        creada = self.client.post("/api/publicaciones/", headers=coord1, json=self.payload()).json()
+
+        self.assertEqual(self.client.get("/api/publicaciones/", headers=coord1).json(), [])
+        self.assertEqual([p["id"] for p in self.client.get("/api/publicaciones/mias", headers=coord1).json()], [creada["id"]])
+        for otro in ("coord1b@upb.edu.co", "coord2@upb.edu.co"):
+            catalogo = self.client.get("/api/publicaciones/", headers=self.login(otro)).json()
+            self.assertEqual([p["id"] for p in catalogo], [creada["id"]], otro)
+
     def test_ciclo_publicar_consultar_retirar_para_consulta(self):
         coord1 = self.login("coord1@upb.edu.co")
         profesor = self.login("profesor@upb.edu.co")

@@ -2,6 +2,17 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-09-30] - Catálogo de publicaciones del coordinador
+
+* **ADR-018:** el coordinador ve sus publicaciones, con retiro, y las de los demás coordinadores de cualquier sede. Modifica el punto 5 de ADR-008 y RN-10; RF-35, la matriz de permisos, la arquitectura y el estado funcional se actualizaron.
+* **Mockup:** `publicaciones.html` incluye `Actualizar`, las secciones "Mis publicaciones" y "Publicadas por otros coordinadores", y el estado `Retirando…` con error; `screen-map.md` registra las variantes.
+* **Pruebas:** 60 de backend y 34 de frontend.
+
+## [2026-09-30] - Validación del flujo de publicación
+
+* **PUB-01/PUB-02:** validados manualmente en el entorno local con los cinco pasos de `docs/07-estado-funcional-actual.md` (sección 8) y archivados con la evidencia en `BACKLOG_ARCHIVE.md`. RF-35 pasa a Implementado (35 implementados y 30 parciales en la matriz); CU-12 y la auditoría 04 reflejan el cierre.
+* **Backlog:** nuevo FE-05; el login queda en "Procesando…" sin mensaje cuando el correo no es institucional.
+
 ## [2026-09-25] - Auditoría de diseño UI 06
 
 * **Auditoría:** `audits/06-auditoria-ui.md` mide la app y los mockups en 1440, 1024 y 375 px contra `design/design.md`; 13 hallazgos resueltos.

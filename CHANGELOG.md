@@ -3,6 +3,9 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Cambiado (2026-09-30, catálogo de publicaciones del coordinador)
+- **Gráficas publicadas (ADR-018):** el coordinador ve la sección "Mis publicaciones", desde la que puede retirar cada una, y la sección "Publicadas por otros coordinadores", que ahora incluye a los demás coordinadores de su sede además de los de otras sedes. Antes la vista excluía toda su sede y aparecía vacía justo después de publicar. `GET /api/publicaciones/` excluye para el coordinador solo sus propias publicaciones. Se agregaron 1 prueba de backend y 3 de frontend.
+
 ### Corregido (2026-09-25, auditoría UI)
 - **Desbordes:** Reporte General (gráficas), Administración de usuarios, Carga de datos y Explorador ya no desbordan en 1440, 1024 ni 375 px.
 - **Alineación con los mockups:** controles de la cabecera de gráfica, casillas de permisos, grilla de 4 KPI, filtros analíticos con el patrón canónico, paleta de gráficas de `design.md` (frontend y publicaciones) y eliminación del pictograma "✕".
