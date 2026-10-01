@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from application.auth_service import get_current_user, require_roles
 from presentation.errores import RESPUESTAS_PROTEGIDAS, ErrorResponse, errores
-from application.indicadores import construir_publicacion
+from application.indicadores import LONGITUD_MAXIMA_PREGUNTA, construir_publicacion
 from application.programas import claves_programas
 from domain.models import PublicacionGrafica, Sede, Usuario
 from infrastructure.database import get_db
@@ -26,7 +26,7 @@ class DefinicionGrafica(BaseModel):
     origen: Literal["reporte_general", "tendencias", "explorador"]
     tipo_visualizacion: Literal["bar", "line", "pie", "doughnut"]
     indicador: str | None = Field(default=None, max_length=100)
-    pregunta: str | None = Field(default=None, max_length=300)
+    pregunta: str | None = Field(default=None, max_length=LONGITUD_MAXIMA_PREGUNTA)
     momento: Literal[0, 1, 5] | None = None
     programa: str | None = Field(default=None, max_length=150)
     anio: int | None = Field(default=None, ge=1900, le=2200)

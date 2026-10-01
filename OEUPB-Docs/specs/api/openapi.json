@@ -1542,7 +1542,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "maxLength": 300,
+              "maxLength": 500,
               "title": "Pregunta"
             }
           },
@@ -3204,7 +3204,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "maxLength": 300
+                "maxLength": 500
               },
               {
                 "type": "null"
@@ -3998,6 +3998,18 @@
           "documento": {
             "type": "string",
             "title": "Documento"
+          },
+          "id_estudiante": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Estudiante",
+            "description": "ID institucional del estudiante (columna USUARIO de las encuestas)"
           },
           "nombre_completo": {
             "type": "string",

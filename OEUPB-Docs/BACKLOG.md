@@ -10,7 +10,7 @@
 - [ ] **UI-01 — Migrar el frontend al sistema canónico.** Alinear tokens, tipografía, layout, estados e iconografía del frontend con `design/design.md` usando los mockups aprobados como contrato. Sustituir iconografía ad hoc por Lucide sin iniciar cambios visuales que carezcan de mockup y entrada en `mockups/screen-map.md`.
 
 - [ ] **UI-02 — Migrar la iconografía a `lucide-angular`.** Sustituir las máscaras CSS que cargan Lucide desde `unpkg.com` (barra lateral) y los SVG escritos a mano (KPI y carga) por `lucide-angular`, con el mapeo de iconos de `design.md`. Requiere añadir la dependencia (auditoría 06).
-- [ ] **UI-03 — Pasar a signals el estado asíncrono restante.** Reporte General, Tendencias, Carga, Administración y Directorio refrescan la vista con un `ChangeDetectorRef` inyectado, que queda inválido tras un reemplazo en caliente (HMR) y deja la pantalla en "Cargando…". Migrar su estado a signals, como el Explorador y Publicaciones (auditoría 06, U-12/UI-03).
+- [ ] **UI-03 — Pasar a signals el estado asíncrono restante.** Reporte General, Tendencias, Carga y Administración refrescan la vista con un `ChangeDetectorRef` inyectado, que queda inválido tras un reemplazo en caliente (HMR) y deja la pantalla en "Cargando…". Migrar su estado a signals, como el Explorador, Publicaciones, el Directorio y la Ficha del egresado (auditoría 06, U-12/UI-03). Observado el 2026-09-30: además, el endpoint de HMR de `ng serve` (`@ng/component`) puede seguir entregando una plantilla anterior incluso tras una recarga completa; si una pantalla no refleja un cambio de plantilla, reiniciar `ng serve`.
 
 ## P2 — Autenticación
 

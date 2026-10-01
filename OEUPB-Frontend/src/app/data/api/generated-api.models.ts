@@ -246,6 +246,7 @@ export interface OperacionEgresadoResponse {
 
 export interface PerfilEgresadoResponse {
   "documento": string;
+  "id_estudiante"?: string | null;
   "nombre_completo": string;
   "programa": string | null;
   "fecha_grado": string;

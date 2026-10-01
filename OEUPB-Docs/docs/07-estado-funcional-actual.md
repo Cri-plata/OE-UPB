@@ -2,7 +2,7 @@
 
 **Fecha de corte:** 2026-09-30  
 **Estado:** referencia funcional verificada contra código, pruebas y migraciones  
-**Versión de base de datos esperada:** `i6e04c1f3a52 (head)`
+**Versión de base de datos esperada:** `j7f15d2a4b63 (head)`
 
 ## 1. Propósito del proyecto
 
@@ -77,10 +77,10 @@ El historial solo debe mostrar las cargas de la sede autenticada. La eliminació
 
 El coordinador debería poder:
 
-- buscar por documento, nombre o apellido;
+- buscar por documento, nombre, apellido o ID del estudiante (también si el ID se escribe con ceros a la izquierda);
 - filtrar por programa;
 - paginar el directorio;
-- abrir la ficha de un egresado y consultar solamente las mediciones de su sede;
+- abrir la ficha de un egresado, que muestra la cédula y debajo el ID del estudiante, y consultar solamente las mediciones de su sede;
 - crear un egresado manualmente;
 - corregir nombre, apellido, programa o fecha de grado;
 - eliminar un registro manual sin mediciones;
@@ -185,13 +185,13 @@ La infraestructura Docker no se ejecutó en el equipo de desarrollo porque Docke
 
 La última revisión (2026-09-30) aprobó:
 
-- 60 pruebas de backend;
-- 34 pruebas de frontend;
+- 65 pruebas de backend;
+- 37 pruebas de frontend;
 - compilación productiva de Angular;
 - sincronización entre FastAPI, OpenAPI y tipos TypeScript;
 - validación de capas frontend, guards y tokens visuales;
 - validación de enlaces y documentación;
-- migraciones hasta `i6e04c1f3a52`; la base local debe actualizarse con `alembic upgrade head` (DB-03 y ETL-01).
+- migraciones hasta `j7f15d2a4b63` (ID del estudiante); la base local debe actualizarse con `alembic upgrade head`.
 
 La compilación Angular mantiene advertencias no bloqueantes por tamaño del paquete inicial y del SCSS de carga de datos.
 

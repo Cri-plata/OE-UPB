@@ -15,6 +15,8 @@ from application.medicion_policy import seleccionar_intentos
 from domain.models import Egresado, Medicion
 
 UMBRAL_MINIMO_PUBLICACION = 5
+# Los enunciados del cuestionario OLE llegan a ~400 caracteres; el margen evita rechazar variables del catálogo.
+LONGITUD_MAXIMA_PREGUNTA = 500
 ETIQUETA_OTROS = "Otros (agrupados por privacidad)"
 MOMENTOS = (0, 1, 5)
 ETIQUETAS_MOMENTOS = ["Momento 0 (Grado)", "Momento 1 (1 año)", "Momento 5 (5 años)"]
@@ -372,6 +374,22 @@ def conteo_respuestas(db: Session, sede_id: int, pregunta: str, momento=None, pr
     return conteo, programas
 
 
+_PREGUNTA_NUMERADA = re.compile(r"\s*pregunta\s+\d", re.IGNORECASE)
+
+
+def _clave_orden_pregunta(texto: str) -> tuple:
+    # Orden natural: "Pregunta 6" antes que "Pregunta 10"; las variables sin número van primero.
+    partes = re.split(r"(\d+)", texto.casefold())
+    return (
+        _PREGUNTA_NUMERADA.match(texto) is not None,
+        [(0, int(parte), "") if parte.isdigit() else (1, 0, parte) for parte in partes],
+    )
+
+
+def ordenar_preguntas(preguntas) -> list[str]:
+    return sorted(preguntas, key=_clave_orden_pregunta)
+
+
 def preguntas_analiticas(db: Session, sede_id: int) -> tuple[list[str], list[str], list[int]]:
     preguntas, programas, anios = set(), set(), set()
     for medicion, programa in _mediciones_identificadas(db, sede_id):
@@ -379,7 +397,7 @@ def preguntas_analiticas(db: Session, sede_id: int) -> tuple[list[str], list[str
         if medicion.anio:
             anios.add(medicion.anio)
         preguntas.update(clave for clave in (medicion.respuestas or {}) if es_variable_analitica(clave))
-    return sorted(preguntas), sorted(p for p in programas if p), sorted(anios)
+    return ordenar_preguntas(preguntas), sorted(p for p in programas if p), sorted(anios)
 
 
 def recortar_etiqueta(texto: str) -> str:

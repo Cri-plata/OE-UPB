@@ -2,6 +2,19 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-09-30] - ID del estudiante
+
+* **Modelo:** `egresados.id_estudiante` en el esquema SQL, el diagrama ER y `04-modelo-datos.md`; la revisión esperada de Alembic es `j7f15d2a4b63`.
+* **OpenAPI:** `PerfilEgresadoResponse.id_estudiante`.
+* **Mockups:** `directorio.html` busca por nombre, cédula o ID; `ficha-egresado.html` muestra el ID debajo de la cédula; `screen-map.md` actualizado.
+* **Backlog:** UI-03 queda limitado a Reporte General, Tendencias, Carga y Administración, con una nota sobre el HMR de `ng serve`.
+* **Pruebas:** 64 de backend y 37 de frontend.
+
+## [2026-09-30] - Límite de longitud de las preguntas del Explorador
+
+* **OpenAPI:** `maxLength` de `pregunta` (`GET /api/reportes/explorador` y `DefinicionGrafica`) pasa de 300 a 500, porque los enunciados del cuestionario llegan a 399 caracteres.
+* **Pruebas:** 62 de backend (incluye el orden natural de las preguntas del Explorador).
+
 ## [2026-09-30] - Catálogo de publicaciones del coordinador
 
 * **ADR-018:** el coordinador ve sus publicaciones, con retiro, y las de los demás coordinadores de cualquier sede. Modifica el punto 5 de ADR-008 y RN-10; RF-35, la matriz de permisos, la arquitectura y el estado funcional se actualizaron.

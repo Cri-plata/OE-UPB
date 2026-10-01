@@ -55,8 +55,10 @@ CREATE TABLE egresados (
     primer_apellido VARCHAR(100) NULL,
     programa VARCHAR(150) NULL,
     fecha_grado DATETIME NULL,
+    id_estudiante VARCHAR(30) NULL,
     PRIMARY KEY (numero_documento),
-    KEY ix_egresados_numero_documento (numero_documento)
+    KEY ix_egresados_numero_documento (numero_documento),
+    KEY ix_egresados_id_estudiante (id_estudiante)
 );
 
 CREATE TABLE egresados_sedes (

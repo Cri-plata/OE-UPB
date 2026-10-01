@@ -21,7 +21,7 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 | RF-12 | Borrar egresado | `DELETE`, motivo, auditoría y protecciones | Implementado |
 | RF-13 | Organizar por ceremonia | hay fecha/cohorte, no ceremonia ni filtro | Parcial |
 | RF-14 | Buscar por nombre | parámetro `q` del Directorio | Implementado |
-| RF-15 | Buscar por identificación | `q` y perfil por documento | Implementado |
+| RF-15 | Buscar por identificación | `q` por documento o ID del estudiante; perfil por documento con el ID | Implementado |
 | RF-16 | Agrupar por programa | catálogo y filtro `programa` | Implementado |
 | RF-17 | Actualizar situación laboral catalogada | respuesta JSON; CRUD no edita el catálogo | Parcial |
 | RF-18 | Dashboard interactivo | Reporte, Tendencias, Explorador y Chart.js | Implementado |

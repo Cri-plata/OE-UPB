@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from application.auth_service import get_password_hash
-from application.indicadores import ETIQUETA_OTROS, estado_laboral, extraer_salario, formalidad, salario
+from application.indicadores import ETIQUETA_OTROS, estado_laboral, extraer_salario, formalidad, ordenar_preguntas, salario
 from domain.models import Base, Carga, Egresado, Medicion, Sede, Usuario
 from infrastructure.database import get_db
 from main import app
@@ -47,6 +47,30 @@ class TaxonomiaLaboralTest(unittest.TestCase):
         self.assertEqual(extraer_salario("Entre 1 y 2 SMMLV"), 1.5)
         self.assertEqual(extraer_salario("Entre 1 y 1,5 SMLV"), 1.25)
         self.assertEqual(salario({M0_INGRESO: "Entre 2 y 3 SMMLV"}), 2.5)
+
+
+class OrdenPreguntasTest(unittest.TestCase):
+    def test_variables_sin_numero_primero_y_preguntas_en_orden_numerico(self):
+        desordenadas = [
+            "Pregunta 69: Describa brevemente la principal tarea que usted realiza",
+            "Pregunta 6: Satisfacción | Ítem 10",
+            "SEXO BIOLÓGICO",
+            "Pregunta 10: ¿Lugar de residencia?",
+            "Pregunta 6: Satisfacción | Ítem 2",
+            "PROGRAMA",
+            "Pregunta 9: Habilidades",
+            "CINE AMPLIO",
+        ]
+        self.assertEqual(ordenar_preguntas(desordenadas), [
+            "CINE AMPLIO",
+            "PROGRAMA",
+            "SEXO BIOLÓGICO",
+            "Pregunta 6: Satisfacción | Ítem 2",
+            "Pregunta 6: Satisfacción | Ítem 10",
+            "Pregunta 9: Habilidades",
+            "Pregunta 10: ¿Lugar de residencia?",
+            "Pregunta 69: Describa brevemente la principal tarea que usted realiza",
+        ])
 
 
 class ReportesAnaliticosTest(unittest.TestCase):

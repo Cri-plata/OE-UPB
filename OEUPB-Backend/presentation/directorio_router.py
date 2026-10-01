@@ -44,6 +44,7 @@ class EncuestaPerfilResponse(BaseModel):
 
 class PerfilEgresadoResponse(BaseModel):
     documento: str
+    id_estudiante: Optional[str] = Field(default=None, description="ID institucional del estudiante (columna USUARIO de las encuestas)")
     nombre_completo: str
     programa: Optional[str]
     fecha_grado: str
@@ -91,7 +92,14 @@ def _query_directorio(db: Session, sede_id: int, q: Optional[str], programa: Opt
     query = db.query(Egresado).filter(Egresado.numero_documento.in_(_documentos_visibles(db, sede_id)))
     if q:
         termino = f"%{q}%"
-        query = query.filter(or_(Egresado.numero_documento.like(termino), Egresado.primer_nombre.like(termino), Egresado.primer_apellido.like(termino)))
+        # Excel suele borrar los ceros a la izquierda del ID: "000123456" debe encontrar "123456".
+        termino_id = f"%{q.lstrip('0') or q}%"
+        query = query.filter(or_(
+            Egresado.numero_documento.like(termino),
+            Egresado.primer_nombre.like(termino),
+            Egresado.primer_apellido.like(termino),
+            Egresado.id_estudiante.like(termino_id),
+        ))
     if programa:
         query = query.filter(Egresado.programa == programa)
     return query.order_by(Egresado.primer_apellido, Egresado.primer_nombre)
@@ -140,7 +148,7 @@ def obtener_perfil_egresado(documento: str, db: Session = Depends(get_db), curre
     for medicion in mediciones:
         respuestas = medicion.respuestas or {}
         encuestas.append({"momento": medicion.momento, "anio": medicion.anio, "empleabilidad": ETIQUETAS_ESTADO.get(estado_laboral(respuestas), "No informa"), "salario": str(respuestas.get(clave_salario(respuestas) or "") or "No informa"), "respuestas_completas": respuestas})
-    return {"documento": documento, "nombre_completo": f"{egresado.primer_nombre} {egresado.primer_apellido or ''}".strip(), "programa": egresado.programa, "fecha_grado": egresado.fecha_grado.strftime("%Y-%m-%d") if egresado.fecha_grado else "N/A", "encuestas": encuestas}
+    return {"documento": documento, "id_estudiante": egresado.id_estudiante, "nombre_completo": f"{egresado.primer_nombre} {egresado.primer_apellido or ''}".strip(), "programa": egresado.programa, "fecha_grado": egresado.fecha_grado.strftime("%Y-%m-%d") if egresado.fecha_grado else "N/A", "encuestas": encuestas}
 
 
 @router.post("/egresados", response_model=OperacionEgresadoResponse, status_code=201, responses=errores(409, d409="El documento ya está registrado"))
