@@ -15,6 +15,7 @@
   --navigation: #1a1818;
   --navigation-hover: #232121;
   --navigation-text: #e4e4e7;
+  --navigation-border: #27272a;
   --text: #1a1c1b;
   --heading: #1a1818;
   --body: #494646;
@@ -40,6 +41,7 @@
   --color-navigation: var(--navigation);
   --color-navigation-hover: var(--navigation-hover);
   --color-navigation-text: var(--navigation-text);
+  --color-navigation-border: var(--navigation-border);
   --color-text: var(--text);
   --color-text-heading: var(--heading);
   --color-text-body: var(--body);
@@ -111,6 +113,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+body.sidebar-collapsed {
+  --sidebar-width: var(--rail-width);
+}
+
+body.mobile-nav-open {
+  overflow: hidden;
+}
+
 button, input, select, textarea {
   font: inherit;
 }
@@ -164,6 +174,10 @@ button {
   min-height: 100vh;
   position: relative;
   background-color: var(--background);
+}
+
+.sidebar {
+  transition: width 0.2s ease;
 }
 
 .main-content,

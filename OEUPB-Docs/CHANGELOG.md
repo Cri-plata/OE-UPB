@@ -2,6 +2,22 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-10-01] - Barra lateral colapsable, navegación móvil drawer y escudo institucional
+
+* **Panel lateral expandible y contraíble:** barra lateral interactiva con soporte para estado expandido (280 px) y contraído (rail 72 px), provista de botón visible de alternancia (`.sidebar-toggle-btn`) y transición suave sincronizada con el desplazamiento del contenido principal (`.content`).
+* **Tooltips informativos al pasar el cursor sobre los iconos:** despliegue de tooltips flotantes (`.sidebar-floating-tooltip`) al pasar el cursor sobre los iconos en estado contraído (rail 72 px y tablet).
+* **Escudo institucional:** integración del escudo institucional oficial (`escudo-upb.png`, clase `.brand-logo`) de forma limpia y sin recuadro rojo de fondo en la marca, adaptativo a ambos estados del panel lateral y a la cabecera móvil.
+* **Persistencia del estado de navegación en `localStorage`:** almacenamiento reactivo del estado de navegación (`oeupb_sidebar_collapsed`) para mantener la preferencia del usuario entre sesiones y pantallas.
+* **Menú móvil desplegable tipo drawer:** navegación off-canvas (`transform: translateX(-100%)`) accesible con botón de hamburguesa (`.menu-toggle-btn`) en barra superior fija (`.mobile-header`, 56 px) con transición suave y escudo institucional.
+* **Fondo semitransparente (backdrop) interactivo:** capa superpuesta (`.sidebar-backdrop`) que oscurece el lienzo y permite el cierre táctil inmediato al tocar fuera del panel.
+* **Mecanismos integrales de cierre:** botón de cierre dedicado (`.sidebar-close-btn` con icono X), cierre automático al seleccionar cualquier opción de navegación y respuesta a la tecla Escape.
+* **Bloqueo de desplazamiento de fondo (`mobile-nav-open`):** clase aplicada al contenedor `body` para congelar el scroll del contenido de fondo mientras el drawer permanece abierto.
+* **Optimización ergonómica para interacción táctil:** dimensionamiento de objetivos de contacto (touch targets) con un mínimo de 44 px en botones de cabecera, cierre y elementos de navegación para interacción táctil cómoda en pantallas pequeñas (< 768 px).
+* **Sincronización de mockups y especificaciones:** actualización de `design.md`, `screen-map.md`, `mockups.css` y la suite de mockups con el nuevo componente de control, navegación móvil drawer y el recurso gráfico `escudo-upb.png`.
+* **Rediseño canónico de la pantalla de inicio de sesión (Login):** tarjeta dual integrada (`width: min(880px, 100%)`) con lienzo dividido Split Dual-Zone a 105° en escritorio y 180° en móvil, jerarquía de marca institucional UPB depurada y eliminación de bordes innecesarios.
+* **Alternancia de visibilidad de contraseña:** botón interactivo (`.btn-toggle-password`) con accesibilidad ARIA (`aria-label`, `aria-pressed`), iconos Lucide (`eye` / `eye-off`) y espaciado de seguridad en el campo.
+* **Adaptabilidad móvil en autenticación:** cabecera de marca compacta que preserva el escudo institucional UPB y garantiza la visibilidad directa del formulario de credenciales en pantallas móviles sin desplazamiento inicial.
+
 ## [2026-09-30] - Catálogo de publicaciones del coordinador
 
 * **ADR-018:** el coordinador ve sus publicaciones, con retiro, y las de los demás coordinadores de cualquier sede. Modifica el punto 5 de ADR-008 y RN-10; RF-35, la matriz de permisos, la arquitectura y el estado funcional se actualizaron.

@@ -16,4 +16,9 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
+  it('should have the "OEUPB" title', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    expect(app.title()).toBe('OEUPB');
+  });
 });

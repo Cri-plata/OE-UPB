@@ -3,6 +3,20 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Añadido (2026-10-01, barra lateral colapsable, menú móvil drawer y escudo institucional)
+- **Panel lateral expandible y contraíble:** barra lateral interactiva con botón visible (`.sidebar-toggle-btn`), alternancia entre estado expandido (280 px) y modo rail (72 px), y transición suave sincronizada con el desplazamiento del contenido principal (`.content`).
+- **Tooltips informativos en estado contraído:** despliegue de tooltips flotantes (`.sidebar-floating-tooltip`) al pasar el cursor sobre los iconos de navegación y cierre de sesión en estado contraído (rail 72 px).
+- **Menú móvil desplegable tipo drawer:** menú móvil off-canvas (`transform: translateX(-100%)`) accesible con botón de hamburguesa (`.menu-toggle-btn`) en barra superior fija (`.mobile-header`, 56 px) con escudo institucional UPB.
+- **Fondo semitransparente (backdrop) interactivo:** capa superpuesta (`.sidebar-backdrop`) con desenfoque suave para oscurecer la interfaz y facilitar el cierre táctil al presionar fuera del menú.
+- **Mecanismos integrales de cierre:** botón de cierre (`.sidebar-close-btn` con icono X), cierre automático al seleccionar una opción de navegación y soporte para la tecla Escape.
+- **Bloqueo de desplazamiento de fondo (`mobile-nav-open`):** clase aplicada al contenedor `body` para congelar el scroll del fondo y evitar desplazamiento no deseado mientras el menú drawer permanezca abierto.
+- **Optimización ergonómica para interacción táctil:** dimensionamiento mínimo de 44 px en todos los touch targets (botones de apertura y cierre, enlaces del menú lateral y botón de cierre de sesión) para garantizar accesibilidad y ergonomía táctil en pantallas móviles (< 768 px).
+- **Escudo institucional UPB:** integración del escudo institucional oficial (`escudo-upb.png`) de forma limpia y sin recuadro rojo de fondo en la marca, adaptativo a ambos estados del panel lateral y a la cabecera móvil.
+- **Persistencia del estado de navegación:** almacenamiento del estado en `localStorage` (`oeupb_sidebar_collapsed`) para conservar la vista preferida entre recargas y navegación.
+- **Rediseño canónico de la pantalla de inicio de sesión (Login):** tarjeta dual integrada (`width: min(880px, 100%)`) con lienzo dividido (Split Dual-Zone a 105° en escritorio y 180° en móvil), jerarquía de marca institucional UPB depurada y eliminación de bordes innecesarios.
+- **Alternancia de visibilidad de contraseña:** botón interactivo (`.btn-toggle-password`) con accesibilidad ARIA (`aria-label`, `aria-pressed`), iconos Lucide (`eye` / `eye-off`) y espaciado de seguridad en el campo.
+- **Adaptabilidad móvil en autenticación:** cabecera de marca compacta que preserva el escudo institucional UPB y garantiza la visibilidad directa del formulario de credenciales en pantallas móviles sin desplazamiento inicial.
+
 ### Cambiado (2026-09-30, catálogo de publicaciones del coordinador)
 - **Gráficas publicadas (ADR-018):** el coordinador ve la sección "Mis publicaciones", desde la que puede retirar cada una, y la sección "Publicadas por otros coordinadores", que ahora incluye a los demás coordinadores de su sede además de los de otras sedes. Antes la vista excluía toda su sede y aparecía vacía justo después de publicar. `GET /api/publicaciones/` excluye para el coordinador solo sus propias publicaciones. Se agregaron 1 prueba de backend y 3 de frontend.
 

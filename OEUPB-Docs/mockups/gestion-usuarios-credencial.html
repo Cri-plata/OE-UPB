@@ -11,7 +11,9 @@
       <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-input" />
       <header class="mobile-header">
         <div class="mobile-brand">
-          <div class="brand-mark">UPB</div>
+          <div class="brand-mark">
+            <img src="escudo-upb.png" alt="Escudo Universidad Pontificia Bolivariana" class="brand-logo" />
+          </div>
           <span>OEUPB</span>
         </div>
         <label for="sidebar-toggle" class="menu-toggle-btn" aria-label="Abrir menú de navegación"></label>
@@ -22,22 +24,55 @@
           <label for="sidebar-toggle" class="sidebar-close-btn" aria-label="Cerrar menú"></label>
         </div>
         <div class="brand">
-          <div class="brand-mark">UPB</div>
+          <div class="brand-mark">
+            <img src="escudo-upb.png" alt="Escudo Universidad Pontificia Bolivariana" class="brand-logo" />
+          </div>
           <h2 class="brand-title">OEUPB</h2>
+          <button type="button" class="sidebar-toggle-btn" aria-label="Alternar panel lateral" title="Alternar panel lateral"></button>
         </div>
         <nav class="nav-menu">
-          <a class="nav-item" href="reporte-general.html" title="Reporte general"><span class="nav-item-text">Reporte general</span></a>
-          <a class="nav-item" href="tendencias.html" title="Tendencias"><span class="nav-item-text">Tendencias</span></a>
-          <a class="nav-item" href="explorador.html" title="Explorador de Datos"><span class="nav-item-text">Explorador de Datos</span></a>
-          <a class="nav-item" href="analitica.html" title="Analítica y alertas"><span class="nav-item-text">Analítica y alertas</span></a>
-          <a class="nav-item" href="directorio.html" title="Directorio"><span class="nav-item-text">Directorio</span></a>
-          <a class="nav-item" href="publicaciones.html" title="Gráficas publicadas"><span class="nav-item-text">Gráficas publicadas</span></a>
-          <a class="nav-item" href="carga-datos.html" title="Cargar datos"><span class="nav-item-text">Cargar datos</span></a>
-          <a class="nav-item active" href="gestion-usuarios.html" title="Administrar Usuarios"><span class="nav-item-text">Administrar Usuarios</span></a>
-          <a class="nav-item" href="mi-perfil.html" title="Mi Perfil"><span class="nav-item-text">Mi Perfil</span></a>
+          <a class="nav-item" href="reporte-general.html" title="Reporte general">
+            <span class="nav-item-text">Reporte general</span>
+            <span class="sidebar-floating-tooltip">Reporte general</span>
+          </a>
+          <a class="nav-item" href="tendencias.html" title="Tendencias">
+            <span class="nav-item-text">Tendencias</span>
+            <span class="sidebar-floating-tooltip">Tendencias</span>
+          </a>
+          <a class="nav-item" href="explorador.html" title="Explorador de Datos">
+            <span class="nav-item-text">Explorador de Datos</span>
+            <span class="sidebar-floating-tooltip">Explorador de Datos</span>
+          </a>
+          <a class="nav-item" href="analitica.html" title="Analítica y alertas">
+            <span class="nav-item-text">Analítica y alertas</span>
+            <span class="sidebar-floating-tooltip">Analítica y alertas</span>
+          </a>
+          <a class="nav-item" href="directorio.html" title="Directorio">
+            <span class="nav-item-text">Directorio</span>
+            <span class="sidebar-floating-tooltip">Directorio</span>
+          </a>
+          <a class="nav-item" href="publicaciones.html" title="Gráficas publicadas">
+            <span class="nav-item-text">Gráficas publicadas</span>
+            <span class="sidebar-floating-tooltip">Gráficas publicadas</span>
+          </a>
+          <a class="nav-item" href="carga-datos.html" title="Cargar datos">
+            <span class="nav-item-text">Cargar datos</span>
+            <span class="sidebar-floating-tooltip">Cargar datos</span>
+          </a>
+          <a class="nav-item active" href="gestion-usuarios.html" title="Administrar Usuarios">
+            <span class="nav-item-text">Administrar Usuarios</span>
+            <span class="sidebar-floating-tooltip">Administrar Usuarios</span>
+          </a>
+          <a class="nav-item" href="mi-perfil.html" title="Mi Perfil">
+            <span class="nav-item-text">Mi Perfil</span>
+            <span class="sidebar-floating-tooltip">Mi Perfil</span>
+          </a>
         </nav>
         <div class="bottom-menu">
-          <a class="logout-btn" href="login.html" title="Cerrar Sesión"><span>Cerrar Sesión</span></a>
+          <a class="logout-btn" href="login.html" title="Cerrar Sesión">
+            <span>Cerrar Sesión</span>
+            <span class="sidebar-floating-tooltip">Cerrar Sesión</span>
+          </a>
         </div>
       </aside>
       <main class="content">
@@ -134,5 +169,27 @@
         </div>
       </section>
     </div>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <script>
+      lucide.createIcons();
+
+      // Control interactivo del panel lateral colapsable y persistencia
+      const STORAGE_KEY = 'oeupb_sidebar_collapsed';
+      const toggleBtn = document.querySelector('.sidebar-toggle-btn');
+      const sidebar = document.querySelector('.sidebar');
+
+      if (localStorage.getItem(STORAGE_KEY) === 'true') {
+        document.body.classList.add('sidebar-collapsed');
+        if (sidebar) sidebar.classList.add('collapsed');
+      }
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
+          if (sidebar) sidebar.classList.toggle('collapsed', isCollapsed);
+          localStorage.setItem(STORAGE_KEY, isCollapsed ? 'true' : 'false');
+        });
+      }
+    </script>
   </body>
 </html>
