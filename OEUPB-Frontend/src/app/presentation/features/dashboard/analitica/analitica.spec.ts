@@ -96,6 +96,16 @@ const PREDICCION_MOCK = {
     { algoritmo: 'Random Forest', accuracy: 57.1, f1_score: 0.320, tiempo_ms: 8.1, seleccionado: false },
     { algoritmo: 'Regresión Logística', accuracy: 54.0, f1_score: 0.301, tiempo_ms: 4.2, seleccionado: false },
   ],
+  validacion_temporal: {
+    disponible: true,
+    cohorte_evaluada: 2024,
+    tamano_muestra_prueba: 25,
+    tamano_muestra_entrenamiento: 66,
+    accuracy_temporal: 64.0,
+    f1_temporal: 0.380,
+    diagnostico_estabilidad: 'Alta (Generalización temporal consistente)',
+    color_estabilidad: 'verde',
+  },
 };
 
 describe('AnaliticaComponent', () => {
@@ -298,5 +308,14 @@ describe('AnaliticaComponent', () => {
     expect(tooltips.length).toBeGreaterThanOrEqual(4);
     const firstTitle = tooltips[0].getAttribute('title');
     expect(firstTitle).toContain('Stratified K-Fold');
+  });
+
+  it('debe renderizar la sección de validación temporal / backtesting longitudinal (IA-17)', () => {
+    const fixture = crear();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.backtesting-card')).toBeTruthy();
+    expect(compiled.textContent).toContain('Validación Temporal por Cohorte / Backtesting (IA-17)');
+    expect(compiled.textContent).toContain('Año 2024');
+    expect(compiled.textContent).toContain('64%');
   });
 });

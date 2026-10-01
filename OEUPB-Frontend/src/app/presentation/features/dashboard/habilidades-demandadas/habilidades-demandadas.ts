@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { IaApi, HabilidadComparativaRow } from '../../../../data/api/ia.api';
+import { IaApi, HabilidadComparativaRow, HabilidadCuradaItem, CurarHabilidadRequest } from '../../../../data/api/ia.api';
 import { DirectorioApi } from '../../../../data/api/directorio.api';
 import { CHART_PALETTE } from '../../../shared/chart-palette';
 import { exportChart } from '../../../shared/export-chart';
@@ -48,11 +48,20 @@ export class HabilidadesDemandadasComponent implements OnInit {
     exportChart(selector, nombre);
   }
 
-  activeTab: 'reglas' | 'habilidades' | 'comparativa' = 'reglas';
+  activeTab: 'reglas' | 'habilidades' | 'comparativa' | 'curadas' = 'reglas';
   isLoading = false;
   isLoadingComparativa = false;
+  isLoadingCuradas = false;
+  isSavingCuraduria = false;
   isExportingExcel = false;
   errorMensaje = '';
+
+  // IA-15: Curaduría interactiva y modal
+  curadasList: HabilidadCuradaItem[] = [];
+  curandoItem: CandidataEmergente | null = null;
+  modalEtiquetaCanonica = '';
+  modalTipo: 'blanda' | 'dura' = 'dura';
+  modalVariantesStr = '';
 
   // Filtros interactivos
   filtroMomento: string = '';
@@ -148,12 +157,129 @@ export class HabilidadesDemandadasComponent implements OnInit {
     });
   }
 
-  setTab(tab: 'reglas' | 'habilidades' | 'comparativa') {
+  setTab(tab: 'reglas' | 'habilidades' | 'comparativa' | 'curadas') {
     this.activeTab = tab;
     if (tab === 'comparativa' && this.comparativaData.length === 0) {
       this.cargarComparativa();
     }
+    if (tab === 'curadas') {
+      this.cargarCuradas();
+    }
     this.cdr.detectChanges();
+  }
+
+  cargarCuradas() {
+    this.isLoadingCuradas = true;
+    this.iaApi.habilidadesCuradas().subscribe({
+      next: (data) => {
+        this.curadasList = data || [];
+        this.isLoadingCuradas = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando curadurías:', err);
+        this.isLoadingCuradas = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  abrirModalAprobar(item: CandidataEmergente) {
+    this.curandoItem = item;
+    this.modalEtiquetaCanonica = item.termino.charAt(0).toUpperCase() + item.termino.slice(1);
+    this.modalTipo = 'dura';
+    this.modalVariantesStr = item.termino;
+    this.cdr.detectChanges();
+  }
+
+  cerrarModalAprobar() {
+    this.curandoItem = null;
+    this.modalEtiquetaCanonica = '';
+    this.modalVariantesStr = '';
+    this.cdr.detectChanges();
+  }
+
+  guardarAprobacion() {
+    if (!this.curandoItem || !this.modalEtiquetaCanonica.trim()) return;
+
+    const variantes = this.modalVariantesStr
+      .split(',')
+      .map(v => v.trim())
+      .filter(v => v.length > 0);
+
+    if (!variantes.includes(this.curandoItem.termino)) {
+      variantes.push(this.curandoItem.termino);
+    }
+
+    const payload: CurarHabilidadRequest = {
+      termino_original: this.curandoItem.termino,
+      etiqueta_canonica: this.modalEtiquetaCanonica.trim(),
+      tipo: this.modalTipo,
+      variantes: variantes,
+      estado: 'aprobada',
+    };
+
+    this.isSavingCuraduria = true;
+    this.iaApi.curarHabilidad(payload).subscribe({
+      next: () => {
+        if (this.curandoItem) {
+          const t = this.curandoItem.termino;
+          this.candidatasEmergentes = this.candidatasEmergentes.filter(c => c.termino !== t);
+        }
+        this.isSavingCuraduria = false;
+        this.cerrarModalAprobar();
+        this.cargarDatosCompletos();
+        if (this.activeTab === 'curadas') {
+          this.cargarCuradas();
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error aprobando habilidad:', err);
+        this.isSavingCuraduria = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  descartarEmergente(item: CandidataEmergente) {
+    if (!confirm(`¿Deseas descartar el término "${item.termino}" para que no vuelva a sugerirse como habilidad emergente?`)) {
+      return;
+    }
+
+    const payload: CurarHabilidadRequest = {
+      termino_original: item.termino,
+      etiqueta_canonica: item.termino,
+      tipo: 'dura',
+      variantes: [],
+      estado: 'descartada',
+    };
+
+    this.iaApi.curarHabilidad(payload).subscribe({
+      next: () => {
+        this.candidatasEmergentes = this.candidatasEmergentes.filter(c => c.termino !== item.termino);
+        if (this.activeTab === 'curadas') {
+          this.cargarCuradas();
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error descartando habilidad:', err)
+    });
+  }
+
+  eliminarCuraduria(item: HabilidadCuradaItem) {
+    if (!confirm(`¿Eliminar la curaduría de "${item.termino_original}"? La habilidad volverá a su estado no catalogado o candidato.`)) {
+      return;
+    }
+
+    this.iaApi.eliminarCuraduria(item.id).subscribe({
+      next: () => {
+        this.curadasList = this.curadasList.filter(c => c.id !== item.id);
+        this.cargarDatosCompletos();
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error eliminando curaduría:', err)
+    });
   }
 
   aplicarFiltros() {

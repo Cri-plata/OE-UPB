@@ -28,6 +28,7 @@ from domain.models import Medicion, Egresado, Sede
 from application.indicadores import estado_laboral, salario
 from application.ia_service import extraer_habilidades_por_respuesta, TAXONOMIA_HABILIDADES_BRUTA
 from application.model_cache import prediccion_model_cache
+from application.programas import canonizar_programa
 
 # Patrones para identificar preguntas abiertas en respuestas_completas
 _OPEN_PATTERNS = [
@@ -174,10 +175,13 @@ def extraer_trayectorias_longitudinales(
             continue
 
         egr = egresados_dict.get(doc)
-        prog = (egr.programa if egr and egr.programa else "Otros").strip()
+        prog_raw = (egr.programa if egr and egr.programa else "Otros").strip()
+        prog = canonizar_programa(prog_raw)
 
-        if filtro_programa and prog != filtro_programa:
-            continue
+        if filtro_programa:
+            filtro_canon = canonizar_programa(filtro_programa)
+            if prog != filtro_canon and prog_raw != filtro_programa:
+                continue
 
         sal_orig = salario(m_origen.respuestas) or 0.0
         sat_orig = _calcular_satisfaccion_promedio(m_origen.respuestas)
@@ -340,6 +344,84 @@ def entrenar_evaluar_modelo(
         },
         "comparativa_algoritmos": comparativa_algoritmos,
     }
+
+
+def evaluar_validacion_temporal(
+    df: pd.DataFrame,
+    X: np.ndarray,
+    y: np.ndarray,
+    accuracy_cv: float,
+) -> Dict[str, Any]:
+    """
+    Realiza backtesting longitudinal por cohorte anual (IA-17):
+    Entrena con las cohortes históricas anteriores y evalúa sobre la cohorte graduada más reciente,
+    simulando la capacidad real de proyección en el tiempo.
+    """
+    if "anio_origen" not in df.columns:
+        return {
+            "disponible": False,
+            "motivo": "Columna anio_origen no disponible para partición temporal.",
+        }
+
+    anios = sorted([int(a) for a in df["anio_origen"].dropna().unique() if a])
+    if len(anios) < 2:
+        return {
+            "disponible": False,
+            "motivo": f"Se identificó una sola cohorte anual ({anios[0] if anios else 'N/A'}). Se requieren al menos 2 cohortes para validación temporal.",
+        }
+
+    anio_test = anios[-1]
+    mask_test = (df["anio_origen"] == anio_test).values
+    mask_train = (df["anio_origen"] < anio_test).values
+
+    n_test = int(np.sum(mask_test))
+    n_train = int(np.sum(mask_train))
+
+    if n_test < 5 or n_train < 15:
+        return {
+            "disponible": False,
+            "motivo": f"Muestra insuficiente para backtesting en la cohorte {anio_test} (Entrenamiento: {n_train}, Prueba: {n_test}). Mínimo requerido: 15 / 5.",
+        }
+
+    X_train, y_train = X[mask_train], y[mask_train]
+    X_test, y_test = X[mask_test], y[mask_test]
+
+    clf_temporal = GradientBoostingClassifier(n_estimators=50, max_depth=3, random_state=42)
+    try:
+        clf_temporal.fit(X_train, y_train)
+        preds_test = clf_temporal.predict(X_test)
+
+        acc_temp = float(accuracy_score(y_test, preds_test)) * 100.0
+        f1_temp = float(f1_score(y_test, preds_test, average="macro"))
+
+        # Diagnóstico de estabilidad comparando con CV
+        diff = abs(accuracy_cv - acc_temp)
+        if diff <= 6.0:
+            diag = "Alta (Generalización temporal consistente)"
+            color = "verde"
+        elif diff <= 14.0:
+            diag = "Moderada (Sensibilidad leve a variaciones de cohorte)"
+            color = "amarillo"
+        else:
+            diag = "Sensible (Influencia de ciclo económico anual)"
+            color = "naranja"
+
+        return {
+            "disponible": True,
+            "motivo": None,
+            "cohorte_evaluada": int(anio_test),
+            "tamano_muestra_prueba": n_test,
+            "tamano_muestra_entrenamiento": n_train,
+            "accuracy_temporal": round(acc_temp, 1),
+            "f1_temporal": round(f1_temp, 3),
+            "diagnostico_estabilidad": diag,
+            "color_estabilidad": color,
+        }
+    except Exception as e:
+        return {
+            "disponible": False,
+            "motivo": f"No fue posible ejecutar el backtesting temporal: {str(e)}",
+        }
 
 
 def agregar_predicciones_por_programa(
@@ -590,6 +672,10 @@ def predecir_empleabilidad_servicio(
                 },
                 "observaciones": ["Muestra longitudinal insuficiente para cálculo de robustez."],
             },
+            "validacion_temporal": {
+                "disponible": False,
+                "motivo": "Muestra longitudinal insuficiente para ejecutar partición temporal por cohortes.",
+            },
         }
 
     df = pd.DataFrame(trayectorias)
@@ -622,6 +708,14 @@ def predecir_empleabilidad_servicio(
         f1=eval_estado["f1_score"],
     )
 
+    # IA-17: Validación temporal por cohorte (backtesting longitudinal)
+    val_temporal = evaluar_validacion_temporal(
+        df=df,
+        X=X,
+        y=y_estado,
+        accuracy_cv=eval_estado["accuracy"],
+    )
+
     resultado = {
         "estado": "exitoso",
         "mensaje": "Modelo predictivo entrenado y validado satisfactoriamente con GradientBoostingClassifier.",
@@ -636,6 +730,7 @@ def predecir_empleabilidad_servicio(
         "matriz_confusion": eval_estado["matriz_confusion"],
         "indicadores_robustez": indicadores_robustez,
         "comparativa_algoritmos": eval_estado.get("comparativa_algoritmos", []),
+        "validacion_temporal": val_temporal,
     }
 
     # IA-09: Guardar en cache
@@ -687,6 +782,12 @@ def generar_excel_prediccion(resultado: Dict[str, Any]) -> "io.BytesIO":
     ws1.append(["Egresados en Riesgo Proyectado", resultado.get("egresados_en_riesgo", 0)])
     rob = resultado.get("indicadores_robustez", {})
     ws1.append(["Nivel de Robustez Estadística", rob.get("nivel_general", "N/A")])
+
+    val_temp = resultado.get("validacion_temporal", {})
+    if val_temp and val_temp.get("disponible"):
+        ws1.append(["Backtesting Cohorte Evaluada", val_temp.get("cohorte_evaluada", "N/A")])
+        ws1.append(["Accuracy Temporal (Cohorte no vista)", f"{val_temp.get('accuracy_temporal', 0.0)}%"])
+        ws1.append(["Estabilidad Temporal Interanual", val_temp.get("diagnostico_estabilidad", "N/A")])
 
     # Hoja 2: Programas
     ws2 = wb.create_sheet(title="Proyecciones por Programa")

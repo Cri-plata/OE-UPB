@@ -3440,6 +3440,192 @@
         }
       }
     },
+    "/api/ia/habilidades/curadas": {
+      "get": {
+        "tags": [
+          "Inteligencia Artificial"
+        ],
+        "summary": "Get Habilidades Curadas",
+        "description": "Lista de habilidades curadas por el equipo (IA-15 / Human-in-the-Loop).\nPermite auditar los términos aprobados y descartados.",
+        "operationId": "get_habilidades_curadas_api_ia_habilidades_curadas_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/HabilidadCuradaItem"
+                  },
+                  "type": "array",
+                  "title": "Response Get Habilidades Curadas Api Ia Habilidades Curadas Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/ia/habilidades/curar": {
+      "post": {
+        "tags": [
+          "Inteligencia Artificial"
+        ],
+        "summary": "Post Curar Habilidad",
+        "description": "Registra la aprobación o descarte de un término emergente (IA-15).\nDisponible para Coordinador_Sede y Admin_CTIC con trazabilidad de autoría (Opción 1).",
+        "operationId": "post_curar_habilidad_api_ia_habilidades_curar_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CurarHabilidadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurarHabilidadResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/ia/habilidades/curar/{curada_id}": {
+      "delete": {
+        "tags": [
+          "Inteligencia Artificial"
+        ],
+        "summary": "Delete Curar Habilidad",
+        "description": "Revierte o elimina una curaduría previa (IA-15).\nAdmin_CTIC puede revertir cualquiera; Coordinador_Sede puede revertir las que haya creado.",
+        "operationId": "delete_curar_habilidad_api_ia_habilidades_curar__curada_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "curada_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Curada Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EliminarCuraduriaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/health/live": {
       "get": {
         "tags": [
@@ -4100,6 +4286,59 @@
         ],
         "title": "CompetenciaResponse"
       },
+      "CurarHabilidadRequest": {
+        "properties": {
+          "termino_original": {
+            "type": "string",
+            "title": "Termino Original"
+          },
+          "etiqueta_canonica": {
+            "type": "string",
+            "title": "Etiqueta Canonica"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo",
+            "default": "dura"
+          },
+          "variantes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Variantes",
+            "default": []
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado",
+            "default": "aprobada"
+          }
+        },
+        "type": "object",
+        "required": [
+          "termino_original",
+          "etiqueta_canonica"
+        ],
+        "title": "CurarHabilidadRequest"
+      },
+      "CurarHabilidadResponse": {
+        "properties": {
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          },
+          "curada": {
+            "$ref": "#/components/schemas/HabilidadCuradaItem"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mensaje",
+          "curada"
+        ],
+        "title": "CurarHabilidadResponse"
+      },
       "DatasetGrafica": {
         "properties": {
           "label": {
@@ -4516,6 +4755,19 @@
         ],
         "title": "EliminarCargaRequest"
       },
+      "EliminarCuraduriaResponse": {
+        "properties": {
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mensaje"
+        ],
+        "title": "EliminarCuraduriaResponse"
+      },
       "EliminarEgresadoRequest": {
         "properties": {
           "motivo": {
@@ -4810,6 +5062,62 @@
           "total_menciones"
         ],
         "title": "HabilidadComparativaItem"
+      },
+      "HabilidadCuradaItem": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "termino_original": {
+            "type": "string",
+            "title": "Termino Original"
+          },
+          "etiqueta_canonica": {
+            "type": "string",
+            "title": "Etiqueta Canonica"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "variantes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Variantes"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "creado_por_id": {
+            "type": "integer",
+            "title": "Creado Por Id"
+          },
+          "creado_por_correo": {
+            "type": "string",
+            "title": "Creado Por Correo"
+          },
+          "fecha_creacion": {
+            "type": "string",
+            "title": "Fecha Creacion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "termino_original",
+          "etiqueta_canonica",
+          "tipo",
+          "variantes",
+          "estado",
+          "creado_por_id",
+          "creado_por_correo",
+          "fecha_creacion"
+        ],
+        "title": "HabilidadCuradaItem"
       },
       "HabilidadReconocida": {
         "properties": {
@@ -5334,6 +5642,16 @@
             ],
             "title": "Comparativa Algoritmos",
             "default": []
+          },
+          "validacion_temporal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValidacionTemporalData"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -6169,6 +6487,107 @@
         },
         "type": "object",
         "title": "UsuarioUpdateRequest"
+      },
+      "ValidacionTemporalData": {
+        "properties": {
+          "disponible": {
+            "type": "boolean",
+            "title": "Disponible"
+          },
+          "motivo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motivo"
+          },
+          "cohorte_evaluada": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cohorte Evaluada"
+          },
+          "tamano_muestra_prueba": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tamano Muestra Prueba"
+          },
+          "tamano_muestra_entrenamiento": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tamano Muestra Entrenamiento"
+          },
+          "accuracy_temporal": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accuracy Temporal"
+          },
+          "f1_temporal": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "F1 Temporal"
+          },
+          "diagnostico_estabilidad": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diagnostico Estabilidad"
+          },
+          "color_estabilidad": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color Estabilidad"
+          }
+        },
+        "type": "object",
+        "required": [
+          "disponible"
+        ],
+        "title": "ValidacionTemporalData"
       },
       "ValidationError": {
         "properties": {

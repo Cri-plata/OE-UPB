@@ -541,6 +541,73 @@
             </table>
           </div>
         </article>
+
+        <!-- IA-17: Validación Temporal por Cohorte (Backtesting Longitudinal) -->
+        <article class="card backtesting-card" *ngIf="prediccion.validacion_temporal">
+          <div class="card-header-flex">
+            <div>
+              <div class="title-with-badge">
+                <h3 class="card-subtitle">Validación Temporal por Cohorte / Backtesting (IA-17)</h3>
+                <span class="badge badge-ai">Generalización en el Tiempo</span>
+              </div>
+              <p class="section-subtitle">
+                Simula la proyección en escenario real: entrena con las cohortes históricas previas y evalúa su capacidad predictiva contra la cohorte más reciente.
+              </p>
+            </div>
+            <div *ngIf="prediccion.validacion_temporal.disponible">
+              <span
+                class="badge"
+                [ngClass]="{
+                  'badge-success': prediccion.validacion_temporal.color_estabilidad === 'verde',
+                  'badge-warning': prediccion.validacion_temporal.color_estabilidad === 'amarillo',
+                  'badge-danger': prediccion.validacion_temporal.color_estabilidad === 'naranja'
+                }"
+              >
+                {{ prediccion.validacion_temporal.diagnostico_estabilidad }}
+              </span>
+            </div>
+          </div>
+
+          <div class="backtesting-grid" *ngIf="prediccion.validacion_temporal.disponible">
+            <div class="backtesting-metric-card">
+              <span class="metric-label">Cohorte Evaluada</span>
+              <div class="metric-val highlight">Año {{ prediccion.validacion_temporal.cohorte_evaluada }}</div>
+              <span class="metric-desc">Graduados de la última cohorte disponible</span>
+            </div>
+
+            <div class="backtesting-metric-card">
+              <span class="metric-label">Muestras de Split</span>
+              <div class="metric-val">
+                {{ prediccion.validacion_temporal.tamano_muestra_entrenamiento }}
+                <span class="metric-divider">/</span>
+                <span class="text-accent">{{ prediccion.validacion_temporal.tamano_muestra_prueba }}</span>
+              </div>
+              <span class="metric-desc">Entrenamiento histórico vs Prueba no vista</span>
+            </div>
+
+            <div class="backtesting-metric-card">
+              <span class="metric-label">Exactitud Temporal</span>
+              <div class="metric-val success-val">{{ prediccion.validacion_temporal.accuracy_temporal }}%</div>
+              <span class="metric-desc">Accuracy real sobre la cohorte no vista</span>
+            </div>
+
+            <div class="backtesting-metric-card">
+              <span class="metric-label">F1-Score Temporal</span>
+              <div class="metric-val">{{ prediccion.validacion_temporal.f1_temporal }}</div>
+              <span class="metric-desc">F1 Macro ponderado interanual</span>
+            </div>
+          </div>
+
+          <div class="empty-state-notice" *ngIf="!prediccion.validacion_temporal.disponible">
+            <p>{{ prediccion.validacion_temporal.motivo }}</p>
+          </div>
+
+          <div class="ethical-notice mt-16" *ngIf="prediccion.validacion_temporal.disponible">
+            <span>
+              <strong>Criterio de Acreditación Curricular:</strong> El backtesting garantiza que las recomendaciones y alertas tempranas del modelo reflejen patrones sostenidos en el tiempo y no sobreajustes estadísticos a una sola promoción.
+            </span>
+          </div>
+        </article>
       </ng-container>
     </section>
   </main>

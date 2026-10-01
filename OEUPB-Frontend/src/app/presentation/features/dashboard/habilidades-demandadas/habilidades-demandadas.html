@@ -88,6 +88,15 @@
             </span>
             Comparativa Temporal (M0 vs M1 vs M5)
           </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="activeTab === 'curadas'" 
+            (click)="setTab('curadas')">
+            <span class="tab-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </span>
+            Curaduría de Habilidades (Human-in-the-Loop)
+          </button>
         </div>
 
         <button class="btn-excel-export" (click)="descargarExcel()" [disabled]="isExportingExcel">
@@ -319,7 +328,17 @@
 
           <div class="emergentes-grid" *ngIf="candidatasEmergentes.length > 0">
             <div class="emergente-chip" *ngFor="let c of candidatasEmergentes">
-              <span class="emergente-name">{{ c.termino }}</span>
+              <div class="emergente-top">
+                <span class="emergente-name">{{ c.termino }}</span>
+                <div class="emergente-actions">
+                  <button type="button" class="btn-chip-action approve" (click)="abrirModalAprobar(c)" title="Aprobar y catalogar en taxonomía">
+                    ✓
+                  </button>
+                  <button type="button" class="btn-chip-action discard" (click)="descartarEmergente(c)" title="Descartar de sugerencias">
+                    ✕
+                  </button>
+                </div>
+              </div>
               <div class="emergente-metrics">
                 <span class="metric-badge score" title="Score TF-IDF">Score: {{ c.score_tfidf | number:'1.3-3' }}</span>
                 <span class="metric-badge docs" title="Documentos donde aparece">{{ c.frecuencia_documentos }} doc(s)</span>
@@ -438,6 +457,136 @@
 
           <div class="empty-state" *ngIf="comparativaData.length === 0">
             <p>No se encontraron datos comparativos para los filtros seleccionados.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- PESTAÑA 4: CURADURÍA DE HABILIDADES (HUMAN-IN-THE-LOOP) -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div class="tab-content" *ngIf="activeTab === 'curadas'">
+        <div class="info-card">
+          <div class="info-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+          </div>
+          <div class="info-text">
+            <strong>Curaduría Continua del Catálogo de Competencias (IA-15 / Human-in-the-Loop):</strong>
+            Aquí se registran los términos evaluados por la coordinación o CTIC. Los términos aprobados enriquecen de inmediato el léxico de spaCy y el análisis de reglas de co-ocurrencia. Los términos descartados se excluyen de futuras extracciones TF-IDF para mantener la pureza de las sugerencias.
+          </div>
+        </div>
+
+        <div class="loading-box" *ngIf="isLoadingCuradas">
+          <div class="spinner"></div>
+          <p>Cargando registro histórico de curadurías...</p>
+        </div>
+
+        <div class="table-card mt-24" *ngIf="!isLoadingCuradas">
+          <div class="table-header-row">
+            <div>
+              <h2>Historial de Términos Curados ({{ curadasList.length }})</h2>
+              <p class="section-subtitle">
+                Supervisión humana sobre los modelos de extracción NLP con auditoría de usuario y fecha.
+              </p>
+            </div>
+            <button type="button" class="btn-secondary table-action" (click)="cargarCuradas()">
+              Actualizar Lista
+            </button>
+          </div>
+
+          <div class="table-responsive" *ngIf="curadasList.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Término Original</th>
+                  <th>Etiqueta Canónica</th>
+                  <th>Tipo</th>
+                  <th>Estado</th>
+                  <th>Variantes Asociadas</th>
+                  <th>Registrado Por</th>
+                  <th>Fecha</th>
+                  <th class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of curadasList">
+                  <td class="font-bold">{{ item.termino_original }}</td>
+                  <td>{{ item.etiqueta_canonica }}</td>
+                  <td>
+                    <span class="tipo-badge" [class.blanda]="item.tipo === 'blanda'" [class.dura]="item.tipo === 'dura'">
+                      {{ item.tipo === 'blanda' ? 'Blanda' : 'Dura' }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="curada-estado-badge" [class.aprobada]="item.estado === 'aprobada'" [class.descartada]="item.estado === 'descartada'">
+                      {{ item.estado === 'aprobada' ? '✓ Catalogada' : '✕ Descartada' }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="variantes-chips" *ngIf="item.variantes && item.variantes.length > 0">
+                      {{ item.variantes.join(', ') }}
+                    </span>
+                    <span *ngIf="!item.variantes || item.variantes.length === 0" class="cnt-sub">—</span>
+                  </td>
+                  <td>
+                    <span class="user-audit-badge">{{ item.creado_por_correo }}</span>
+                  </td>
+                  <td class="cnt-sub">
+                    {{ item.fecha_creacion | date:'mediumDate' }}
+                  </td>
+                  <td class="text-center">
+                    <button type="button" class="btn-revertir-curada" (click)="eliminarCuraduria(item)" title="Revertir curaduría">
+                      Revertir
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="empty-state" *ngIf="curadasList.length === 0">
+            <p>Aún no se han registrado curadurías manuales. Puedes clasificar términos emergentes desde la pestaña de Catálogo &amp; Emergentes.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de Curaduría / Catalogación -->
+      <div class="modal-overlay" *ngIf="curandoItem" (click)="cerrarModalAprobar()">
+        <div class="modal-card" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Catalogar Habilidad Emergente</h3>
+            <button type="button" class="btn-close-modal" (click)="cerrarModalAprobar()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p class="modal-intro">
+              El término <strong>"{{ curandoItem.termino }}"</strong> fue detectado de forma no supervisada en las respuestas de egresados. Defina su clasificación taxonómica para incorporarla en las reglas y comparativas institucionales.
+            </p>
+
+            <div class="form-group">
+              <label for="etiquetaCanonica">Nombre / Etiqueta Canónica:</label>
+              <input id="etiquetaCanonica" type="text" class="custom-input" [(ngModel)]="modalEtiquetaCanonica" placeholder="Ej. Docker, Gestión Ágil...">
+            </div>
+
+            <div class="form-group">
+              <label for="tipoHabilidad">Tipo de Competencia:</label>
+              <select id="tipoHabilidad" class="custom-select" [(ngModel)]="modalTipo">
+                <option value="dura">Técnica / Dura</option>
+                <option value="blanda">Interpersonal / Blanda</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="variantesStr">Variantes o sinónimos de búsqueda (separados por coma):</label>
+              <input id="variantesStr" type="text" class="custom-input" [(ngModel)]="modalVariantesStr" placeholder="Ej. docker, contenedor docker, contenedores">
+              <small class="form-hint">Cualquier aparición de estas variantes en el texto será mapeada a la etiqueta canónica.</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-cancelar" (click)="cerrarModalAprobar()">Cancelar</button>
+            <button type="button" class="btn-guardar" (click)="guardarAprobacion()" [disabled]="isSavingCuraduria || !modalEtiquetaCanonica.trim()">
+              {{ isSavingCuraduria ? 'Guardando...' : 'Aprobar e Incorporar' }}
+            </button>
           </div>
         </div>
       </div>

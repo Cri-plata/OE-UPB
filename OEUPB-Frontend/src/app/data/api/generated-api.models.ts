@@ -112,6 +112,19 @@ export interface CompetenciaResponse {
   "frecuencia": number;
 }
 
+export interface CurarHabilidadRequest {
+  "termino_original": string;
+  "etiqueta_canonica": string;
+  "tipo"?: string;
+  "variantes"?: Array<string>;
+  "estado"?: string;
+}
+
+export interface CurarHabilidadResponse {
+  "mensaje": string;
+  "curada": HabilidadCuradaItem;
+}
+
 export interface DatasetGrafica {
   "label": string;
   "data": Array<number | null>;
@@ -170,6 +183,10 @@ export interface EgresadoManualUpdate {
 
 export interface EliminarCargaRequest {
   "motivo": string;
+}
+
+export interface EliminarCuraduriaResponse {
+  "mensaje": string;
 }
 
 export interface EliminarEgresadoRequest {
@@ -238,6 +255,18 @@ export interface HabilidadComparativaItem {
   "delta_m1_m0": number;
   "tendencia": string;
   "total_menciones": number;
+}
+
+export interface HabilidadCuradaItem {
+  "id": number;
+  "termino_original": string;
+  "etiqueta_canonica": string;
+  "tipo": string;
+  "variantes": Array<string>;
+  "estado": string;
+  "creado_por_id": number;
+  "creado_por_correo": string;
+  "fecha_creacion": string;
 }
 
 export interface HabilidadReconocida {
@@ -349,6 +378,7 @@ export interface PrediccionEmpleabilidadResponse {
   "matriz_confusion": MatrizConfusionData;
   "indicadores_robustez"?: Record<string, unknown> | null;
   "comparativa_algoritmos"?: Array<ComparativaAlgoritmoItem> | null;
+  "validacion_temporal"?: ValidacionTemporalData | null;
 }
 
 export interface PrediccionProgramaItem {
@@ -491,6 +521,18 @@ export interface UsuarioUpdateRequest {
   "etiqueta"?: "Rector" | "Profesor" | "Administrativo" | null;
   "permisos"?: Array<"ver_reporte_general" | "ver_tendencias" | "ver_explorador" | "ver_publicaciones"> | null;
   "programas"?: Array<string> | null;
+}
+
+export interface ValidacionTemporalData {
+  "disponible": boolean;
+  "motivo"?: string | null;
+  "cohorte_evaluada"?: number | null;
+  "tamano_muestra_prueba"?: number | null;
+  "tamano_muestra_entrenamiento"?: number | null;
+  "accuracy_temporal"?: number | null;
+  "f1_temporal"?: number | null;
+  "diagnostico_estabilidad"?: string | null;
+  "color_estabilidad"?: string | null;
 }
 
 export interface ValidationError {

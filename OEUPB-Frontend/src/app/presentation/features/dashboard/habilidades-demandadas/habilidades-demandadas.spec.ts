@@ -294,4 +294,83 @@ describe('HabilidadesDemandadasComponent', () => {
 
     expect(comp.isExportingExcel).toBe(false);
   });
+
+  it('permite cambiar a la pestaña de curadas y consultar la lista histórica (IA-15)', () => {
+    const fixture = crear();
+    const comp = fixture.componentInstance;
+
+    comp.setTab('curadas');
+    expect(comp.activeTab).toBe('curadas');
+    expect(comp.isLoadingCuradas).toBe(true);
+
+    const req = http.expectOne(`${API}/ia/habilidades/curadas`);
+    req.flush([
+      {
+        id: 1,
+        termino_original: 'docker',
+        etiqueta_canonica: 'Docker Containers',
+        tipo: 'dura',
+        variantes: ['docker', 'contenedores'],
+        estado: 'aprobada',
+        creado_por_id: 2,
+        creado_por_correo: 'coordinador@upb.edu.co',
+        fecha_creacion: '2026-10-01T10:00:00Z',
+      }
+    ]);
+    fixture.detectChanges();
+
+    expect(comp.isLoadingCuradas).toBe(false);
+    expect(comp.curadasList.length).toBe(1);
+    expect(comp.curadasList[0].etiqueta_canonica).toBe('Docker Containers');
+  });
+
+  it('abre el modal de aprobación y permite guardar una habilidad curada (IA-15)', () => {
+    const fixture = crear();
+    const comp = fixture.componentInstance;
+
+    const cand = { termino: 'flutter', score_tfidf: 0.85, frecuencia_documentos: 4 };
+    comp.candidatasEmergentes = [cand];
+
+    comp.abrirModalAprobar(cand);
+    expect(comp.curandoItem).toBe(cand);
+    expect(comp.modalEtiquetaCanonica).toBe('Flutter');
+    expect(comp.modalTipo).toBe('dura');
+
+    comp.modalVariantesStr = 'flutter, dart';
+    comp.guardarAprobacion();
+    expect(comp.isSavingCuraduria).toBe(true);
+
+    const req = http.expectOne(`${API}/ia/habilidades/curar`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      termino_original: 'flutter',
+      etiqueta_canonica: 'Flutter',
+      tipo: 'dura',
+      variantes: ['flutter', 'dart'],
+      estado: 'aprobada',
+    });
+    req.flush({
+      mensaje: 'Habilidad aprobada',
+      curada: {
+        id: 10,
+        termino_original: 'flutter',
+        etiqueta_canonica: 'Flutter',
+        tipo: 'dura',
+        variantes: ['flutter', 'dart'],
+        estado: 'aprobada',
+        creado_por_id: 1,
+        creado_por_correo: 'admin@upb.edu.co',
+        fecha_creacion: '2026-10-01T10:00:00Z',
+      }
+    });
+
+    // Como reload dispara cargarDatosCompletos, flush las peticiones
+    http.expectOne(r => r.url === `${API}/ia/habilidades-demandadas`).flush(HABILIDADES_RESPONSE);
+    http.expectOne(r => r.url === `${API}/ia/reglas-asociacion`).flush(REGLAS_RESPONSE);
+
+    expect(comp.isSavingCuraduria).toBe(false);
+    expect(comp.curandoItem).toBeNull();
+    expect(comp.candidatasEmergentes.some(c => c.termino === 'flutter')).toBe(false);
+  });
 });
+

@@ -35,10 +35,14 @@ def test_servicio_prediccion_con_datos_reales():
     assert rob["color_general"] in ("verde", "amarillo", "rojo")
     assert "muestra" in rob and "balance_clases" in rob and "precision" in rob
     assert len(rob["observaciones"]) > 0
+    assert "validacion_temporal" in resultado
+    val_temp = resultado["validacion_temporal"]
+    assert "disponible" in val_temp
     print("\n[OK] Servicio predictivo ejecutado exitosamente:")
     print(f"  - Trayectorias analizadas: {resultado['total_trayectorias']}")
     print(f"  - Precisión CV: {resultado['precision_modelo']}%")
     print(f"  - Robustez estadística: {rob['nivel_general']} ({rob['color_general']})")
+    print(f"  - Validación temporal: disponible={val_temp['disponible']}")
     print(f"  - Programas proyectados: {resultado['programas_analizados']}")
     print(f"  - Alertas de riesgo: {len(resultado['alertas_riesgo'])}")
 
@@ -91,6 +95,7 @@ def test_endpoint_api_prediccion_autorizado():
     assert "total_trayectorias" in data
     assert "precision_modelo" in data
     assert "predicciones_programas" in data
+    assert "validacion_temporal" in data
     print("\n[OK] Endpoint GET /api/ia/prediccion-empleabilidad responde 200 OK con esquema completo")
 
 

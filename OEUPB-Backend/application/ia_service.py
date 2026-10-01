@@ -414,15 +414,77 @@ _STOPWORDS_ENCUESTA = [
     "profesional", "preparacion", "conocimiento", "ambito", "trabajo",
 ]
 
+_STOPWORDS_DINAMICAS: Set[str] = set()
+
+
+def invalidar_cache_taxonomia():
+    """Invalida la taxonomía compilada en memoria para re-compilar con nuevas curadurías."""
+    global _TAXONOMIA_PREP, _TIPOS_HABILIDAD, _PATRONES_COMPILADOS
+    _TAXONOMIA_PREP = None
+    _TIPOS_HABILIDAD = None
+    _PATRONES_COMPILADOS = None
+    _extraer_habilidades_cached.cache_clear()
+
+
+def registrar_habilidad_curada_en_memoria(
+    termino_original: str,
+    etiqueta_canonica: str,
+    tipo: str,
+    variantes: List[str],
+    estado: str,
+):
+    """
+    Integra inmediatamente una curaduría en la taxonomía en memoria (IA-15).
+    Si es 'aprobada', la agrega como categoría canónica con sus variantes.
+    Si es 'descartada', la añade a stopwords dinámicas para que TF-IDF no la vuelva a sugerir.
+    """
+    global TAXONOMIA_HABILIDADES_BRUTA
+    term_limpio = termino_original.lower().strip()
+
+    if estado == "aprobada":
+        vars_unificadas = list(set([termino_original, etiqueta_canonica] + (variantes or [])))
+        if etiqueta_canonica in TAXONOMIA_HABILIDADES_BRUTA:
+            existentes = TAXONOMIA_HABILIDADES_BRUTA[etiqueta_canonica].get("variantes", [])
+            TAXONOMIA_HABILIDADES_BRUTA[etiqueta_canonica]["variantes"] = list(set(existentes + vars_unificadas))
+        else:
+            TAXONOMIA_HABILIDADES_BRUTA[etiqueta_canonica] = {
+                "tipo": tipo if tipo in ("blanda", "dura") else "dura",
+                "variantes": vars_unificadas,
+            }
+        _STOPWORDS_DINAMICAS.discard(term_limpio)
+        for v in vars_unificadas:
+            _STOPWORDS_DINAMICAS.discard(v.lower().strip())
+    elif estado == "descartada":
+        _STOPWORDS_DINAMICAS.add(term_limpio)
+        for v in (variantes or []):
+            _STOPWORDS_DINAMICAS.add(v.lower().strip())
+
+    invalidar_cache_taxonomia()
+
+
+def sincronizar_curadurias_bd(db):
+    """Carga todas las habilidades curadas desde la base de datos a memoria al iniciar/consultar."""
+    try:
+        from domain.models import HabilidadCurada
+        curadas = db.query(HabilidadCurada).all()
+        for c in curadas:
+            registrar_habilidad_curada_en_memoria(
+                termino_original=c.termino_original,
+                etiqueta_canonica=c.etiqueta_canonica,
+                tipo=c.tipo,
+                variantes=c.variantes or [],
+                estado=c.estado,
+            )
+    except Exception:
+        pass
+
 
 def _extraer_emergentes_tfidf(textos_residuales: List[str], top_n: int = 15) -> List[dict]:
     """
     Aplica TF-IDF con ngram_range=(1,2) sobre los textos residuales (ya libres de
     habilidades reconocidas) para descubrir términos emergentes no catalogados.
 
-    Filtra ruido sintáctico con stopwords de relleno de encuestas y ordena por
-    score TF-IDF real descendente.
-
+    Filtra ruido sintáctico con stopwords de relleno de encuestas y términos descartados por curaduría.
     Retorna lista de dicts: [{"termino": str, "score_tfidf": float, "frecuencia_documentos": int}]
     """
     # Filtrar textos vacíos
@@ -430,12 +492,14 @@ def _extraer_emergentes_tfidf(textos_residuales: List[str], top_n: int = 15) -> 
     if not textos_validos:
         return []
 
+    todas_stopwords = list(set(_STOPWORDS_ENCUESTA) | _STOPWORDS_DINAMICAS)
+
     if TfidfVectorizer is not None:
         try:
             vectorizer = TfidfVectorizer(
                 ngram_range=(1, 2),
                 token_pattern=r"(?u)\b\w+\b",
-                stop_words=_STOPWORDS_ENCUESTA,
+                stop_words=todas_stopwords,
                 min_df=1,
             )
             X = vectorizer.fit_transform(textos_validos)
@@ -451,12 +515,18 @@ def _extraer_emergentes_tfidf(textos_residuales: List[str], top_n: int = 15) -> 
             ranking = np.argsort(scores_max)[::-1]
 
             emergentes = []
-            for idx in ranking[:top_n]:
+            for idx in ranking:
+                term = str(feature_names[idx])
+                # Excluir explícitamente términos descartados (unigramas o componentes)
+                if term in _STOPWORDS_DINAMICAS or any(w in _STOPWORDS_DINAMICAS for w in term.split()):
+                    continue
                 emergentes.append({
-                    "termino": str(feature_names[idx]),
+                    "termino": term,
                     "score_tfidf": round(float(scores_max[idx]), 4),
                     "frecuencia_documentos": int(doc_freq[idx]),
                 })
+                if len(emergentes) >= top_n:
+                    break
 
             return emergentes
         except Exception:

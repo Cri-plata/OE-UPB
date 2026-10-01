@@ -1,4 +1,4 @@
-﻿from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean
 from infrastructure.database import Base
 from sqlalchemy import JSON, ForeignKey, DateTime, Text
 from datetime import datetime, timezone
@@ -212,4 +212,30 @@ class PublicacionGrafica(Base):
     )
     fecha_retiro = Column(DateTime, nullable=True)
     retirado_por_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
+
+
+class HabilidadCurada(Base):
+    """
+    Catálogo de habilidades curadas por el equipo (IA-15 / Human-in-the-Loop).
+    Almacena términos emergentes aprobados como habilidades blandas o duras (con sus sinónimos),
+    o marcados como descartados (ruido para excluir de sugerencias TF-IDF).
+    """
+    __tablename__ = "habilidades_curadas"
+    __table_args__ = (
+        UniqueConstraint("termino_original", name="uq_habilidad_curada_termino"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    termino_original = Column(String(100), nullable=False, index=True)
+    etiqueta_canonica = Column(String(100), nullable=False)
+    tipo = Column(String(20), nullable=False)  # "blanda" o "dura"
+    variantes = Column(JSON, nullable=False, default=list)
+    estado = Column(String(20), nullable=False, default="aprobada")  # "aprobada" o "descartada"
+    creado_por_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    creado_por_correo = Column(String(100), nullable=False)
+    fecha_creacion = Column(
+        DateTime, nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+
 

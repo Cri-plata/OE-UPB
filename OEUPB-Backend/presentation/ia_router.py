@@ -6,14 +6,14 @@ Consulta las respuestas JSON de la tabla mediciones y ejecuta el pipeline
 de análisis de habilidades sin almacenar texto crudo más allá del procesamiento.
 """
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Optional, Set, Dict, Any
 
 from infrastructure.database import get_db
-from domain.models import Medicion, Egresado, Sede
+from domain.models import Medicion, Egresado, Sede, HabilidadCurada
 from application.auth_service import require_roles
 from presentation.errores import RESPUESTAS_PROTEGIDAS
 from application.ia_service import (
@@ -22,6 +22,9 @@ from application.ia_service import (
     extraer_habilidades_por_respuesta,
     comparar_habilidades_temporales,
     generar_excel_habilidades,
+    registrar_habilidad_curada_en_memoria,
+    sincronizar_curadurias_bd,
+    invalidar_cache_taxonomia,
 )
 from application.prediccion_service import (
     predecir_empleabilidad_servicio,
@@ -88,6 +91,35 @@ class HabilidadesDemandadasResponse(BaseModel):
     estadisticas: EstadisticasAnalisis
 
 
+class CurarHabilidadRequest(BaseModel):
+    termino_original: str
+    etiqueta_canonica: str
+    tipo: str = "dura"
+    variantes: List[str] = []
+    estado: str = "aprobada"
+
+
+class HabilidadCuradaItem(BaseModel):
+    id: int
+    termino_original: str
+    etiqueta_canonica: str
+    tipo: str
+    variantes: List[str]
+    estado: str
+    creado_por_id: int
+    creado_por_correo: str
+    fecha_creacion: str
+
+
+class CurarHabilidadResponse(BaseModel):
+    mensaje: str
+    curada: HabilidadCuradaItem
+
+
+class EliminarCuraduriaResponse(BaseModel):
+    mensaje: str
+
+
 class ImportanciaFactorItem(BaseModel):
     factor: str
     importancia: float
@@ -137,6 +169,18 @@ class BenchmarkSedeItem(BaseModel):
     robustez: str
 
 
+class ValidacionTemporalData(BaseModel):
+    disponible: bool
+    motivo: Optional[str] = None
+    cohorte_evaluada: Optional[int] = None
+    tamano_muestra_prueba: Optional[int] = None
+    tamano_muestra_entrenamiento: Optional[int] = None
+    accuracy_temporal: Optional[float] = None
+    f1_temporal: Optional[float] = None
+    diagnostico_estabilidad: Optional[str] = None
+    color_estabilidad: Optional[str] = None
+
+
 class PrediccionEmpleabilidadResponse(BaseModel):
     estado: str
     mensaje: str
@@ -151,6 +195,7 @@ class PrediccionEmpleabilidadResponse(BaseModel):
     matriz_confusion: MatrizConfusionData
     indicadores_robustez: Optional[Dict[str, Any]] = None
     comparativa_algoritmos: Optional[List[ComparativaAlgoritmoItem]] = []
+    validacion_temporal: Optional[ValidacionTemporalData] = None
 
 
 class HabilidadComparativaItem(BaseModel):
@@ -273,6 +318,9 @@ def get_habilidades_demandadas(
     if hasattr(anio, "default"): anio = anio.default
     if hasattr(programa, "default"): programa = programa.default
     if hasattr(top_emergentes, "default"): top_emergentes = top_emergentes.default or 15
+
+    # IA-15: Sincronizar curadurías aprobadas/descartadas desde la BD
+    sincronizar_curadurias_bd(db)
 
     # 1. Consultar mediciones con filtros opcionales
     query = db.query(Medicion)
@@ -618,3 +666,136 @@ def get_benchmark_sedes(
     )
 
     return benchmark
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# IA-15: CURADURÍA DE HABILIDADES EMERGENTES (HUMAN-IN-THE-LOOP)
+# ─────────────────────────────────────────────────────────────────────────────
+@router.get("/habilidades/curadas", response_model=List[HabilidadCuradaItem])
+def get_habilidades_curadas(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_roles("Coordinador_Sede", "Admin_CTIC")),
+):
+    """
+    Lista de habilidades curadas por el equipo (IA-15 / Human-in-the-Loop).
+    Permite auditar los términos aprobados y descartados.
+    """
+    curadas = db.query(HabilidadCurada).order_by(HabilidadCurada.fecha_creacion.desc()).all()
+    return [
+        HabilidadCuradaItem(
+            id=c.id,
+            termino_original=c.termino_original,
+            etiqueta_canonica=c.etiqueta_canonica,
+            tipo=c.tipo,
+            variantes=c.variantes or [],
+            estado=c.estado,
+            creado_por_id=c.creado_por_id,
+            creado_por_correo=c.creado_por_correo,
+            fecha_creacion=c.fecha_creacion.isoformat() if c.fecha_creacion else "",
+        )
+        for c in curadas
+    ]
+
+
+@router.post("/habilidades/curar", response_model=CurarHabilidadResponse)
+def post_curar_habilidad(
+    req: CurarHabilidadRequest,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_roles("Coordinador_Sede", "Admin_CTIC")),
+):
+    """
+    Registra la aprobación o descarte de un término emergente (IA-15).
+    Disponible para Coordinador_Sede y Admin_CTIC con trazabilidad de autoría (Opción 1).
+    """
+    termino_norm = req.termino_original.strip()
+    if not termino_norm:
+        raise HTTPException(status_code=400, detail="El término original es obligatorio.")
+
+    estado_norm = req.estado.lower().strip()
+    if estado_norm not in ("aprobada", "descartada"):
+        raise HTTPException(status_code=400, detail="El estado debe ser 'aprobada' o 'descartada'.")
+
+    tipo_norm = req.tipo.lower().strip()
+    if tipo_norm not in ("blanda", "dura"):
+        tipo_norm = "dura"
+
+    etiqueta = req.etiqueta_canonica.strip() or termino_norm.title()
+
+    # Verificar si ya existe curaduría para este término
+    existente = db.query(HabilidadCurada).filter(HabilidadCurada.termino_original == termino_norm).first()
+    if existente:
+        existente.etiqueta_canonica = etiqueta
+        existente.tipo = tipo_norm
+        existente.variantes = req.variantes or [termino_norm]
+        existente.estado = estado_norm
+        existente.creado_por_id = current_user.get("usuario_id", 1)
+        existente.creado_por_correo = current_user.get("sub", "desconocido")
+        db.commit()
+        db.refresh(existente)
+        curada_obj = existente
+    else:
+        curada_obj = HabilidadCurada(
+            termino_original=termino_norm,
+            etiqueta_canonica=etiqueta,
+            tipo=tipo_norm,
+            variantes=req.variantes or [termino_norm],
+            estado=estado_norm,
+            creado_por_id=current_user.get("usuario_id", 1),
+            creado_por_correo=current_user.get("sub", "desconocido"),
+        )
+        db.add(curada_obj)
+        db.commit()
+        db.refresh(curada_obj)
+
+    # Actualizar la taxonomía en memoria e invalidar caché
+    registrar_habilidad_curada_en_memoria(
+        termino_original=curada_obj.termino_original,
+        etiqueta_canonica=curada_obj.etiqueta_canonica,
+        tipo=curada_obj.tipo,
+        variantes=curada_obj.variantes or [],
+        estado=curada_obj.estado,
+    )
+    habilidades_cache.clear()
+
+    return CurarHabilidadResponse(
+        mensaje=f"Habilidad '{curada_obj.termino_original}' registrada como '{curada_obj.estado}' exitosamente.",
+        curada=HabilidadCuradaItem(
+            id=curada_obj.id,
+            termino_original=curada_obj.termino_original,
+            etiqueta_canonica=curada_obj.etiqueta_canonica,
+            tipo=curada_obj.tipo,
+            variantes=curada_obj.variantes or [],
+            estado=curada_obj.estado,
+            creado_por_id=curada_obj.creado_por_id,
+            creado_por_correo=curada_obj.creado_por_correo,
+            fecha_creacion=curada_obj.fecha_creacion.isoformat() if curada_obj.fecha_creacion else "",
+        ),
+    )
+
+
+@router.delete("/habilidades/curar/{curada_id}", response_model=EliminarCuraduriaResponse)
+def delete_curar_habilidad(
+    curada_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_roles("Coordinador_Sede", "Admin_CTIC")),
+):
+    """
+    Revierte o elimina una curaduría previa (IA-15).
+    Admin_CTIC puede revertir cualquiera; Coordinador_Sede puede revertir las que haya creado.
+    """
+    curada = db.query(HabilidadCurada).filter(HabilidadCurada.id == curada_id).first()
+    if not curada:
+        raise HTTPException(status_code=404, detail="Curaduría no encontrada.")
+
+    if current_user.get("rol") != "Admin_CTIC" and curada.creado_por_id != current_user.get("usuario_id"):
+        raise HTTPException(status_code=403, detail="No tiene permisos para revertir esta curaduría.")
+
+    db.delete(curada)
+    db.commit()
+
+    # Re-sincronizar taxonomía completa
+    invalidar_cache_taxonomia()
+    sincronizar_curadurias_bd(db)
+    habilidades_cache.clear()
+
+    return {"mensaje": f"Curaduría de '{curada.termino_original}' eliminada exitosamente."}

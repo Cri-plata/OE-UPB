@@ -89,6 +89,43 @@ export interface BenchmarkSedeItem {
   robustez: string;
 }
 
+export interface ValidacionTemporalData {
+  disponible: boolean;
+  motivo?: string | null;
+  cohorte_evaluada?: number | null;
+  tamano_muestra_prueba?: number | null;
+  tamano_muestra_entrenamiento?: number | null;
+  accuracy_temporal?: number | null;
+  f1_temporal?: number | null;
+  diagnostico_estabilidad?: string | null;
+  color_estabilidad?: 'verde' | 'amarillo' | 'naranja' | string | null;
+}
+
+export interface HabilidadCuradaItem {
+  id: number;
+  termino_original: string;
+  etiqueta_canonica: string;
+  tipo: 'blanda' | 'dura' | string;
+  variantes: string[];
+  estado: 'aprobada' | 'descartada' | string;
+  creado_por_id: number;
+  creado_por_correo: string;
+  fecha_creacion: string;
+}
+
+export interface CurarHabilidadRequest {
+  termino_original: string;
+  etiqueta_canonica: string;
+  tipo: 'blanda' | 'dura' | string;
+  variantes?: string[];
+  estado: 'aprobada' | 'descartada' | string;
+}
+
+export interface CurarHabilidadResponse {
+  mensaje: string;
+  curada: HabilidadCuradaItem;
+}
+
 export interface PrediccionEmpleabilidadResponse {
   estado: 'exitoso' | 'insuficiente_datos' | string;
   mensaje: string;
@@ -103,6 +140,7 @@ export interface PrediccionEmpleabilidadResponse {
   matriz_confusion: MatrizConfusionData;
   indicadores_robustez?: IndicadoresRobustezData;
   comparativa_algoritmos?: ComparativaAlgoritmoItem[];
+  validacion_temporal?: ValidacionTemporalData;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -251,5 +289,17 @@ export class IaApi {
       params = params.set('momento_destino', filtros.momento_destino);
     }
     return this.http.get<BenchmarkSedeItem[]>(`${this.url}/prediccion-benchmark-sedes`, { params });
+  }
+
+  habilidadesCuradas(): Observable<HabilidadCuradaItem[]> {
+    return this.http.get<HabilidadCuradaItem[]>(`${this.url}/habilidades/curadas`);
+  }
+
+  curarHabilidad(req: CurarHabilidadRequest): Observable<CurarHabilidadResponse> {
+    return this.http.post<CurarHabilidadResponse>(`${this.url}/habilidades/curar`, req);
+  }
+
+  eliminarCuraduria(id: number): Observable<{ mensaje: string }> {
+    return this.http.delete<{ mensaje: string }>(`${this.url}/habilidades/curar/${id}`);
   }
 }
