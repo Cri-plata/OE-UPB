@@ -2,6 +2,22 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-10-01] - Barra lateral colapsable, navegación móvil drawer y escudo institucional
+
+* **Panel lateral expandible y contraíble:** barra lateral interactiva con soporte para estado expandido (280 px) y contraído (rail 72 px), provista de botón visible de alternancia (`.sidebar-toggle-btn`) y transición suave sincronizada con el desplazamiento del contenido principal (`.content`).
+* **Tooltips informativos al pasar el cursor sobre los iconos:** despliegue de tooltips flotantes (`.sidebar-floating-tooltip`) al pasar el cursor sobre los iconos en estado contraído (rail 72 px y tablet).
+* **Escudo institucional:** integración del escudo institucional oficial (`escudo-upb.png`, clase `.brand-logo`) de forma limpia y sin recuadro rojo de fondo en la marca, adaptativo a ambos estados del panel lateral y a la cabecera móvil.
+* **Persistencia del estado de navegación en `localStorage`:** almacenamiento reactivo del estado de navegación (`oeupb_sidebar_collapsed`) para mantener la preferencia del usuario entre sesiones y pantallas.
+* **Menú móvil desplegable tipo drawer:** navegación off-canvas (`transform: translateX(-100%)`) accesible con botón de hamburguesa (`.menu-toggle-btn`) en barra superior fija (`.mobile-header`, 56 px) con transición suave y escudo institucional.
+* **Fondo semitransparente (backdrop) interactivo:** capa superpuesta (`.sidebar-backdrop`) que oscurece el lienzo y permite el cierre táctil inmediato al tocar fuera del panel.
+* **Mecanismos integrales de cierre:** botón de cierre dedicado (`.sidebar-close-btn` con icono X), cierre automático al seleccionar cualquier opción de navegación y respuesta a la tecla Escape.
+* **Bloqueo de desplazamiento de fondo (`mobile-nav-open`):** clase aplicada al contenedor `body` para congelar el scroll del contenido de fondo mientras el drawer permanece abierto.
+* **Optimización ergonómica para interacción táctil:** dimensionamiento de objetivos de contacto (touch targets) con un mínimo de 44 px en botones de cabecera, cierre y elementos de navegación para interacción táctil cómoda en pantallas pequeñas (< 768 px).
+* **Sincronización de mockups y especificaciones:** actualización de `design.md`, `screen-map.md`, `mockups.css` y la suite de mockups con el nuevo componente de control, navegación móvil drawer y el recurso gráfico `escudo-upb.png`.
+* **Rediseño canónico de la pantalla de inicio de sesión (Login):** tarjeta dual integrada (`width: min(880px, 100%)`) con lienzo dividido Split Dual-Zone a 105° en escritorio y 180° en móvil, jerarquía de marca institucional UPB depurada y eliminación de bordes innecesarios.
+* **Alternancia de visibilidad de contraseña:** botón interactivo (`.btn-toggle-password`) con accesibilidad ARIA (`aria-label`, `aria-pressed`), iconos Lucide (`eye` / `eye-off`) y espaciado de seguridad en el campo.
+* **Adaptabilidad móvil en autenticación:** cabecera de marca compacta que preserva el escudo institucional UPB y garantiza la visibilidad directa del formulario de credenciales en pantallas móviles sin desplazamiento inicial.
+
 ## [2026-09-30] - ID del estudiante
 
 * **Modelo:** `egresados.id_estudiante` en el esquema SQL, el diagrama ER y `04-modelo-datos.md`; la revisión esperada de Alembic es `j7f15d2a4b63`.
@@ -47,22 +63,6 @@ Este documento registra únicamente cambios de la documentación canónica. Los 
 * **Requisitos:** RF-21, RF-22, RF-23, RF-25, RF-26 y RF-61 pasan a Implementado. RN-01, RN-16, RN-26 y RN-31, HU-07 y CU-05 a CU-07 se actualizaron.
 * **Backlog:** EXP-03, ANA-01, DB-03 y ETL-01 se archivaron; se agregó ANA-03 y se amplió ANA-02.
 
-## [2026-09-25] - Corrección integral de mockups según auditoría
-
-* **Tokens y espaciado:** se expuso la cadencia modular de espaciado (`--space-2xs` a `--space-3xl`), radios (`--radius-sm` a `--radius-full`) y padding dinámico en `mockups.css`.
-* **Sidebar responsive:** implementación del rail iconográfico de 72 px en tablet (`768–1279 px`) y drawer overlay para móvil (`< 768 px`) con barra superior institucional (`.mobile-header`), toggle accesible y backdrop oscuro.
-* **Contención horizontal:** se creó `.table-scroll` y se fijaron anchos mínimos específicos para Directorio (900 px), Gestión de usuarios (1000 px) e Historial de carga (650 px), retirando recortes invisibles en `.table-card`.
-* **Jerarquía de acciones:** botones compactos de tabla a 32 px; acciones destructivas de fila (`Eliminar`, `Desactivar`, `Retirar`) migradas a estilo outline sutil (`.table-action.btn-danger`), reservando el relleno sólido para confirmaciones en modal.
-* **Formularios y modales:** etiquetas accesibles visibles en login y cambio de contraseña; panel de control del Explorador reestructurado en dos filas; modales con contención vertical, scroll interno y apilamiento en móvil.
-* **Mapa de pantallas:** `screen-map.md` actualizado con matriz de anchos de referencia responsive y registro exhaustivo de variantes por pantalla.
-* **Regla de tarjetas sin bordes de acento:** se prohibieron explícitamente los bordes de acento de color laterales (izquierdo/derecho) o superiores en tarjetas y paneles en `design/design.md`, `CLAUDE.md` y `screen-map.md`, retirando la clase `border-alert` en `analitica.html` y bordes laterales de contenedores.
-
-## [2026-09-25] - Mockups de las pantallas actuales
-
-* **Diseño:** `design/design.md` reemplaza formalmente a `design-system.md` como fuente canónica y obligatoria para mockups y frontend. Se añadieron reglas de iconografía Lucide, estados, modales, gráficos, tablas, carga de archivos y el bloqueo de implementación sin mockup previo.
-* **Mockups:** se añadieron HTML/CSS navegables de las pantallas existentes en `mockups/`, junto con un mapa de pantallas, roles y flujos. Cada pantalla tiene un HTML estilizado en la misma carpeta que `mockups.css`; los dos modales implementados se documentan en variantes con y sin modal y las tablas muestran datos sintéticos para revisión visual.
-* **Gobierno UI:** `screen-map.md` pasa a ser obligatorio en todo cambio de pantalla o flujo y se prohíben emojis y pictogramas Unicode como sustitutos de iconos.
-
 ## [2026-09-25] - Actualización de verificación
 
 * **Pruebas:** la estrategia y el estado funcional reflejan 38 pruebas de backend y 23 de frontend, los casos de privacidad de publicación y la convención de pruebas zoneless.
@@ -80,8 +80,6 @@ Este documento registra únicamente cambios de la documentación canónica. Los 
 * **Requisitos:** se alinearon RN-01, 07, 09, 12-15, 18, 22-24, 26, 28 y 31, HU-01, 05-09 y 11-13, y CU-02 a CU-12 con RN-24, ADR-013, ADR-014 y ADR-015. RF-21, RF-22 y RF-26 pasan a Parcial.
 * **Arquitectura y operación:** se completaron inventarios de routers y rutas, frontera de publicación, invariantes del modelo y enmascaramiento de logs.
 * **Backlog:** EXP-02 archivado; nuevos ítems ANA-01, DB-03, ETL-01, API-02, PRG-01, ANA-02 y DOC-03.
-<<<<<<< HEAD
-=======
 
 ## [2026-09-25] - Corrección integral de mockups según auditoría
 
@@ -260,4 +258,3 @@ Este documento registra únicamente cambios de la documentación canónica. Los 
 - Generador automático de archivos Excel de prueba con datos falsos (50, 120 y 500 filas).
 - Dashboards interactivos con Chart.js para "Reporte General" y "Tendencias" con indicadores KPI y gráficas (Datos simulados para presentación).
 - Logo oficial de la UPB integrado en las vistas del Coordinador.
->>>>>>> origin/dev-cristian

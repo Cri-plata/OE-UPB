@@ -73,22 +73,32 @@
   gap: var(--space-sm);
 
   button {
-    padding: 8px 16px;
+    min-height: 36px;
+    padding: 6px var(--space-md);
     border: 1px solid var(--control-border);
-    background: white;
+    background: var(--surface);
     color: var(--heading);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     cursor: pointer;
     font-size: 13px;
     font-weight: 500;
+    transition: background 0.15s ease, border-color 0.15s ease;
 
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      background: var(--background);
+      border-color: var(--border);
     }
 
     &:not(:disabled):hover {
       background: var(--background);
+      border-color: rgba(26, 24, 24, 0.25);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--brand);
+      outline-offset: 2px;
     }
   }
 
@@ -121,16 +131,20 @@
 
 .success-message {
   padding: var(--space-sm) var(--space-md);
-  background: rgba(46, 125, 50, 0.1);
+  background: rgba(19, 122, 71, 0.08);
   color: var(--success);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(19, 122, 71, 0.2);
   margin-bottom: var(--space-md);
+  font-size: 13px;
 }
 
 .error-message {
   padding: var(--space-sm) var(--space-md);
-  background: rgba(186, 26, 26, 0.1);
+  background: rgba(186, 26, 26, 0.08);
   color: var(--danger);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(186, 26, 26, 0.2);
   margin-bottom: var(--space-md);
+  font-size: 13px;
 }

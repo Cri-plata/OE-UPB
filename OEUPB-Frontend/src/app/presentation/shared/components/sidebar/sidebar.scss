@@ -1,3 +1,29 @@
+.mobile-header {
+  display: none;
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 24, 24, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+  animation: fadeInBackdrop 0.2s ease-out;
+}
+
+@keyframes fadeInBackdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sidebar-mobile-close {
+  display: none;
+}
+
 .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
@@ -23,17 +49,21 @@
 
   .brand-mark,
   .logo {
-    display: grid;
-    width: 44px;
-    height: 40px;
-    flex: 0 0 44px;
-    place-items: center;
-    border-radius: var(--radius-md);
-    background: var(--brand);
-    color: white;
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 46px;
+    flex: 0 0 40px;
+    background: transparent;
+  }
+
+  .brand-logo {
+    width: 36px;
+    height: 44px;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
   }
 
   h2,
@@ -43,6 +73,39 @@
     font-weight: 700;
     white-space: nowrap;
     color: white;
+  }
+}
+
+.sidebar-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  margin-left: auto;
+  padding: 0;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: var(--navigation-text);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, width 0.2s ease, height 0.2s ease;
+
+  .toggle-icon {
+    display: block;
+    width: 18px;
+    height: 18px;
+    background: currentColor;
+    mask: var(--toggle-icon, url("https://unpkg.com/lucide-static@0.468.0/icons/chevron-left.svg")) center / contain no-repeat;
+    -webkit-mask: var(--toggle-icon, url("https://unpkg.com/lucide-static@0.468.0/icons/chevron-left.svg")) center / contain no-repeat;
+  }
+
+  &:hover {
+    background: var(--navigation-hover);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
   }
 }
 
@@ -133,49 +196,194 @@
   }
 }
 
-/* Tablet: Rail 72px conforme a design.md */
-@media (min-width: 768px) and (max-width: 1279px) {
-  .sidebar {
+.sidebar-floating-tooltip {
+  position: fixed;
+  transform: translateY(-50%);
+  z-index: 1200;
+  background: var(--navigation-hover);
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Desktop / Tablet: Barra colapsada a rail de 72px */
+@media (min-width: 768px) {
+  .sidebar.collapsed {
     width: var(--rail-width);
+
+    .brand {
+      flex-direction: column;
+      padding: 0 var(--space-xs);
+      margin-bottom: var(--space-md);
+      gap: var(--space-xs);
+
+      .brand-title {
+        display: none;
+      }
+    }
+
+    .sidebar-toggle-btn {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      min-height: 36px;
+      margin-left: 0;
+      --toggle-icon: url("https://unpkg.com/lucide-static@0.468.0/icons/chevron-right.svg");
+    }
+
+    .nav-item-text,
+    .logout-btn span {
+      display: none;
+    }
+
+    .nav-item {
+      justify-content: center;
+      padding: var(--space-xs) 0;
+    }
+
+    .bottom-menu {
+      padding: var(--space-md) var(--space-xs);
+    }
+
+    .logout-btn {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      margin: 0 auto;
+    }
+  }
+}
+
+
+/* Mobile drawer navigation (max-width: 767px) */
+@media (max-width: 767px) {
+  .mobile-header {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--mobile-header-height);
+    background: var(--navigation);
+    color: white;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-md);
+    z-index: 900;
+    border-bottom: 1px solid var(--navigation-border);
+  }
+
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-weight: 700;
+    font-size: 16px;
+    color: white;
+  }
+
+  .mobile-brand-logo {
+    width: 24px;
+    height: 30px;
+    object-fit: contain;
+  }
+
+  .menu-toggle-btn,
+  .sidebar-close-btn {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .menu-toggle-btn {
+    color: white;
+    border-radius: var(--radius-md);
+  }
+
+  .sidebar-close-btn {
+    color: var(--navigation-text);
+    border-radius: var(--radius-sm);
+  }
+
+  .menu-icon,
+  .close-icon {
+    background: currentColor;
+    mask: var(--btn-icon) center / contain no-repeat;
+    -webkit-mask: var(--btn-icon) center / contain no-repeat;
+  }
+
+  .menu-icon {
+    width: 24px;
+    height: 24px;
+    --btn-icon: url("https://unpkg.com/lucide-static@0.468.0/icons/menu.svg");
+  }
+
+  .close-icon {
+    width: 20px;
+    height: 20px;
+    --btn-icon: url("https://unpkg.com/lucide-static@0.468.0/icons/x.svg");
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(320px, 85vw);
+    max-width: 320px;
+    height: 100vh;
+    padding: var(--space-md) 0 var(--space-lg);
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none;
+    border-right: 1px solid var(--navigation-border);
+
+    &.mobile-open {
+      transform: translateX(0);
+      box-shadow: 6px 0 28px rgba(0, 0, 0, 0.55);
+    }
+  }
+
+  .sidebar-mobile-close {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 var(--space-md) var(--space-xs);
+  }
+
+  .sidebar-toggle-btn,
+  .sidebar-floating-tooltip {
+    display: none !important;
   }
 
   .brand {
-    justify-content: center;
-    padding: 0 var(--space-xs);
+    padding: 0 var(--space-lg);
     margin-bottom: var(--space-xl);
-
-    h2,
-    .brand-title {
-      display: none;
-    }
-  }
-
-  .nav-item-text,
-  .logout-btn span {
-    display: none;
   }
 
   .nav-item {
-    justify-content: center;
-    padding: var(--space-xs) 0;
-    border-left: 0;
-    border-right: 3px solid transparent;
-
-    &:hover,
-    &.active {
-      border-right-color: var(--brand);
-    }
+    min-height: 48px;
+    padding: var(--space-xs) var(--space-lg);
   }
 
   .bottom-menu {
-    padding: var(--space-md) var(--space-xs);
+    padding: var(--space-md) var(--space-lg);
   }
 
   .logout-btn {
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    margin: 0 auto;
+    min-height: 44px;
   }
 }
 

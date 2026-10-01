@@ -1,4 +1,4 @@
-﻿import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -19,6 +19,7 @@ export class LoginComponent {
   isLoading = false;
   isChangingPassword = false;
   mostrarCambioObligatorio = false;
+  mostrarContrasena = false;
 
   private fb = inject(FormBuilder);
   private loginUseCase = inject(LoginUseCase);
@@ -36,7 +37,15 @@ export class LoginComponent {
     });
   }
 
+  togglePasswordVisibility(): void {
+    this.mostrarContrasena = !this.mostrarContrasena;
+  }
+
   onSubmit(): void {
+    if (this.isLoading) {
+      return;
+    }
+
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;

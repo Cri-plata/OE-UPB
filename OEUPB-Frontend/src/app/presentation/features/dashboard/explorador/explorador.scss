@@ -100,13 +100,33 @@
 }
 
 /* Estado de publicación por gráfica (PublicacionControl). */
-.publication-status { color: var(--success); font-weight: 700; font-size: 13px; }
-.publish-error { flex-basis: 100%; margin: var(--space-2xs) 0 0; color: var(--danger); font-size: 13px; }
+.publication-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(19, 122, 71, 0.1);
+  color: var(--success);
+  font-weight: 600;
+  font-size: 12px;
+  border: 1px solid rgba(19, 122, 71, 0.2);
+}
+
+.publish-error {
+  flex-basis: 100%;
+  margin: var(--space-2xs) 0 0;
+  color: var(--danger);
+  font-size: 13px;
+  background: rgba(186, 26, 26, 0.08);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(186, 26, 26, 0.2);
+}
 
 /* Varias gráficas simultáneas (EXP-03). */
 .bloques { display: flex; flex-direction: column; gap: var(--space-2xl); }
 .bloque-acciones { display: flex; justify-content: flex-end; gap: var(--space-sm); margin-bottom: var(--space-sm); }
-.crear-btn { margin-top: var(--space-xl); width: 100%; }
 
 :host,
 app-explorador-grafica {

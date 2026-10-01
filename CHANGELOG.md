@@ -3,6 +3,20 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Añadido (2026-10-01, barra lateral colapsable, menú móvil drawer y escudo institucional)
+- **Panel lateral expandible y contraíble:** barra lateral interactiva con botón visible (`.sidebar-toggle-btn`), alternancia entre estado expandido (280 px) y modo rail (72 px), y transición suave sincronizada con el desplazamiento del contenido principal (`.content`).
+- **Tooltips informativos en estado contraído:** despliegue de tooltips flotantes (`.sidebar-floating-tooltip`) al pasar el cursor sobre los iconos de navegación y cierre de sesión en estado contraído (rail 72 px).
+- **Menú móvil desplegable tipo drawer:** menú móvil off-canvas (`transform: translateX(-100%)`) accesible con botón de hamburguesa (`.menu-toggle-btn`) en barra superior fija (`.mobile-header`, 56 px) con escudo institucional UPB.
+- **Fondo semitransparente (backdrop) interactivo:** capa superpuesta (`.sidebar-backdrop`) con desenfoque suave para oscurecer la interfaz y facilitar el cierre táctil al presionar fuera del menú.
+- **Mecanismos integrales de cierre:** botón de cierre (`.sidebar-close-btn` con icono X), cierre automático al seleccionar una opción de navegación y soporte para la tecla Escape.
+- **Bloqueo de desplazamiento de fondo (`mobile-nav-open`):** clase aplicada al contenedor `body` para congelar el scroll del fondo y evitar desplazamiento no deseado mientras el menú drawer permanezca abierto.
+- **Optimización ergonómica para interacción táctil:** dimensionamiento mínimo de 44 px en todos los touch targets (botones de apertura y cierre, enlaces del menú lateral y botón de cierre de sesión) para garantizar accesibilidad y ergonomía táctil en pantallas móviles (< 768 px).
+- **Escudo institucional UPB:** integración del escudo institucional oficial (`escudo-upb.png`) de forma limpia y sin recuadro rojo de fondo en la marca, adaptativo a ambos estados del panel lateral y a la cabecera móvil.
+- **Persistencia del estado de navegación:** almacenamiento del estado en `localStorage` (`oeupb_sidebar_collapsed`) para conservar la vista preferida entre recargas y navegación.
+- **Rediseño canónico de la pantalla de inicio de sesión (Login):** tarjeta dual integrada (`width: min(880px, 100%)`) con lienzo dividido (Split Dual-Zone a 105° en escritorio y 180° en móvil), jerarquía de marca institucional UPB depurada y eliminación de bordes innecesarios.
+- **Alternancia de visibilidad de contraseña:** botón interactivo (`.btn-toggle-password`) con accesibilidad ARIA (`aria-label`, `aria-pressed`), iconos Lucide (`eye` / `eye-off`) y espaciado de seguridad en el campo.
+- **Adaptabilidad móvil en autenticación:** cabecera de marca compacta que preserva el escudo institucional UPB y garantiza la visibilidad directa del formulario de credenciales en pantallas móviles sin desplazamiento inicial.
+
 ### Corregido (2026-10-01, carga de datos)
 - **Filas sin documento:** la carga de un Excel con mediciones anónimas (filas sin `NUMERO_DOCUMENTO`) respondía 500 y el navegador lo mostraba como error de CORS. Con pandas 3 el documento vacío se convertía en NaN y la validación fallaba. La columna normalizada conserva ahora `None`. Se agregó 1 prueba de backend.
 
@@ -69,6 +83,12 @@ Este es el historial global del producto y el código del monorepo. Los cambios 
 - **Datos:** Se añadió el catálogo persistente de sedes, relaciones obligatorias y soporte explícito de intentos de medición con política de selección por indicador.
 - **Auditoría de cargas:** La eliminación física exige motivo, conserva un evento inmutable y evita reutilizar números de versión borrados.
 - **Calidad:** Se consolidaron 19 pruebas de backend y 11 de frontend, más validaciones de contratos, documentación y compilación en CI.
+
+### Añadido (2026-09-23)
+- **RBAC:** Se implementaron `Admin_CTIC`, `Coordinador_Sede` y `Usuario_Consulta` con administración jerárquica y denegaciones 403.
+- **Permisos:** Los usuarios de consulta almacenan etiqueta informativa, cuatro permisos y programas validados contra cargas visibles de su sede.
+- **Cuentas:** Se añadieron desactivación/reactivación, borrado físico excepcional auditado y revocación inmediata mediante versión de autorización.
+- **Aislamiento:** Directorio, perfiles, reportes, explorador y cargas restringen los datos privados al coordinador y a su sede.
 
 ### Añadido (2026-09-12)
 - **Módulo de IA (Habilidades Demandadas)**: Pipeline de PLN para extracción y clasificación de habilidades blandas y duras desde texto libre de encuestas con spaCy (`es_core_news_md`) y descubrimiento de emergentes con TF-IDF (`/api/ia/habilidades-demandadas`).
