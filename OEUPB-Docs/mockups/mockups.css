@@ -930,30 +930,36 @@ body.sidebar-collapsed .sidebar .logout-btn:hover .sidebar-floating-tooltip {
   .table-toolbar {
     flex-direction: column;
     align-items: stretch;
-    gap: var(--space-md);
+    gap: var(--space-sm);
   }
 
   .search-box {
+    flex: none;
     max-width: 100%;
     width: 100%;
   }
 
   .filters-group {
+    flex: none;
     flex-direction: column;
     align-items: stretch;
     width: 100%;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
   }
 
   .filter-item {
+    flex: none;
     width: 100%;
-    min-width: 100%;
+    min-width: 0;
+    gap: 4px;
   }
 
   .btn-clear-filters {
+    flex: none;
     width: 100%;
     justify-content: center;
     min-height: 44px;
+    margin-top: var(--space-2xs);
   }
 }
 
