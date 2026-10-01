@@ -223,6 +223,8 @@ class HabilidadCurada(Base):
     __tablename__ = "habilidades_curadas"
     __table_args__ = (
         UniqueConstraint("termino_original", name="uq_habilidad_curada_termino"),
+        CheckConstraint("tipo IN ('blanda', 'dura')", name="ck_habilidades_curadas_tipo"),
+        CheckConstraint("estado IN ('aprobada', 'descartada')", name="ck_habilidades_curadas_estado"),
     )
 
     id = Column(Integer, primary_key=True, index=True)

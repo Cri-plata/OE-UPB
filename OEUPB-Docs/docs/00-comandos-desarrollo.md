@@ -67,7 +67,7 @@ npm test -- --watch=false
 npm run build
 ```
 
-La revisión esperada de Alembic es `j7f15d2a4b63 (head)`. Los secretos y el archivo `.env` nunca se versionan. En producción se requieren `APP_ENV=production`, un `SECRET_KEY` de al menos 32 caracteres e `INITIAL_CREDENTIAL_MODE=random`.
+La revisión esperada de Alembic es `k8a26e3b5c74 (head)`. Los secretos y el archivo `.env` nunca se versionan. En producción se requieren `APP_ENV=production`, un `SECRET_KEY` de al menos 32 caracteres e `INITIAL_CREDENTIAL_MODE=random`.
 
 ## Regenerar OpenAPI
 

@@ -3,6 +3,11 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Corregido (2026-10-01, integración de dev-gio)
+- **Migración de habilidades curadas:** `habilidades_curadas` no tenía migración de Alembic. La migración `k8a26e3b5c74` la crea con las restricciones del esquema (tipo `blanda`/`dura`, estado `aprobada`/`descartada`) o, si ya existía por un `create_all`, le añade solo las restricciones. El modelo `HabilidadCurada` declara las mismas restricciones.
+- **Pruebas aisladas:** `test_curaduria_habilidades.py` escribía en la base configurada en `.env` (creaba la tabla con `create_all` y un coordinador de prueba). Ahora usa SQLite en memoria como el resto de la suite.
+- **Build:** el límite de error de estilos por componente pasa de 16 kB a 20 kB, porque Analítica y Habilidades lo superaban y `ng build` fallaba. El aviso se mantiene en 10 kB.
+
 ### Añadido (2026-10-01, barra lateral colapsable, menú móvil drawer y escudo institucional)
 - **Panel lateral expandible y contraíble:** barra lateral interactiva con botón visible (`.sidebar-toggle-btn`), alternancia entre estado expandido (280 px) y modo rail (72 px), y transición suave sincronizada con el desplazamiento del contenido principal (`.content`).
 - **Tooltips informativos en estado contraído:** despliegue de tooltips flotantes (`.sidebar-floating-tooltip`) al pasar el cursor sobre los iconos de navegación y cierre de sesión en estado contraído (rail 72 px).

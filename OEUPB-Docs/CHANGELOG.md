@@ -2,6 +2,11 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-10-01] - Habilidades curadas y aislamiento de pruebas
+
+* **Modelo:** `HABILIDADES_CURADAS` en el diagrama ER de `04-modelo-datos.md`; la revisión esperada de Alembic es `k8a26e3b5c74`.
+* **Pruebas:** `03-estrategia-pruebas.md` exige que las pruebas usen SQLite en memoria y nunca la base de `.env`. Recuento: 73 de backend y 100 de frontend.
+
 ## [2026-10-01] - Barra lateral colapsable, navegación móvil drawer y escudo institucional
 
 * **Panel lateral expandible y contraíble:** barra lateral interactiva con soporte para estado expandido (280 px) y contraído (rail 72 px), provista de botón visible de alternancia (`.sidebar-toggle-btn`) y transición suave sincronizada con el desplazamiento del contenido principal (`.content`).

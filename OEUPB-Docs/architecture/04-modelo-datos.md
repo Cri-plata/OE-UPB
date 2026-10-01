@@ -84,6 +84,7 @@ erDiagram
     }
     USUARIOS ||--o{ EVENTOS_ELIMINACION_CARGA : ejecuta
     USUARIOS ||--o{ PUBLICACIONES_GRAFICAS : publica
+    USUARIOS ||--o{ HABILIDADES_CURADAS : cura
     SEDES ||--o{ EVENTOS_ELIMINACION_CARGA : delimita
     PUBLICACIONES_GRAFICAS {
         int id PK
@@ -103,6 +104,17 @@ erDiagram
         datetime fecha_publicacion
         datetime fecha_retiro
         int retirado_por_id FK "nullable"
+    }
+    HABILIDADES_CURADAS {
+        int id PK
+        string termino_original UK
+        string etiqueta_canonica
+        string tipo "blanda | dura"
+        json variantes
+        string estado "aprobada | descartada"
+        int creado_por_id FK
+        string creado_por_correo
+        datetime fecha_creacion
     }
     EVENTOS_ELIMINACION_CARGA {
         int id PK

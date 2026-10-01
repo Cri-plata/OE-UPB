@@ -2,7 +2,7 @@
 
 **Fecha de corte:** 2026-09-30  
 **Estado:** referencia funcional verificada contra código, pruebas y migraciones  
-**Versión de base de datos esperada:** `j7f15d2a4b63 (head)`
+**Versión de base de datos esperada:** `k8a26e3b5c74 (head)`
 
 ## 1. Propósito del proyecto
 
@@ -185,13 +185,13 @@ La infraestructura Docker no se ejecutó en el equipo de desarrollo porque Docke
 
 La última revisión (2026-09-30) aprobó:
 
-- 65 pruebas de backend;
-- 37 pruebas de frontend;
+- 73 pruebas de backend;
+- 100 pruebas de frontend;
 - compilación productiva de Angular;
 - sincronización entre FastAPI, OpenAPI y tipos TypeScript;
 - validación de capas frontend, guards y tokens visuales;
 - validación de enlaces y documentación;
-- migraciones hasta `j7f15d2a4b63` (ID del estudiante); la base local debe actualizarse con `alembic upgrade head`.
+- migraciones hasta `k8a26e3b5c74` (catálogo de habilidades curadas); la base local debe actualizarse con `alembic upgrade head`.
 
 La compilación Angular mantiene advertencias no bloqueantes por tamaño del paquete inicial y del SCSS de carga de datos.
 

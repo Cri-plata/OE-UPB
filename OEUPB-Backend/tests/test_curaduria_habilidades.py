@@ -4,67 +4,66 @@ Pruebas de la API de Curaduría de Habilidades Emergentes (IA-15 / Human-in-the-
 
 import unittest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+
 from main import app
-from infrastructure.database import SessionLocal, Base, engine
-from domain.models import Usuario, HabilidadCurada
+from infrastructure.database import Base, get_db
+from domain.models import Sede, Usuario
 from application.auth_service import create_access_token
 from application.ia_service import (
     extraer_habilidades_por_respuesta,
     _extraer_emergentes_tfidf,
     invalidar_cache_taxonomia,
-    sincronizar_curadurias_bd,
 )
 
 
 class TestCuraduriaHabilidades(unittest.TestCase):
+    # Base en memoria: las pruebas nunca deben escribir en la base configurada en .env.
 
     @classmethod
     def setUpClass(cls):
-        Base.metadata.create_all(bind=engine)
-        cls.client = TestClient(app)
-        db = SessionLocal()
-        try:
-            # Buscar o crear usuario de prueba Coordinador
-            user_coord = db.query(Usuario).filter(Usuario.correo == "coord_curador@upb.edu.co").first()
-            if not user_coord:
-                user_coord = Usuario(
-                    nombre="Coordinador Curador",
-                    correo="coord_curador@upb.edu.co",
-                    contrasena_hash="fakehash",
-                    rol="Coordinador_Sede",
-                    sede_id=1,
-                    activo=True,
-                    version_autorizacion=1,
-                )
-                db.add(user_coord)
-                db.commit()
-                db.refresh(user_coord)
-            cls.coord_token = create_access_token({
-                "sub": user_coord.correo,
-                "usuario_id": user_coord.id,
-                "rol": user_coord.rol,
-                "sede_id": user_coord.sede_id,
-                "version_autorizacion": user_coord.version_autorizacion,
-            })
-            cls.coord_id = user_coord.id
+        cls.engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+        cls.Session = sessionmaker(bind=cls.engine)
 
-            # Limpiar curadurías de prueba previas
-            db.query(HabilidadCurada).filter(
-                HabilidadCurada.termino_original.in_(["docker_test", "ruido_test"])
-            ).delete(synchronize_session=False)
-            db.commit()
-        finally:
-            db.close()
+    def setUp(self):
+        Base.metadata.drop_all(bind=self.engine)
+        Base.metadata.create_all(bind=self.engine)
+        db = self.Session()
+        db.add(Sede(id=1, codigo="BUC", nombre="Bucaramanga"))
+        coordinador = Usuario(
+            nombre="Coordinador Curador",
+            correo="coord_curador@upb.edu.co",
+            contrasena_hash="fakehash",
+            rol="Coordinador_Sede",
+            sede_id=1,
+            activo=True,
+            version_autorizacion=1,
+        )
+        db.add(coordinador)
+        db.commit()
+        self.coord_token = create_access_token({
+            "sub": coordinador.correo,
+            "usuario_id": coordinador.id,
+            "rol": coordinador.rol,
+            "sede_id": coordinador.sede_id,
+            "version_autorizacion": coordinador.version_autorizacion,
+        })
+        db.close()
+
+        def override_db():
+            session = self.Session()
+            try:
+                yield session
+            finally:
+                session.close()
+
+        app.dependency_overrides[get_db] = override_db
+        self.client = TestClient(app)
 
     def tearDown(self):
-        db = SessionLocal()
-        try:
-            db.query(HabilidadCurada).filter(
-                HabilidadCurada.termino_original.in_(["docker_test", "ruido_test"])
-            ).delete(synchronize_session=False)
-            db.commit()
-        finally:
-            db.close()
+        app.dependency_overrides.clear()
         invalidar_cache_taxonomia()
 
     def test_aprobar_habilidad_emergente(self):
