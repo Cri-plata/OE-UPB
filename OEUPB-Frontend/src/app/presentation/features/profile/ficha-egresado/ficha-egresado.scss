@@ -106,7 +106,7 @@
   height: 12px;
   background: var(--brand);
   border-radius: var(--radius-full);
-  border: 3px solid white;
+  border: 3px solid var(--surface);
   box-shadow: 0 0 0 1px var(--border);
 }
 
@@ -151,10 +151,12 @@
 
 .error-message {
   padding: var(--space-sm) var(--space-md);
-  background: rgba(186, 26, 26, 0.1);
+  background: rgba(186, 26, 26, 0.08);
   color: var(--danger);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(186, 26, 26, 0.2);
   margin-bottom: var(--space-md);
+  font-size: 13px;
 }
 
 @media (max-width: 900px) {
