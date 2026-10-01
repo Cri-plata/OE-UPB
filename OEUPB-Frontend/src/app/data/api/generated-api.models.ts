@@ -11,10 +11,30 @@ export interface AlertaResponse {
   "muestra": number;
 }
 
+export interface AlertaRiesgoItem {
+  "programa": string;
+  "severidad": string;
+  "mensaje": string;
+  "riesgo_estimado": number;
+  "tamano_muestra": number;
+}
+
 export interface AnaliticaResponse {
   "textos_analizados": number;
   "competencias": Array<CompetenciaResponse>;
   "alertas": Array<AlertaResponse>;
+}
+
+export interface BenchmarkSedeItem {
+  "sede_id": number;
+  "sede_nombre": string;
+  "estado": string;
+  "total_trayectorias": number;
+  "precision_modelo": number;
+  "probabilidad_empleo_promedio": number;
+  "egresados_en_riesgo": number;
+  "factor_principal": string;
+  "robustez": string;
 }
 
 export interface Body_procesar_excel_api_carga_excel_post {
@@ -77,6 +97,14 @@ export interface ComparacionResponse {
   "indicador": string;
   "minimo_pares": number;
   "programas": Array<ComparacionProgramaResponse>;
+}
+
+export interface ComparativaAlgoritmoItem {
+  "algoritmo": string;
+  "accuracy": number;
+  "f1_score": number;
+  "tiempo_ms": number;
+  "seleccionado": boolean;
 }
 
 export interface CompetenciaResponse {
@@ -198,10 +226,30 @@ export interface HTTPValidationError {
   "detail"?: Array<ValidationError>;
 }
 
+export interface HabilidadComparativaItem {
+  "habilidad": string;
+  "tipo": string;
+  "m0_menciones": number;
+  "m0_pct": number;
+  "m1_menciones": number;
+  "m1_pct": number;
+  "m5_menciones": number;
+  "m5_pct": number;
+  "delta_m1_m0": number;
+  "tendencia": string;
+  "total_menciones": number;
+}
+
 export interface HabilidadReconocida {
   "habilidad": string;
   "tipo": string;
   "menciones": number;
+}
+
+export interface HabilidadesComparativaResponse {
+  "comparativa": Array<HabilidadComparativaItem>;
+  "totales_respuestas": Record<string, number>;
+  "totales_con_habilidad": Record<string, number>;
 }
 
 export interface HabilidadesDemandadasResponse {
@@ -226,6 +274,11 @@ export interface HistorialCargaItem {
   "estado": string;
 }
 
+export interface ImportanciaFactorItem {
+  "factor": string;
+  "importancia": number;
+}
+
 export interface KpisResponse {
   "total_egresados": number;
   "total_encuestados": number;
@@ -248,6 +301,11 @@ export interface LoginRequest {
 export interface LoginResponse {
   "token": string;
   "usuario": UsuarioLoginResponse;
+}
+
+export interface MatrizConfusionData {
+  "clases": Array<string>;
+  "matriz": Array<Array<number>>;
 }
 
 export interface MensajeResponse {
@@ -275,6 +333,33 @@ export interface PerfilEgresadoResponse {
   "programa": string | null;
   "fecha_grado": string;
   "encuestas": Array<EncuestaPerfilResponse>;
+}
+
+export interface PrediccionEmpleabilidadResponse {
+  "estado": string;
+  "mensaje": string;
+  "total_trayectorias": number;
+  "precision_modelo": number;
+  "f1_score": number;
+  "programas_analizados": number;
+  "egresados_en_riesgo": number;
+  "importancia_factores": Array<ImportanciaFactorItem>;
+  "predicciones_programas": Array<PrediccionProgramaItem>;
+  "alertas_riesgo": Array<AlertaRiesgoItem>;
+  "matriz_confusion": MatrizConfusionData;
+  "indicadores_robustez"?: Record<string, unknown> | null;
+  "comparativa_algoritmos"?: Array<ComparativaAlgoritmoItem> | null;
+}
+
+export interface PrediccionProgramaItem {
+  "programa": string;
+  "total_egresados": number;
+  "probabilidad_empleado": number;
+  "probabilidad_independiente": number;
+  "probabilidad_estudiante": number;
+  "probabilidad_sin_empleo": number;
+  "nivel_riesgo": string;
+  "rango_salarial_estimado": string;
 }
 
 export interface PublicacionCreate {

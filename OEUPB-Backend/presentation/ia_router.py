@@ -32,6 +32,17 @@ from application.model_cache import habilidades_cache
 
 router = APIRouter(prefix="/api/ia", tags=["Inteligencia Artificial"], responses=RESPUESTAS_PROTEGIDAS)
 
+EXCEL_RESPONSES = {
+    200: {
+        "content": {
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {"type": "string", "format": "binary"}
+            }
+        },
+        "description": "Reporte Excel (.xlsx)",
+    }
+}
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Modelos de respuesta (Pydantic)
@@ -437,7 +448,7 @@ def get_habilidades_comparativa(
     return resp
 
 
-@router.get("/habilidades-export")
+@router.get("/habilidades-export", responses=EXCEL_RESPONSES)
 def exportar_habilidades_excel(
     momento: Optional[int] = Query(None, description="Filtrar por momento (0, 1 o 5)"),
     anio: Optional[int] = Query(None, description="Filtrar por año"),
@@ -534,7 +545,7 @@ def get_prediccion_empleabilidad(
     return resultado
 
 
-@router.get("/prediccion-export")
+@router.get("/prediccion-export", responses=EXCEL_RESPONSES)
 def exportar_prediccion_excel(
     momento_origen: int = Query(0, description="Momento inicial de trayectoria"),
     momento_destino: int = Query(1, description="Momento longitudinal a proyectar"),

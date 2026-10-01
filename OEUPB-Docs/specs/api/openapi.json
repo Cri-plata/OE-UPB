@@ -2885,6 +2885,561 @@
         }
       }
     },
+    "/api/ia/habilidades-comparativa": {
+      "get": {
+        "tags": [
+          "Inteligencia Artificial"
+        ],
+        "summary": "Get Habilidades Comparativa",
+        "description": "Comparativa Temporal Longitudinal de Habilidades Demandadas (IA-06).\nCompara las menciones relativas entre M0 (grado), M1 (1 año) y M5 (5 años)\npara clasificar tendencias emergentes, crecientes o decrecientes.",
+        "operationId": "get_habilidades_comparativa_api_ia_habilidades_comparativa_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "anio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por año de cohorte",
+              "title": "Anio"
+            },
+            "description": "Filtrar por año de cohorte"
+          },
+          {
+            "name": "programa",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por programa académico",
+              "title": "Programa"
+            },
+            "description": "Filtrar por programa académico"
+          },
+          {
+            "name": "top_n",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 5,
+              "description": "Top N habilidades a comparar",
+              "default": 25,
+              "title": "Top N"
+            },
+            "description": "Top N habilidades a comparar"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HabilidadesComparativaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ia/habilidades-export": {
+      "get": {
+        "tags": [
+          "Inteligencia Artificial"
+        ],
+        "summary": "Exportar Habilidades Excel",
+        "description": "Exportación de Resultados NLP a Hoja de Cálculo Excel .xlsx (IA-07).\nGenera un archivo con 3 hojas: Habilidades Reconocidas, Reglas de Asociación y Candidatas Emergentes.",
+        "operationId": "exportar_habilidades_excel_api_ia_habilidades_export_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "momento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por momento (0, 1 o 5)",
+              "title": "Momento"
+            },
+            "description": "Filtrar por momento (0, 1 o 5)"
+          },
+          {
+            "name": "anio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por año",
+              "title": "Anio"
+            },
+            "description": "Filtrar por año"
+          },
+          {
+            "name": "programa",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por programa académico",
+              "title": "Programa"
+            },
+            "description": "Filtrar por programa académico"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reporte Excel (.xlsx)",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ia/prediccion-empleabilidad": {
+      "get": {
+        "tags": [
+          "Inteligencia Artificial"
+        ],
+        "summary": "Get Prediccion Empleabilidad",
+        "description": "Modelo Predictivo de Empleabilidad (RF-71 / IA-01).\nEntrena modelos supervisados (GradientBoostingClassifier) usando trayectorias longitudinales\nde egresados (M0 -> M1 o M0/M1 -> M5) para proyectar probabilidades de inserción laboral,\nriesgo de desempleo y nivel salarial agregado por programa.",
+        "operationId": "get_prediccion_empleabilidad_api_ia_prediccion_empleabilidad_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "momento_origen",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Momento inicial de trayectoria (default 0 - graduación)",
+              "default": 0,
+              "title": "Momento Origen"
+            },
+            "description": "Momento inicial de trayectoria (default 0 - graduación)"
+          },
+          {
+            "name": "momento_destino",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Momento longitudinal a proyectar (1 o 5, default 1)",
+              "default": 1,
+              "title": "Momento Destino"
+            },
+            "description": "Momento longitudinal a proyectar (1 o 5, default 1)"
+          },
+          {
+            "name": "programa",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por programa académico",
+              "title": "Programa"
+            },
+            "description": "Filtrar por programa académico"
+          },
+          {
+            "name": "anio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por cohorte / año",
+              "title": "Anio"
+            },
+            "description": "Filtrar por cohorte / año"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrediccionEmpleabilidadResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ia/prediccion-export": {
+      "get": {
+        "tags": [
+          "Inteligencia Artificial"
+        ],
+        "summary": "Exportar Prediccion Excel",
+        "description": "Descarga del Informe Ejecutivo Predictivo en Hoja de Cálculo Excel (.xlsx) (IA-14).",
+        "operationId": "exportar_prediccion_excel_api_ia_prediccion_export_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "momento_origen",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Momento inicial de trayectoria",
+              "default": 0,
+              "title": "Momento Origen"
+            },
+            "description": "Momento inicial de trayectoria"
+          },
+          {
+            "name": "momento_destino",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Momento longitudinal a proyectar",
+              "default": 1,
+              "title": "Momento Destino"
+            },
+            "description": "Momento longitudinal a proyectar"
+          },
+          {
+            "name": "programa",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por programa académico",
+              "title": "Programa"
+            },
+            "description": "Filtrar por programa académico"
+          },
+          {
+            "name": "anio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por año",
+              "title": "Anio"
+            },
+            "description": "Filtrar por año"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reporte Excel (.xlsx)",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ia/prediccion-benchmark-sedes": {
+      "get": {
+        "tags": [
+          "Inteligencia Artificial"
+        ],
+        "summary": "Get Benchmark Sedes",
+        "description": "Benchmark Inter-Sedes de Trayectorias y Empleabilidad (IA-08).\nPermite contrastar la capacidad predictiva y métricas entre sedes institucionales.",
+        "operationId": "get_benchmark_sedes_api_ia_prediccion_benchmark_sedes_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "momento_origen",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Momento inicial",
+              "default": 0,
+              "title": "Momento Origen"
+            },
+            "description": "Momento inicial"
+          },
+          {
+            "name": "momento_destino",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Momento proyectado",
+              "default": 1,
+              "title": "Momento Destino"
+            },
+            "description": "Momento proyectado"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BenchmarkSedeItem"
+                  },
+                  "title": "Response Get Benchmark Sedes Api Ia Prediccion Benchmark Sedes Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o revocada, o credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El rol, la sede o los permisos no autorizan la operación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/health/live": {
       "get": {
         "tags": [
@@ -3003,6 +3558,39 @@
         ],
         "title": "AlertaResponse"
       },
+      "AlertaRiesgoItem": {
+        "properties": {
+          "programa": {
+            "type": "string",
+            "title": "Programa"
+          },
+          "severidad": {
+            "type": "string",
+            "title": "Severidad"
+          },
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          },
+          "riesgo_estimado": {
+            "type": "number",
+            "title": "Riesgo Estimado"
+          },
+          "tamano_muestra": {
+            "type": "integer",
+            "title": "Tamano Muestra"
+          }
+        },
+        "type": "object",
+        "required": [
+          "programa",
+          "severidad",
+          "mensaje",
+          "riesgo_estimado",
+          "tamano_muestra"
+        ],
+        "title": "AlertaRiesgoItem"
+      },
       "AnaliticaResponse": {
         "properties": {
           "textos_analizados": {
@@ -3031,6 +3619,59 @@
           "alertas"
         ],
         "title": "AnaliticaResponse"
+      },
+      "BenchmarkSedeItem": {
+        "properties": {
+          "sede_id": {
+            "type": "integer",
+            "title": "Sede Id"
+          },
+          "sede_nombre": {
+            "type": "string",
+            "title": "Sede Nombre"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "total_trayectorias": {
+            "type": "integer",
+            "title": "Total Trayectorias"
+          },
+          "precision_modelo": {
+            "type": "number",
+            "title": "Precision Modelo"
+          },
+          "probabilidad_empleo_promedio": {
+            "type": "number",
+            "title": "Probabilidad Empleo Promedio"
+          },
+          "egresados_en_riesgo": {
+            "type": "integer",
+            "title": "Egresados En Riesgo"
+          },
+          "factor_principal": {
+            "type": "string",
+            "title": "Factor Principal"
+          },
+          "robustez": {
+            "type": "string",
+            "title": "Robustez"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sede_id",
+          "sede_nombre",
+          "estado",
+          "total_trayectorias",
+          "precision_modelo",
+          "probabilidad_empleo_promedio",
+          "egresados_en_riesgo",
+          "factor_principal",
+          "robustez"
+        ],
+        "title": "BenchmarkSedeItem"
       },
       "Body_procesar_excel_api_carga_excel_post": {
         "properties": {
@@ -3407,6 +4048,39 @@
           "programas"
         ],
         "title": "ComparacionResponse"
+      },
+      "ComparativaAlgoritmoItem": {
+        "properties": {
+          "algoritmo": {
+            "type": "string",
+            "title": "Algoritmo"
+          },
+          "accuracy": {
+            "type": "number",
+            "title": "Accuracy"
+          },
+          "f1_score": {
+            "type": "number",
+            "title": "F1 Score"
+          },
+          "tiempo_ms": {
+            "type": "number",
+            "title": "Tiempo Ms"
+          },
+          "seleccionado": {
+            "type": "boolean",
+            "title": "Seleccionado"
+          }
+        },
+        "type": "object",
+        "required": [
+          "algoritmo",
+          "accuracy",
+          "f1_score",
+          "tiempo_ms",
+          "seleccionado"
+        ],
+        "title": "ComparativaAlgoritmoItem"
       },
       "CompetenciaResponse": {
         "properties": {
@@ -4074,6 +4748,69 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "HabilidadComparativaItem": {
+        "properties": {
+          "habilidad": {
+            "type": "string",
+            "title": "Habilidad"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "m0_menciones": {
+            "type": "integer",
+            "title": "M0 Menciones"
+          },
+          "m0_pct": {
+            "type": "number",
+            "title": "M0 Pct"
+          },
+          "m1_menciones": {
+            "type": "integer",
+            "title": "M1 Menciones"
+          },
+          "m1_pct": {
+            "type": "number",
+            "title": "M1 Pct"
+          },
+          "m5_menciones": {
+            "type": "integer",
+            "title": "M5 Menciones"
+          },
+          "m5_pct": {
+            "type": "number",
+            "title": "M5 Pct"
+          },
+          "delta_m1_m0": {
+            "type": "number",
+            "title": "Delta M1 M0"
+          },
+          "tendencia": {
+            "type": "string",
+            "title": "Tendencia"
+          },
+          "total_menciones": {
+            "type": "integer",
+            "title": "Total Menciones"
+          }
+        },
+        "type": "object",
+        "required": [
+          "habilidad",
+          "tipo",
+          "m0_menciones",
+          "m0_pct",
+          "m1_menciones",
+          "m1_pct",
+          "m5_menciones",
+          "m5_pct",
+          "delta_m1_m0",
+          "tendencia",
+          "total_menciones"
+        ],
+        "title": "HabilidadComparativaItem"
+      },
       "HabilidadReconocida": {
         "properties": {
           "habilidad": {
@@ -4096,6 +4833,38 @@
           "menciones"
         ],
         "title": "HabilidadReconocida"
+      },
+      "HabilidadesComparativaResponse": {
+        "properties": {
+          "comparativa": {
+            "items": {
+              "$ref": "#/components/schemas/HabilidadComparativaItem"
+            },
+            "type": "array",
+            "title": "Comparativa"
+          },
+          "totales_respuestas": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Totales Respuestas"
+          },
+          "totales_con_habilidad": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Totales Con Habilidad"
+          }
+        },
+        "type": "object",
+        "required": [
+          "comparativa",
+          "totales_respuestas",
+          "totales_con_habilidad"
+        ],
+        "title": "HabilidadesComparativaResponse"
       },
       "HabilidadesDemandadasResponse": {
         "properties": {
@@ -4190,6 +4959,24 @@
           "estado"
         ],
         "title": "HistorialCargaItem"
+      },
+      "ImportanciaFactorItem": {
+        "properties": {
+          "factor": {
+            "type": "string",
+            "title": "Factor"
+          },
+          "importancia": {
+            "type": "number",
+            "title": "Importancia"
+          }
+        },
+        "type": "object",
+        "required": [
+          "factor",
+          "importancia"
+        ],
+        "title": "ImportanciaFactorItem"
       },
       "KpisResponse": {
         "properties": {
@@ -4310,6 +5097,33 @@
           "usuario"
         ],
         "title": "LoginResponse"
+      },
+      "MatrizConfusionData": {
+        "properties": {
+          "clases": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Clases"
+          },
+          "matriz": {
+            "items": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Matriz"
+          }
+        },
+        "type": "object",
+        "required": [
+          "clases",
+          "matriz"
+        ],
+        "title": "MatrizConfusionData"
       },
       "MensajeResponse": {
         "properties": {
@@ -4439,6 +5253,152 @@
           "encuestas"
         ],
         "title": "PerfilEgresadoResponse"
+      },
+      "PrediccionEmpleabilidadResponse": {
+        "properties": {
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          },
+          "total_trayectorias": {
+            "type": "integer",
+            "title": "Total Trayectorias"
+          },
+          "precision_modelo": {
+            "type": "number",
+            "title": "Precision Modelo"
+          },
+          "f1_score": {
+            "type": "number",
+            "title": "F1 Score"
+          },
+          "programas_analizados": {
+            "type": "integer",
+            "title": "Programas Analizados"
+          },
+          "egresados_en_riesgo": {
+            "type": "integer",
+            "title": "Egresados En Riesgo"
+          },
+          "importancia_factores": {
+            "items": {
+              "$ref": "#/components/schemas/ImportanciaFactorItem"
+            },
+            "type": "array",
+            "title": "Importancia Factores"
+          },
+          "predicciones_programas": {
+            "items": {
+              "$ref": "#/components/schemas/PrediccionProgramaItem"
+            },
+            "type": "array",
+            "title": "Predicciones Programas"
+          },
+          "alertas_riesgo": {
+            "items": {
+              "$ref": "#/components/schemas/AlertaRiesgoItem"
+            },
+            "type": "array",
+            "title": "Alertas Riesgo"
+          },
+          "matriz_confusion": {
+            "$ref": "#/components/schemas/MatrizConfusionData"
+          },
+          "indicadores_robustez": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Indicadores Robustez"
+          },
+          "comparativa_algoritmos": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ComparativaAlgoritmoItem"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comparativa Algoritmos",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "estado",
+          "mensaje",
+          "total_trayectorias",
+          "precision_modelo",
+          "f1_score",
+          "programas_analizados",
+          "egresados_en_riesgo",
+          "importancia_factores",
+          "predicciones_programas",
+          "alertas_riesgo",
+          "matriz_confusion"
+        ],
+        "title": "PrediccionEmpleabilidadResponse"
+      },
+      "PrediccionProgramaItem": {
+        "properties": {
+          "programa": {
+            "type": "string",
+            "title": "Programa"
+          },
+          "total_egresados": {
+            "type": "integer",
+            "title": "Total Egresados"
+          },
+          "probabilidad_empleado": {
+            "type": "number",
+            "title": "Probabilidad Empleado"
+          },
+          "probabilidad_independiente": {
+            "type": "number",
+            "title": "Probabilidad Independiente"
+          },
+          "probabilidad_estudiante": {
+            "type": "number",
+            "title": "Probabilidad Estudiante"
+          },
+          "probabilidad_sin_empleo": {
+            "type": "number",
+            "title": "Probabilidad Sin Empleo"
+          },
+          "nivel_riesgo": {
+            "type": "string",
+            "title": "Nivel Riesgo"
+          },
+          "rango_salarial_estimado": {
+            "type": "string",
+            "title": "Rango Salarial Estimado"
+          }
+        },
+        "type": "object",
+        "required": [
+          "programa",
+          "total_egresados",
+          "probabilidad_empleado",
+          "probabilidad_independiente",
+          "probabilidad_estudiante",
+          "probabilidad_sin_empleo",
+          "nivel_riesgo",
+          "rango_salarial_estimado"
+        ],
+        "title": "PrediccionProgramaItem"
       },
       "PublicacionCreate": {
         "properties": {
