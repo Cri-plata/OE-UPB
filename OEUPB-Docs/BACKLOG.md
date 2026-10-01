@@ -26,4 +26,4 @@
 
 ## Completadas recientemente
  
-- [x] **IA-01 — Modelo predictivo de empleabilidad.** Implementado y validado conforme a ADR-018 y RF-71 con `GradientBoostingClassifier`, validación cruzada estratificada, endpoint `/api/ia/prediccion-empleabilidad` y visualización institucional por programa en la vista de Analítica y alertas.
+- [x] **IA-01 — Modelo predictivo de empleabilidad.** Implementado y validado conforme a ADR-019 y RF-71 con `GradientBoostingClassifier`, validación cruzada estratificada, endpoint `/api/ia/prediccion-empleabilidad` y visualización institucional por programa en la vista de Analítica y alertas.

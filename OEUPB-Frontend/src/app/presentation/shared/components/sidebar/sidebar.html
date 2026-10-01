@@ -1,60 +1,141 @@
-<aside class="sidebar">
+<header class="mobile-header">
+  <div class="mobile-brand">
+    <img src="escudo-upb.png" alt="Escudo UPB" class="mobile-brand-logo">
+    <span>OEUPB</span>
+  </div>
+  <button type="button" class="menu-toggle-btn" (click)="openMobileMenu()" aria-label="Abrir menú de navegación" [attr.aria-expanded]="isMobileOpen">
+    <span class="menu-icon" aria-hidden="true"></span>
+  </button>
+</header>
+
+<div class="sidebar-backdrop" *ngIf="isMobileOpen" (click)="closeMobileMenu()" aria-label="Cerrar menú"></div>
+
+<aside class="sidebar" [class.collapsed]="isCollapsed" [class.mobile-open]="isMobileOpen">
+  <div class="sidebar-mobile-close">
+    <button type="button" class="sidebar-close-btn" (click)="closeMobileMenu()" aria-label="Cerrar menú">
+      <span class="close-icon" aria-hidden="true"></span>
+    </button>
+  </div>
+
   <div class="brand">
-    <div class="brand-mark">UPB</div>
+    <div class="brand-mark">
+      <img src="escudo-upb.png" alt="Escudo UPB" class="brand-logo">
+    </div>
     <h2 class="brand-title">OEUPB</h2>
+    <button type="button" class="sidebar-toggle-btn" (click)="toggleSidebar()" [attr.aria-label]="isCollapsed ? 'Expandir barra lateral' : 'Contraer barra lateral'" [attr.aria-expanded]="!isCollapsed" [title]="isCollapsed ? 'Expandir menú' : 'Contraer menú'">
+      <span class="toggle-icon" aria-hidden="true"></span>
+    </button>
   </div>
 
   <nav class="nav-menu">
     <!-- Los reportes actuales son privados de la sede y exclusivos del coordinador. -->
     <ng-container *ngIf="userRole === 'Coordinador_Sede'">
-      <a routerLink="/reporte" routerLinkActive="active" class="nav-item nav-reporte" title="Reporte general">
+      <a routerLink="/reporte" routerLinkActive="active" class="nav-item nav-reporte" title="Reporte general"
+        (click)="onNavClick()"
+        (mouseenter)="onItemMouseEnter($event, 'Reporte general')"
+        (mouseleave)="onItemMouseLeave()"
+        (focus)="onItemMouseEnter($event, 'Reporte general')"
+        (blur)="onItemMouseLeave()">
         <span class="nav-item-text">Reporte general</span>
       </a>
-      <a routerLink="/tendencias" routerLinkActive="active" class="nav-item nav-tendencias" title="Tendencias">
+      <a routerLink="/tendencias" routerLinkActive="active" class="nav-item nav-tendencias" title="Tendencias"
+        (click)="onNavClick()"
+        (mouseenter)="onItemMouseEnter($event, 'Tendencias')"
+        (mouseleave)="onItemMouseLeave()"
+        (focus)="onItemMouseEnter($event, 'Tendencias')"
+        (blur)="onItemMouseLeave()">
         <span class="nav-item-text">Tendencias</span>
       </a>
-      <a routerLink="/explorador" routerLinkActive="active" class="nav-item nav-explorador" title="Explorador de Datos">
+      <a routerLink="/explorador" routerLinkActive="active" class="nav-item nav-explorador" title="Explorador de Datos"
+        (click)="onNavClick()"
+        (mouseenter)="onItemMouseEnter($event, 'Explorador de Datos')"
+        (mouseleave)="onItemMouseLeave()"
+        (focus)="onItemMouseEnter($event, 'Explorador de Datos')"
+        (blur)="onItemMouseLeave()">
         <span class="nav-item-text">Explorador de Datos</span>
       </a>
-      <a routerLink="/analitica" routerLinkActive="active" class="nav-item nav-analitica" title="Analítica y alertas">
+      <a routerLink="/analitica" routerLinkActive="active" class="nav-item nav-analitica" title="Analítica y alertas"
+        (click)="onNavClick()"
+        (mouseenter)="onItemMouseEnter($event, 'Analítica y alertas')"
+        (mouseleave)="onItemMouseLeave()"
+        (focus)="onItemMouseEnter($event, 'Analítica y alertas')"
+        (blur)="onItemMouseLeave()">
         <span class="nav-item-text">Analítica y alertas</span>
       </a>
-      <a routerLink="/directorio" routerLinkActive="active" class="nav-item nav-directorio" title="Directorio">
+      <a routerLink="/directorio" routerLinkActive="active" class="nav-item nav-directorio" title="Directorio"
+        (click)="onNavClick()"
+        (mouseenter)="onItemMouseEnter($event, 'Directorio')"
+        (mouseleave)="onItemMouseLeave()"
+        (focus)="onItemMouseEnter($event, 'Directorio')"
+        (blur)="onItemMouseLeave()">
         <span class="nav-item-text">Directorio</span>
       </a>
-      <a routerLink="/habilidades" routerLinkActive="active" class="nav-item nav-habilidades" title="Co-relaciones">
+      <a routerLink="/habilidades" routerLinkActive="active" class="nav-item nav-habilidades" title="Co-relaciones"
+        (click)="onNavClick()"
+        (mouseenter)="onItemMouseEnter($event, 'Co-relaciones')"
+        (mouseleave)="onItemMouseLeave()"
+        (focus)="onItemMouseEnter($event, 'Co-relaciones')"
+        (blur)="onItemMouseLeave()">
         <span class="nav-item-text">Co-relaciones</span>
       </a>
     </ng-container>
 
     <a *ngIf="userRole === 'Coordinador_Sede' || userRole === 'Usuario_Consulta'"
-      routerLink="/publicaciones" routerLinkActive="active" class="nav-item nav-publicaciones" title="Gráficas publicadas">
+      routerLink="/publicaciones" routerLinkActive="active" class="nav-item nav-publicaciones" title="Gráficas publicadas"
+      (click)="onNavClick()"
+      (mouseenter)="onItemMouseEnter($event, 'Gráficas publicadas')"
+      (mouseleave)="onItemMouseLeave()"
+      (focus)="onItemMouseEnter($event, 'Gráficas publicadas')"
+      (blur)="onItemMouseLeave()">
       <span class="nav-item-text">Gráficas publicadas</span>
     </a>
 
     <!-- Solo visible para Coordinadores -->
     <ng-container *ngIf="userRole === 'Coordinador_Sede'">
-      <a routerLink="/carga" routerLinkActive="active" class="nav-item nav-carga" title="Cargar datos">
+      <a routerLink="/carga" routerLinkActive="active" class="nav-item nav-carga" title="Cargar datos"
+        (click)="onNavClick()"
+        (mouseenter)="onItemMouseEnter($event, 'Cargar datos')"
+        (mouseleave)="onItemMouseLeave()"
+        (focus)="onItemMouseEnter($event, 'Cargar datos')"
+        (blur)="onItemMouseLeave()">
         <span class="nav-item-text">Cargar datos</span>
       </a>
     </ng-container>
 
     <!-- Solo visible para Administradores CTIC -->
     <ng-container *ngIf="userRole === 'Admin_CTIC' || userRole === 'Coordinador_Sede'">
-      <a routerLink="/admin-usuarios" routerLinkActive="active" class="nav-item nav-usuarios" title="Administrar Usuarios">
+      <a routerLink="/admin-usuarios" routerLinkActive="active" class="nav-item nav-usuarios" title="Administrar Usuarios"
+        (click)="onNavClick()"
+        (mouseenter)="onItemMouseEnter($event, 'Administrar Usuarios')"
+        (mouseleave)="onItemMouseLeave()"
+        (focus)="onItemMouseEnter($event, 'Administrar Usuarios')"
+        (blur)="onItemMouseLeave()">
         <span class="nav-item-text">Administrar Usuarios</span>
       </a>
     </ng-container>
 
     <!-- Perfil General -->
-    <a routerLink="/mi-perfil" routerLinkActive="active" class="nav-item nav-perfil" title="Mi Perfil">
+    <a routerLink="/mi-perfil" routerLinkActive="active" class="nav-item nav-perfil" title="Mi Perfil"
+      (click)="onNavClick()"
+      (mouseenter)="onItemMouseEnter($event, 'Mi Perfil')"
+      (mouseleave)="onItemMouseLeave()"
+      (focus)="onItemMouseEnter($event, 'Mi Perfil')"
+      (blur)="onItemMouseLeave()">
       <span class="nav-item-text">Mi Perfil</span>
     </a>
   </nav>
 
   <div class="bottom-menu">
-    <button class="logout-btn" (click)="logout()" title="Cerrar Sesión">
+    <button class="logout-btn" (click)="onNavClick(); logout()" title="Cerrar Sesión"
+      (mouseenter)="onItemMouseEnter($event, 'Cerrar Sesión')"
+      (mouseleave)="onItemMouseLeave()"
+      (focus)="onItemMouseEnter($event, 'Cerrar Sesión')"
+      (blur)="onItemMouseLeave()">
       <span>Cerrar Sesión</span>
     </button>
+  </div>
+
+  <div *ngIf="isCollapsed && activeTooltip" class="sidebar-floating-tooltip" [style.top.px]="tooltipTop" [style.left.px]="tooltipLeft" role="tooltip">
+    {{ activeTooltip }}
   </div>
 </aside>

@@ -883,9 +883,10 @@
 
 .error-message {
   padding: var(--space-sm) var(--space-md);
-  background: rgba(186, 26, 26, 0.1);
+  background: rgba(186, 26, 26, 0.08);
   color: var(--danger);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(186, 26, 26, 0.2);
   margin-bottom: var(--space-md);
   font-size: 13px;
 }

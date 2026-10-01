@@ -7,29 +7,26 @@
           src="escudo-upb.png"
           alt="Escudo Universidad Pontificia Bolivariana"
         />
-        <div>
-          <span class="login-institution-badge">Universidad Pontificia Bolivariana</span>
-          <h1 class="login-brand-title">OE UPB</h1>
+        <div class="login-brand-headings">
+          <span class="login-institution-name">Universidad Pontificia Bolivariana</span>
+          <h1 class="login-brand-title">Observatorio de Egresados</h1>
+          <span class="login-brand-acronym">OEUPB</span>
         </div>
       </div>
       <div class="login-brand-body">
         <p>
-          Observatorio de Egresados para el seguimiento del impacto profesional,
-          trayectoria laboral y aseguramiento de la calidad académica.
+          Información para comprender las trayectorias de nuestros egresados y fortalecer la calidad académica.
         </p>
-        <div class="login-milestones">
-          <span>Momento 0</span> · <span>Momento 1</span> · <span>Momento 5</span>
-        </div>
       </div>
       <footer class="login-brand-footer">
-        <p>Acceso y aislamiento de datos gobernado estrictamente por sede institucional.</p>
+        <p>Acceso reservado a usuarios autorizados.</p>
       </footer>
     </aside>
 
     <article class="login-form-pane">
       <header class="login-form-header">
-        <h2>Acceso Institucional</h2>
-        <p>Ingresa tus credenciales asignadas para acceder a la plataforma.</p>
+        <h2>Acceso institucional</h2>
+        <p>Ingresa con las credenciales asignadas por la universidad.</p>
       </header>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
@@ -44,7 +41,7 @@
               formControlName="correo"
               placeholder="usuario@upb.edu.co"
               class="form-control"
-              autocomplete="email"
+              autocomplete="username"
               [class.is-invalid]="loginForm.get('correo')?.invalid && loginForm.get('correo')?.touched"
             />
           </div>
@@ -63,13 +60,27 @@
             <span class="input-icon lock" aria-hidden="true"></span>
             <input
               id="contrasena"
-              type="password"
+              [type]="mostrarContrasena ? 'text' : 'password'"
               formControlName="contrasena"
               placeholder="••••••••••••"
-              class="form-control"
+              class="form-control has-toggle"
               autocomplete="current-password"
               [class.is-invalid]="loginForm.get('contrasena')?.invalid && loginForm.get('contrasena')?.touched"
             />
+            <button
+              type="button"
+              class="btn-toggle-password"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="mostrarContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="mostrarContrasena"
+            >
+              <span
+                class="toggle-icon"
+                [class.eye]="!mostrarContrasena"
+                [class.eye-off]="mostrarContrasena"
+                aria-hidden="true"
+              ></span>
+            </button>
           </div>
           <div class="error-msg" *ngIf="loginForm.get('contrasena')?.hasError('required') && loginForm.get('contrasena')?.touched">
             La contraseña es obligatoria.
@@ -83,12 +94,12 @@
 
         <!-- Botón de Envío -->
         <button type="submit" class="btn-primary" [disabled]="isLoading">
-          {{ isLoading ? 'Procesando...' : 'Ingresar al Observatorio' }}
+          {{ isLoading ? 'Ingresando…' : 'Ingresar al observatorio' }}
         </button>
 
         <footer class="login-footer-links">
           <span class="login-security-notice">
-            Sistema protegido bajo políticas de seguridad y privacidad UPB
+            Acceso institucional protegido bajo directrices de privacidad y seguridad UPB
           </span>
         </footer>
       </form>

@@ -41,6 +41,10 @@
   margin: var(--space-sm) 0 0;
   color: var(--danger);
   font-size: 13px;
+  background: rgba(186, 26, 26, 0.08);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(186, 26, 26, 0.2);
 }
 
 .publication-card {
@@ -99,10 +103,12 @@
 
 .error-message {
   padding: var(--space-sm) var(--space-md);
-  background: rgba(186, 26, 26, 0.1);
+  background: rgba(186, 26, 26, 0.08);
   color: var(--danger);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(186, 26, 26, 0.2);
   grid-column: 1 / -1;
+  font-size: 13px;
 }
 
 @media (max-width: 767px) {

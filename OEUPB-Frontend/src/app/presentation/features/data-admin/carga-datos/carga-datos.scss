@@ -31,16 +31,16 @@
 .alert-box {
   display: flex;
   gap: var(--space-sm);
-  background: rgba(2, 136, 209, 0.1);
+  background: var(--info-bg);
   padding: var(--space-md);
   border-radius: var(--radius-md);
-  color: var(--info-text, var(--body));
+  color: var(--info-text);
   align-items: flex-start;
-  border: 1px solid rgba(2, 136, 209, 0.2);
+  border: 1px solid rgba(0, 86, 179, 0.2);
 
   svg {
     flex-shrink: 0;
-    color: var(--brand);
+    color: var(--info-text);
   }
 
   p {
@@ -77,7 +77,7 @@
   border: 2px dashed var(--control-border);
   border-radius: var(--radius-lg);
   background-color: var(--background);
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
   text-align: center;
 
   &:hover {
@@ -85,9 +85,14 @@
     background-color: rgba(227, 30, 36, 0.04);
   }
 
+  &:focus-within {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 2px rgba(227, 30, 36, 0.15);
+  }
+
   &.file-selected {
     border-color: var(--success);
-    background-color: rgba(46, 125, 50, 0.05);
+    background-color: rgba(19, 122, 71, 0.05);
     border-style: solid;
   }
 }
@@ -100,6 +105,12 @@
   opacity: 0;
   cursor: pointer;
   z-index: 10;
+
+  &:focus-visible + .file-label {
+    outline: 2px solid var(--brand);
+    outline-offset: -2px;
+    border-radius: inherit;
+  }
 }
 
 .file-label {
@@ -148,7 +159,7 @@
 .file-name {
   font-weight: 600;
   color: var(--heading);
-  background: white;
+  background: var(--surface);
   padding: 4px 12px;
   border-radius: var(--radius-full);
   border: 1px solid var(--border);
@@ -163,15 +174,15 @@
 
   .success {
     color: var(--success);
-    background: rgba(46, 125, 50, 0.1);
+    background: rgba(19, 122, 71, 0.08);
     padding: var(--space-md);
     border-radius: var(--radius-md);
-    border: 1px solid rgba(46, 125, 50, 0.2);
+    border: 1px solid rgba(19, 122, 71, 0.2);
   }
 
   .error {
     color: var(--danger);
-    background: rgba(186, 26, 26, 0.1);
+    background: rgba(186, 26, 26, 0.08);
     padding: var(--space-md);
     border-radius: var(--radius-md);
     border: 1px solid rgba(186, 26, 26, 0.2);

@@ -9,68 +9,70 @@
       </div>
     </header>
 
-    <div class="admin-grid">
+    <div class="admin-grid admin-layout">
       <!-- Formulario para crear coordinador -->
       <article class="card form-card">
         <h2 class="card-title">{{ usuarioEditandoId ? 'Editar usuario' : 'Crear nuevo usuario' }}</h2>
         <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
-          <div class="form-group">
-            <label>Nombre Completo</label>
-            <input type="text" formControlName="nombre" placeholder="Ej. Carlos Gómez" class="form-control">
-          </div>
-          
-          <div class="form-group">
-            <label>Correo Institucional</label>
-            <input type="email" formControlName="correo" placeholder="ejemplo@upb.edu.co" [readonly]="usuarioEditandoId !== null" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label>Rol del Usuario *</label>
-            <select formControlName="rol" class="form-control">
-              <option value="">Seleccione un rol...</option>
-              <option value="Coordinador_Sede" *ngIf="usuarioActual?.rol === 'Admin_CTIC'">Coordinador de Sede</option>
-              <option value="Usuario_Consulta" *ngIf="usuarioActual?.rol === 'Coordinador_Sede'">Usuario de consulta</option>
-            </select>
-          </div>
-
-          <div class="form-group" *ngIf="usuarioEditandoId === null">
-            <label>Número de documento *</label>
-            <input type="text" formControlName="numero_documento" placeholder="Cédula, CE o pasaporte" class="form-control">
-            <small class="form-help-text">En desarrollo se usa como credencial inicial; solo se almacena su hash.</small>
-          </div>
-
-          <ng-container *ngIf="usuarioActual?.rol === 'Coordinador_Sede'">
+          <div class="user-form-grid">
             <div class="form-group">
-              <label>Etiqueta informativa *</label>
-              <select formControlName="etiqueta" class="form-control">
-                <option value="">Seleccione una etiqueta...</option>
-                <option value="Rector">Rector</option>
-                <option value="Profesor">Profesor</option>
-                <option value="Administrativo">Administrativo</option>
+              <label for="user-nombre">Nombre Completo *</label>
+              <input id="user-nombre" type="text" formControlName="nombre" placeholder="Ej. Carlos Gómez" class="form-control">
+            </div>
+            
+            <div class="form-group">
+              <label for="user-correo">Correo Institucional *</label>
+              <input id="user-correo" type="email" formControlName="correo" placeholder="ejemplo@upb.edu.co" [readonly]="usuarioEditandoId !== null" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="user-rol">Rol del Usuario *</label>
+              <select id="user-rol" formControlName="rol" class="form-control">
+                <option value="">Seleccione un rol...</option>
+                <option value="Coordinador_Sede" *ngIf="usuarioActual?.rol === 'Admin_CTIC'">Coordinador de Sede</option>
+                <option value="Usuario_Consulta" *ngIf="usuarioActual?.rol === 'Coordinador_Sede'">Usuario de consulta</option>
               </select>
             </div>
-            <fieldset class="form-group" formGroupName="permisos">
-              <legend class="form-legend">Permisos</legend>
-              <label *ngFor="let permiso of permisosDisponibles" class="check-option">
-                <input type="checkbox" [formControlName]="permiso.id"> {{ permiso.nombre }}
-              </label>
-            </fieldset>
-            <div class="form-group">
-              <label>Programas autorizados</label>
-              <select formControlName="programas" multiple size="5" class="form-control">
-                <option *ngFor="let programa of programasDisponibles" [value]="programa">{{ programa }}</option>
-                <option *ngFor="let programa of programasSinDatos" [value]="programa">{{ programa }} (sin datos actuales)</option>
-              </select>
-              <small class="form-help-text">Solo aparecen programas observados en cargas de tu sede.</small>
-            </div>
-          </ng-container>
 
-          <div class="form-group" *ngIf="usuarioActual?.rol === 'Admin_CTIC'">
-            <label>Sede asignada *</label>
-            <select formControlName="sede_id" class="form-control">
-              <option value="">Seleccione una sede...</option>
-              <option *ngFor="let s of sedesDisponibles" [ngValue]="s.id">{{ s.nombre }}</option>
-            </select>
+            <div class="form-group" *ngIf="usuarioEditandoId === null">
+              <label for="user-doc">Número de documento *</label>
+              <input id="user-doc" type="text" formControlName="numero_documento" placeholder="Cédula, CE o pasaporte" class="form-control">
+              <small class="form-help-text">En desarrollo se usa como credencial inicial; solo se almacena su hash.</small>
+            </div>
+
+            <ng-container *ngIf="usuarioActual?.rol === 'Coordinador_Sede'">
+              <div class="form-group">
+                <label for="user-etiqueta">Etiqueta informativa *</label>
+                <select id="user-etiqueta" formControlName="etiqueta" class="form-control">
+                  <option value="">Seleccione una etiqueta...</option>
+                  <option value="Rector">Rector</option>
+                  <option value="Profesor">Profesor</option>
+                  <option value="Administrativo">Administrativo</option>
+                </select>
+              </div>
+              <fieldset class="form-group permisos-group" formGroupName="permisos">
+                <legend class="form-legend">Permisos</legend>
+                <label *ngFor="let permiso of permisosDisponibles" class="check-option">
+                  <input type="checkbox" [formControlName]="permiso.id"> {{ permiso.nombre }}
+                </label>
+              </fieldset>
+              <div class="form-group">
+                <label for="user-programas">Programas autorizados</label>
+                <select id="user-programas" formControlName="programas" multiple size="5" class="form-control">
+                  <option *ngFor="let programa of programasDisponibles" [value]="programa">{{ programa }}</option>
+                  <option *ngFor="let programa of programasSinDatos" [value]="programa">{{ programa }} (sin datos actuales)</option>
+                </select>
+                <small class="form-help-text">Solo aparecen programas observados en cargas de tu sede.</small>
+              </div>
+            </ng-container>
+
+            <div class="form-group" *ngIf="usuarioActual?.rol === 'Admin_CTIC'">
+              <label for="user-sede">Sede asignada *</label>
+              <select id="user-sede" formControlName="sede_id" class="form-control">
+                <option value="">Seleccione una sede...</option>
+                <option *ngFor="let s of sedesDisponibles" [ngValue]="s.id">{{ s.nombre }}</option>
+              </select>
+            </div>
           </div>
 
           <div class="form-actions">
@@ -82,8 +84,125 @@
 
       <!-- Lista de Usuarios -->
       <article class="card list-card">
-        <h2 class="card-title">Usuarios Activos</h2>
-        <div class="table-scroll">
+        <div class="list-card-header">
+          <h2 class="card-title">Usuarios Activos</h2>
+          <span class="badge info users-count" aria-live="polite">
+            {{ usuariosFiltrados.length }} {{ usuariosFiltrados.length === 1 ? 'usuario' : 'usuarios' }}
+          </span>
+        </div>
+
+        <!-- Barra de búsqueda y filtros -->
+        <div class="table-toolbar">
+          <div class="search-box">
+            <label for="search-users" class="sr-only">Buscar usuarios</label>
+            <div class="search-input-wrapper">
+              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input
+                id="search-users"
+                type="search"
+                class="form-control search-input"
+                placeholder="Buscar usuarios…"
+                [(ngModel)]="terminoBusqueda"
+                (input)="onBusquedaChange()"
+                aria-label="Buscar usuarios…"
+              >
+              <button
+                type="button"
+                class="btn-clear-search"
+                *ngIf="terminoBusqueda"
+                (click)="limpiarBusqueda()"
+                aria-label="Limpiar texto de búsqueda"
+                title="Limpiar búsqueda"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="filters-group">
+            <div class="filter-item" *ngIf="mostrarFiltroRol">
+              <label for="filter-rol" class="filter-label">Rol</label>
+              <select
+                id="filter-rol"
+                class="form-control filter-select"
+                [(ngModel)]="filtroRol"
+                (change)="aplicarFiltros()"
+                aria-label="Filtrar por rol"
+              >
+                <option value="">Todos los roles</option>
+                <option *ngFor="let rol of rolesDisponibles" [value]="rol">
+                  {{ rol === 'Coordinador_Sede' ? 'Coordinador de Sede' : (rol === 'Usuario_Consulta' ? 'Usuario de consulta' : rol) }}
+                </option>
+              </select>
+            </div>
+
+            <div class="filter-item">
+              <label for="filter-sede" class="filter-label">Sede</label>
+              <select
+                id="filter-sede"
+                class="form-control filter-select"
+                [(ngModel)]="filtroSede"
+                (change)="aplicarFiltros()"
+                aria-label="Filtrar por sede"
+              >
+                <option value="">Todas las sedes</option>
+                <option *ngFor="let s of sedesParaFiltro" [value]="s.id">{{ s.nombre }}</option>
+              </select>
+            </div>
+
+            <div class="filter-item">
+              <label for="filter-alcance" class="filter-label">Alcance</label>
+              <select
+                id="filter-alcance"
+                class="form-control filter-select"
+                [(ngModel)]="filtroAlcance"
+                (change)="aplicarFiltros()"
+                aria-label="Filtrar por alcance"
+              >
+                <option value="">Todos los alcances</option>
+                <option *ngFor="let alcance of alcancesDisponibles" [value]="alcance">{{ alcance }}</option>
+              </select>
+            </div>
+
+            <div class="filter-item">
+              <label for="filter-estado" class="filter-label">Estado</label>
+              <select
+                id="filter-estado"
+                class="form-control filter-select"
+                [(ngModel)]="filtroEstado"
+                (change)="aplicarFiltros()"
+                aria-label="Filtrar por estado"
+              >
+                <option value="">Todos los estados</option>
+                <option value="activo">Activa</option>
+                <option value="inactivo">Inactiva</option>
+              </select>
+            </div>
+
+            <button
+              type="button"
+              class="btn-secondary btn-clear-filters"
+              *ngIf="hayFiltrosActivos"
+              (click)="limpiarFiltros()"
+              aria-label="Limpiar búsqueda y filtros"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              Limpiar filtros
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabla de usuarios -->
+        <div class="table-scroll" *ngIf="usuariosFiltrados.length > 0">
           <table class="modern-table users-table">
             <thead>
               <tr>
@@ -93,27 +212,42 @@
                 <th>Sede</th>
                 <th>Alcance</th>
                 <th>Estado</th>
-                <th>Acciones</th>
+                <th class="col-actions">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let u of usuarios">
+              <tr *ngFor="let u of usuariosFiltrados">
                 <td class="cell-primary">{{ u.nombre }}</td>
                 <td>{{ u.correo }}</td>
                 <td><span class="badge">{{ u.rol }}</span></td>
                 <td>{{ nombreSede(u.sede_id) }}</td>
                 <td>{{ u.etiqueta || '—' }}<br><small class="cell-subtext">{{ u.programas.join(', ') || 'Sin programas' }}</small><small class="cell-subtext sin-datos" *ngIf="u.programas_sin_datos?.length"><br>Sin datos actuales: {{ u.programas_sin_datos?.join(', ') }}</small></td>
                 <td><span class="badge" [class.success]="u.activo">{{ u.activo ? 'Activa' : 'Inactiva' }}</span></td>
-                <td>
+                <td class="cell-actions">
                   <div class="table-actions">
                     <button class="btn-secondary table-action" (click)="editarUsuario(u)">Editar</button>
                     <button class="btn-secondary table-action" (click)="regenerarCredencial(u)" [disabled]="!u.activo">Recuperar acceso</button>
-                    <button class="btn-danger table-action" (click)="cambiarEstado(u)">{{ u.activo ? 'Desactivar' : 'Reactivar' }}</button>
+                    <button [class.btn-danger]="u.activo" [class.btn-primary]="!u.activo" class="table-action" (click)="cambiarEstado(u)">{{ u.activo ? 'Desactivar' : 'Reactivar' }}</button>
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Estado sin coincidencias -->
+        <div class="empty-state" *ngIf="usuariosFiltrados.length === 0">
+          <div class="empty-state-content">
+            <svg class="empty-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+            </svg>
+            <p class="empty-state-message">No se encontraron usuarios con estos criterios</p>
+            <button type="button" class="btn-secondary btn-reset-filters" (click)="limpiarFiltros()">
+              Restablecer búsqueda y filtros
+            </button>
+          </div>
         </div>
       </article>
     </div>

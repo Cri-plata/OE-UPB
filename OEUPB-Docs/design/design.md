@@ -16,12 +16,12 @@ colors:
   outline: '#926f6b'
   outline-variant: '#e7bdb8'
   surface-tint: '#c00014'
-  primary: '#ba0013'
+  primary: '#e31e24'
   on-primary: '#ffffff'
   primary-container: '#e31e24'
   on-primary-container: '#fffafa'
   inverse-primary: '#ffb4ab'
-  secondary: '#785a00'
+  secondary: '#ffc20e'
   on-secondary: '#ffffff'
   secondary-container: '#fdc008'
   on-secondary-container: '#6c5000'
@@ -45,7 +45,7 @@ colors:
   tertiary-fixed-dim: '#cbc5c5'
   on-tertiary-fixed: '#1d1b1b'
   on-tertiary-fixed-variant: '#494646'
-  background: '#f9f9f7'
+  background: '#f4f4f2'
   on-background: '#1a1c1b'
   surface-variant: '#e2e3e1'
   panel-dark-surface: '#1A1818'
@@ -132,9 +132,9 @@ typography:
 rounded:
   sm: 0.25rem
   DEFAULT: 0.5rem
-  md: 0.75rem
-  lg: 1rem
-  xl: 1.5rem
+  md: 0.5rem
+  lg: 0.75rem
+  xl: 1.0rem
   full: 9999px
 spacing:
   gutter: 1rem
@@ -204,7 +204,7 @@ The typography leverages **Plus Jakarta Sans** consistently across navigation, d
 The layout is structured around an asymmetrical split architecture with a persistent left navigation rail and a fluid analytical work area.
 
 ### Viewport Structure
-- **Left Navigation Sidebar (`#1A1818`):** Fixed width of `280px` on desktop viewports (`>= 1280px`), collapsing to an icon-rail format (`72px`) on tablet screens (`768px - 1279px`), and transforming into an off-canvas drawer on mobile (`< 768px`).
+- **Left Navigation Sidebar (`#1A1818`):** Base width of `280px` on desktop viewports (`>= 1280px`), supporting interactive collapse to an icon-rail format (`72px`) via a visible toggle button (`.sidebar-toggle-btn`), displaying floating flyout tooltips (`.sidebar-floating-tooltip`) on icon hover, synchronizing smooth transitions with the workspace canvas margin, and persisting state in `localStorage`. Automatically collapses to an icon-rail format (`72px`) on tablet screens (`768px - 1279px`), and transforms into an off-canvas drawer on mobile (`< 768px`). The brand lockup incorporates the official UPB institutional shield (`escudo-upb.png`) centered inside `.brand-mark` (`.brand-logo`) across all screens.
 - **Main Workspace Canvas (`#F4F4F2`):** Spans the remaining viewport width, hosting an adaptable 12-column grid system with `gutter-lg` (`1.5rem`) and `margin-lg` (`2rem`) padding.
 - **Rhythm & Padding:** Component interiors follow an 8px modular cadence (`space-xs` = 4px, `space-sm` = 8px, `space-md` = 12px, `space-lg` = 20px, `space-xl` = 32px). Sidebar navigation rows maintain a compact 40px height with `space-sm` vertical spacing.
 
@@ -270,10 +270,24 @@ The design system enforces a **Rounded** shape language (`roundedness: 2`, base 
 
 ## Page Composition
 
-- Every authenticated desktop screen uses the 280px dark sidebar and a `#F4F4F2` workspace. Page content uses a maximum readable width while charts and tables may span the available canvas.
+- Every authenticated desktop screen uses the dark sidebar (expandable to 280px or collapsible to 72px icon rail with floating tooltips and toggle button) and a `#F4F4F2` workspace. Page content uses a maximum readable width while charts and tables may span the available canvas.
 - Page headers contain one `headline-lg` title, optional body text and only the actions that affect the entire page. Local actions remain inside their card or table.
 - Filters precede the affected result and use the same card plane, spacing rhythm and 40px controls defined above.
-- Authentication screens omit the sidebar and center a single card on the neutral canvas.
+- Authentication screens omit the sidebar and center a single dual-zone card (`width: min(880px, 100%)`) over a Split Dual-Zone architectural canvas: a continuous 105° diagonal split (180° horizontal split on mobile viewports) separating the dark institutional zone (`var(--navigation)` `#1A1818`) from the daylight workspace zone (`var(--background)` `#F4F4F2`), bridged by an attenuated seam line and discrete low-intensity atmospheric brand halos (`var(--brand)` at 7% and `var(--warning)` at 5%, radius 35%) to ensure maximum prominence for the login form.
+  - **Card Construction:** Seamless perimeter without outer border (`border: none`), corner radius `var(--radius-lg)` (12px), and refined Level 1/2 shadow elevation (`box-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.22), 0 8px 20px -4px rgba(0, 0, 0, 0.12)`).
+  - **Institutional Dark Panel Hierarchy:**
+    - Secondary institution label: "Universidad Pontificia Bolivariana" (discreet 13px text in `var(--navigation-text)` or `#A1A1AA`, weight 500; without badge container, border, or red background).
+    - Primary title: "Observatorio de Egresados" (22–24px, weight 700).
+    - Supporting acronym: "OEUPB" (discreet 12px label, weight 600, color `#E4E4E7`).
+    - Narrative description: "Información para comprender las trayectorias de nuestros egresados y fortalecer la calidad académica" (14px, muted white text). Milestone tags (Momento 0, 1, 5) are eliminated.
+    - Footer notice: "Acceso reservado a usuarios autorizados" (12px, subtle caption).
+  - **Form Panel Construction:**
+    - Section header: title "Acceso institucional" (`headline-sm`, 20–22px, weight 700) and descriptive caption "Ingresa con las credenciales asignadas por la universidad" (13–14px, `var(--muted)`).
+    - Field controls: "Correo institucional" (`type="email"`, `autocomplete="username"`) and "Contraseña" (`type="password"`, `autocomplete="current-password"`), both with 42px left-inset Lucide icons (`mail` and `lock`).
+    - Password visibility toggle: interactive button (`.btn-toggle-password`) aligned to the right inside the password input container, rendering Lucide `eye` or `eye-off` with visible 2px primary focus ring and accessible label (`aria-label="Mostrar contraseña"` / `"Ocultar contraseña"`). The input enforces right padding (`padding-right: 44px`) to prevent text overlap.
+    - Primary action: submit button labeled "Ingresar al observatorio" (loading state: "Ingresando…") maintaining consistent touch target (`min-height: 42px; height: 42px;`).
+    - Support and help area: contextual contact guidance without placeholder hashes (`#`).
+  - **Mobile Adaptation (< 768 px):** The card stacks vertically with a compact institutional header (UPB shield scaled to 36×44px, institutional and title texts aligned horizontally, extensive narrative collapsed) ensuring instant visibility of the credential inputs and comfortable 320 px viewport containment without initial scrolling.
 
 ## Interaction States
 
