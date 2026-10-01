@@ -1,6 +1,6 @@
 # ADR-009 — Carga auditable y gobierno de datos
 
-**Estado:** Aceptado. Los puntos 4 y 5 fueron reemplazados por [ADR-014](014-alcance-identidad-egresado.md), el punto 8 fue precisado por [ADR-015](015-recalculo-publicaciones-umbral.md), y el punto 9 fue resuelto e implementado por [ADR-018](018-modelo-predictivo-empleabilidad.md).
+**Estado:** Aceptado. Los puntos 4 y 5 fueron reemplazados por [ADR-014](014-alcance-identidad-egresado.md), el punto 8 fue precisado por [ADR-015](015-recalculo-publicaciones-umbral.md), y el punto 9 fue resuelto e implementado por [ADR-019](019-modelo-predictivo-empleabilidad.md).
 
 **Fecha de registro:** 2026-09-23
 

@@ -66,7 +66,7 @@
 
 - **Actor:** Coordinador de Sede.
 - **Flujo implementado:** seleccionar los datos de la sede → anonimizar respuestas abiertas localmente → clasificar competencias y reglas de asociación de mercado → entrenar y evaluar modelo predictivo supervisado (Gradient Boosting) con validación cruzada estratificada → mostrar proyecciones y semáforo de riesgo por programa.
-- **Implementación:** clasificación de habilidades, reglas de asociación y modelo predictivo supervisado (RF-71) verificados conforme a ADR-018 y plan aprobado.
+- **Implementación:** clasificación de habilidades, reglas de asociación y modelo predictivo supervisado (RF-71) verificados conforme a ADR-019 y plan aprobado.
 
 ## CU-11 — Configurar usuario de consulta
 
