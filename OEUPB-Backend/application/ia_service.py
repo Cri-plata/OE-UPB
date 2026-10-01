@@ -13,6 +13,7 @@ Restricciones:
 
 import unicodedata
 import re
+from functools import lru_cache
 from typing import Dict, List, Set, Tuple, Optional
 from collections import Counter
 
@@ -52,12 +53,14 @@ _STOPWORDS_ES = {
 _nlp = None
 
 def _get_nlp():
-    """Carga el modelo de spaCy en español de forma lazy (solo la primera vez)."""
+    """Carga el modelo de spaCy en español de forma lazy (solo la primera vez).
+    Desactiva 'parser' y 'ner' para acelerar drásticamente la tokenización y lematización.
+    """
     global _nlp
     if _nlp is None:
         if spacy is not None:
             try:
-                _nlp = spacy.load("es_core_news_md")
+                _nlp = spacy.load("es_core_news_md", disable=["parser", "ner"])
             except Exception:
                 _nlp = False
         else:
@@ -74,44 +77,50 @@ def _quitar_tildes(texto: str) -> str:
     return "".join(c for c in texto if unicodedata.category(c) != "Mn")
 
 
-def preprocesar_texto(texto: str) -> str:
+@lru_cache(maxsize=16384)
+def _preprocesar_dual(texto: str) -> Tuple[str, str]:
     """
-    Pipeline de limpieza y normalización de texto libre de encuestas.
-
-    1. Tokenización morfosintáctica con spaCy (es_core_news_md)
-    2. Filtro de stopwords, puntuación, espacios, números (like_num) y tokens <= 1 char
-    3. Nombres propios (PROPN): se preserva token.text.lower() sin lematizar
-       (evita sobrelematización de términos técnicos en inglés: Kubernetes → kubernetes, no kubernet)
-    4. Resto de tokens: lematización estándar (lemma_.lower())
-    5. Remoción de tildes para matching consistente
+    Pipeline unificado de preprocesamiento en UNA SOLA PASADA.
+    Genera simultáneamente la forma lematizada y la forma cruda normalizada.
+    Memoizado con @lru_cache para responder en 0 ms ante respuestas repetidas.
     """
     if not texto or not isinstance(texto, str):
-        return ""
+        return "", ""
+
+    texto_strip = texto.strip()
+    if not texto_strip:
+        return "", ""
 
     nlp = _get_nlp()
     if nlp is not None:
-        doc = nlp(texto.strip())
-        tokens = []
+        doc = nlp(texto_strip)
+        tokens_lema = []
+        tokens_crudo = []
 
         for token in doc:
             if token.is_stop or token.is_punct or token.is_space or token.like_num or len(token.text.strip()) <= 1:
                 continue
 
-            # Regla PROPN: preservar texto original en minúsculas sin lematizar
+            # Forma cruda: text.lower() sin tildes ni caracteres extraños
+            val_crudo = _quitar_tildes(token.text.lower())
+            val_crudo = re.sub(r"[^a-zA-Z0-9]", "", val_crudo)
+
+            # Forma lematizada: PROPN preserva original; otros usan lemma_.lower()
             if token.pos_ == "PROPN":
-                valor = token.text.lower()
+                val_lema = val_crudo
             else:
-                valor = token.lemma_.lower()
+                val_lema = _quitar_tildes(token.lemma_.lower())
+                val_lema = re.sub(r"[^a-zA-Z0-9]", "", val_lema)
 
-            valor = _quitar_tildes(valor)
-            valor = re.sub(r"[^a-zA-Z0-9]", "", valor)
+            if val_crudo and len(val_crudo) > 1 and not val_crudo.isdigit():
+                tokens_crudo.append(val_crudo)
 
-            if valor and len(valor) > 1 and not valor.isdigit():
-                tokens.append(valor)
+            if val_lema and len(val_lema) > 1 and not val_lema.isdigit():
+                tokens_lema.append(val_lema)
 
-        return " ".join(tokens)
+        return " ".join(tokens_lema), " ".join(tokens_crudo)
     else:
-        palabras = re.findall(r"\b[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9]+\b", texto)
+        palabras = re.findall(r"\b[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9]+\b", texto_strip)
         tokens = []
         for p in palabras:
             p_limpia = _quitar_tildes(p.lower())
@@ -119,52 +128,24 @@ def preprocesar_texto(texto: str) -> str:
             if p_limpia in _STOPWORDS_ES or p_limpia.isdigit() or len(p_limpia) <= 1:
                 continue
             tokens.append(p_limpia)
-        return " ".join(tokens)
+        res = " ".join(tokens)
+        return res, res
+
+
+def preprocesar_texto(texto: str) -> str:
+    """
+    Pipeline de limpieza y normalización de texto libre de encuestas.
+    (Versión lematizada estándar).
+    """
+    return _preprocesar_dual(texto)[0]
 
 
 def _preprocesar_crudo(texto: str) -> str:
     """
     Versión sin lematización del preprocesamiento (solo lowercase + quitar tildes).
-
-    Genera la forma "cruda normalizada" del texto para matching doble-forma.
-    Se aplica el mismo filtrado de stopwords y puntuación que preprocesar_texto(),
-    pero usando token.text.lower() en vez de token.lemma_ para TODOS los tokens.
-
-    Esto cubre los casos donde es_core_news_md asigna POS incorrecto en
-    respuestas fragmentadas (palabras sueltas, listas por comas, fragmentos
-    sin contexto sintáctico), produciendo lemas incorrectos.
+    Genera la forma 'cruda normalizada' para matching doble-forma.
     """
-    if not texto or not isinstance(texto, str):
-        return ""
-
-    nlp = _get_nlp()
-    if nlp is not None:
-        doc = nlp(texto.strip())
-        tokens = []
-
-        for token in doc:
-            if token.is_stop or token.is_punct or token.is_space or token.like_num or len(token.text.strip()) <= 1:
-                continue
-
-            # Siempre usar text.lower(), nunca lemma_
-            valor = token.text.lower()
-            valor = _quitar_tildes(valor)
-            valor = re.sub(r"[^a-zA-Z0-9]", "", valor)
-
-            if valor and len(valor) > 1 and not valor.isdigit():
-                tokens.append(valor)
-
-        return " ".join(tokens)
-    else:
-        palabras = re.findall(r"\b[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9]+\b", texto)
-        tokens = []
-        for p in palabras:
-            p_limpia = _quitar_tildes(p.lower())
-            p_limpia = re.sub(r"[^a-zA-Z0-9]", "", p_limpia)
-            if p_limpia in _STOPWORDS_ES or p_limpia.isdigit() or len(p_limpia) <= 1:
-                continue
-            tokens.append(p_limpia)
-        return " ".join(tokens)
+    return _preprocesar_dual(texto)[1]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -263,6 +244,50 @@ TAXONOMIA_HABILIDADES_BRUTA: Dict[str, Dict] = {
     "Marketing y ventas": {
         "tipo": "dura",
         "variantes": ["marketing digital", "estrategias de venta", "ventas"]
+    },
+    "Programación y desarrollo": {
+        "tipo": "dura",
+        "variantes": ["programación", "desarrollo de software", "python", "java", "javascript", "código", "desarrollo web", "backend", "frontend"]
+    },
+    "Bases de datos y SQL": {
+        "tipo": "dura",
+        "variantes": ["bases de datos", "sql", "postgresql", "mysql", "modelado de datos", "consultas sql", "oracle"]
+    },
+    "Contabilidad y normas NIIF": {
+        "tipo": "dura",
+        "variantes": ["contabilidad", "normas niif", "tributaria", "declaración de renta", "auditoría contable", "revisoría fiscal"]
+    },
+    "Diseño gráfico y multimedia": {
+        "tipo": "dura",
+        "variantes": ["diseño gráfico", "illustrator", "photoshop", "edición de video", "diseño ui", "diseño ux", "multimedia"]
+    },
+    "Machine Learning e IA": {
+        "tipo": "dura",
+        "variantes": ["machine learning", "aprendizaje automático", "inteligencia artificial", "modelos predictivos", "deep learning", "nlp"]
+    },
+    "Redes y telecomunicaciones": {
+        "tipo": "dura",
+        "variantes": ["redes de computadores", "telecomunicaciones", "infraestructura de redes", "protocolos de comunicación", "enrutamiento"]
+    },
+    "Ciberseguridad y seguridad de la información": {
+        "tipo": "dura",
+        "variantes": ["ciberseguridad", "seguridad informática", "seguridad de la información", "hacking ético", "gestión de vulnerabilidades"]
+    },
+    "Arquitectura de software y cloud": {
+        "tipo": "dura",
+        "variantes": ["computación en la nube", "cloud computing", "aws", "azure", "docker", "microservicios", "arquitectura de software"]
+    },
+    "Primeros auxilios y seguridad en el trabajo": {
+        "tipo": "dura",
+        "variantes": ["primeros auxilios", "seguridad y salud en el trabajo", "sst", "salud ocupacional", "prevención de riesgos"]
+    },
+    "Investigación y metodología científica": {
+        "tipo": "dura",
+        "variantes": ["investigación científica", "metodología de la investigación", "redacción de artículos científicos", "revisión bibliográfica"]
+    },
+    "Automatización y optimización de procesos": {
+        "tipo": "dura",
+        "variantes": ["automatización de procesos", "optimización de procesos", "mejora continua", "lean", "diagramación de procesos"]
     },
 }
 
@@ -502,9 +527,8 @@ def analizar_habilidades_demandadas(
     respuestas_con_habilidad = 0
 
     for texto_crudo in textos_respuestas:
-        # 1. Preprocesar con AMBAS formas (doble-forma en texto entrante)
-        texto_lema = preprocesar_texto(texto_crudo)      # Con lematización
-        texto_crudo_norm = _preprocesar_crudo(texto_crudo)  # Sin lematización
+        # 1. Preprocesar con AMBAS formas (single-pass memoizado)
+        texto_lema, texto_crudo_norm = _preprocesar_dual(texto_crudo)
 
         if not texto_lema and not texto_crudo_norm:
             textos_residuales.append("")
@@ -563,21 +587,26 @@ def analizar_habilidades_demandadas(
 # ─────────────────────────────────────────────────────────────────────────────
 # 6. ANÁLISIS DE REGLAS DE ASOCIACIÓN (Market Basket Analysis)
 # ─────────────────────────────────────────────────────────────────────────────
-def extraer_habilidades_por_respuesta(texto_crudo: str) -> Set[str]:
-    """
-    Extrae el conjunto de habilidades únicas detectadas en una respuesta abierta
-    utilizando el pipeline de doble-forma (lematizada + cruda).
-    """
+@lru_cache(maxsize=16384)
+def _extraer_habilidades_cached(texto_crudo: str) -> Tuple[str, ...]:
+    """Extracción memoizada de habilidades por respuesta individual."""
     if not texto_crudo or not isinstance(texto_crudo, str):
-        return set()
+        return ()
 
-    texto_lema = preprocesar_texto(texto_crudo)
-    texto_crudo_norm = _preprocesar_crudo(texto_crudo)
+    texto_lema, texto_crudo_norm = _preprocesar_dual(texto_crudo)
 
     habs_lema = _extraer_habilidades_y_residual(texto_lema)[0] if texto_lema else set()
     habs_crudo = _extraer_habilidades_y_residual(texto_crudo_norm)[0] if texto_crudo_norm else set()
 
-    return habs_lema | habs_crudo
+    return tuple(sorted(habs_lema | habs_crudo))
+
+
+def extraer_habilidades_por_respuesta(texto_crudo: str) -> Set[str]:
+    """
+    Extrae el conjunto de habilidades únicas detectadas en una respuesta abierta
+    utilizando el pipeline de doble-forma (lematizada + cruda) con memoización LRU.
+    """
+    return set(_extraer_habilidades_cached(texto_crudo))
 
 
 # Alias de compatibilidad
@@ -740,3 +769,226 @@ def generar_reglas_asociacion(
 
 # Alias de compatibilidad
 calcular_reglas_asociacion = generar_reglas_asociacion
+
+
+def comparar_habilidades_temporales(
+    textos_por_momento: Dict[int, List[str]],
+    top_n: int = 25,
+) -> Dict[str, Any]:
+    """
+    Compara longitudinalmente la frecuencia de habilidades demandadas entre
+    los momentos de medición (M0: grado, M1: 1 año, M5: 5 años). (IA-06)
+
+    Calcula menciones absolutas, porcentajes relativos por momento y deltas
+    para clasificar la tendencia: 'crece', 'decrece', 'estable', 'emergente_en_m1', 'emergente_en_m5'.
+    """
+    momentos = [0, 1, 5]
+    conteos_por_momento: Dict[int, Counter] = {}
+    totales_respuestas: Dict[int, int] = {}
+    totales_con_habilidad: Dict[int, int] = {}
+
+    for m in momentos:
+        textos = textos_por_momento.get(m, [])
+        totales_respuestas[m] = len(textos)
+        counter = Counter()
+        con_hab = 0
+
+        for t in textos:
+            habs = extraer_habilidades_por_respuesta(t)
+            if habs:
+                con_hab += 1
+                for h in set(habs):  # conteo binario por respuesta
+                    counter[h] += 1
+
+        conteos_por_momento[m] = counter
+        totales_con_habilidad[m] = con_hab
+
+    # Unir todas las habilidades detectadas en al menos un momento
+    todas_habs: Set[str] = set()
+    for m in momentos:
+        todas_habs.update(conteos_por_momento[m].keys())
+
+    _, tipos_hab, _ = _asegurar_taxonomia()
+
+    filas = []
+    for h in todas_habs:
+        m0_count = conteos_por_momento[0].get(h, 0)
+        m1_count = conteos_por_momento[1].get(h, 0)
+        m5_count = conteos_por_momento[5].get(h, 0)
+
+        tot_m0 = totales_con_habilidad[0] if totales_con_habilidad[0] > 0 else 1
+        tot_m1 = totales_con_habilidad[1] if totales_con_habilidad[1] > 0 else 1
+        tot_m5 = totales_con_habilidad[5] if totales_con_habilidad[5] > 0 else 1
+
+        pct_m0 = round((m0_count / tot_m0) * 100.0, 1) if totales_con_habilidad[0] > 0 else 0.0
+        pct_m1 = round((m1_count / tot_m1) * 100.0, 1) if totales_con_habilidad[1] > 0 else 0.0
+        pct_m5 = round((m5_count / tot_m5) * 100.0, 1) if totales_con_habilidad[5] > 0 else 0.0
+
+        delta_m1_m0 = round(pct_m1 - pct_m0, 1)
+
+        # Determinar tendencia
+        if m0_count == 0 and m1_count > 0:
+            tendencia = "emergente_en_m1"
+        elif m0_count == 0 and m1_count == 0 and m5_count > 0:
+            tendencia = "emergente_en_m5"
+        elif delta_m1_m0 >= 4.0:
+            tendencia = "crece"
+        elif delta_m1_m0 <= -4.0:
+            tendencia = "decrece"
+        else:
+            tendencia = "estable"
+
+        filas.append({
+            "habilidad": h,
+            "tipo": tipos_hab.get(h, "blanda"),
+            "m0_menciones": m0_count,
+            "m0_pct": pct_m0,
+            "m1_menciones": m1_count,
+            "m1_pct": pct_m1,
+            "m5_menciones": m5_count,
+            "m5_pct": pct_m5,
+            "delta_m1_m0": delta_m1_m0,
+            "tendencia": tendencia,
+            "total_menciones": m0_count + m1_count + m5_count,
+        })
+
+    # Ordenar por total de menciones y limitar al top_n
+    filas.sort(key=lambda x: (x["total_menciones"], x["m1_menciones"]), reverse=True)
+    comparativa = filas[:top_n]
+
+    return {
+        "comparativa": comparativa,
+        "totales_respuestas": totales_respuestas,
+        "totales_con_habilidad": totales_con_habilidad,
+    }
+
+
+def generar_excel_habilidades(
+    habilidades_data: Dict[str, Any],
+    reglas_data: Dict[str, Any],
+    comparativa_data: Optional[Dict[str, Any]] = None,
+) -> "io.BytesIO":
+    """
+    Genera un archivo Excel (.xlsx) estructurado (IA-07):
+      1. Habilidades Reconocidas
+      2. Reglas de Asociación
+      3. Candidatas Emergentes (TF-IDF)
+      4. Comparativa Temporal M0-M1-M5 (si se suministra)
+    Aplica cabecera institucional y anchos de columna automáticos.
+    """
+    import io
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+
+    wb = openpyxl.Workbook()
+
+    header_fill = PatternFill(start_color="1A1818", end_color="1A1818", fill_type="solid")
+    header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+    border_thin = Border(
+        left=Side(style="thin", color="E2E3E1"),
+        right=Side(style="thin", color="E2E3E1"),
+        top=Side(style="thin", color="E2E3E1"),
+        bottom=Side(style="thin", color="E2E3E1"),
+    )
+
+    # ── HOJA 1: Habilidades Reconocidas ──
+    ws1 = wb.active
+    ws1.title = "Habilidades Reconocidas"
+    headers1 = ["Habilidad Canónica", "Tipo", "Menciones"]
+    ws1.append(headers1)
+
+    for h in habilidades_data.get("habilidades_reconocidas", []):
+        ws1.append([h["habilidad"], h["tipo"].capitalize(), h["menciones"]])
+
+    # ── HOJA 2: Reglas de Asociación ──
+    ws2 = wb.create_sheet(title="Reglas de Asociación")
+    headers2 = [
+        "Si Menciona (Antecedente)",
+        "También Menciona (Consecuente)",
+        "Ocurrencias",
+        "Soporte",
+        "Confianza",
+        "Lift",
+    ]
+    ws2.append(headers2)
+
+    for r in reglas_data.get("reglas", []):
+        ws2.append([
+            r["si_menciona"],
+            r["tambien_menciona"],
+            r["ocurrencias"],
+            f"{round(r['soporte'] * 100, 1)}%",
+            f"{round(r['confianza'] * 100, 1)}%",
+            round(r["lift"], 2),
+        ])
+
+    # ── HOJA 3: Candidatas Emergentes ──
+    ws3 = wb.create_sheet(title="Candidatas Emergentes")
+    headers3 = ["Término / Bigrama Emergente", "Score TF-IDF", "Frecuencia en Documentos"]
+    ws3.append(headers3)
+
+    for c in habilidades_data.get("candidatas_emergentes", []):
+        ws3.append([
+            c["termino"],
+            round(c["score_tfidf"], 4),
+            c["frecuencia_documentos"],
+        ])
+
+    sheets_to_style = [ws1, ws2, ws3]
+
+    # ── HOJA 4: Comparativa Temporal (Opcional) ──
+    if comparativa_data and comparativa_data.get("comparativa"):
+        ws4 = wb.create_sheet(title="Comparativa Temporal M0-M1-M5")
+        headers4 = [
+            "Habilidad Canónica",
+            "Tipo",
+            "Total Menciones",
+            "M0 Menciones",
+            "% M0",
+            "M1 Menciones",
+            "% M1",
+            "M5 Menciones",
+            "% M5",
+            "Delta M1-M0 (pp)",
+            "Tendencia",
+        ]
+        ws4.append(headers4)
+
+        for row in comparativa_data.get("comparativa", []):
+            ws4.append([
+                row.get("habilidad", ""),
+                str(row.get("tipo", "")).capitalize(),
+                row.get("total_menciones", 0),
+                row.get("m0_menciones", 0),
+                f"{row.get('m0_porcentaje', 0.0)}%",
+                row.get("m1_menciones", 0),
+                f"{row.get('m1_porcentaje', 0.0)}%",
+                row.get("m5_menciones", 0),
+                f"{row.get('m5_porcentaje', 0.0)}%",
+                f"{row.get('delta_m1_m0', 0.0)} pp",
+                row.get("tendencia", "").replace("_", " ").title(),
+            ])
+        sheets_to_style.append(ws4)
+
+    # Estilizar hojas y autoajustar anchos
+    for ws in sheets_to_style:
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        for row in ws.iter_rows(min_row=2):
+            for cell in row:
+                cell.border = border_thin
+                cell.alignment = Alignment(vertical="center")
+
+        for col in ws.columns:
+            max_len = max(len(str(cell.value or "")) for cell in col)
+            col_letter = get_column_letter(col[0].column)
+            ws.column_dimensions[col_letter].width = max(max_len + 4, 12)
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output

@@ -21,3 +21,4 @@ Los ADR registran decisiones relevantes y sus consecuencias. Una decisión reemp
 | [015](015-recalculo-publicaciones-umbral.md) | Recálculo en backend, umbral k = 5 y autoaprobación explícita de publicaciones | Aceptado |
 | [016](016-taxonomia-laboral-cuestionarios.md) | Clasificación laboral, formalidad y salario a partir de los cuestionarios OLE | Aceptado |
 | [017](017-normalizacion-documento-limites-carga.md) | Normalización del documento de identidad y límites de carga | Aceptado |
+| [019](019-modelo-predictivo-empleabilidad.md) | Modelo predictivo de empleabilidad y reactivación de IA-01 | Aceptado |

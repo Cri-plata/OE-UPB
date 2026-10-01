@@ -3,38 +3,545 @@
   <main class="main-content">
     <header class="page-header">
       <div class="page-header-content">
-        <h1>Analítica de textos y alertas</h1>
-        <p>Clasificación local sobre textos anonimizados. Las alertas son descriptivas y no son predicciones.</p>
+        <h1>Analítica y alertas</h1>
+        <p>Indicadores complementarios, clasificación de texto no estructurado y modelo predictivo de empleabilidad.</p>
       </div>
+      <img src="escudo-upb.png" alt="Escudo UPB" class="shield" />
     </header>
 
-    <p *ngIf="error" class="error-message">{{ error }}</p>
+    <div *ngIf="error" class="error-message">{{ error }}</div>
 
+    <!-- SECCIÓN 1: RESUMEN ANALÍTICO Y TEXTOS ABIERTOS -->
     <ng-container *ngIf="resumen">
       <div class="two-column">
         <section class="card">
-          <h2 class="card-title">Competencias mencionadas</h2>
-          <p class="section-subtitle">{{ resumen.textos_analizados }} textos abiertos analizados</p>
-          <div class="competencia-item" *ngFor="let item of resumen.competencias">
-            <span>{{ item.categoria }}</span>
-            <strong class="competencia-count">{{ item.frecuencia }}</strong>
+          <div class="card-header-flex">
+            <h2 class="card-title">Competencias mencionadas</h2>
+            <span class="badge badge-neutral">NLP Descriptivo</span>
           </div>
-          <p *ngIf="!resumen.competencias.length" class="empty-state">No hay menciones clasificables.</p>
+          <p class="section-subtitle">{{ resumen.textos_analizados }} respuestas abiertas clasificadas</p>
+          <div class="competencias-list">
+            <div class="competencia-item" *ngFor="let item of resumen.competencias">
+              <span>{{ item.categoria }}</span>
+              <strong class="competencia-count">{{ item.frecuencia }}</strong>
+            </div>
+          </div>
+          <p *ngIf="!resumen.competencias.length" class="empty-state">No hay menciones clasificables en este momento.</p>
         </section>
 
         <section class="card">
-          <h2 class="card-title">Alertas de empleabilidad</h2>
-          <article class="alert-item" [class.high]="alerta.severidad === 'alta'" *ngFor="let alerta of resumen.alertas">
-            <div class="alert-header">
-              <strong>{{ alerta.programa }}</strong>
-              <span class="badge" [class.danger]="alerta.severidad === 'alta'">{{ alerta.severidad || 'Media' }}</span>
-            </div>
-            <p>{{ alerta.mensaje }}</p>
-            <small class="cell-subtext">Valor: {{ alerta.valor }} · muestra: {{ alerta.muestra }}</small>
-          </article>
-          <p *ngIf="!resumen.alertas.length" class="empty-state">No se detectaron patrones que superen los umbrales descriptivos.</p>
+          <div class="card-header-flex">
+            <h2 class="card-title">Alertas operativas de seguimiento</h2>
+            <span class="badge badge-neutral">Umbrales observados</span>
+          </div>
+          <p class="section-subtitle">Detección de patrones sobre egresados en el periodo</p>
+          <div class="alertas-list">
+            <article class="alert-item" [class.high]="alerta.severidad === 'alta'" *ngFor="let alerta of resumen.alertas">
+              <div class="alert-header">
+                <strong>{{ alerta.programa }}</strong>
+                <span class="badge" [ngClass]="alerta.severidad === 'alta' ? 'badge-danger' : 'badge-warning'">
+                  {{ alerta.severidad === 'alta' ? 'Severidad Alta' : 'Severidad Media' }}
+                </span>
+              </div>
+              <p>{{ alerta.mensaje }}</p>
+              <small class="cell-subtext">Valor observado: {{ alerta.valor }} · Muestra analizada: {{ alerta.muestra }}</small>
+            </article>
+          </div>
+          <p *ngIf="!resumen.alertas.length" class="empty-state">No se detectaron patrones que superen los umbrales de seguimiento.</p>
         </section>
       </div>
     </ng-container>
+
+    <!-- SECCIÓN 2: MODELO PREDICTIVO DE EMPLEABILIDAD (RF-71) -->
+    <section class="card predictive-section">
+      <div class="predictive-header">
+        <div>
+          <div class="title-with-badge">
+            <h2 class="card-title">Modelo Predictivo de Empleabilidad (RF-71)</h2>
+            <span class="badge badge-ai">Gradient Boosting</span>
+          </div>
+          <p class="section-subtitle">
+            Proyección longitudinal de inserción laboral y rangos salariales por programa académico, entrenado on-demand
+            a partir de las encuestas longitudinales de la sede.
+          </p>
+        </div>
+
+        <!-- Controles de horizonte y filtro -->
+        <div class="predictive-controls">
+          <div class="horizon-toggle">
+            <button
+              type="button"
+              class="toggle-btn"
+              [class.active]="momentoDestino === 1"
+              (click)="cambiarHorizonte(1)"
+            >
+              Horizonte M1 (1 año)
+            </button>
+            <button
+              type="button"
+              class="toggle-btn"
+              [class.active]="momentoDestino === 5"
+              (click)="cambiarHorizonte(5)"
+            >
+              Horizonte M5 (5 años)
+            </button>
+          </div>
+
+          <div class="filter-dropdown" *ngIf="programasDisponibles.length > 0">
+            <select
+              class="form-select"
+              (change)="onFiltrarPrograma($any($event.target).value)"
+            >
+              <option value="" [selected]="filtroPrograma === ''">Todos los programas</option>
+              <option *ngFor="let prog of programasDisponibles" [value]="prog" [selected]="filtroPrograma === prog">
+                {{ prog }}
+              </option>
+            </select>
+          </div>
+
+          <button
+            type="button"
+            class="btn-excel-export"
+            (click)="descargarReporteEjecutivo()"
+            [disabled]="isExportingExecutiveReport"
+            title="Descargar informe ejecutivo en Excel con proyecciones y factores (IA-14)"
+          >
+            <svg *ngIf="!isExportingExecutiveReport" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <div *ngIf="isExportingExecutiveReport" class="btn-spinner"></div>
+            <span>{{ isExportingExecutiveReport ? 'Generando...' : 'Informe Ejecutivo (.xlsx)' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="cargandoPrediccion" class="loading-state">
+        <div class="spinner"></div>
+        <p>Entrenando y evaluando modelo predictivo con validación cruzada...</p>
+      </div>
+
+      <div *ngIf="errorPrediccion" class="error-message">
+        {{ errorPrediccion }}
+      </div>
+
+      <!-- ESTADO: DATOS INSUFICIENTES -->
+      <div
+        *ngIf="!cargandoPrediccion && prediccion && prediccion.estado === 'insuficiente_datos'"
+        class="insufficient-card"
+      >
+        <div class="insufficient-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <div class="insufficient-text">
+          <h3>Muestra longitudinal insuficiente</h3>
+          <p>{{ prediccion.mensaje }}</p>
+          <small class="cell-subtext">
+            Total trayectorias encontradas: {{ prediccion.total_trayectorias }}. Para habilitar este horizonte,
+            se deben cargar mediciones correspondientes al momento seleccionado.
+          </small>
+        </div>
+      </div>
+
+      <!-- ESTADO: MODELO ENTRENADO Y PROYECCIONES DISPONIBLES -->
+      <ng-container *ngIf="!cargandoPrediccion && prediccion && prediccion.estado === 'exitoso'">
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-icon brand">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              </span>
+              <span class="kpi-label">
+                Precisión del Modelo
+                <span class="tooltip-trigger" title="Porcentaje de predicciones correctas sobre el total de egresados evaluados mediante validación cruzada estratificada (Stratified K-Fold).">ℹ</span>
+              </span>
+            </div>
+            <div class="kpi-value">{{ prediccion.precision_modelo }}%</div>
+            <div class="kpi-subtext">Stratified CV · F1: {{ prediccion.f1_score }}</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-icon blue">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </span>
+              <span class="kpi-label">
+                Trayectorias M0 → M{{ momentoDestino }}
+                <span class="tooltip-trigger" title="Número de egresados con respuestas vinculadas entre grado (M0) y el horizonte proyectado.">ℹ</span>
+              </span>
+            </div>
+            <div class="kpi-value">{{ prediccion.total_trayectorias }}</div>
+            <div class="kpi-subtext">Egresados con seguimiento</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-icon green">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              </span>
+              <span class="kpi-label">
+                Programas Proyectados
+                <span class="tooltip-trigger" title="Planes de estudio de la sede analizados mediante modelos supervisados.">ℹ</span>
+              </span>
+            </div>
+            <div class="kpi-value">{{ prediccion.programas_analizados }}</div>
+            <div class="kpi-subtext">Planes curriculares evaluados</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-icon" [ngClass]="prediccion.egresados_en_riesgo > 0 ? 'red' : 'green'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </span>
+              <span class="kpi-label">
+                Egresados en Riesgo
+                <span class="tooltip-trigger" title="Egresados en programas con probabilidad proyectada de desempleo superior al 30%.">ℹ</span>
+              </span>
+            </div>
+            <div class="kpi-value" [class.highlight-danger]="prediccion.egresados_en_riesgo > 0">
+              {{ prediccion.egresados_en_riesgo }}
+            </div>
+            <div class="kpi-subtext">Riesgo proyectado &gt; 30%</div>
+          </div>
+        </div>
+
+        <!-- IA-13: Semáforo de Robustez Estadística del Modelo -->
+        <article class="robustness-banner" *ngIf="prediccion.indicadores_robustez">
+          <div class="robustness-header">
+            <div class="robustness-status">
+              <span class="semaphore-indicator" [ngClass]="prediccion.indicadores_robustez.color_general"></span>
+              <span class="robustness-title">Confiabilidad Estadística del Modelo:</span>
+              <span class="badge" [ngClass]="getRobustnessBadgeClass(prediccion.indicadores_robustez.color_general)">
+                Robustez {{ prediccion.indicadores_robustez.nivel_general }}
+              </span>
+            </div>
+            <span class="robustness-help">Diagnóstico de significancia metodológica institucional</span>
+          </div>
+
+          <div class="robustness-pills">
+            <div class="dimension-pill">
+              <span class="pill-dot" [ngClass]="prediccion.indicadores_robustez.muestra.color"></span>
+              <strong class="pill-title">Muestra:</strong>
+              <span class="pill-desc">{{ prediccion.indicadores_robustez.muestra.observacion }}</span>
+            </div>
+            <div class="dimension-pill">
+              <span class="pill-dot" [ngClass]="prediccion.indicadores_robustez.balance_clases.color"></span>
+              <strong class="pill-title">Balance:</strong>
+              <span class="pill-desc">{{ prediccion.indicadores_robustez.balance_clases.observacion }}</span>
+            </div>
+            <div class="dimension-pill">
+              <span class="pill-dot" [ngClass]="prediccion.indicadores_robustez.precision.color"></span>
+              <strong class="pill-title">Concordancia:</strong>
+              <span class="pill-desc">{{ prediccion.indicadores_robustez.precision.observacion }}</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Dos Columnas: Importancia de Factores y Alertas Predictivas -->
+        <div class="two-column predictive-details">
+          <!-- Tarjeta: Importancia de Factores (IA-03) -->
+          <article class="card inner-card">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="card-subtitle">Factores Más Influyentes en la Empleabilidad</h3>
+                <p class="section-subtitle">Importancia relativa estimada por Gradient Boosting para inserción laboral</p>
+              </div>
+              <div class="chart-actions" *ngIf="isChartReady">
+                <button
+                  type="button"
+                  class="btn-secondary table-action"
+                  (click)="exportarGrafica('#grafica-factores canvas', 'factores-empleabilidad.png')"
+                  title="Exportar gráfica como PNG"
+                >
+                  PNG
+                </button>
+              </div>
+            </div>
+
+            <!-- Gráfica Chart.js interactiva -->
+            <div id="grafica-factores" class="chart-wrapper factors-chart" *ngIf="isChartReady">
+              <canvas
+                baseChart
+                [data]="factoresChartData"
+                [type]="barChartType"
+                [options]="factoresChartOptions"
+              >
+              </canvas>
+            </div>
+
+            <div class="factor-list" *ngIf="!isChartReady">
+              <div class="factor-item" *ngFor="let f of prediccion.importancia_factores">
+                <div class="factor-info">
+                  <span class="factor-name">{{ f.factor }}</span>
+                  <span class="factor-percent">{{ f.importancia }}%</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-bar" [style.width.%]="f.importancia"></div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Tarjeta: Alertas Predictivas -->
+          <article class="card inner-card">
+            <h3 class="card-subtitle">Alertas de Riesgo de Desempleo Proyectado</h3>
+            <p class="section-subtitle">Alertas automáticas cuando la probabilidad de desempleo supera el 30%</p>
+            <div class="alertas-list" *ngIf="prediccion.alertas_riesgo.length > 0">
+              <article
+                class="alert-item high"
+                *ngFor="let alerta of prediccion.alertas_riesgo"
+              >
+                <div class="alert-header">
+                  <strong>{{ alerta.programa }}</strong>
+                  <span class="badge badge-danger">Alerta Crítica</span>
+                </div>
+                <p>{{ alerta.mensaje }}</p>
+                <small class="cell-subtext">Muestra analizada: {{ alerta.tamano_muestra }} egresados</small>
+              </article>
+            </div>
+            <div class="safe-state" *ngIf="prediccion.alertas_riesgo.length === 0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="safe-icon">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <p>Ningún programa supera el umbral crítico de riesgo de desempleo (&gt;30%) para este horizonte.</p>
+            </div>
+          </article>
+        </div>
+
+        <!-- IA-02: Gráfica de Distribución de Probabilidades por Programa -->
+        <article class="card chart-card" *ngIf="isChartReady && prediccion.predicciones_programas.length > 0">
+          <div class="card-header-flex">
+            <div>
+              <div class="title-with-badge">
+                <h3 class="card-subtitle">Distribución Probabilística de Inserción Laboral por Programa</h3>
+                <span class="badge badge-neutral">Barras apiladas (100%)</span>
+              </div>
+              <p class="section-subtitle">
+                Proyección comparativa de la condición laboral esperada hacia Momento {{ momentoDestino }} para cada programa académico analizado.
+              </p>
+            </div>
+            <div class="chart-actions">
+              <button
+                type="button"
+                class="btn-secondary table-action"
+                (click)="exportarGrafica('#grafica-distribucion-probabilidades canvas', 'distribucion-probabilidades-programas.png')"
+                title="Exportar gráfica como PNG"
+              >
+                PNG
+              </button>
+            </div>
+          </div>
+
+          <div id="grafica-distribucion-probabilidades" class="chart-wrapper stacked-chart">
+            <canvas
+              baseChart
+              [data]="stackedProbsChartData"
+              [type]="barChartType"
+              [options]="stackedProbsChartOptions"
+            >
+            </canvas>
+          </div>
+        </article>
+
+        <!-- Tabla Completa: Proyecciones por Programa Académico -->
+        <article class="card table-card">
+          <div class="card-header-flex">
+            <div>
+              <h3 class="card-subtitle">Proyección Detallada por Programa Académico</h3>
+              <p class="section-subtitle">Distribución probabilística estimada hacia Momento {{ momentoDestino }}</p>
+            </div>
+          </div>
+
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Programa Académico</th>
+                  <th class="text-center">Muestra</th>
+                  <th>Prob. Empleado</th>
+                  <th>Prob. Independiente</th>
+                  <th>Riesgo Desempleo</th>
+                  <th>Rango Salarial Proyectado</th>
+                  <th class="text-center">Nivel de Riesgo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let prog of prediccion.predicciones_programas">
+                  <td class="font-medium">{{ prog.programa }}</td>
+                  <td class="text-center">{{ prog.total_egresados }}</td>
+                  <td>
+                    <div class="prob-cell">
+                      <span>{{ prog.probabilidad_empleado }}%</span>
+                      <div class="mini-bar-track">
+                        <div class="mini-bar-fill green" [style.width.%]="prog.probabilidad_empleado"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="prob-cell">
+                      <span>{{ prog.probabilidad_independiente }}%</span>
+                      <div class="mini-bar-track">
+                        <div class="mini-bar-fill blue" [style.width.%]="prog.probabilidad_independiente"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="prob-cell">
+                      <span [class.text-danger]="prog.probabilidad_sin_empleo >= 30">
+                        {{ prog.probabilidad_sin_empleo }}%
+                      </span>
+                      <div class="mini-bar-track">
+                        <div class="mini-bar-fill red" [style.width.%]="prog.probabilidad_sin_empleo"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="salary-badge">{{ prog.rango_salarial_estimado }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge" [ngClass]="getBadgeClass(prog.nivel_riesgo)">
+                      {{ prog.nivel_riesgo }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="ethical-notice">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>
+              <strong>Garantía ética institucional:</strong> Este modelo estadístico supervisado no utiliza identificadores personales ni emite diagnósticos deterministas individuales. Proyecta tendencias agregadas orientadas al aseguramiento continuo de la calidad curricular de la UPB.
+            </span>
+          </div>
+        </article>
+
+        <!-- IA-04: Matriz de Confusión y Diagnóstico del Modelo (Heatmap) -->
+        <article class="card heatmap-card" *ngIf="prediccion.matriz_confusion?.clases?.length">
+          <div class="card-header-flex">
+            <div>
+              <div class="title-with-badge">
+                <h3 class="card-subtitle">Matriz de Confusión y Diagnóstico del Modelo</h3>
+                <span class="badge badge-ai">Stratified K-Fold</span>
+              </div>
+              <p class="section-subtitle">
+                Evaluación de aciertos y desvíos entre los estados laborales reales y los proyectados por el clasificador.
+              </p>
+            </div>
+            <div class="matrix-legend">
+              <span class="legend-item">
+                <span class="legend-dot green"></span>
+                Aciertos (diagonal)
+              </span>
+              <span class="legend-item">
+                <span class="legend-dot red"></span>
+                Desvíos / confusión
+              </span>
+            </div>
+          </div>
+
+          <div class="heatmap-wrapper">
+            <table class="heatmap-table">
+              <thead>
+                <tr>
+                  <th class="corner-header">
+                    <span class="axis-observed">Real ↓</span>
+                    <span class="axis-predicted">Predicho →</span>
+                  </th>
+                  <th *ngFor="let colClase of prediccion.matriz_confusion.clases" class="text-center col-header">
+                    {{ formatClaseLabel(colClase) }}
+                  </th>
+                  <th class="text-center total-header">Total Real</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let fila of prediccion.matriz_confusion.matriz; let i = index">
+                  <td class="row-header">
+                    <strong>{{ formatClaseLabel(prediccion.matriz_confusion.clases[i]) }}</strong>
+                  </td>
+                  <td
+                    *ngFor="let val of fila; let j = index"
+                    class="heatmap-cell text-center"
+                    [style.background-color]="getHeatmapBg(i, j, val)"
+                    [style.color]="getHeatmapTextColor(i, j, val)"
+                  >
+                    <div class="cell-content">
+                      <span class="cell-val">{{ val }}</span>
+                      <span class="cell-pct" *ngIf="getFilaTotal(fila) > 0">
+                        {{ getFilaPorcentaje(val, fila) }}%
+                      </span>
+                    </div>
+                  </td>
+                  <td class="text-center total-cell">
+                    <strong>{{ getFilaTotal(fila) }}</strong>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="heatmap-footer">
+            <small class="cell-subtext">
+              Precisión general validada: <strong>{{ prediccion.precision_modelo }}%</strong> · F1-Score Macro: <strong>{{ prediccion.f1_score }}</strong>.
+              Las celdas verdes en la diagonal representan trayectorias donde el clasificador predijo con exactitud el estado del egresado.
+            </small>
+          </div>
+        </article>
+
+        <!-- IA-10: Panel Comparativo Multi-Algoritmo -->
+        <article class="card table-card" *ngIf="comparativaAlgoritmos.length > 0">
+          <div class="card-header-flex">
+            <div>
+              <div class="title-with-badge">
+                <h3 class="card-subtitle">Evaluación Comparativa Multi-Algoritmo (IA-10)</h3>
+                <span class="badge badge-ai">Selección Transparente de Modelos</span>
+              </div>
+              <p class="section-subtitle">
+                Comparación empírica entre estimadores supervisados sobre la misma partición estratificada de validación cruzada.
+              </p>
+            </div>
+          </div>
+
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Algoritmo Evaluado</th>
+                  <th class="text-center">Precisión (Accuracy)</th>
+                  <th class="text-center">F1-Score Macro</th>
+                  <th class="text-center">Tiempo Inferencia</th>
+                  <th class="text-center">Estado del Modelo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let a of comparativaAlgoritmos" [class.highlight-row]="a.seleccionado">
+                  <td>
+                    <strong>{{ a.algoritmo }}</strong>
+                    <span class="subtext-d" *ngIf="a.seleccionado"> · Ensamble por árboles de decisión en cascada</span>
+                  </td>
+                  <td class="text-center font-bold">{{ a.accuracy }}%</td>
+                  <td class="text-center">{{ a.f1_score }}</td>
+                  <td class="text-center font-mono">{{ a.tiempo_ms }} ms</td>
+                  <td class="text-center">
+                    <span class="badge" [ngClass]="a.seleccionado ? 'badge-success' : 'badge-neutral'">
+                      {{ a.seleccionado ? '✦ En Producción' : 'Evaluado' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </ng-container>
+    </section>
   </main>
 </div>

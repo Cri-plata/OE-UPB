@@ -31,6 +31,7 @@
           <a class="nav-item" href="explorador.html" title="Explorador de Datos"><span class="nav-item-text">Explorador de Datos</span></a>
           <a class="nav-item active" href="analitica.html" title="Analítica y alertas"><span class="nav-item-text">Analítica y alertas</span></a>
           <a class="nav-item" href="directorio.html" title="Directorio"><span class="nav-item-text">Directorio</span></a>
+          <a class="nav-item" href="habilidades.html" title="Co-relaciones"><span class="nav-item-text">Co-relaciones</span></a>
           <a class="nav-item" href="publicaciones.html" title="Gráficas publicadas"><span class="nav-item-text">Gráficas publicadas</span></a>
           <a class="nav-item" href="carga-datos.html" title="Cargar datos"><span class="nav-item-text">Cargar datos</span></a>
           <a class="nav-item" href="gestion-usuarios.html" title="Administrar Usuarios"><span class="nav-item-text">Administrar Usuarios</span></a>
@@ -40,56 +41,223 @@
           <a class="logout-btn" href="login.html" title="Cerrar Sesión"><span>Cerrar Sesión</span></a>
         </div>
       </aside>
+
       <main class="content">
         <section class="page">
           <header class="page-header">
             <div class="page-header-content">
               <h1>Analítica y alertas</h1>
-              <p>Indicadores complementarios para el seguimiento y aseguramiento de egresados.</p>
+              <p>Indicadores complementarios, procesamiento de texto no estructurado y modelo predictivo de empleabilidad.</p>
             </div>
+            <img class="shield" src="../../OEUPB-Frontend/public/escudo-upb.png" alt="Escudo UPB" />
           </header>
-          <div class="kpi-grid">
-            <article class="kpi-card">
-              <div class="kpi-icon blue">
-                <i data-lucide="chart-no-axes-combined" aria-hidden="true"></i>
-              </div>
-              <div>
-                <h3>Registros analizados</h3>
-                <strong>—</strong>
-                <small>Datos de la sede</small>
-              </div>
-            </article>
-            <article class="kpi-card">
-              <div class="kpi-icon green">
-                <i data-lucide="badge-check" aria-hidden="true"></i>
-              </div>
-              <div>
-                <h3>Calidad de datos</h3>
-                <strong>—</strong>
-                <small>Resumen analítico</small>
-              </div>
-            </article>
-            <article class="kpi-card">
-              <div class="kpi-icon red">
-                <i data-lucide="triangle-alert" aria-hidden="true"></i>
-              </div>
-              <div>
-                <h3>Alertas</h3>
-                <strong>—</strong>
-                <small>Seguimiento requerido</small>
-              </div>
-            </article>
-          </div>
+
+          <!-- SECCIÓN 1: Competencias y Alertas Operativas -->
           <div class="two-column">
             <article class="card">
-              <h2>Resumen analítico</h2>
-              <div class="chart-placeholder">Cargando resumen analítico...</div>
+              <div class="card-header-flex">
+                <h2>Competencias mencionadas</h2>
+                <span class="badge badge-neutral">NLP Descriptivo</span>
+              </div>
+              <p class="section-subtitle">25 respuestas abiertas clasificadas</p>
+              <div class="competencias-list">
+                <div class="competencia-item">
+                  <span>Trabajo en equipo</span>
+                  <strong class="competencia-count">10</strong>
+                </div>
+                <div class="competencia-item">
+                  <span>Liderazgo</span>
+                  <strong class="competencia-count">8</strong>
+                </div>
+                <div class="competencia-item">
+                  <span>Manejo de Excel / Office</span>
+                  <strong class="competencia-count">7</strong>
+                </div>
+              </div>
             </article>
+
             <article class="card">
-              <h2>Alertas de seguimiento</h2>
-              <div class="chart-placeholder">No hay alertas para mostrar.</div>
+              <div class="card-header-flex">
+                <h2>Alertas operativas de seguimiento</h2>
+                <span class="badge badge-neutral">Umbrales observados</span>
+              </div>
+              <p class="section-subtitle">Detección de patrones sobre egresados en el periodo</p>
+              <div class="alertas-list">
+                <div class="alert-item high">
+                  <div class="alert-header">
+                    <strong>Ingeniería de Sistemas</strong>
+                    <span class="badge badge-danger">Severidad Alta</span>
+                  </div>
+                  <p>Baja tasa de inserción laboral observada en seguimiento a 1 año.</p>
+                  <small class="cell-subtext">Valor observado: 45.0% · Muestra analizada: 20 egresados</small>
+                </div>
+              </div>
             </article>
           </div>
+
+          <!-- SECCIÓN 2: Modelo Predictivo de Empleabilidad (RF-71) -->
+          <article class="card predictive-section">
+            <div class="predictive-header">
+              <div>
+                <div class="title-with-badge">
+                  <h2>Modelo Predictivo de Empleabilidad (RF-71)</h2>
+                  <span class="badge badge-ai">Gradient Boosting</span>
+                </div>
+                <p class="section-subtitle">
+                  Proyección longitudinal de inserción laboral y rangos salariales por programa académico, entrenado on-demand a partir de las encuestas longitudinales de la sede.
+                </p>
+              </div>
+
+              <div class="predictive-controls">
+                <div class="horizon-toggle">
+                  <button type="button" class="toggle-btn active">Horizonte M1 (1 año)</button>
+                  <button type="button" class="toggle-btn">Horizonte M5 (5 años)</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- KPIs Modelo -->
+            <div class="kpi-grid four-columns">
+              <div class="kpi-card">
+                <div class="kpi-icon brand">
+                  <i data-lucide="check-check" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <span class="kpi-label">Precisión del Modelo</span>
+                  <strong>59.3%</strong>
+                  <small>Stratified CV · F1: 0.343</small>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-icon blue">
+                  <i data-lucide="users" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <span class="kpi-label">Trayectorias M0 → M1</span>
+                  <strong>91</strong>
+                  <small>Egresados con seguimiento</small>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-icon green">
+                  <i data-lucide="graduation-cap" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <span class="kpi-label">Programas Proyectados</span>
+                  <strong>12</strong>
+                  <small>Planes curriculares evaluados</small>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-icon red">
+                  <i data-lucide="triangle-alert" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <span class="kpi-label">Egresados en Riesgo</span>
+                  <strong>0</strong>
+                  <small>Riesgo desempleo &gt; 30%</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dos columnas predictivas -->
+            <div class="two-column">
+              <article class="card inner-card">
+                <h3>Factores Más Influyentes</h3>
+                <p class="section-subtitle">Importancia relativa estimada por Gradient Boosting para inserción laboral</p>
+                <div class="factor-list">
+                  <div class="factor-item">
+                    <div class="factor-info">
+                      <span>Nivel salarial inicial</span>
+                      <strong class="factor-percent">34.1%</strong>
+                    </div>
+                    <div class="progress-track"><div class="progress-bar" style="width: 34.1%;"></div></div>
+                  </div>
+                  <div class="factor-item">
+                    <div class="factor-info">
+                      <span>Estado laboral inicial (M0)</span>
+                      <strong class="factor-percent">20.3%</strong>
+                    </div>
+                    <div class="progress-track"><div class="progress-bar" style="width: 20.3%;"></div></div>
+                  </div>
+                  <div class="factor-item">
+                    <div class="factor-info">
+                      <span>Programa Académico</span>
+                      <strong class="factor-percent">16.5%</strong>
+                    </div>
+                    <div class="progress-track"><div class="progress-bar" style="width: 16.5%;"></div></div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="card inner-card">
+                <h3>Alertas de Riesgo de Desempleo Proyectado</h3>
+                <p class="section-subtitle">Programas con probabilidad proyectada de desempleo superior al 30%</p>
+                <div class="safe-state">
+                  <i data-lucide="shield-check" class="safe-icon" aria-hidden="true"></i>
+                  <p>Ningún programa supera el umbral crítico de riesgo de desempleo (&gt;30%) para este horizonte.</p>
+                </div>
+              </article>
+            </div>
+
+            <!-- Tabla de proyecciones por programa -->
+            <article class="card table-card">
+              <h3>Proyección Detallada por Programa Académico</h3>
+              <p class="section-subtitle">Distribución probabilística estimada hacia Momento 1</p>
+              <div class="table-scroll">
+                <table class="data-table" style="min-width: 800px;">
+                  <thead>
+                    <tr>
+                      <th>Programa Académico</th>
+                      <th style="text-align: center;">Muestra</th>
+                      <th>Prob. Empleado</th>
+                      <th>Prob. Independiente</th>
+                      <th>Riesgo Desempleo</th>
+                      <th>Rango Salarial Proyectado</th>
+                      <th style="text-align: center;">Nivel de Riesgo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Ingeniería Industrial (Demo)</strong></td>
+                      <td style="text-align: center;">18</td>
+                      <td>78.2%</td>
+                      <td>12.5%</td>
+                      <td>9.3%</td>
+                      <td><span class="badge badge-neutral">2–4 SMLV</span></td>
+                      <td style="text-align: center;"><span class="badge badge-success">Bajo</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Derecho (Demo)</strong></td>
+                      <td style="text-align: center;">15</td>
+                      <td>65.4%</td>
+                      <td>21.0%</td>
+                      <td>13.6%</td>
+                      <td><span class="badge badge-neutral">2–4 SMLV</span></td>
+                      <td style="text-align: center;"><span class="badge badge-success">Bajo</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Psicología (Demo)</strong></td>
+                      <td style="text-align: center;">12</td>
+                      <td>58.0%</td>
+                      <td>18.0%</td>
+                      <td>24.0%</td>
+                      <td><span class="badge badge-neutral">&lt; 2 SMLV</span></td>
+                      <td style="text-align: center;"><span class="badge badge-warning">Medio</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="ethical-notice">
+                <small>
+                  <strong>Garantía ética institucional:</strong> Este modelo estadístico supervisado no utiliza identificadores personales ni emite diagnósticos deterministas individuales. Proyecta tendencias agregadas orientadas al aseguramiento continuo de la calidad curricular de la UPB.
+                </small>
+              </div>
+            </article>
+          </article>
         </section>
       </main>
     </div>

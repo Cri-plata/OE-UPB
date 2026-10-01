@@ -77,7 +77,7 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 | RF-68 | Destinos de movilidad | pregunta graficable, sin mapa/flujo | Parcial |
 | RF-69 | Descargar tablas en Excel | exporta Directorio, no toda analítica | Parcial |
 | RF-70 | Exportar gráficas | PNG en Reporte, Tendencias y Explorador | Implementado |
-| RF-71 | Modelo predictivo | ADR-009 e IA-01 | En pausa |
+| RF-71 | Modelo predictivo | ADR-018, `prediccion_service.py`, `/api/ia/prediccion-empleabilidad`, Analítica | Implementado, Gradient Boosting longitudinal con Stratified CV |
 | RF-72 | Clasificar texto abierto | `nlp_service.py`, Analítica y pruebas | Implementado, NLP local anonimizado |
 | RF-73 | Alertas de patrones negativos | endpoint y vista Analítica; criterios ANA-02 (M1/M5, muestra ≥ 5, severidad enumerada) | Implementado, descriptivo |
 
@@ -85,13 +85,13 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 
 | Estado | Cantidad |
 |---|---:|
-| Implementado | 34 |
+| Implementado | 35 |
 | Parcial | 31 |
 | No implementado | 7 |
-| En pausa | 1 |
+| En pausa | 0 |
 | **Total** | **73** |
 
-Los RF-38 a RF-51 preservan cualquier columna dinámica, pero no tienen validación semántica individual. Los estados Parcial y No implementado describen brechas del alcance objetivo; producto debe priorizarlas antes de convertirlas en backlog comprometido. RF-71 permanece en pausa. Las brechas priorizadas por producto están en `BACKLOG.md`.
+Los RF-38 a RF-51 preservan cualquier columna dinámica, pero no tienen validación semántica individual. Los estados Parcial y No implementado describen brechas del alcance objetivo; producto debe priorizarlas antes de convertirlas en backlog comprometido. RF-71 ha sido implementado y verificado conforme a ADR-018. Las brechas priorizadas por producto están en `BACKLOG.md`.
 
 ## Autorización verificada
 

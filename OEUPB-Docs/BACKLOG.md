@@ -28,6 +28,6 @@
 
 - [ ] **PRD-01 — Validar las prioridades y los criterios RNF propuestos.** El 2026-09-25 se propusieron la prioridad de los RF/RNF y los criterios verificables de RNF-01 a RNF-06 (`requirements/01-requerimientos.md`). Producto debe confirmarlos o ajustarlos, y después hay que automatizar la medición de RNF-06 (rendimiento con 50.000 mediciones).
 
-## P2 — Decisión de producto en pausa
-
-- [ ] **IA-01 — Modelo predictivo (en pausa).** No iniciar implementación hasta que producto apruebe objetivo, métricas, población, horizonte y criterios de aceptación conforme a ADR-009.
+## Completadas recientemente
+ 
+- [x] **IA-01 — Modelo predictivo de empleabilidad.** Implementado y validado conforme a ADR-018 y RF-71 con `GradientBoostingClassifier`, validación cruzada estratificada, endpoint `/api/ia/prediccion-empleabilidad` y visualización institucional por programa en la vista de Analítica y alertas.

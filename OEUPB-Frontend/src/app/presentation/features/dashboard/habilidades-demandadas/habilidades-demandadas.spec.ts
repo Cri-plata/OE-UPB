@@ -38,6 +38,52 @@ const REGLAS_RESPONSE = {
 
 const PROGRAMAS_RESPONSE = ['Derecho', 'Ingeniería de Sistemas', 'Medicina'];
 
+const COMPARATIVA_RESPONSE = {
+  comparativa: [
+    {
+      habilidad: 'Gestión de proyectos',
+      tipo: 'dura',
+      total_menciones: 10,
+      m0_menciones: 2,
+      m0_porcentaje: 20.0,
+      m1_menciones: 5,
+      m1_porcentaje: 50.0,
+      m5_menciones: 3,
+      m5_porcentaje: 30.0,
+      delta_m1_m0: 30.0,
+      tendencia: 'crece',
+    },
+    {
+      habilidad: 'Manejo de Office',
+      tipo: 'dura',
+      total_menciones: 6,
+      m0_menciones: 4,
+      m0_porcentaje: 40.0,
+      m1_menciones: 2,
+      m1_porcentaje: 20.0,
+      m5_menciones: 0,
+      m5_porcentaje: 0.0,
+      delta_m1_m0: -20.0,
+      tendencia: 'decrece',
+    },
+    {
+      habilidad: 'Machine Learning e IA',
+      tipo: 'dura',
+      total_menciones: 4,
+      m0_menciones: 0,
+      m0_porcentaje: 0.0,
+      m1_menciones: 3,
+      m1_porcentaje: 30.0,
+      m5_menciones: 1,
+      m5_porcentaje: 10.0,
+      delta_m1_m0: 30.0,
+      tendencia: 'emergente_en_m1',
+    },
+  ],
+  totales_respuestas: { '0': 10, '1': 10, '5': 10 },
+  totales_con_habilidad: { '0': 8, '1': 9, '5': 7 },
+};
+
 describe('HabilidadesDemandadasComponent', () => {
   let http: HttpTestingController;
 
@@ -193,5 +239,59 @@ describe('HabilidadesDemandadasComponent', () => {
     const botones = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
     const btnPng = botones.filter(b => b.textContent?.trim() === 'PNG');
     expect(btnPng.length).toBe(2);
+  });
+
+  it('cambia a la pestaña de comparativa y carga datos longitudinales', () => {
+    const fixture = crear();
+    const comp = fixture.componentInstance;
+
+    comp.setTab('comparativa');
+    const req = http.expectOne(r => r.url === `${API}/ia/habilidades-comparativa`);
+    req.flush(COMPARATIVA_RESPONSE);
+    fixture.detectChanges();
+
+    expect(comp.activeTab).toBe('comparativa');
+    expect(comp.comparativaData.length).toBe(3);
+    expect(comp.comparativaData[0].habilidad).toBe('Gestión de proyectos');
+    expect(comp.comparativaData[0].tendencia).toBe('crece');
+    expect(comp.totalesConHabilidadMomento['0']).toBe(8);
+
+    const rows = fixture.nativeElement.querySelectorAll('.table-responsive tbody tr');
+    expect(rows.length).toBe(3);
+  });
+
+  it('asigna correctamente las clases y etiquetas de tendencia y delta', () => {
+    const fixture = crear();
+    const comp = fixture.componentInstance;
+
+    expect(comp.getTendenciaBadgeClass('crece')).toBe('badge-crece');
+    expect(comp.getTendenciaLabel('crece')).toContain('Crecimiento');
+
+    expect(comp.getTendenciaBadgeClass('decrece')).toBe('badge-decrece');
+    expect(comp.getTendenciaLabel('decrece')).toContain('Descenso');
+
+    expect(comp.getTendenciaBadgeClass('emergente_en_m1')).toBe('badge-emergente');
+    expect(comp.getTendenciaLabel('emergente_en_m1')).toContain('Emergente en M1');
+
+    expect(comp.getTendenciaBadgeClass('estable')).toBe('badge-estable');
+    expect(comp.getTendenciaLabel('estable')).toContain('Estable');
+
+    expect(comp.getDeltaClass(12.5)).toBe('delta-positivo');
+    expect(comp.getDeltaClass(-8.0)).toBe('delta-negativo');
+    expect(comp.getDeltaClass(0)).toBe('delta-neutro');
+  });
+
+  it('permite exportar a Excel y solicita el endpoint correspondiente', () => {
+    const fixture = crear();
+    const comp = fixture.componentInstance;
+
+    comp.descargarExcel();
+    expect(comp.isExportingExcel).toBe(true);
+
+    const req = http.expectOne(r => r.url === `${API}/ia/habilidades-export`);
+    expect(req.request.responseType).toBe('blob');
+    req.flush(new Blob(['fake excel content'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+
+    expect(comp.isExportingExcel).toBe(false);
   });
 });

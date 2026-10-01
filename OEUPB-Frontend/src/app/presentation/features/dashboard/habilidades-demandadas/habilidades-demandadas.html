@@ -58,31 +58,50 @@
         </div>
       </div>
 
-      <!-- Barra de Navegación de Pestañas -->
-      <div class="tabs-container">
-        <button 
-          class="tab-btn" 
-          [class.active]="activeTab === 'reglas'" 
-          (click)="setTab('reglas')">
-          <span class="tab-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg>
-          </span>
-          Reglas de Asociación (Co-ocurrencias)
-        </button>
-        <button 
-          class="tab-btn" 
-          [class.active]="activeTab === 'habilidades'" 
-          (click)="setTab('habilidades')">
-          <span class="tab-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
-          </span>
-          Catálogo de Habilidades &amp; Emergentes
+      <!-- Barra de Navegación de Pestañas y Exportación -->
+      <div class="tabs-toolbar">
+        <div class="tabs-container">
+          <button 
+            class="tab-btn" 
+            [class.active]="activeTab === 'reglas'" 
+            (click)="setTab('reglas')">
+            <span class="tab-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg>
+            </span>
+            Reglas de Asociación (Co-ocurrencias)
+          </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="activeTab === 'habilidades'" 
+            (click)="setTab('habilidades')">
+            <span class="tab-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+            </span>
+            Catálogo de Habilidades &amp; Emergentes
+          </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="activeTab === 'comparativa'" 
+            (click)="setTab('comparativa')">
+            <span class="tab-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+            </span>
+            Comparativa Temporal (M0 vs M1 vs M5)
+          </button>
+        </div>
+
+        <button class="btn-excel-export" (click)="descargarExcel()" [disabled]="isExportingExcel">
+          <svg *ngIf="!isExportingExcel" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <div *ngIf="isExportingExcel" class="btn-spinner"></div>
+          <span>{{ isExportingExcel ? 'Generando...' : 'Exportar Excel (.xlsx)' }}</span>
         </button>
       </div>
 
       <!-- Panel de Filtros Compartido -->
       <div class="control-panel">
-        <div class="control-group">
+        <div class="control-group" *ngIf="activeTab !== 'comparativa'">
           <label>Momento de Medición:</label>
           <select class="custom-select" [(ngModel)]="filtroMomento" (change)="aplicarFiltros()">
             <option value="">Todos los momentos</option>
@@ -105,6 +124,15 @@
           <select class="custom-select" [(ngModel)]="filtroPrograma" (change)="aplicarFiltros()">
             <option value="">Todos los programas</option>
             <option *ngFor="let p of programasDisponibles" [value]="p">{{ p }}</option>
+          </select>
+        </div>
+
+        <div class="control-group" *ngIf="activeTab === 'comparativa'">
+          <label>Top Competencias:</label>
+          <select class="custom-select" [(ngModel)]="filtroTopComparativa" (change)="cargarComparativa()">
+            <option [ngValue]="15">Top 15</option>
+            <option [ngValue]="25">Top 25 (Recomendado)</option>
+            <option [ngValue]="50">Top 50</option>
           </select>
         </div>
 
@@ -170,9 +198,18 @@
                   <th>Si la empresa menciona...</th>
                   <th>También exige...</th>
                   <th class="text-center">Egresados</th>
-                  <th class="text-center">Soporte</th>
-                  <th class="text-center">Confianza</th>
-                  <th class="text-center">Lift</th>
+                  <th class="text-center">
+                    Soporte
+                    <span class="tooltip-trigger" title="Porcentaje de todas las encuestas donde ambas habilidades aparecen juntas.">ℹ</span>
+                  </th>
+                  <th class="text-center">
+                    Confianza
+                    <span class="tooltip-trigger" title="Probabilidad condicional de que se exija la segunda habilidad si se exigió la primera.">ℹ</span>
+                  </th>
+                  <th class="text-center">
+                    Lift
+                    <span class="tooltip-trigger" title="Fuerza de asociación: valores > 1.0 indican correlación superior al azar.">ℹ</span>
+                  </th>
                   <th>Insight Interpretativo</th>
                 </tr>
               </thead>
@@ -292,6 +329,115 @@
 
           <div class="empty-state" *ngIf="candidatasEmergentes.length === 0">
             <p>No se encontraron términos emergentes en el conjunto seleccionado.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- PESTAÑA 3: COMPARATIVA TEMPORAL (M0 vs M1 vs M5) -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div class="tab-content" *ngIf="activeTab === 'comparativa'">
+        <!-- Info card explicativa -->
+        <div class="info-card">
+          <div class="info-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div class="info-text">
+            <strong>Evolución Longitudinal de Habilidades Demandadas (IA-06):</strong>
+            Compara la presencia de competencias entre el momento de graduación (M0), el primer año laboral (M1) y a los cinco años (M5).
+            Permite a directores de programa identificar qué habilidades cobran mayor relevancia a medida que el profesional consolida su carrera o cuáles son primordiales al recién egresar.
+          </div>
+        </div>
+
+        <!-- Mini tarjetas de muestra por momento -->
+        <div class="momento-stats-grid">
+          <div class="momento-stat-card">
+            <span class="stat-badge m0">M0 &bull; Graduación</span>
+            <div class="stat-val">{{ totalesConHabilidadMomento['0'] || 0 }} <span class="stat-total">/ {{ totalesRespuestasMomento['0'] || 0 }}</span></div>
+            <span class="stat-lbl">Respuestas con habilidades</span>
+          </div>
+          <div class="momento-stat-card">
+            <span class="stat-badge m1">M1 &bull; 1 Año</span>
+            <div class="stat-val">{{ totalesConHabilidadMomento['1'] || 0 }} <span class="stat-total">/ {{ totalesRespuestasMomento['1'] || 0 }}</span></div>
+            <span class="stat-lbl">Respuestas con habilidades</span>
+          </div>
+          <div class="momento-stat-card">
+            <span class="stat-badge m5">M5 &bull; 5 Años</span>
+            <div class="stat-val">{{ totalesConHabilidadMomento['5'] || 0 }} <span class="stat-total">/ {{ totalesRespuestasMomento['5'] || 0 }}</span></div>
+            <span class="stat-lbl">Respuestas con habilidades</span>
+          </div>
+        </div>
+
+        <!-- Spinner comparativa -->
+        <div class="loading-box" *ngIf="isLoadingComparativa">
+          <div class="spinner"></div>
+          <p>Analizando trayectorias temporales y calculando deltas de evolución...</p>
+        </div>
+
+        <!-- Tabla Comparativa -->
+        <div class="table-card mt-24" *ngIf="!isLoadingComparativa">
+          <div class="table-header-row">
+            <div>
+              <h2>Matriz de Evolución Temporal de Competencias</h2>
+              <p class="section-subtitle">
+                Frecuencias relativas respecto al total de respuestas válidas de cada momento. Ordenado por relevancia total en la muestra.
+              </p>
+            </div>
+            <div class="meta-tag" *ngIf="comparativaData.length > 0">
+              {{ comparativaData.length }} competencias comparadas
+            </div>
+          </div>
+
+          <div class="table-responsive" *ngIf="comparativaData.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Competencia / Habilidad</th>
+                  <th>Tipo</th>
+                  <th class="text-center">M0: Grado</th>
+                  <th class="text-center">M1: 1 Año</th>
+                  <th class="text-center">M5: 5 Años</th>
+                  <th class="text-center">Delta M1-M0</th>
+                  <th class="text-center">Tendencia de Mercado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of comparativaData">
+                  <td class="font-medium">{{ row.habilidad }}</td>
+                  <td>
+                    <span class="tipo-badge" [class.blanda]="row.tipo === 'blanda'" [class.dura]="row.tipo === 'dura'">
+                      {{ row.tipo === 'blanda' ? 'Blanda' : 'Dura' }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <span class="pct-val">{{ row.m0_porcentaje }}%</span>
+                    <span class="cnt-sub">({{ row.m0_menciones }})</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="pct-val">{{ row.m1_porcentaje }}%</span>
+                    <span class="cnt-sub">({{ row.m1_menciones }})</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="pct-val">{{ row.m5_porcentaje }}%</span>
+                    <span class="cnt-sub">({{ row.m5_menciones }})</span>
+                  </td>
+                  <td class="text-center font-bold" [ngClass]="getDeltaClass(row.delta_m1_m0)">
+                    {{ row.delta_m1_m0 > 0 ? '+' : '' }}{{ row.delta_m1_m0 }} pp
+                  </td>
+                  <td class="text-center">
+                    <span class="tendencia-badge" [ngClass]="getTendenciaBadgeClass(row.tendencia)">
+                      {{ getTendenciaLabel(row.tendencia) }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="empty-state" *ngIf="comparativaData.length === 0">
+            <p>No se encontraron datos comparativos para los filtros seleccionados.</p>
           </div>
         </div>
       </div>
