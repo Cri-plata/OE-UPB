@@ -189,6 +189,30 @@ class CargaTransaccionalTest(unittest.TestCase):
         self.assertEqual(egresado.fecha_grado, datetime(2020, 1, 1))
         db.close()
 
+    def test_guarda_el_id_del_estudiante_normalizado(self):
+        contenido = io.BytesIO()
+        # Excel entrega el ID como número: 1234567.0.
+        pd.DataFrame([{"NUMERO_DOCUMENTO": "10001", "PRIMER NOMBRE": "Demo", "PROGRAMA": "Derecho", "FECHA_GRADO": "2024-06-01", "USUARIO": 1234567.0}]).to_excel(contenido, index=False)
+        respuesta = self.cargar(("encuesta.xlsx", contenido.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+        self.assertEqual(respuesta.status_code, 200, respuesta.text)
+        db = self.Session()
+        self.assertEqual(db.get(Egresado, "10001").id_estudiante, "1234567")
+        db.close()
+
+    def test_fila_sin_documento_se_guarda_como_medicion_anonima(self):
+        contenido = io.BytesIO()
+        pd.DataFrame([
+            {"NUMERO_DOCUMENTO": "10001", "PRIMER NOMBRE": "Demo", "PROGRAMA": "Derecho", "FECHA_GRADO": "2024-06-01"},
+            {"NUMERO_DOCUMENTO": None, "PRIMER NOMBRE": "Anónimo", "PROGRAMA": "Derecho", "FECHA_GRADO": "2024-06-01"},
+        ]).to_excel(contenido, index=False)
+        respuesta = self.cargar(("encuesta.xlsx", contenido.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+        self.assertEqual(respuesta.status_code, 200, respuesta.text)
+        db = self.Session()
+        anonima = db.query(Medicion).filter(Medicion.egresado_documento.is_(None)).one()
+        self.assertIsNone(anonima.respuestas["NUMERO_DOCUMENTO"])
+        self.assertEqual(db.query(Medicion).count(), 2)
+        db.close()
+
     def test_documento_invalido_rechaza_el_archivo_con_detalle_por_fila(self):
         contenido = io.BytesIO()
         pd.DataFrame([

@@ -5,6 +5,7 @@ from application.auth_service import require_roles
 from presentation.errores import RESPUESTAS_PROTEGIDAS, ErrorResponse
 from application.indicadores import (
     ETIQUETAS_MOMENTOS,
+    LONGITUD_MAXIMA_PREGUNTA,
     Filtros,
     _mediciones,
     comparacion_momentos,
@@ -218,7 +219,7 @@ def explorador_init(db: Session = Depends(get_db), current_user: dict = Depends(
     responses={422: {"model": ErrorResponse, "description": "La variable no pertenece al catálogo analítico autorizado o los filtros son inválidos"}},
 )
 def explorador_data(
-    pregunta: str = Query(..., max_length=300),
+    pregunta: str = Query(..., max_length=LONGITUD_MAXIMA_PREGUNTA),
     momento: Optional[int] = Query(None, description="Momento 0, 1 o 5"),
     programa: Optional[str] = Query(None, max_length=150),
     anio: Optional[int] = Query(None, ge=1900, le=2200),

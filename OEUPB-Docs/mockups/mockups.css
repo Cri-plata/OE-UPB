@@ -1112,6 +1112,32 @@ table,
   min-height: 340px;
 }
 
+.publications-section + .publications-section {
+  margin-top: var(--space-2xl);
+}
+
+.publications-section-header {
+  margin-bottom: var(--space-lg);
+}
+
+.publications-section-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+}
+
+.publications-section-header p {
+  margin: var(--space-2xs) 0 0;
+}
+
+.publication-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-md);
+}
+
 .publication-meta {
   display: flex;
   align-items: flex-start;

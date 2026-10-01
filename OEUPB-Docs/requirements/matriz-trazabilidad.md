@@ -1,6 +1,6 @@
 # Matriz de trazabilidad funcional
 
-**Verificada:** 2026-09-25  
+**Verificada:** 2026-09-30  
 **Alcance:** auditoría individual de RF-01 a RF-73 contra código, contrato y pruebas vigentes.
 
 Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacidad genérica), **No implementado** (sin comportamiento correspondiente) y **En pausa** (decisión explícita).
@@ -21,7 +21,7 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 | RF-12 | Borrar egresado | `DELETE`, motivo, auditoría y protecciones | Implementado |
 | RF-13 | Organizar por ceremonia | hay fecha/cohorte, no ceremonia ni filtro | Parcial |
 | RF-14 | Buscar por nombre | parámetro `q` del Directorio | Implementado |
-| RF-15 | Buscar por identificación | `q` y perfil por documento | Implementado |
+| RF-15 | Buscar por identificación | `q` por documento o ID del estudiante; perfil por documento con el ID | Implementado |
 | RF-16 | Agrupar por programa | catálogo y filtro `programa` | Implementado |
 | RF-17 | Actualizar situación laboral catalogada | respuesta JSON; CRUD no edita el catálogo | Parcial |
 | RF-18 | Dashboard interactivo | Reporte, Tendencias, Explorador y Chart.js | Implementado |
@@ -41,7 +41,7 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 | RF-32 | Usuario y contraseña | JWT, hash, expiración, cambio; ADR-013 | Implementado |
 | RF-33 | Alcance Coordinador | RBAC, sede, usuarios y publicación | Implementado |
 | RF-34 | Aislamiento por sede | filtros backend y pruebas negativas | Implementado |
-| RF-35 | Gráficas agregadas publicadas | `/api/publicaciones` con recálculo, k = 5 y RN-31 (ADR-015); estados de interfaz corregidos con pruebas (PUB-01/PUB-02), pendientes de validación manual | Parcial |
+| RF-35 | Gráficas agregadas publicadas | `/api/publicaciones` con recálculo, k = 5 y RN-31 (ADR-015); estados de interfaz corregidos con pruebas y validados manualmente el 2026-09-30 (PUB-01/PUB-02) | Implementado |
 | RF-36 | Administración jerárquica | CTIC/coordinador según RBAC | Implementado |
 | RF-37 | Permisos/programas/audiencia | audiencia calculada en backend | Implementado |
 | RF-38 | Satisfacción con profesores | preservada en `mediciones.respuestas` | Parcial |
@@ -85,13 +85,13 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 
 | Estado | Cantidad |
 |---|---:|
-| Implementado | 35 |
-| Parcial | 31 |
+| Implementado | 36 |
+| Parcial | 30 |
 | No implementado | 7 |
 | En pausa | 0 |
 | **Total** | **73** |
 
-Los RF-38 a RF-51 preservan cualquier columna dinámica, pero no tienen validación semántica individual. Los estados Parcial y No implementado describen brechas del alcance objetivo; producto debe priorizarlas antes de convertirlas en backlog comprometido. RF-71 ha sido implementado y verificado conforme a ADR-018. Las brechas priorizadas por producto están en `BACKLOG.md`.
+Los RF-38 a RF-51 preservan cualquier columna dinámica, pero no tienen validación semántica individual. Los estados Parcial y No implementado describen brechas del alcance objetivo; producto debe priorizarlas antes de convertirlas en backlog comprometido. RF-71 ha sido implementado y verificado conforme a ADR-019. Las brechas priorizadas por producto están en `BACKLOG.md`.
 
 ## Autorización verificada
 
@@ -102,7 +102,7 @@ Los RF-38 a RF-51 preservan cualquier columna dinámica, pero no tienen validaci
 | Datos fuente/directorio | No | Propia sede | No |
 | Carga y eliminación | No | Propia sede | No |
 | Publicar/retirar | No | Gráfica propia (retiro también si el propietario está inactivo o reasignado) | No |
-| Ver publicadas | No | Todas las de otras sedes | Según permisos/programas, cualquier sede |
+| Ver publicadas | No | Las propias (con retiro) y todas las de los demás coordinadores, de cualquier sede (ADR-018) | Según permisos/programas, cualquier sede |
 | Reportes, tendencias, explorador, analítica | No | Propia sede | No |
 
 La autoridad se aplica en backend; los guards del frontend solo controlan navegación.

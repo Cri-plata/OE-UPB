@@ -14,18 +14,21 @@
       <img src="escudo-upb.png" alt="UPB" class="shield">
     </header>
 
-    <div class="loading-overlay" *ngIf="cargando">Cargando perfil...</div>
+    <div class="loading-overlay" *ngIf="cargando()">Cargando perfil...</div>
     
-    <div class="error-message" *ngIf="error">{{ error }}</div>
+    <div class="error-message" *ngIf="error()">{{ error() }}</div>
 
-    <div class="profile-grid" *ngIf="perfil && !cargando">
+    <div class="profile-grid" *ngIf="perfil() as perfil">
       <!-- Tarjeta Izquierda: Info Básica -->
       <article class="card identity-card">
         <div class="avatar-circle">
           {{ perfil.nombre_completo.charAt(0) }}
         </div>
         <h2>{{ perfil.nombre_completo }}</h2>
-        <p class="cedula">C.C. {{ perfil.documento }}</p>
+        <div class="identificacion">
+          <p class="cedula">C.C. {{ perfil.documento }}</p>
+          <p class="cedula" *ngIf="perfil.id_estudiante">ID {{ perfil.id_estudiante }}</p>
+        </div>
         
         <hr>
         

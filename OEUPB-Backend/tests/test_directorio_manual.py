@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from application.auth_service import get_password_hash
-from domain.models import AuditoriaEgresado, Base, Sede, Usuario
+from domain.models import AuditoriaEgresado, Base, Egresado, Sede, Usuario
 from infrastructure.database import get_db
 from main import app
 
@@ -51,6 +51,20 @@ class DirectorioManualTest(unittest.TestCase):
         db = self.Session()
         self.assertEqual([a.accion for a in db.query(AuditoriaEgresado).order_by(AuditoriaEgresado.id)], ["crear", "editar", "eliminar"])
         db.close()
+
+    def test_busca_por_id_del_estudiante_y_lo_muestra_en_el_perfil(self):
+        bog = self.login("bog@upb.edu.co")
+        payload = {"numero_documento": "10010001", "primer_nombre": "Demo", "primer_apellido": "Uno", "programa": "Derecho", "motivo": "Registro solicitado"}
+        self.assertEqual(self.client.post("/api/directorio/egresados", headers=bog, json=payload).status_code, 201)
+        db = self.Session()
+        db.get(Egresado, "10010001").id_estudiante = "123456"
+        db.commit(); db.close()
+
+        for termino in ("123456", "000123456", "2345"):
+            tabla = self.client.get("/api/directorio/tabla", headers=bog, params={"q": termino}).json()
+            self.assertEqual([fila["documento"] for fila in tabla["data"]], ["10010001"], termino)
+        self.assertEqual(self.client.get("/api/directorio/tabla", headers=bog, params={"q": "999999"}).json()["total"], 0)
+        self.assertEqual(self.client.get("/api/directorio/perfil/10010001", headers=bog).json()["id_estudiante"], "123456")
 
 
 if __name__ == "__main__": unittest.main()

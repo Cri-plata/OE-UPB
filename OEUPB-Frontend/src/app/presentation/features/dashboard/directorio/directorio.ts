@@ -1,8 +1,7 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
 import { Router } from '@angular/router';
-import { ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DirectorioApi } from '../../../../data/api/directorio.api';
 import { DirectorioItem } from '../../../../data/api/generated-api.models';
@@ -18,21 +17,22 @@ export class DirectorioComponent implements OnInit {
   terminoBusqueda: string = '';
   programaSeleccionado: string = '';
   
-  programasDisponibles: string[] = [];
-  egresados: DirectorioItem[] = [];
+  // Signals: la aplicación es zoneless y la vista debe reflejar la respuesta sin otra interacción.
+  readonly programasDisponibles = signal<string[]>([]);
+  readonly egresados = signal<DirectorioItem[]>([]);
   
   paginaActual: number = 1;
-  totalRegistros: number = 0;
+  readonly totalRegistros = signal(0);
   registrosPorPagina: number = 50;
   
-  cargando: boolean = false;
-  mostrandoFormulario = false;
-  editandoDocumento: string | null = null;
-  mensaje = '';
-  error = '';
+  readonly cargando = signal(false);
+  readonly mostrandoFormulario = signal(false);
+  readonly editandoDocumento = signal<string | null>(null);
+  readonly mensaje = signal('');
+  readonly error = signal('');
   formulario = { numero_documento: '', primer_nombre: '', primer_apellido: '', programa: '', fecha_grado: '', motivo: '' };
 
-  constructor(private directorioApi: DirectorioApi, private cdr: ChangeDetectorRef, private router: Router) {}
+  constructor(private directorioApi: DirectorioApi, private router: Router) {}
 
   ngOnInit() {
     this.cargarProgramas();
@@ -40,13 +40,11 @@ export class DirectorioComponent implements OnInit {
   }
 
   cargarProgramas() {
-    this.directorioApi.programas().subscribe(data => {
-      this.programasDisponibles = data;
-    });
+    this.directorioApi.programas().subscribe(data => this.programasDisponibles.set(data));
   }
 
   buscar() {
-    this.cargando = true;
+    this.cargando.set(true);
     this.directorioApi.buscar(
       this.paginaActual,
       this.registrosPorPagina,
@@ -54,15 +52,11 @@ export class DirectorioComponent implements OnInit {
       this.programaSeleccionado || undefined,
     ).subscribe({
       next: (res) => {
-        this.egresados = res.data;
-        this.totalRegistros = res.total;
-        this.cargando = false;
-        this.cdr.detectChanges();
+        this.egresados.set(res.data);
+        this.totalRegistros.set(res.total);
+        this.cargando.set(false);
       },
-      error: () => {
-        this.cargando = false;
-        this.cdr.detectChanges();
-      }
+      error: () => this.cargando.set(false)
     });
   }
 
@@ -80,7 +74,7 @@ export class DirectorioComponent implements OnInit {
   }
 
   getTotalPaginas(): number {
-    return Math.ceil(this.totalRegistros / this.registrosPorPagina);
+    return Math.ceil(this.totalRegistros() / this.registrosPorPagina);
   }
 
   verPerfil(documento: string) {
@@ -88,28 +82,29 @@ export class DirectorioComponent implements OnInit {
   }
 
   nuevo() {
-    this.editandoDocumento = null;
+    this.editandoDocumento.set(null);
     this.formulario = { numero_documento: '', primer_nombre: '', primer_apellido: '', programa: '', fecha_grado: '', motivo: 'Registro manual autorizado' };
-    this.mostrandoFormulario = true;
+    this.mostrandoFormulario.set(true);
   }
 
   editar(e: DirectorioItem, event: Event) {
     event.stopPropagation();
     const [primer_nombre, ...resto] = e.nombre_completo.split(' ');
-    this.editandoDocumento = e.documento;
+    this.editandoDocumento.set(e.documento);
     this.formulario = { numero_documento: e.documento, primer_nombre, primer_apellido: resto.join(' '), programa: e.programa || '', fecha_grado: e.fecha_grado === 'N/A' ? '' : e.fecha_grado, motivo: 'Corrección manual autorizada' };
-    this.mostrandoFormulario = true;
+    this.mostrandoFormulario.set(true);
   }
 
   guardar() {
-    this.error = '';
+    this.error.set('');
     const payload = { ...this.formulario, fecha_grado: this.formulario.fecha_grado || null };
-    const operacion = this.editandoDocumento
-      ? this.directorioApi.editar(this.editandoDocumento, payload)
+    const editando = this.editandoDocumento();
+    const operacion = editando
+      ? this.directorioApi.editar(editando, payload)
       : this.directorioApi.crear(payload);
     operacion.subscribe({
-      next: () => { this.mostrandoFormulario = false; this.mensaje = 'Registro guardado correctamente.'; this.cargarProgramas(); this.buscar(); },
-      error: (err) => { this.error = err.error?.detail || 'No fue posible guardar el registro.'; }
+      next: () => { this.mostrandoFormulario.set(false); this.mensaje.set('Registro guardado correctamente.'); this.cargarProgramas(); this.buscar(); },
+      error: (err) => this.error.set(err.error?.detail || 'No fue posible guardar el registro.')
     });
   }
 
@@ -118,8 +113,8 @@ export class DirectorioComponent implements OnInit {
     const motivo = window.prompt('Motivo de eliminación (mínimo 5 caracteres):');
     if (!motivo) return;
     this.directorioApi.eliminar(e.documento, motivo).subscribe({
-      next: () => { this.mensaje = 'Registro eliminado correctamente.'; this.buscar(); },
-      error: (err) => { this.error = err.error?.detail || 'No fue posible eliminar el registro.'; }
+      next: () => { this.mensaje.set('Registro eliminado correctamente.'); this.buscar(); },
+      error: (err) => this.error.set(err.error?.detail || 'No fue posible eliminar el registro.')
     });
   }
 

@@ -156,6 +156,23 @@ class PublicacionesTest(unittest.TestCase):
         self.assertEqual(publicada.json()["metricas"]["labels"], ["SI"])
         self.assertEqual(publicada.json()["metricas"]["datasets"][0]["data"], [6.0])
 
+    def test_pregunta_larga_del_catalogo_se_grafica_y_publica(self):
+        # El cuestionario OLE tiene enunciados de hasta ~400 caracteres (Pregunta 9: 304).
+        larga = "Pregunta 9: Respecto a las siguientes habilidades " + "x" * 300 + " | Adquirir conocimientos"
+        db = self.Session()
+        for medicion in db.query(Medicion).all():
+            medicion.respuestas = {**medicion.respuestas, larga: "4"}
+        db.commit()
+        db.close()
+        coord1 = self.login("coord1@upb.edu.co")
+        self.assertIn(larga, self.client.get("/api/reportes/explorador/init", headers=coord1).json()["preguntas"])
+
+        privado = self.client.get("/api/reportes/explorador", headers=coord1, params={"pregunta": larga})
+        self.assertEqual(privado.status_code, 200, privado.text)
+        self.assertEqual(privado.json(), {"labels": ["4"], "valores": [7]})
+        publicada = self.client.post("/api/publicaciones/", headers=coord1, json=self.payload_explorador(larga))
+        self.assertEqual(publicada.status_code, 201, publicada.text)
+
     def test_publicacion_sin_celdas_suficientes_se_rechaza(self):
         coord1 = self.login("coord1@upb.edu.co")
         payload = self.payload_explorador()
@@ -179,6 +196,20 @@ class PublicacionesTest(unittest.TestCase):
         db.close()
         retiro = self.client.delete(f"/api/publicaciones/{creada['id']}", headers=coord1b)
         self.assertEqual(retiro.status_code, 200, retiro.text)
+
+    def test_coordinador_ve_publicaciones_de_los_demas_coordinadores_y_las_propias_aparte(self):
+        db = self.Session()
+        db.add(Usuario(nombre="Coord 1b", correo="coord1b@upb.edu.co", contrasena_hash=get_password_hash("ClaveSegura2026"), rol="Coordinador_Sede", sede_id=1))
+        db.commit()
+        db.close()
+        coord1 = self.login("coord1@upb.edu.co")
+        creada = self.client.post("/api/publicaciones/", headers=coord1, json=self.payload()).json()
+
+        self.assertEqual(self.client.get("/api/publicaciones/", headers=coord1).json(), [])
+        self.assertEqual([p["id"] for p in self.client.get("/api/publicaciones/mias", headers=coord1).json()], [creada["id"]])
+        for otro in ("coord1b@upb.edu.co", "coord2@upb.edu.co"):
+            catalogo = self.client.get("/api/publicaciones/", headers=self.login(otro)).json()
+            self.assertEqual([p["id"] for p in catalogo], [creada["id"]], otro)
 
     def test_ciclo_publicar_consultar_retirar_para_consulta(self):
         coord1 = self.login("coord1@upb.edu.co")

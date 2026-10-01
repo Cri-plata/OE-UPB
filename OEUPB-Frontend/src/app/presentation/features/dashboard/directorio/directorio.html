@@ -12,15 +12,15 @@
       </div>
     </header>
 
-    <p class="success-message" *ngIf="mensaje">{{ mensaje }}</p>
-    <p class="error-message" *ngIf="error">{{ error }}</p>
+    <p class="success-message" *ngIf="mensaje()">{{ mensaje() }}</p>
+    <p class="error-message" *ngIf="error()">{{ error() }}</p>
 
-    <section class="card form-section" *ngIf="mostrandoFormulario">
-      <h3 class="card-title">{{ editandoDocumento ? 'Editar egresado' : 'Nuevo egresado' }}</h3>
+    <section class="card form-section" *ngIf="mostrandoFormulario()">
+      <h3 class="card-title">{{ editandoDocumento() ? 'Editar egresado' : 'Nuevo egresado' }}</h3>
       <div class="form-grid">
         <div class="filter-group">
           <label>Documento</label>
-          <input class="modern-input" [(ngModel)]="formulario.numero_documento" [disabled]="!!editandoDocumento">
+          <input class="modern-input" [(ngModel)]="formulario.numero_documento" [disabled]="!!editandoDocumento()">
         </div>
         <div class="filter-group">
           <label>Nombres</label>
@@ -44,21 +44,21 @@
         </div>
       </div>
       <div class="form-actions">
-        <button class="btn-secondary" (click)="mostrandoFormulario=false">Cancelar</button>
+        <button class="btn-secondary" (click)="mostrandoFormulario.set(false)">Cancelar</button>
         <button class="btn-primary" (click)="guardar()">Guardar</button>
       </div>
     </section>
 
     <div class="card filters-card">
       <div class="filter-group">
-        <label>Buscar por Nombre o Cédula</label>
-        <input type="text" [(ngModel)]="terminoBusqueda" (keyup.enter)="onFiltroChange()" placeholder="Ej: Juan Perez o 10394..." class="modern-input">
+        <label>Buscar por Nombre, Cédula o ID</label>
+        <input type="text" [(ngModel)]="terminoBusqueda" (keyup.enter)="onFiltroChange()" placeholder="Ej: Juan Pérez, 10394... o ID 1234567" class="modern-input">
       </div>
       <div class="filter-group">
         <label>Filtrar por Programa</label>
         <select [(ngModel)]="programaSeleccionado" (change)="onFiltroChange()" class="modern-input">
           <option value="">Todos los Programas</option>
-          <option *ngFor="let prog of programasDisponibles" [value]="prog">{{prog}}</option>
+          <option *ngFor="let prog of programasDisponibles()" [value]="prog">{{prog}}</option>
         </select>
       </div>
       <div class="filter-action">
@@ -67,7 +67,7 @@
     </div>
 
     <article class="card table-card">
-      <div class="loading-overlay" *ngIf="cargando">Cargando datos...</div>
+      <div class="loading-overlay" *ngIf="cargando()">Cargando datos...</div>
       <div class="table-scroll">
         <table class="modern-table directory-table">
           <thead>
@@ -81,7 +81,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let e of egresados" (click)="verPerfil(e.documento)" class="clickable-row" title="Ver Perfil Completo">
+            <tr *ngFor="let e of egresados()" (click)="verPerfil(e.documento)" class="clickable-row" title="Ver Perfil Completo">
               <td>{{ e.documento }}</td>
               <td class="bold-text">{{ e.nombre_completo }}</td>
               <td>{{ e.programa }}</td>
@@ -94,7 +94,7 @@
                 </div>
               </td>
             </tr>
-            <tr *ngIf="egresados.length === 0 && !cargando">
+            <tr *ngIf="egresados().length === 0 && !cargando()">
               <td colspan="6" class="empty-state">No se encontraron egresados con los filtros seleccionados.</td>
             </tr>
           </tbody>
@@ -102,9 +102,9 @@
       </div>
 
       <div class="pagination">
-        <button (click)="cambiarPagina(-1)" [disabled]="paginaActual === 1 || cargando">Anterior</button>
-        <span>Página {{ paginaActual }} de {{ getTotalPaginas() }} ({{ totalRegistros }} registros totales)</span>
-        <button (click)="cambiarPagina(1)" [disabled]="paginaActual === getTotalPaginas() || cargando">Siguiente</button>
+        <button (click)="cambiarPagina(-1)" [disabled]="paginaActual === 1 || cargando()">Anterior</button>
+        <span>Página {{ paginaActual }} de {{ getTotalPaginas() }} ({{ totalRegistros() }} registros totales)</span>
+        <button (click)="cambiarPagina(1)" [disabled]="paginaActual === getTotalPaginas() || cargando()">Siguiente</button>
       </div>
     </article>
   </main>

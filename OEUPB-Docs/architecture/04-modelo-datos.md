@@ -47,6 +47,7 @@ erDiagram
         string primer_apellido
         string programa
         datetime fecha_grado
+        string id_estudiante
     }
     MEDICIONES {
         int id PK
@@ -154,6 +155,7 @@ erDiagram
 - `sede_id` está en `mediciones`; `egresados` no pertenece directamente a una sede.
 - `usuarios.sede_id` referencia el catálogo `sedes`. Solo `Admin_CTIC` puede no tener sede: lo valida el backend y lo garantiza `CHECK ck_usuarios_sede_por_rol`.
 - `egresados.numero_documento` se almacena normalizado según ADR-017.
+- `egresados.id_estudiante` es el ID institucional del estudiante. Proviene de la columna `USUARIO` de las encuestas, se normaliza como el documento (sin el `.0` que agrega Excel) y cada carga lo actualiza; la migración `j7f15d2a4b63` lo completó con la medición más reciente. El directorio lo usa en la búsqueda, tolerando los ceros a la izquierda que Excel elimina.
 - Cada archivo se registra como `cargas`; una recarga crea una versión nueva y marca la anterior como reemplazada dentro de la misma transacción.
 - `mediciones.anio` conserva el nombre físico legado, pero su significado vigente es año de grado o cohorte.
 - `carga_id` y `cargas.usuario_id` son obligatorios. Las cargas históricas se atribuyen a una cuenta técnica desactivada.

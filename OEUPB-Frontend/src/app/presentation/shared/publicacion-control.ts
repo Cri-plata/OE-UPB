@@ -24,10 +24,13 @@ export class PublicacionControl {
   readonly ocupado = computed(() => this.enCurso() !== null);
   /** Error al consultar el estado de publicación; sin él la vista no sabe qué está publicado. */
   readonly errorCarga = signal('');
+  readonly cargandoPropias = signal(false);
+  readonly propias = computed(() => Object.values(this.publicaciones()));
 
   cargarPropias(): void {
     this.errorCarga.set('');
-    this.api.listarPropias().subscribe({
+    this.cargandoPropias.set(true);
+    this.api.listarPropias().pipe(finalize(() => this.cargandoPropias.set(false))).subscribe({
       next: publicaciones => this.publicaciones.set(
         Object.fromEntries(publicaciones.map(publicacion => [publicacion.grafica_key, publicacion]))
       ),

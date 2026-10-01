@@ -180,7 +180,10 @@ async def procesar_excel(
         )
 
     # ETL-01: normalización única del documento; un documento inválido rechaza el archivo.
-    df['NUMERO_DOCUMENTO'] = df['NUMERO_DOCUMENTO'].map(normalizar_documento)
+    # dtype object: el tipo `str` de pandas 3 convertiría el None de un documento vacío en NaN.
+    df['NUMERO_DOCUMENTO'] = pd.Series(
+        [normalizar_documento(valor) for valor in df['NUMERO_DOCUMENTO']], index=df.index, dtype=object
+    )
     for indice, documento in df['NUMERO_DOCUMENTO'].items():
         if documento is not None and not es_documento_valido(documento):
             # +2: encabezado en la fila 1 de Excel e índice basado en cero.
@@ -324,6 +327,11 @@ async def procesar_excel(
                         or row.get("FECHA_GRADO") > egresado.fecha_grado
                     ):
                         egresado.fecha_grado = row.get("FECHA_GRADO")
+
+                # El ID no se corrige manualmente: siempre lo actualiza la fuente.
+                id_estudiante = normalizar_documento(row.get("USUARIO"))
+                if id_estudiante:
+                    egresado.id_estudiante = id_estudiante[:30]
 
             respuestas_dict = row.to_dict()
             if isinstance(respuestas_dict.get("FECHA_GRADO"), pd.Timestamp):

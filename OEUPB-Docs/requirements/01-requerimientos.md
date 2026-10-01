@@ -332,7 +332,7 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-33, RF-34 |
-| Descripción del requerimiento | El sistema debe permitir consultar en una vista común las gráficas y métricas agregadas que los coordinadores de otras sedes hayan publicado. La vista no debe unir ni exponer datos fuente o respuestas individuales. |
+| Descripción del requerimiento | El sistema debe permitir consultar en una vista común las gráficas y métricas agregadas que los coordinadores de otras sedes hayan publicado. Al coordinador, la vista le muestra además sus propias publicaciones, con la acción de retirarlas, y las de los demás coordinadores de su sede (ADR-018). La vista no debe unir ni exponer datos fuente o respuestas individuales. |
 
 | Número de requisito | RF-36 |
 |---|---|

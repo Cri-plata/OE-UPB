@@ -44,7 +44,9 @@ class Egresado(Base):
     primer_apellido = Column(String(100), nullable=True)
     programa = Column(String(150))
     fecha_grado = Column(DateTime, nullable=True)
-    
+    # ID institucional del estudiante (columna USUARIO de las encuestas OLE).
+    id_estudiante = Column(String(30), nullable=True, index=True)
+
     mediciones = relationship("Medicion", back_populates="egresado")
 
 

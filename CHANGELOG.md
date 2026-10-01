@@ -3,6 +3,20 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Corregido (2026-10-01, carga de datos)
+- **Filas sin documento:** la carga de un Excel con mediciones anónimas (filas sin `NUMERO_DOCUMENTO`) respondía 500 y el navegador lo mostraba como error de CORS. Con pandas 3 el documento vacío se convertía en NaN y la validación fallaba. La columna normalizada conserva ahora `None`. Se agregó 1 prueba de backend.
+
+### Agregado (2026-09-30, ID del estudiante)
+- **ID del estudiante:** nueva columna `egresados.id_estudiante` (migración `j7f15d2a4b63`), tomada de la columna `USUARIO` de las encuestas y completada para los egresados existentes. El Directorio busca también por ID, aunque se escriba con los ceros a la izquierda que Excel elimina, y la ficha del egresado muestra el ID debajo de la cédula. `PerfilEgresadoResponse` incluye `id_estudiante`.
+- **Directorio y ficha en signals (parte de UI-03):** la tabla del Directorio y la ficha se refrescaban con un `ChangeDetectorRef` y podían quedar con el resultado anterior o en "Cargando perfil…". Se agregaron 2 pruebas de backend y 3 de frontend.
+
+### Corregido (2026-09-30, Explorador)
+- **Preguntas largas:** el Explorador respondía 422 al graficar o publicar 40 de las 309 preguntas del cuestionario (por ejemplo, la Pregunta 9, de 304 caracteres), porque `pregunta` admitía como máximo 300 caracteres y los enunciados llegan a 399. El límite pasa a 500 (`LONGITUD_MAXIMA_PREGUNTA`) en `/api/reportes/explorador` y en `definicion.pregunta` de las publicaciones. Se agregó 1 prueba de backend.
+- **Orden de las preguntas:** el selector del Explorador ordenaba las preguntas como texto ("Pregunta 6" después de "Pregunta 69"). Ahora usa orden natural: primero las variables sin número y después las preguntas por número, con sus subítems en orden. Se agregó 1 prueba de backend.
+
+### Cambiado (2026-09-30, catálogo de publicaciones del coordinador)
+- **Gráficas publicadas (ADR-018):** el coordinador ve la sección "Mis publicaciones", desde la que puede retirar cada una, y la sección "Publicadas por otros coordinadores", que ahora incluye a los demás coordinadores de su sede además de los de otras sedes. Antes la vista excluía toda su sede y aparecía vacía justo después de publicar. `GET /api/publicaciones/` excluye para el coordinador solo sus propias publicaciones. Se agregaron 1 prueba de backend y 3 de frontend.
+
 ### Corregido (2026-09-25, auditoría UI)
 - **Desbordes:** Reporte General (gráficas), Administración de usuarios, Carga de datos y Explorador ya no desbordan en 1440, 1024 ni 375 px.
 - **Alineación con los mockups:** controles de la cabecera de gráfica, casillas de permisos, grilla de 4 KPI, filtros analíticos con el patrón canónico, paleta de gráficas de `design.md` (frontend y publicaciones) y eliminación del pictograma "✕".

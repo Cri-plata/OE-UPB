@@ -1,24 +1,20 @@
 # Backlog activo de OE UPB
 
-**Última verificación contra el código:** 2026-09-25
+**Última verificación contra el código:** 2026-09-30
 
 **Última decisión de producto incorporada:** 2026-09-25 (ADR-014 y ADR-015)
 **Regla:** este archivo contiene solo trabajo pendiente. Al completar o descartar un ítem, moverlo a [`BACKLOG_ARCHIVE.md`](BACKLOG_ARCHIVE.md) con evidencia.
-
-## P1 — Flujo de publicación
-
-- [ ] **PUB-01 — Cerrar correctamente el estado de publicación.** La acción `Publicar gráfica` debe finalizar en éxito/error, impedir duplicados, actualizar inmediatamente el estado visible y permitir reintento controlado. Desde ADR-015 el backend puede rechazar con 422 por datos insuficientes; la interfaz debe mostrar ese motivo sin quedar cargando.
-  - **Implementado el 2026-09-25, pendiente de validación manual.** Causa: la aplicación es zoneless y el estado se guardaba en campos simples, así que la vista no se refrescaba hasta otra interacción. `presentation/shared/publicacion-control.ts` concentra el estado en signals, bloquea duplicados, muestra errores HTTP y de red en la gráfica con reintento, y reconcilia el 409 del retiro. Pruebas: `publicacion-control.spec.ts`.
-- [ ] **PUB-02 — Corregir la carga del catálogo publicado.** La vista debe resolver listas con datos, vacías y errores; debe reflejar el ciclo publicar → consultar → retirar sin perder las restricciones de audiencia.
-  - **Implementado el 2026-09-25, pendiente de validación manual.** La misma causa zoneless. `/publicaciones` usa signals, muestra los estados de datos, vacío y error con `Reintentar`, y tiene un botón `Actualizar`. Pruebas: `publicaciones.spec.ts`, más la prueba de backend `test_ciclo_publicar_consultar_retirar_para_consulta`.
-  - **Para cerrar ambos:** validar el flujo en el entorno local (ver la lista de `docs/07-estado-funcional-actual.md`, sección 8) y archivarlos con la evidencia.
 
 ## P1 — Alineación del sistema de diseño
 
 - [ ] **UI-01 — Migrar el frontend al sistema canónico.** Alinear tokens, tipografía, layout, estados e iconografía del frontend con `design/design.md` usando los mockups aprobados como contrato. Sustituir iconografía ad hoc por Lucide sin iniciar cambios visuales que carezcan de mockup y entrada en `mockups/screen-map.md`.
 
 - [ ] **UI-02 — Migrar la iconografía a `lucide-angular`.** Sustituir las máscaras CSS que cargan Lucide desde `unpkg.com` (barra lateral) y los SVG escritos a mano (KPI y carga) por `lucide-angular`, con el mapeo de iconos de `design.md`. Requiere añadir la dependencia (auditoría 06).
-- [ ] **UI-03 — Pasar a signals el estado asíncrono restante.** Reporte General, Tendencias, Carga, Administración y Directorio refrescan la vista con un `ChangeDetectorRef` inyectado, que queda inválido tras un reemplazo en caliente (HMR) y deja la pantalla en "Cargando…". Migrar su estado a signals, como el Explorador y Publicaciones (auditoría 06, U-12/UI-03).
+- [ ] **UI-03 — Pasar a signals el estado asíncrono restante.** Reporte General, Tendencias, Carga y Administración refrescan la vista con un `ChangeDetectorRef` inyectado, que queda inválido tras un reemplazo en caliente (HMR) y deja la pantalla en "Cargando…". Migrar su estado a signals, como el Explorador, Publicaciones, el Directorio y la Ficha del egresado (auditoría 06, U-12/UI-03). Observado el 2026-09-30: además, el endpoint de HMR de `ng serve` (`@ng/component`) puede seguir entregando una plantilla anterior incluso tras una recarga completa; si una pantalla no refleja un cambio de plantilla, reiniciar `ng serve`.
+
+## P2 — Autenticación
+
+- [ ] **FE-05 — Mostrar el rechazo de correos no institucionales en el login.** `LoginUseCase.execute` lanza un error síncrono cuando el correo no contiene `@upb.edu.co`; `LoginComponent.onSubmit` no lo captura, así que el botón queda en "Procesando…" y no aparece ningún mensaje. El caso de uso debe devolver un `Observable` con error (o el componente capturar la excepción) y la pantalla mostrar el motivo. Observado el 2026-09-30 durante la validación de PUB-01/PUB-02.
 
 ## P2 — Analítica
 

@@ -40,10 +40,18 @@
     color: var(--heading);
   }
 
+  .identificacion {
+    margin-bottom: var(--space-md);
+  }
+
   .cedula {
     color: var(--muted);
     font-size: 13px;
-    margin: 0 0 var(--space-md);
+    margin: 0;
+
+    & + .cedula {
+      margin-top: var(--space-2xs);
+    }
   }
 
   hr {
