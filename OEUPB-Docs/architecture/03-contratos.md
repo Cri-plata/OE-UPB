@@ -1,6 +1,6 @@
 # Estrategia de contratos HTTP
 
-**Estado:** verificado el 2026-09-24
+**Estado:** verificado el 2026-10-03
 
 ## Fuente canónica
 
@@ -13,7 +13,7 @@ Angular consume `src/app/data/api/generated-api.models.ts`, generado desde OpenA
 - Base local del backend: `http://localhost:8000`.
 - Rutas actuales: `/api/*`, decisión cerrada por ADR-011.
 - Autenticación: `Authorization: Bearer <JWT>`.
-- Errores: esquema `ErrorResponse` con `detail` (texto, u objeto `{codigo, mensaje}` cuando el cliente debe distinguir el caso). Cada router protegido declara 401/403 y cada endpoint sus códigos propios (`presentation/errores.py`). El 422 de validación de Pydantic conserva el esquema `HTTPValidationError`; la carga y la publicación documentan su propio 422.
+- Errores: esquema `ErrorResponse` con `detail` (texto, u objeto `{codigo, mensaje}` cuando el cliente debe distinguir el caso). Cada router protegido declara 401/403 y cada endpoint sus códigos propios (`presentation/errores.py`). El 422 de validación de Pydantic conserva el esquema `HTTPValidationError`. La carga, la publicación, la comparación y el Explorador documentan su propio 422 de negocio con `ErrorResponse`; una restricción de tipo de sus parámetros o del cuerpo (por ejemplo, `anio` fuera de 1900-2200) sigue respondiendo con `HTTPValidationError`, así que el cliente debe aceptar ambas formas.
 - Operaciones obsoletas: se marcan con `deprecated: true` y se conservan por compatibilidad (por ejemplo, `DELETE /api/usuarios/{id}`).
 - Cargas: `multipart/form-data`.
 

@@ -29,6 +29,7 @@ Nginx / proxy institucional
 - Backups y restauración probados.
 - Logs sin documentos, correos, respuestas abiertas ni tokens completos. El backend enmascara el documento en las rutas del directorio y la imagen desactiva el access log de Uvicorn; el proxy debe registrar la ruta sin query string o enmascarar `/api/directorio/*` y el parámetro `q`.
 - Health checks, métricas y procedimiento de rollback.
+- El proxy admite cuerpos de hasta 26 MB y espera 180 s en `/api/` (cargas de 25 MB y entrenamiento del modelo). El índice del frontend se sirve con `Cache-Control: no-cache` y Uvicorn confía en las cabeceras `X-Forwarded-*` del proxy interno (auditoría 08).
 
 ## Estado actual
 

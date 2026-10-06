@@ -22,7 +22,7 @@ Formato: **Como** [rol], **quiero** [acción], **para** [beneficio]. Incluye cri
 
 - CA1: Con credenciales incorrectas, el sistema muestra "Correo o contraseña incorrectos" sin especificar cuál falló (seguridad).
 - CA2: Tras un inicio exitoso, el sistema devuelve un token JWT que incluye el rol y el `sede_id` del usuario; los permisos y programas efectivos se obtienen y validan en backend contra su estado vigente. *(RN-08, RN-11, RN-22)*
-- CA3: El sistema redirige al usuario a su pantalla inicial según su rol (CTIC → Gestión de Coordinadores; Coordinador/Usuario de Consulta → Dashboard).
+- CA3: El sistema redirige al usuario a su pantalla inicial según su rol: CTIC → Gestión de accesos; Coordinador → Reporte General; Usuario de Consulta → Gráficas publicadas, también cuando aún no tiene permisos ni programas y la lista aparece vacía. *(RN-24, RN-28)*
 
 ### HU-03 — Aislamiento de Datos Fuente por Sede
 **Como** Coordinador de Sede, **quiero** que el sistema filtre automáticamente los datos fuente, **para** gestionar únicamente los egresados y encuestas de mi sede sin exponerlos a otras sedes.
@@ -50,10 +50,10 @@ Formato: **Como** [rol], **quiero** [acción], **para** [beneficio]. Incluye cri
 - CA1: El backend normaliza los nombres de las columnas, elimina filas completamente vacías y unifica formatos de texto (minúsculas, sin espacios extra). *(RF-04)*
 - CA2: El sistema usa la cédula (`numero_documento`) como llave primaria y nunca crea un duplicado. Si el Excel contiene una cédula existente, la carga crea la nueva medición y solo puede actualizar `fecha_grado` cuando la fecha recibida es más reciente; no sobrescribe nombre, apellido ni programa. *(RN-01, RF-06, ADR-014)*
 - CA3: Las respuestas dinámicas a las encuestas se serializan en JSON y se almacenan en `mediciones.respuestas`. *(Modelo de Datos)*
-- CA4: Una carga nunca modifica los datos personales de un egresado con corrección manual auditada; el resumen informa cuántos registros se conservaron. No existe sobrescritura con confirmación. *(RN-13, ADR-014)*
+- CA4: Una carga nunca modifica los datos personales de un egresado con corrección manual auditada; el mensaje de resultado informa cuántos registros se conservaron y cuántos casos de doble titulación se resolvieron. No existe sobrescritura con confirmación. *(RN-13, ADR-014)*
 
 ### HU-06 — Búsqueda y Edición Manual
-**Como** Coordinador de Sede, **quiero** un módulo de gestión individual, **para** buscar un egresado por su cédula y modificar o agregar su información manualmente en caso de omisiones en el Excel.
+**Como** Coordinador de Sede, **quiero** un módulo de gestión individual, **para** buscar un egresado por su cédula, nombre o ID y corregir manualmente sus datos personales (nombre, apellido, programa y fecha de grado). Las respuestas de las encuestas solo provienen de las cargas (RN-13).
 
 - CA1: El módulo incluye una barra de búsqueda que acepta cédula o nombre. *(RF-14, RF-15)*
 - CA2: Al encontrar al egresado, se despliega una "Ficha Individual" con su información personal y su historial de encuestas visibles para la sede. *(RF-14, RF-15, RF-52, RN-06)*
@@ -90,7 +90,7 @@ Formato: **Como** [rol], **quiero** [acción], **para** [beneficio]. Incluye cri
 ## Épica 4: Inteligencia Artificial (Módulo Predictivo)
 
 ### HU-10 — Predicción de Riesgo de Desempleo
-> **Estado:** en pausa hasta aprobar objetivo, métricas, población, horizonte y criterios de aceptación. Los criterios siguientes se conservan como antecedente y no autorizan implementación.
+> **Estado:** implementada conforme a ADR-019, que aprobó objetivo, métricas, población, horizonte y criterios éticos. Los criterios vigentes son los de RF-71; los siguientes se conservan como antecedente cuando difieren (el modelo usa Gradient Boosting sobre trayectorias M0 → M1 o M0/M1 → M5 y no recibe la cohorte como parámetro de entrada).
 
 **Como** Coordinador de Sede, **quiero** que el sistema corra un modelo predictivo sobre los egresados recién graduados, **para** identificar qué porcentaje tiene un alto riesgo de quedar desempleado a los 5 años.
 
@@ -124,7 +124,7 @@ Formato: **Como** [rol], **quiero** [acción], **para** [beneficio]. Incluye cri
 **Como** Coordinador de Sede, **quiero** publicar o retirar una gráfica desde la propia visualización, **para** compartir resultados agregados con usuarios autorizados sin exponer los datos fuente.
 
 - CA1: Cada gráfica publicable ofrece una acción `Publicar`; la pantalla de carga no contiene una acción para compartir encuestas. *(RF-35, RN-09)*
-- CA2: El cliente envía solo la definición de la gráfica. El backend recalcula las métricas y los programas de audiencia con los datos de la sede del JWT, y conserva la sede propietaria, los programas, la definición y una copia inmutable de las métricas. *(ADR-015)* La definición se usa para renderizar y auditar la instantánea, no para recalcularla automáticamente con datos posteriores. *(RN-09, RN-11, RN-14)*
+- CA2: El cliente envía la definición de la gráfica, una clave y un título; el backend rechaza (422) el título con correos, enlaces o secuencias de 5 o más dígitos (ADR-020). El backend recalcula las métricas y los programas de audiencia con los datos de la sede del JWT, y conserva la sede propietaria, los programas, la definición y una copia inmutable de las métricas. *(ADR-015)* La definición se usa para renderizar y auditar la instantánea, no para recalcularla automáticamente con datos posteriores. *(RN-09, RN-11, RN-14)*
 - CA3: El backend calcula la audiencia automáticamente; el coordinador no selecciona personas manualmente por gráfica. *(RF-37, RN-08, RN-11)*
 - CA4: Otra sede nunca recibe filas, documentos, nombres, correos, respuestas individuales ni archivos fuente. *(RN-04, RN-06, RN-09)*
 - CA5: Al retirar una publicación, deja de estar disponible para los coordinadores de otras sedes y para todos los usuarios de consulta, incluidos los de la propia sede, sin afectar la gráfica privada. Si el coordinador propietario está inactivo o fue reasignado a otra sede, otro coordinador de la sede propietaria puede retirarla. *(RN-09, RN-24)*

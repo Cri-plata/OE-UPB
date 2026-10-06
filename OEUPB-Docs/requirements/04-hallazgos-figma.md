@@ -9,7 +9,7 @@ Tras analizar los 8 nuevos mockups (UI en Modo Claro / Blanco con colores instit
 *   **Reporte General (Dashboard):** Representa visualmente filtros históricos de Sede, Facultad y Cohorte, además de métricas de empleabilidad y salarios. La política vigente exige derivar la sede propia del JWT y separar las publicaciones agregadas de otras sedes.
 *   **Administración de Datos:** El mockup histórico permite seleccionar Momento y Sede. La política vigente conserva la selección de Momento, pero la sede debe derivarse del JWT del coordinador y no puede seleccionarse para ampliar alcance.
 *   **Tendencias por Momento:** Representa visualmente el cruce M1 vs M5 requerido en el Acta 2; no demuestra que el contrato o la comparación longitudinal estén implementados.
-*   **Inteligencia Artificial:** Representa visualmente un word cloud / barras para NLP y alertas de riesgo de desempleo. La clasificación NLP local está implementada (RF-72) y la predicción permanece en pausa.
+*   **Inteligencia Artificial:** Representa visualmente un word cloud / barras para NLP y alertas de riesgo de desempleo. La clasificación NLP local (RF-72) y la predicción por programa (RF-71, ADR-019) están implementadas.
 *   **Gestión de Usuarios:** Se incluyó una pantalla con roles históricos (Decano, Coordinador, Administrador). La política vigente usa `Admin_CTIC`, `Coordinador_Sede` y `Usuario_Consulta`; este último recibe permisos y programas al crear la cuenta.
 *   **Modal de Errores Excel:** El mockup contempla cédulas duplicadas y vacías. La política vigente distingue duplicados dentro de la carga, resueltos según ADR-006, de documentos ya persistidos, que reciben la medición sin sobrescribir sus datos personales según RN-01 y ADR-014.
 

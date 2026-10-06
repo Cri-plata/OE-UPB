@@ -24,7 +24,7 @@
         </div>
         <div class="info-row">
           <span class="label">Sede Asignada:</span>
-          <strong class="value">{{ sedeNombre }}</strong>
+          <strong class="value">{{ sedeNombre() }}</strong>
         </div>
         <div class="info-row">
           <span class="label">ID de Sistema:</span>
@@ -42,7 +42,7 @@
         </div>
         <div class="security-box">
           <h3>Permisos de Acceso</h3>
-          <p *ngIf="usuario.rol === 'Coordinador_Sede'">Tienes permisos exclusivos para cargar, eliminar y consultar estadísticas y egresados correspondientes a la seccional de {{ sedeNombre }}.</p>
+          <p *ngIf="usuario.rol === 'Coordinador_Sede'">Tienes permisos exclusivos para cargar, eliminar y consultar estadísticas y egresados correspondientes a la seccional de {{ sedeNombre() }}.</p>
           <p *ngIf="usuario.rol === 'Admin_CTIC'">Tienes permisos de acceso a nivel nacional, incluyendo administración de usuarios de todo el sistema.</p>
           <p *ngIf="usuario.rol === 'Usuario_Consulta'">Tu acceso de solo lectura depende de los permisos, programas y publicaciones asignados por el coordinador de tu sede.</p>
         </div>

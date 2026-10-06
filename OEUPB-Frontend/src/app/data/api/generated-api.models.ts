@@ -379,6 +379,7 @@ export interface PrediccionEmpleabilidadResponse {
   "indicadores_robustez"?: Record<string, unknown> | null;
   "comparativa_algoritmos"?: Array<ComparativaAlgoritmoItem> | null;
   "validacion_temporal"?: ValidacionTemporalData | null;
+  "estrategia_balanceo"?: string | null;
 }
 
 export interface PrediccionProgramaItem {

@@ -113,7 +113,7 @@ export class LoginComponent {
     if (rol === 'Admin_CTIC') {
       this.router.navigate(['/admin-usuarios']);
     } else if (rol === 'Usuario_Consulta') {
-      this.router.navigate(['/mi-perfil']);
+      this.router.navigate(['/publicaciones']);
     } else {
       this.router.navigate(['/reporte']);
     }

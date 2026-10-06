@@ -9,9 +9,11 @@ export class UsuariosApi {
   private readonly http = inject(HttpClient);
   private readonly url = `${API_BASE_URL}/usuarios`;
 
-  listar(): Observable<UsuarioResponse[]> { return this.http.get<UsuarioResponse[]>(this.url); }
+  // La colección se publica como `/api/usuarios/`: sin la barra, FastAPI responde 307 con un Location
+  // que, detrás del proxy HTTPS, apunta a http:// y el navegador lo bloquea.
+  listar(): Observable<UsuarioResponse[]> { return this.http.get<UsuarioResponse[]>(`${this.url}/`); }
   programasAsignables(): Observable<string[]> { return this.http.get<string[]>(`${this.url}/programas-asignables`); }
-  crear(payload: UsuarioCreateRequest): Observable<UsuarioCreateResponse> { return this.http.post<UsuarioCreateResponse>(this.url, payload); }
+  crear(payload: UsuarioCreateRequest): Observable<UsuarioCreateResponse> { return this.http.post<UsuarioCreateResponse>(`${this.url}/`, payload); }
   actualizar(id: number, payload: object): Observable<UsuarioResponse> { return this.http.patch<UsuarioResponse>(`${this.url}/${id}`, payload); }
   cambiarEstado(id: number, accion: 'desactivar' | 'reactivar'): Observable<UsuarioResponse> { return this.http.post<UsuarioResponse>(`${this.url}/${id}/${accion}`, {}); }
   desactivar(id: number): Observable<unknown> { return this.http.delete(`${this.url}/${id}`); }

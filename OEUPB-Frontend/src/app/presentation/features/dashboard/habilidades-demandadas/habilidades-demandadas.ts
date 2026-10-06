@@ -6,6 +6,7 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { IaApi, HabilidadComparativaRow, HabilidadCuradaItem, CurarHabilidadRequest } from '../../../../data/api/ia.api';
 import { DirectorioApi } from '../../../../data/api/directorio.api';
+import { ReportesApi } from '../../../../data/api/reportes.api';
 import { CHART_PALETTE } from '../../../shared/chart-palette';
 import { exportChart } from '../../../shared/export-chart';
 
@@ -72,7 +73,8 @@ export class HabilidadesDemandadasComponent implements OnInit {
   topReglas: number = 20;
   filtroTopComparativa: number = 25;
 
-  aniosDisponibles: number[] = [2026, 2025, 2024, 2023, 2022];
+  // Cohortes (año de grado, RN-17) con datos en la sede; se cargan desde /api/reportes/filtros.
+  aniosDisponibles: number[] = [];
   programasDisponibles: string[] = [];
 
   // Datos obtenidos
@@ -139,11 +141,13 @@ export class HabilidadesDemandadasComponent implements OnInit {
   constructor(
     private iaApi: IaApi,
     private directorioApi: DirectorioApi,
+    private reportesApi: ReportesApi,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.cargarProgramas();
+    this.cargarCohortes();
     this.cargarDatosCompletos();
   }
 
@@ -154,6 +158,16 @@ export class HabilidadesDemandadasComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error cargando programas académicos:', err)
+    });
+  }
+
+  cargarCohortes() {
+    this.reportesApi.filtros().subscribe({
+      next: (filtros) => {
+        this.aniosDisponibles = [...(filtros.anios || [])].sort((a, b) => b - a);
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error cargando cohortes:', err)
     });
   }
 
@@ -236,6 +250,7 @@ export class HabilidadesDemandadasComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error aprobando habilidad:', err);
+        this.avisarErrorCuraduria(err, 'No se pudo aprobar la habilidad.');
         this.isSavingCuraduria = false;
         this.cdr.detectChanges();
       }
@@ -263,7 +278,10 @@ export class HabilidadesDemandadasComponent implements OnInit {
         }
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error descartando habilidad:', err)
+      error: (err) => {
+        console.error('Error descartando habilidad:', err);
+        this.avisarErrorCuraduria(err, 'No se pudo descartar el término.');
+      }
     });
   }
 
@@ -278,8 +296,17 @@ export class HabilidadesDemandadasComponent implements OnInit {
         this.cargarDatosCompletos();
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error eliminando curaduría:', err)
+      error: (err) => {
+        console.error('Error eliminando curaduría:', err);
+        this.avisarErrorCuraduria(err, 'No se pudo revertir la curaduría.');
+      }
     });
+  }
+
+  /** La curaduría es institucional: solo su autor la modifica (409) o revierte (403); el motivo viene del backend. */
+  private avisarErrorCuraduria(err: any, mensaje: string) {
+    const detalle = err?.error?.detail;
+    alert(typeof detalle === 'string' ? detalle : mensaje);
   }
 
   aplicarFiltros() {

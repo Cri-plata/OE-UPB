@@ -43,7 +43,8 @@ La URL base está centralizada en `environments/environment.ts` y `data/api/api.
 | `/tendencias` | Tendencias históricas |
 | `/explorador` | Cruce dinámico de variables |
 | `/publicaciones` | Catálogo de instantáneas agregadas autorizadas |
-| `/analitica` | Clasificación NLP y alertas descriptivas (coordinador) |
+| `/analitica` | Clasificación NLP, alertas descriptivas y predicción por programa (coordinador) |
+| `/habilidades` | Habilidades demandadas, reglas de asociación, comparativa M0/M1/M5 y curaduría (coordinador) |
 | `/carga` | Carga e historial de Excel |
 | `/directorio` | Directorio de egresados |
 | `/perfil/:cedula` | Ficha individual |
@@ -73,9 +74,9 @@ La URL base está centralizada en `environments/environment.ts` y `data/api/api.
 
 - `Admin_CTIC` mantiene una vista para administrar coordinadores.
 - `Coordinador_Sede` administra usuarios de consulta, su etiqueta informativa, los cuatro permisos del catálogo inicial y los programas observados en cargas visibles de la sede propia desde la vista de accesos.
-- Las gráficas publicables muestran una acción `Publicar`/`Retirar publicación` únicamente al coordinador propietario.
+- Las gráficas publicables muestran una acción `Publicar`/`Retirar publicación` únicamente al coordinador propietario. El backend también permite retirar la publicación de un propietario inactivo o reasignado (RN-09), pero la sección "Publicadas por otros coordinadores" todavía no ofrece esa acción (pendiente en el backlog).
 - La pantalla de carga no selecciona una sede para ampliar alcance y no contiene la acción de compartir encuestas.
-- `Usuario_Consulta` recibe un dashboard de solo lectura; el frontend muestra las gráficas autorizadas por la respuesta del backend y no intenta reconstruir permisos localmente.
+- `Usuario_Consulta` inicia en `/publicaciones` (login y guards), sin acceso al dashboard privado; el frontend muestra las gráficas autorizadas por la respuesta del backend y no intenta reconstruir permisos localmente.
 - El dashboard privado no ofrece selector de sede: usa exclusivamente la sede derivada de la sesión. Una vista separada presenta las instantáneas publicadas; al coordinador le muestra la sección "Mis publicaciones", con `Retirar publicación` (estado en `PublicacionControl`), y la sección "Publicadas por otros coordinadores" (ADR-018).
 - `Usuario_Consulta` nunca recibe gráficas privadas, ni siquiera las de su propia sede; solo instantáneas publicadas compatibles con sus permisos y programas.
 - Rector, profesor y administrativo son etiquetas informativas: la interfaz no precarga ni bloquea privilegios por etiqueta. Permisos y programas se seleccionan manualmente.

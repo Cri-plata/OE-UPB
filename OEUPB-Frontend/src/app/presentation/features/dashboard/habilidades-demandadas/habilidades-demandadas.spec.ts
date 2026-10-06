@@ -96,8 +96,9 @@ describe('HabilidadesDemandadasComponent', () => {
     http = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
 
-    // El componente dispara 3 peticiones en ngOnInit: programas, habilidades y reglas
+    // El componente dispara 4 peticiones en ngOnInit: programas, cohortes, habilidades y reglas
     http.expectOne(`${API}/directorio/programas`).flush(PROGRAMAS_RESPONSE);
+    http.expectOne(`${API}/reportes/filtros`).flush({ programas: [], anios: [2019, 2023], momentos: [0, 1, 5] });
     http.expectOne(r => r.url === `${API}/ia/habilidades-demandadas`).flush(HABILIDADES_RESPONSE);
     http.expectOne(r => r.url === `${API}/ia/reglas-asociacion`).flush(REGLAS_RESPONSE);
     fixture.detectChanges();
@@ -117,6 +118,11 @@ describe('HabilidadesDemandadasComponent', () => {
     expect(comp.estadisticas?.total_respuestas_analizadas).toBe(20);
     expect(comp.totalRespuestasReglas).toBe(20);
     expect(comp.transaccionesValidas).toBe(15);
+  });
+
+  it('ofrece como años las cohortes con datos de la sede, de la más reciente a la más antigua', () => {
+    const comp = crear().componentInstance;
+    expect(comp.aniosDisponibles).toEqual([2023, 2019]);
   });
 
   it('separa habilidades blandas y duras en los gráficos', () => {
@@ -372,5 +378,38 @@ describe('HabilidadesDemandadasComponent', () => {
     expect(comp.curandoItem).toBeNull();
     expect(comp.candidatasEmergentes.some(c => c.termino === 'flutter')).toBe(false);
   });
-});
 
+  it('informa al coordinador cuando el backend rechaza revertir una curaduría ajena', () => {
+    const fixture = crear();
+    const comp = fixture.componentInstance;
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const alerta = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    const ajena = {
+      id: 9, termino_original: 'docker', etiqueta_canonica: 'Docker', tipo: 'dura', variantes: [],
+      estado: 'aprobada', creado_por_id: 99, creado_por_correo: 'otro@upb.edu.co', fecha_creacion: '2026-10-01T10:00:00Z',
+    };
+    comp.curadasList = [ajena];
+
+    comp.eliminarCuraduria(ajena);
+    http.expectOne(`${API}/ia/habilidades/curar/9`).flush(
+      { detail: 'No tiene permisos para revertir esta curaduría.' }, { status: 403, statusText: 'Forbidden' },
+    );
+
+    expect(alerta).toHaveBeenCalledWith(expect.stringContaining('No tiene permisos para revertir esta curaduría.'));
+    expect(comp.curadasList.length).toBe(1);
+  });
+
+  it('informa al coordinador cuando el término ya fue curado por otro', () => {
+    const fixture = crear();
+    const comp = fixture.componentInstance;
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const alerta = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+    comp.descartarEmergente({ termino: 'docker', score_tfidf: 0.5, frecuencia_documentos: 3 });
+    http.expectOne(`${API}/ia/habilidades/curar`).flush(
+      { detail: 'El término ya fue curado por otro@upb.edu.co; solo su autor puede modificarlo.' }, { status: 409, statusText: 'Conflict' },
+    );
+
+    expect(alerta).toHaveBeenCalledWith(expect.stringContaining('solo su autor puede modificarlo'));
+  });
+});
