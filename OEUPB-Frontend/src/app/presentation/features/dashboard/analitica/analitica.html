@@ -432,6 +432,7 @@
               <div class="title-with-badge">
                 <h3 class="card-subtitle">Matriz de Confusión y Diagnóstico del Modelo</h3>
                 <span class="badge badge-ai">Stratified K-Fold</span>
+                <span class="badge badge-success" *ngIf="prediccion.estrategia_balanceo">Ponderación Balanceada Activa</span>
               </div>
               <p class="section-subtitle">
                 Evaluación de aciertos y desvíos entre los estados laborales reales y los proyectados por el clasificador.
@@ -493,6 +494,9 @@
             <small class="cell-subtext">
               Precisión general validada: <strong>{{ prediccion.precision_modelo }}%</strong> · F1-Score Macro: <strong>{{ prediccion.f1_score }}</strong>.
               Las celdas verdes en la diagonal representan trayectorias donde el clasificador predijo con exactitud el estado del egresado.
+              <span *ngIf="prediccion.estrategia_balanceo">
+                El modelo opera con ponderación adaptativa de clases (Cost-Sensitive Learning) para priorizar la identificación de egresados en situación de desempleo.
+              </span>
             </small>
           </div>
         </article>

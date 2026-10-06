@@ -31,6 +31,7 @@ const PREDICCION_MOCK = {
   total_trayectorias: 91,
   precision_modelo: 59.3,
   f1_score: 0.343,
+  estrategia_balanceo: 'Ponderación adaptativa de clases activa (Cost-Sensitive Learning)',
   programas_analizados: 2,
   egresados_en_riesgo: 0,
   importancia_factores: [
@@ -317,5 +318,13 @@ describe('AnaliticaComponent', () => {
     expect(compiled.textContent).toContain('Validación Temporal por Cohorte / Backtesting (IA-17)');
     expect(compiled.textContent).toContain('Año 2024');
     expect(compiled.textContent).toContain('64%');
+  });
+
+  it('muestra el badge y texto de ponderación balanceada en la matriz de confusión', () => {
+    const fixture = crear();
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Ponderación Balanceada Activa');
+    expect(compiled.textContent).toContain('Cost-Sensitive Learning');
   });
 });

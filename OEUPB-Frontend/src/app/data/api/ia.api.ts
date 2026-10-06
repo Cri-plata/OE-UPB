@@ -43,6 +43,7 @@ export interface IndicadorDimension {
 export interface IndicadoresRobustezData {
   nivel_general: 'Alta' | 'Media' | 'Baja' | string;
   color_general: 'verde' | 'amarillo' | 'rojo' | string;
+  estrategia_balanceo?: string;
   muestra: IndicadorDimension;
   balance_clases: IndicadorDimension;
   precision: IndicadorDimension;
@@ -141,6 +142,7 @@ export interface PrediccionEmpleabilidadResponse {
   indicadores_robustez?: IndicadoresRobustezData;
   comparativa_algoritmos?: ComparativaAlgoritmoItem[];
   validacion_temporal?: ValidacionTemporalData;
+  estrategia_balanceo?: string;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -18,11 +18,15 @@ from collections import Counter
 import time
 import numpy as np
 import pandas as pd
+import sklearn.base
 
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import StratifiedKFold, cross_validate
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
+from sklearn.utils.class_weight import compute_sample_weight
 
 from domain.models import Medicion, Egresado, Sede
 from application.indicadores import estado_laboral, salario
@@ -241,24 +245,41 @@ def preparar_matriz_features(df: pd.DataFrame) -> Tuple[np.ndarray, List[str], p
     return X, feature_cols, df_proc
 
 
+def calcular_pesos_balanceados(y: np.ndarray, factor_suavizado: float = 0.65) -> np.ndarray:
+    """
+    Calcula pesos muestrales balanceados inversamente proporcionales a las frecuencias de clase (Cost-Sensitive Learning),
+    aplicando suavizado exponencial (factor_suavizado=0.65) para atenuar sobre-penalizaciones agresivas de la clase mayoritaria.
+    Normaliza los pesos para preservar la escala promedio unitaria (mean=1.0).
+    """
+    if len(y) == 0:
+        return np.array([], dtype=float)
+    raw_weights = compute_sample_weight(class_weight="balanced", y=y)
+    if factor_suavizado != 1.0:
+        smoothed = np.power(raw_weights, factor_suavizado)
+        mean_val = float(np.mean(smoothed))
+        return (smoothed / mean_val) if mean_val > 0 else smoothed
+    return raw_weights
+
+
 def entrenar_evaluar_modelo(
     X: np.ndarray,
     y: np.ndarray,
     feature_cols: List[str],
 ) -> Dict[str, Any]:
     """
-    Aplica GradientBoostingClassifier con validación cruzada y evaluación comparativa
-    multi-algoritmo (Gradient Boosting vs Random Forest vs Regresión Logística) (IA-10).
+    Aplica GradientBoostingClassifier con calibración adaptativa contra desbalance de clases (Cost-Sensitive Learning),
+    validación cruzada estratificada y evaluación comparativa multi-algoritmo (IA-10).
     """
     clase_counts = Counter(y)
     min_count = min(clase_counts.values()) if clase_counts else 0
     n_splits = max(2, min(5, min_count))
+    sample_weights = calcular_pesos_balanceados(y, factor_suavizado=0.65)
 
-    # Definir suite de clasificadores supervisados (IA-10)
+    # Definir suite de clasificadores supervisados con soporte de ponderación balanceada (IA-10)
     candidatos = [
         ("Gradient Boosting", GradientBoostingClassifier(n_estimators=50, max_depth=3, random_state=42)),
-        ("Random Forest", RandomForestClassifier(n_estimators=50, max_depth=5, random_state=42)),
-        ("Regresión Logística", LogisticRegression(max_iter=400, random_state=42)),
+        ("Random Forest", RandomForestClassifier(n_estimators=50, max_depth=5, class_weight="balanced", random_state=42)),
+        ("Regresión Logística", make_pipeline(StandardScaler(), LogisticRegression(max_iter=500, class_weight="balanced", random_state=42))),
     ]
 
     comparativa_algoritmos = []
@@ -271,22 +292,43 @@ def entrenar_evaluar_modelo(
         if n_splits >= 2 and len(clase_counts) > 1:
             cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
             try:
-                scores = cross_validate(estimator, X, y, cv=cv, scoring=["accuracy", "f1_macro"])
-                m_acc = float(np.mean(scores["test_accuracy"]))
-                m_f1 = float(np.mean(scores["test_f1_macro"]))
+                acc_folds = []
+                f1_folds = []
+                for tr_idx, te_idx in cv.split(X, y):
+                    est_fold = sklearn.base.clone(estimator)
+                    if nombre == "Gradient Boosting":
+                        sw_fold = calcular_pesos_balanceados(y[tr_idx], factor_suavizado=0.65)
+                        est_fold.fit(X[tr_idx], y[tr_idx], sample_weight=sw_fold)
+                    else:
+                        est_fold.fit(X[tr_idx], y[tr_idx])
+                    preds_fold = est_fold.predict(X[te_idx])
+                    acc_folds.append(accuracy_score(y[te_idx], preds_fold))
+                    f1_folds.append(f1_score(y[te_idx], preds_fold, average="macro"))
+                m_acc = float(np.mean(acc_folds))
+                m_f1 = float(np.mean(f1_folds))
             except Exception:
-                estimator.fit(X, y)
+                if nombre == "Gradient Boosting":
+                    estimator.fit(X, y, sample_weight=sample_weights)
+                else:
+                    estimator.fit(X, y)
                 preds = estimator.predict(X)
                 m_acc = float(accuracy_score(y, preds))
                 m_f1 = float(f1_score(y, preds, average="macro"))
         else:
-            estimator.fit(X, y)
+            if nombre == "Gradient Boosting":
+                estimator.fit(X, y, sample_weight=sample_weights)
+            else:
+                estimator.fit(X, y)
             preds = estimator.predict(X)
             m_acc = float(accuracy_score(y, preds))
             m_f1 = float(f1_score(y, preds, average="macro"))
         t_elapsed = round((time.perf_counter() - t0) * 1000, 1)
 
-        estimator.fit(X, y)
+        # Ajuste final en toda la muestra
+        if nombre == "Gradient Boosting":
+            estimator.fit(X, y, sample_weight=sample_weights)
+        else:
+            estimator.fit(X, y)
         es_seleccionado = (nombre == "Gradient Boosting")
 
         comparativa_algoritmos.append({
@@ -388,7 +430,8 @@ def evaluar_validacion_temporal(
 
     clf_temporal = GradientBoostingClassifier(n_estimators=50, max_depth=3, random_state=42)
     try:
-        clf_temporal.fit(X_train, y_train)
+        sw_temporal = calcular_pesos_balanceados(y_train, factor_suavizado=0.65)
+        clf_temporal.fit(X_train, y_train, sample_weight=sw_temporal)
         preds_test = clf_temporal.predict(X_test)
 
         acc_temp = float(accuracy_score(y_test, preds_test)) * 100.0
@@ -574,6 +617,7 @@ def calcular_indicadores_robustez(
     return {
         "nivel_general": nivel_general,
         "color_general": color_general,
+        "estrategia_balanceo": "Ponderación adaptativa de clases activa (Cost-Sensitive Learning)",
         "muestra": {
             "status": status_muestra,
             "color": color_muestra,
@@ -584,7 +628,7 @@ def calcular_indicadores_robustez(
             "status": status_balance,
             "color": color_balance,
             "min_porcentaje": round(min_pct, 1),
-            "observacion": obs_balance,
+            "observacion": obs_balance + " Compensado con pesos muestrales balanceados.",
         },
         "precision": {
             "status": status_precision,
@@ -718,7 +762,8 @@ def predecir_empleabilidad_servicio(
 
     resultado = {
         "estado": "exitoso",
-        "mensaje": "Modelo predictivo entrenado y validado satisfactoriamente con GradientBoostingClassifier.",
+        "mensaje": "Modelo predictivo entrenado y validado satisfactoriamente con GradientBoostingClassifier y balanceo adaptativo de clases.",
+        "estrategia_balanceo": "Ponderación adaptativa de clases activa (Cost-Sensitive Learning)",
         "total_trayectorias": len(trayectorias),
         "precision_modelo": eval_estado["accuracy"],
         "f1_score": eval_estado["f1_score"],

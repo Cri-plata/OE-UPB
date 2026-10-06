@@ -99,7 +99,41 @@ def test_endpoint_api_prediccion_autorizado():
     print("\n[OK] Endpoint GET /api/ia/prediccion-empleabilidad responde 200 OK con esquema completo")
 
 
+def test_calibracion_desbalance_clases():
+    import numpy as np
+    from application.prediccion_service import calcular_pesos_balanceados
+
+    # Dataset sintético desbalanceado: 80% A, 15% B, 5% C
+    y_test = np.array(["A"] * 80 + ["B"] * 15 + ["C"] * 5)
+    pesos = calcular_pesos_balanceados(y_test, factor_suavizado=0.65)
+
+    assert len(pesos) == len(y_test)
+    assert np.isclose(np.mean(pesos), 1.0, atol=1e-5)
+
+    # Las clases minoritarias deben tener mayor peso que la clase mayoritaria
+    peso_A = pesos[y_test == "A"][0]
+    peso_B = pesos[y_test == "B"][0]
+    peso_C = pesos[y_test == "C"][0]
+
+    assert peso_C > peso_B > peso_A, f"Esperado peso_C > peso_B > peso_A, obtenido: C={peso_C}, B={peso_B}, A={peso_A}"
+
+    db = SessionLocal()
+    mediciones = db.query(Medicion).all()
+    egresados = db.query(Egresado).all()
+    resultado = predecir_empleabilidad_servicio(
+        mediciones=mediciones,
+        egresados=egresados,
+        momento_origen=0,
+        momento_destino=1,
+    )
+    assert "estrategia_balanceo" in resultado
+    assert "Cost-Sensitive" in resultado["estrategia_balanceo"]
+    assert "Cost-Sensitive" in resultado["indicadores_robustez"]["estrategia_balanceo"]
+    print(f"\n[OK] Calibración de desbalance de clases validada: peso_C={peso_C:.2f} > peso_B={peso_B:.2f} > peso_A={peso_A:.2f}")
+
+
 if __name__ == "__main__":
+    test_calibracion_desbalance_clases()
     test_servicio_prediccion_con_datos_reales()
     test_servicio_fallback_datos_insuficientes()
     test_endpoint_api_prediccion_autorizado()
