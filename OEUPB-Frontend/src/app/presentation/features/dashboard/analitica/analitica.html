@@ -57,8 +57,8 @@
       <div class="predictive-header">
         <div>
           <div class="title-with-badge">
-            <h2 class="card-title">Proyección de Inserción Laboral y Empleabilidad</h2>
-            <span class="badge badge-ai" title="Modelo predictivo supervisado basado en Gradient Boosting">Modelo Predictivo Institucional</span>
+            <h2 class="card-title">Modelo de Análisis de Empleabilidad (RF-71)</h2>
+            <span class="badge badge-ai">Gradient Boosting</span>
           </div>
           <p class="section-subtitle">
             Estimación de la probabilidad de empleo y niveles salariales futuros por programa académico, basada en el seguimiento histórico a egresados de la sede.
@@ -156,7 +156,7 @@
               </span>
               <span class="kpi-label">
                 Nivel de Acierto del Modelo
-                <span class="tooltip-trigger" title="Porcentaje de predicciones correctas sobre el total de egresados evaluados mediante validación cruzada estratificada (Stratified K-Fold).">ℹ</span>
+                <span class="tooltip-trigger" title="Porcentaje de clasificaciones correctas sobre el total de egresados evaluados mediante validación cruzada estratificada (Stratified K-Fold).">ℹ</span>
               </span>
             </div>
             <div class="kpi-value">{{ prediccion.precision_modelo }}%</div>
@@ -529,7 +529,7 @@
                 <tr *ngFor="let a of comparativaAlgoritmos" [class.highlight-row]="a.seleccionado">
                   <td>
                     <strong>{{ a.algoritmo }}</strong>
-                    <span class="subtext-d" *ngIf="a.seleccionado"> · Ensamble predictivo por árboles de decisión (Mayor precisión demostrada)</span>
+                    <span class="subtext-d" *ngIf="a.seleccionado"> · Ensamble por árboles de decisión (Mayor precisión demostrada)</span>
                   </td>
                   <td class="text-center font-bold">{{ a.accuracy }}%</td>
                   <td class="text-center">{{ a.f1_score }}</td>
