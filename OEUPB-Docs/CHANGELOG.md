@@ -2,6 +2,13 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-10-06] - Modelo de análisis en interfaz, informe y contrato (IA-02)
+
+* **Mockups:** `analitica.html` y `screen-map.md` hablan de "Modelo de Análisis de Empleabilidad" (ADR-021).
+* **OpenAPI:** las descripciones de `/api/ia/prediccion-*` describen un análisis retrospectivo; las rutas conservan su nombre.
+* **Arquitectura y reglas:** `00-proyecto.md`, `01-frontend.md`, `02-backend.md`, RN-32 y los hallazgos de Figma ya no llaman "predicción" a la capacidad. El título de ADR-019 en el índice remite a ADR-021.
+* **Backlog:** IA-02 cerrado y archivado.
+
 ## [2026-10-06] - Documentación de los modelos de análisis
 
 * **Nuevo:** `architecture/06-modelos-analiticos.md` documenta los 11 modelos de análisis (KPI laborales, comparación entre momentos, publicación con k = 5, NLP descriptivo y alertas, habilidades con spaCy, emergentes TF-IDF, curaduría, reglas de asociación, comparativa temporal, modelo de empleabilidad y su robustez). Para cada uno: datos, parámetros reales, salida, cachés, verificación y límites de interpretación.

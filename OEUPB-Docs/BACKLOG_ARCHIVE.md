@@ -4,6 +4,12 @@ Este archivo conserva tareas completadas, reemplazadas o descartadas. No debe us
 
 ## Completado el 2026-10-06
 
+- [x] **IA-02 — Presentar el modelo de empleabilidad como modelo de análisis (ADR-021).** Se siguió el orden de las reglas de interfaz:
+  - Mockup `mockups/analitica.html` y `mockups/screen-map.md`.
+  - Pantalla Analítica (título, carga, tooltip de exactitud, eje "Estimado" de la matriz, validación temporal, mensaje de error y nombre del archivo descargado), con la prueba `presenta el modelo como modelo de análisis y no como predictivo`.
+  - Mensaje del servicio, informe Excel ("Factor Explicativo") y docstrings del router (OpenAPI regenerado), con la prueba `test_mensaje_e_informe_no_lo_presentan_como_predictivo`.
+  Se mantienen las menciones a proyecciones (estudio de proyección) y los identificadores técnicos `prediccion_*`.
+
 - [x] **TST-01 — Scripts de prueba en la raíz del backend.** `test_prediccion_empleabilidad.py` pasó a `tests/` sobre SQLite en memoria, con trayectorias sintéticas y las mismas verificaciones; ya no usa la base de `.env` (su prueba de endpoint podía cambiar el rol del primer usuario de la base real). `test_diagnostico.py`, `test_ia_pipeline.py` y `test_reglas_asociacion.py` eran diagnósticos manuales sin base de datos: pasaron a `scripts/dev/diagnostico_ia/` con nombres `diagnostico_*.py`. Los scripts operativos (`seed_db`, `backup_database`, `restore_database`) pasaron a `scripts/ops/`.
 
 ## Verificado y archivado el 2026-09-22

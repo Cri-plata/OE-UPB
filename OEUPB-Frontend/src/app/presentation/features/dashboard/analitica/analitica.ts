@@ -166,7 +166,7 @@ export class AnaliticaComponent implements OnInit {
           this.cdr.markForCheck();
         },
         error: () => {
-          this.errorPrediccion = 'No fue posible conectar con el servicio predictivo de IA.';
+          this.errorPrediccion = 'No fue posible conectar con el servicio de análisis de IA.';
           this.cargandoPrediccion = false;
           this.isChartReady = false;
           this.cdr.markForCheck();
@@ -333,7 +333,7 @@ export class AnaliticaComponent implements OnInit {
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `informe_predictivo_M0_a_M${this.momentoDestino}_oeupb.xlsx`;
+          a.download = `informe_analisis_empleabilidad_M0_a_M${this.momentoDestino}_oeupb.xlsx`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);

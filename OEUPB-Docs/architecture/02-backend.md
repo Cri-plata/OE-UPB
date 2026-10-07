@@ -38,7 +38,7 @@ La estructura usa nombres de Clean Architecture, pero los límites son parciales
 | `/api/sedes` | Catálogo autenticado de sedes activas |
 | `/api/publicaciones` | Publicar (con recálculo), retirar, listar propias y catálogo autorizado |
 | `/api/analitica` | Resumen NLP y alertas descriptivas de la sede |
-| `/api/ia` | Habilidades demandadas, reglas de asociación, comparativa temporal, curaduría, predicción, robustez del modelo y exportaciones Excel; solo coordinador y sede propia (RN-32) |
+| `/api/ia` | Habilidades demandadas, reglas de asociación, comparativa temporal, curaduría, modelo de análisis de empleabilidad, robustez del modelo y exportaciones Excel; solo coordinador y sede propia (RN-32) |
 | `/api/health` | Liveness y readiness |
 
 El inventario exacto se encuentra en `../specs/api/openapi.json`.

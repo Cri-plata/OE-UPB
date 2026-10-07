@@ -4,7 +4,7 @@
     <header class="page-header">
       <div class="page-header-content">
         <h1>Analítica y alertas</h1>
-        <p>Indicadores complementarios, clasificación de texto no estructurado y modelo predictivo de empleabilidad.</p>
+        <p>Indicadores complementarios, clasificación de texto no estructurado y modelo de análisis de empleabilidad.</p>
       </div>
       <img src="escudo-upb.png" alt="Escudo UPB" class="shield" />
     </header>
@@ -52,12 +52,12 @@
       </div>
     </ng-container>
 
-    <!-- SECCIÓN 2: MODELO PREDICTIVO DE EMPLEABILIDAD (RF-71) -->
+    <!-- SECCIÓN 2: MODELO DE ANÁLISIS DE EMPLEABILIDAD (RF-71, ADR-021) -->
     <section class="card predictive-section">
       <div class="predictive-header">
         <div>
           <div class="title-with-badge">
-            <h2 class="card-title">Modelo Predictivo de Empleabilidad (RF-71)</h2>
+            <h2 class="card-title">Modelo de Análisis de Empleabilidad (RF-71)</h2>
             <span class="badge badge-ai">Gradient Boosting</span>
           </div>
           <p class="section-subtitle">
@@ -117,7 +117,7 @@
 
       <div *ngIf="cargandoPrediccion" class="loading-state">
         <div class="spinner"></div>
-        <p>Entrenando y evaluando modelo predictivo con validación cruzada...</p>
+        <p>Entrenando y evaluando el modelo de análisis con validación cruzada...</p>
       </div>
 
       <div *ngIf="errorPrediccion" class="error-message">
@@ -157,7 +157,7 @@
               </span>
               <span class="kpi-label">
                 Precisión del Modelo
-                <span class="tooltip-trigger" title="Porcentaje de predicciones correctas sobre el total de egresados evaluados mediante validación cruzada estratificada (Stratified K-Fold).">ℹ</span>
+                <span class="tooltip-trigger" title="Porcentaje de clasificaciones correctas sobre el total de egresados evaluados mediante validación cruzada estratificada (Stratified K-Fold).">ℹ</span>
               </span>
             </div>
             <div class="kpi-value">{{ prediccion.precision_modelo }}%</div>
@@ -241,7 +241,7 @@
           </div>
         </article>
 
-        <!-- Dos Columnas: Importancia de Factores y Alertas Predictivas -->
+        <!-- Dos Columnas: Importancia de Factores y Alertas de Riesgo -->
         <div class="two-column predictive-details">
           <!-- Tarjeta: Importancia de Factores (IA-03) -->
           <article class="card inner-card">
@@ -286,7 +286,7 @@
             </div>
           </article>
 
-          <!-- Tarjeta: Alertas Predictivas -->
+          <!-- Tarjeta: Alertas de Riesgo -->
           <article class="card inner-card">
             <h3 class="card-subtitle">Alertas de Riesgo de Desempleo Proyectado</h3>
             <p class="section-subtitle">Alertas automáticas cuando la probabilidad de desempleo supera el 30%</p>
@@ -456,7 +456,7 @@
                 <tr>
                   <th class="corner-header">
                     <span class="axis-observed">Real ↓</span>
-                    <span class="axis-predicted">Predicho →</span>
+                    <span class="axis-predicted">Estimado →</span>
                   </th>
                   <th *ngFor="let colClase of prediccion.matriz_confusion.clases" class="text-center col-header">
                     {{ formatClaseLabel(colClase) }}
@@ -555,7 +555,7 @@
                 <span class="badge badge-ai">Generalización en el Tiempo</span>
               </div>
               <p class="section-subtitle">
-                Simula la proyección en escenario real: entrena con las cohortes históricas previas y evalúa su capacidad predictiva contra la cohorte más reciente.
+                Simula la proyección en escenario real: entrena con las cohortes históricas previas y evalúa su capacidad de generalización contra la cohorte más reciente.
               </p>
             </div>
             <div *ngIf="prediccion.validacion_temporal.disponible">

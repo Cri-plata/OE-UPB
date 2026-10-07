@@ -3,6 +3,10 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Cambiado (2026-10-06, modelo de análisis de empleabilidad, ADR-021)
+- **Pantalla Analítica:** "Modelo de Análisis de Empleabilidad" en lugar de "Modelo Predictivo". El tooltip de exactitud habla de clasificaciones correctas, el eje de la matriz de confusión dice "Estimado" y la validación temporal mide la capacidad de generalización. También se corrigieron el mensaje de error y el nombre del archivo descargado. Las referencias a proyecciones se conservan.
+- **Backend:** el mensaje del servicio, el informe Excel ("Factor Explicativo"), los docstrings y las descripciones del OpenAPI dejan de presentar el modelo como predictivo. El archivo del informe se llama `informe_analisis_empleabilidad_oeupb.xlsx`. Rutas e identificadores `prediccion_*` sin cambios.
+
 ### Cambiado (2026-10-06, reorganización de archivos sueltos)
 - **Backend:** `seed_db.py`, `backup_database.py` y `restore_database.py` pasan a `scripts/ops/`. Los diagnósticos manuales de IA (`test_diagnostico.py`, `test_ia_pipeline.py`, `test_reglas_asociacion.py`) pasan a `scripts/dev/diagnostico_ia/` como `diagnostico_*.py`, porque no son pruebas.
 - **Pruebas de predicción:** `test_prediccion_empleabilidad.py` pasa a `tests/` y usa SQLite en memoria con trayectorias sintéticas. Antes se conectaba a la base de `.env` y su prueba de endpoint podía cambiar el rol de un usuario real.

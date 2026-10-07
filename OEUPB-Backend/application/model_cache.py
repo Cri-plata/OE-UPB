@@ -1,6 +1,6 @@
 """
 application/model_cache.py
-Cache en memoria para modelos y resultados predictivos (IA-09)
+Cache en memoria para los resultados del modelo de análisis de empleabilidad y de habilidades (IA-09)
 ==============================================================
 Evita reentrenar modelos supervisados (GradientBoostingClassifier, StratifiedKFold)
 innecesariamente cuando múltiples peticiones con los mismos filtros y volumen

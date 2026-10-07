@@ -1,4 +1,4 @@
-"""Pruebas del servicio y endpoint del modelo predictivo de empleabilidad (RF-71, ADR-019).
+"""Pruebas del servicio y endpoint del modelo de análisis de empleabilidad (RF-71, ADR-019, ADR-021).
 
 Usan SQLite en memoria y trayectorias sintéticas: nunca la base configurada en `.env`.
 """
@@ -12,7 +12,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from application.auth_service import get_password_hash
-from application.prediccion_service import calcular_pesos_balanceados, predecir_empleabilidad_servicio
+from application.prediccion_service import calcular_pesos_balanceados, generar_excel_prediccion, predecir_empleabilidad_servicio
 from domain.models import Base, Carga, Egresado, Medicion, Sede, Usuario
 from infrastructure.database import get_db
 from main import app
@@ -138,6 +138,16 @@ class PrediccionEmpleabilidadTest(unittest.TestCase):
         self.assertIn("Cost-Sensitive", resultado["estrategia_balanceo"])
         self.assertIn("Cost-Sensitive", resultado["indicadores_robustez"]["estrategia_balanceo"])
 
+
+    def test_mensaje_e_informe_no_lo_presentan_como_predictivo(self):
+        # ADR-021: es un modelo de análisis retrospectivo, no un modelo predictivo.
+        from openpyxl import load_workbook
+        resultado = self.predecir(1)
+        self.assertNotIn("predictiv", resultado["mensaje"].lower())
+        libro = load_workbook(generar_excel_prediccion(resultado))
+        textos = " ".join(str(c.value) for hoja in libro.worksheets for fila in hoja.iter_rows() for c in fila if c.value is not None).lower()
+        self.assertNotIn("predictiv", textos)
+        self.assertIn("factor explicativo", textos)
 
 if __name__ == "__main__":
     unittest.main()

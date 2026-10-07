@@ -97,7 +97,7 @@ Los módulos más grandes son `ia_service.py` (1.071), `prediccion_service.py` (
 | Riesgo | Impacto | Recomendación |
 |---|---|---|
 | Lógica de negocio en routers grandes (`ia_router.py`, `carga_router.py`) | Mantenimiento y pruebas más costosos | Extraer casos de uso a `application/` con pruebas |
-| ~~Scripts de prueba en la raíz del backend que usaban la base de `.env`~~ | Resuelto el 2026-10-06 (TST-01): la prueba de predicción pasó a `tests/` sobre SQLite y los diagnósticos a `scripts/dev/diagnostico_ia/` | — |
+| ~~Scripts de prueba en la raíz del backend que usaban la base de `.env`~~ | Resuelto el 2026-10-06 (TST-01): la prueba del modelo de empleabilidad pasó a `tests/` sobre SQLite y los diagnósticos a `scripts/dev/diagnostico_ia/` | — |
 | Pantallas con `ChangeDetectorRef` (UI-03) | Pantallas en "Cargando…" tras recargas en caliente | Migrar a signals |
 | IA en frío | La primera consulta por worker tras un reinicio puede tardar unos 40 s con decenas de miles de respuestas | Calentar antes de la demo; a futuro, precálculo o caché compartida |
 | Cachés en memoria por worker | Resultados de IA calculados por proceso (la taxonomía ya se alinea por firma) | Caché compartida (Redis) si se escala |

@@ -19,10 +19,6 @@
 - [ ] **CAR-01 — Avisar que una recarga reemplaza la cohorte.** La pantalla de carga debe advertir que un archivo con la misma sede, momento y año sustituye la versión vigente completa y que cada cohorte se carga en un único archivo consolidado (ADR-020, punto 8). Requiere mockup.
 - [ ] **PUB-05 — Publicaciones derivadas de cargas eliminadas o reemplazadas.** Una instantánea sigue vigente aunque se elimine o reemplace la carga de la que salió (B-06). Producto debe decidir si se retira, se marca como desactualizada o se notifica al propietario.
 
-## P2 — Analítica (denominación)
-
-- [ ] **IA-02 — Dejar de presentar el modelo de empleabilidad como predictivo en la interfaz y el informe.** La pantalla Analítica ("Modelo Predictivo de Empleabilidad", "proyección", "riesgo proyectado"), el informe Excel de `generar_excel_prediccion` y las descripciones del OpenAPI siguen usando lenguaje predictivo. Según ADR-021 deben hablar de modelo de análisis y estimaciones. Orden obligatorio: `mockups/analitica.html`, `mockups/screen-map.md`, la plantilla Angular con sus pruebas, el Excel y los docstrings del router, y regenerar el OpenAPI. Los identificadores técnicos (`prediccion_*`) se conservan.
-
 ## P2 — Autenticación
 
 - [ ] **AUT-01 — Ciclo de vida de cuentas CTIC y de sedes.** No hay flujo para crear, desactivar o recuperar una cuenta `Admin_CTIC` ni para desactivar una sede, y no se define el efecto sobre usuarios, cargas y publicaciones (B-12, B-13). Tampoco hay política de contraseña personal, cambio voluntario ni límite de intentos (B-18).

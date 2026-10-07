@@ -28,3 +28,5 @@ El equipo de producto confirmó el 2026-10-06 que la denominación correcta es *
 
 - La documentación vigente usa la nueva denominación: requisitos (RF-71, HU-10), casos de uso, matriz, arquitectura (`06-modelos-analiticos.md`), estado funcional, estudio del proyecto, seguridad, pruebas y `CLAUDE.md`. Los registros históricos (ADR-019, auditorías y entradas antiguas del changelog) no se reescriben.
 - Queda pendiente alinear los textos visibles de la pantalla Analítica, el informe Excel y las descripciones del OpenAPI (IA-02). El cambio de la pantalla exige actualizar primero el mockup `mockups/analitica.html` y `mockups/screen-map.md`, según las reglas de interfaz.
+
+**Actualización 2026-10-06:** IA-02 completado. La interfaz, el informe Excel y el OpenAPI ya no presentan el modelo como predictivo. Las referencias a "proyección" se conservan cuando describen el estudio de proyección por programa.

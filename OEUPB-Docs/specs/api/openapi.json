@@ -3117,7 +3117,7 @@
           "Inteligencia Artificial"
         ],
         "summary": "Get Prediccion Empleabilidad",
-        "description": "Modelo Predictivo de Empleabilidad (RF-71 / IA-01).\nEntrena modelos supervisados (GradientBoostingClassifier) usando trayectorias longitudinales\nde egresados (M0 -> M1 o M0/M1 -> M5) para proyectar probabilidades de inserción laboral,\nriesgo de desempleo y nivel salarial agregado por programa.",
+        "description": "Modelo de Análisis de Empleabilidad (RF-71 / IA-01, ADR-021).\nEntrena un modelo supervisado (GradientBoostingClassifier) sobre trayectorias longitudinales ya\nobservadas (M0 -> M1 o M0/M1 -> M5) y estima, agregado por programa, la probabilidad de cada\nsituación laboral, el riesgo de desempleo y el rango salarial. Es un análisis retrospectivo, no\nun pronóstico sobre graduandos sin seguimiento; la ruta conserva su nombre histórico.",
         "operationId": "get_prediccion_empleabilidad_api_ia_prediccion_empleabilidad_get",
         "security": [
           {
@@ -3143,11 +3143,11 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "description": "Momento longitudinal a proyectar (1 o 5, default 1)",
+              "description": "Momento de seguimiento analizado (1 o 5, default 1)",
               "default": 1,
               "title": "Momento Destino"
             },
-            "description": "Momento longitudinal a proyectar (1 o 5, default 1)"
+            "description": "Momento de seguimiento analizado (1 o 5, default 1)"
           },
           {
             "name": "programa",
@@ -3236,7 +3236,7 @@
           "Inteligencia Artificial"
         ],
         "summary": "Exportar Prediccion Excel",
-        "description": "Descarga del Informe Ejecutivo Predictivo en Hoja de Cálculo Excel (.xlsx) (IA-14).",
+        "description": "Informe ejecutivo del modelo de análisis de empleabilidad en Excel (.xlsx) (IA-14).",
         "operationId": "exportar_prediccion_excel_api_ia_prediccion_export_get",
         "security": [
           {
@@ -3262,11 +3262,11 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "description": "Momento longitudinal a proyectar",
+              "description": "Momento de seguimiento analizado",
               "default": 1,
               "title": "Momento Destino"
             },
-            "description": "Momento longitudinal a proyectar"
+            "description": "Momento de seguimiento analizado"
           },
           {
             "name": "programa",
@@ -3359,7 +3359,7 @@
           "Inteligencia Artificial"
         ],
         "summary": "Get Benchmark Sedes",
-        "description": "Robustez del modelo predictivo en la sede del coordinador (IA-08).\nSolo calcula la sede del JWT: entre sedes únicamente se comparten las gráficas\npublicadas (RN-06, RN-09, ADR-020).",
+        "description": "Robustez del modelo de análisis de empleabilidad en la sede del coordinador (IA-08).\nSolo calcula la sede del JWT: entre sedes únicamente se comparten las gráficas\npublicadas (RN-06, RN-09, ADR-020).",
         "operationId": "get_benchmark_sedes_api_ia_prediccion_benchmark_sedes_get",
         "security": [
           {

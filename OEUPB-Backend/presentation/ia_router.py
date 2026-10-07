@@ -576,17 +576,18 @@ def exportar_habilidades_excel(
 @router.get("/prediccion-empleabilidad", response_model=PrediccionEmpleabilidadResponse)
 def get_prediccion_empleabilidad(
     momento_origen: int = Query(0, description="Momento inicial de trayectoria (default 0 - graduación)"),
-    momento_destino: int = Query(1, description="Momento longitudinal a proyectar (1 o 5, default 1)"),
+    momento_destino: int = Query(1, description="Momento de seguimiento analizado (1 o 5, default 1)"),
     programa: Optional[str] = Query(None, description="Filtrar por programa académico"),
     anio: Optional[int] = Query(None, description="Filtrar por año de grado o cohorte (RN-17)"),
     db: Session = Depends(get_db),
     current_user: dict = Depends(require_roles("Coordinador_Sede")),
 ):
     """
-    Modelo Predictivo de Empleabilidad (RF-71 / IA-01).
-    Entrena modelos supervisados (GradientBoostingClassifier) usando trayectorias longitudinales
-    de egresados (M0 -> M1 o M0/M1 -> M5) para proyectar probabilidades de inserción laboral,
-    riesgo de desempleo y nivel salarial agregado por programa.
+    Modelo de Análisis de Empleabilidad (RF-71 / IA-01, ADR-021).
+    Entrena un modelo supervisado (GradientBoostingClassifier) sobre trayectorias longitudinales ya
+    observadas (M0 -> M1 o M0/M1 -> M5) y estima, agregado por programa, la probabilidad de cada
+    situación laboral, el riesgo de desempleo y el rango salarial. Es un análisis retrospectivo, no
+    un pronóstico sobre graduandos sin seguimiento; la ruta conserva su nombre histórico.
     """
     sincronizar_curadurias_bd(db)
     query = db.query(Medicion)
@@ -611,14 +612,14 @@ def get_prediccion_empleabilidad(
 @router.get("/prediccion-export", responses=EXCEL_RESPONSES)
 def exportar_prediccion_excel(
     momento_origen: int = Query(0, description="Momento inicial de trayectoria"),
-    momento_destino: int = Query(1, description="Momento longitudinal a proyectar"),
+    momento_destino: int = Query(1, description="Momento de seguimiento analizado"),
     programa: Optional[str] = Query(None, description="Filtrar por programa académico"),
     anio: Optional[int] = Query(None, description="Filtrar por año de grado o cohorte (RN-17)"),
     db: Session = Depends(get_db),
     current_user: dict = Depends(require_roles("Coordinador_Sede")),
 ):
     """
-    Descarga del Informe Ejecutivo Predictivo en Hoja de Cálculo Excel (.xlsx) (IA-14).
+    Informe ejecutivo del modelo de análisis de empleabilidad en Excel (.xlsx) (IA-14).
     """
     sincronizar_curadurias_bd(db)
     query = db.query(Medicion)
@@ -641,7 +642,7 @@ def exportar_prediccion_excel(
     return StreamingResponse(
         excel_stream,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=informe_predictivo_empleabilidad_oeupb.xlsx"},
+        headers={"Content-Disposition": "attachment; filename=informe_analisis_empleabilidad_oeupb.xlsx"},
     )
 
 
@@ -653,7 +654,7 @@ def get_benchmark_sedes(
     current_user: dict = Depends(require_roles("Coordinador_Sede")),
 ):
     """
-    Robustez del modelo predictivo en la sede del coordinador (IA-08).
+    Robustez del modelo de análisis de empleabilidad en la sede del coordinador (IA-08).
     Solo calcula la sede del JWT: entre sedes únicamente se comparten las gráficas
     publicadas (RN-06, RN-09, ADR-020).
     """

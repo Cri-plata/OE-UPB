@@ -27,7 +27,7 @@ const RESUMEN_MOCK = {
 
 const PREDICCION_MOCK = {
   estado: 'exitoso',
-  mensaje: 'Modelo predictivo entrenado con GradientBoostingClassifier.',
+  mensaje: 'Modelo de análisis entrenado con GradientBoostingClassifier.',
   total_trayectorias: 91,
   precision_modelo: 59.3,
   f1_score: 0.343,
@@ -326,5 +326,19 @@ describe('AnaliticaComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('Ponderación Balanceada Activa');
     expect(compiled.textContent).toContain('Cost-Sensitive Learning');
+  });
+
+  it('presenta el modelo como modelo de análisis y no como predictivo (ADR-021)', () => {
+    const fixture = crear();
+    const texto = ((fixture.nativeElement as HTMLElement).textContent || '').toLowerCase();
+    // Los atributos title (tooltips) también son texto visible para el usuario.
+    const tooltips = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('[title]'))
+      .map(e => (e.getAttribute('title') || '').toLowerCase()).join(' ');
+
+    expect(texto).toContain('modelo de análisis de empleabilidad');
+    for (const prohibido of ['predictiv', 'predicci', 'predicho']) {
+      expect(texto).not.toContain(prohibido);
+      expect(tooltips).not.toContain(prohibido);
+    }
   });
 });

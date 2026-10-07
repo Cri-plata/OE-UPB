@@ -1,5 +1,8 @@
 """
-Servicio del Modelo Predictivo de Empleabilidad (RF-71)
+Servicio del Modelo de Análisis de Empleabilidad (RF-71, ADR-021)
+
+Modelo de análisis retrospectivo, no predictivo: se entrena y resume sobre trayectorias ya
+observadas. Los identificadores conservan el nombre histórico "prediccion" por compatibilidad.
 ======================================================
 Módulo de Machine Learning para proyectar trayectorias de egresados UPB.
 Entrena modelos supervisados (GradientBoostingClassifier) usando mediciones
@@ -10,7 +13,7 @@ Restricciones éticas y técnicas:
   - Resultados agregados por programa académico y cohorte.
   - Explicabilidad transparente: ranking de importancia de características.
   - Validación cruzada estratificada (Stratified K-Fold).
-  - Umbral mínimo de 30 trayectorias para evitar predicciones espurias con muestras insuficientes.
+  - Umbral mínimo de 30 trayectorias para evitar estimaciones espurias con muestras insuficientes.
 """
 
 from typing import Dict, List, Optional, Any, Tuple
@@ -475,7 +478,7 @@ def agregar_predicciones_por_programa(
     modelo_salario: Optional[GradientBoostingClassifier] = None,
 ) -> Tuple[List[Dict[str, Any]], int, List[Dict[str, Any]]]:
     """
-    Agrupa predicciones por programa académico, calcula semáforo de riesgo y alertas.
+    Agrupa las estimaciones por programa académico, calcula semáforo de riesgo y alertas.
     """
     probs_estado = modelo_estado.predict_proba(X)
     preds_salario = modelo_salario.predict(X) if modelo_salario else ["No proyectado"] * len(X)
@@ -551,7 +554,7 @@ def calcular_indicadores_robustez(
     Evalúa tres dimensiones clave:
       1. Tamaño muestral: óptimo (>=100), moderado (30-99), crítico (<30).
       2. Balance de clases: balanceado (mínimo >=10%), moderado (5-10%), severo (<5%).
-      3. Precisión predictiva: alta (>=75%), moderada (55-75%), baja (<55%).
+      3. Exactitud en validación cruzada: alta (>=75%), moderada (55-75%), baja (<55%).
     Retorna un nivel consolidado ('Alta', 'Media', 'Baja') y observaciones interpretativas.
     """
     # 1. Tamaño muestral
@@ -584,7 +587,7 @@ def calcular_indicadores_robustez(
     else:
         status_balance = "desbalanceado_severo"
         color_balance = "rojo"
-        obs_balance = f"Fuerte desbalance de clases ({min_pct:.1f}% en la clase minoritaria). Puede sesgar predicciones minoritarias."
+        obs_balance = f"Fuerte desbalance de clases ({min_pct:.1f}% en la clase minoritaria). Puede sesgar las estimaciones de las clases minoritarias."
 
     # 3. Precisión / Concordancia
     if accuracy >= 75.0:
@@ -762,7 +765,7 @@ def predecir_empleabilidad_servicio(
 
     resultado = {
         "estado": "exitoso",
-        "mensaje": "Modelo predictivo entrenado y validado satisfactoriamente con GradientBoostingClassifier y balanceo adaptativo de clases.",
+        "mensaje": "Modelo de análisis entrenado y validado satisfactoriamente con GradientBoostingClassifier y balanceo adaptativo de clases.",
         "estrategia_balanceo": "Ponderación adaptativa de clases activa (Cost-Sensitive Learning)",
         "total_trayectorias": len(trayectorias),
         "precision_modelo": eval_estado["accuracy"],
@@ -860,7 +863,7 @@ def generar_excel_prediccion(resultado: Dict[str, Any]) -> "io.BytesIO":
 
     # Hoja 3: Factores Determinantes
     ws3 = wb.create_sheet(title="Factores Determinantes")
-    ws3.append(["Factor Predictivo", "Importancia Relativa (%)"])
+    ws3.append(["Factor Explicativo", "Importancia Relativa (%)"])
     for f in resultado.get("importancia_factores", []):
         ws3.append([f.get("factor", ""), f"{f.get('importancia', 0.0)}%"])
 
@@ -904,7 +907,7 @@ def benchmark_sedes_servicio(
     momento_destino: int = 1,
 ) -> List[Dict[str, Any]]:
     """
-    Calcula benchmark predictivo comparando sedes de la UPB (IA-08).
+    Evalúa la robustez del modelo de análisis por sede (IA-08); el router solo le pasa la sede del JWT (ADR-020).
     """
     egresados_dict = {e.numero_documento: e for e in egresados}
     benchmark = []

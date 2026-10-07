@@ -43,7 +43,7 @@ La URL base está centralizada en `environments/environment.ts` y `data/api/api.
 | `/tendencias` | Tendencias históricas |
 | `/explorador` | Cruce dinámico de variables |
 | `/publicaciones` | Catálogo de instantáneas agregadas autorizadas |
-| `/analitica` | Clasificación NLP, alertas descriptivas y predicción por programa (coordinador) |
+| `/analitica` | Clasificación NLP, alertas descriptivas y modelo de análisis de empleabilidad por programa (coordinador) |
 | `/habilidades` | Habilidades demandadas, reglas de asociación, comparativa M0/M1/M5 y curaduría (coordinador) |
 | `/carga` | Carga e historial de Excel |
 | `/directorio` | Directorio de egresados |
