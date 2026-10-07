@@ -2,7 +2,7 @@
 
 **Estado:** descripción del modelo SQLAlchemy actual
 
-**Verificado:** 2026-09-25
+**Verificado:** 2026-10-03
 
 **Esquema canónico:** [`../specs/db/oeupb-schema.sql`](../specs/db/oeupb-schema.sql)
 
@@ -135,7 +135,7 @@ erDiagram
     AUDITORIA_CUENTAS {
         int id PK
         string accion
-        int actor_id FK
+        int actor_id "sin FK en el SQL canónico"
         string actor_correo
         int objetivo_id "sin FK: sobrevive al borrado físico"
         string objetivo_correo
@@ -167,13 +167,15 @@ erDiagram
 - `sede_id` está en `mediciones`; `egresados` no pertenece directamente a una sede.
 - `usuarios.sede_id` referencia el catálogo `sedes`. Solo `Admin_CTIC` puede no tener sede: lo valida el backend y lo garantiza `CHECK ck_usuarios_sede_por_rol`.
 - `egresados.numero_documento` se almacena normalizado según ADR-017.
-- `egresados.id_estudiante` es el ID institucional del estudiante. Proviene de la columna `USUARIO` de las encuestas, se normaliza como el documento (sin el `.0` que agrega Excel) y cada carga lo actualiza; la migración `j7f15d2a4b63` lo completó con la medición más reciente. El directorio lo usa en la búsqueda, tolerando los ceros a la izquierda que Excel elimina.
+- `egresados.id_estudiante` es el ID institucional del estudiante. Proviene de la columna `USUARIO` de las encuestas, se normaliza como el documento (sin el `.0` que agrega Excel) y cada carga lo actualiza, incluso en egresados con corrección manual, porque no se edita a mano (RN-01); la migración `j7f15d2a4b63` lo completó con la medición más reciente. El directorio lo usa en la búsqueda, tolerando los ceros a la izquierda que Excel elimina.
 - Cada archivo se registra como `cargas`; una recarga crea una versión nueva y marca la anterior como reemplazada dentro de la misma transacción.
 - `mediciones.anio` conserva el nombre físico legado, pero su significado vigente es año de grado o cohorte.
 - `carga_id` y `cargas.usuario_id` son obligatorios. Las cargas históricas se atribuyen a una cuenta técnica desactivada.
 - Cada medición posee `intento` y `fecha_registro`; la combinación persona/sede/momento/cohorte/intento es única.
 - El borrado físico de una carga conserva primero un evento inmutable sin FK hacia la carga eliminada.
 - El alta manual crea `egresados_sedes`; crear, editar o eliminar conserva un evento en `auditoria_egresados` con actor, sede, motivo y cambios.
+- La protección de RN-13 se deriva de la existencia de eventos en `auditoria_egresados` para el documento; no hay un atributo en `egresados`. Si un egresado corregido llegó por carga (sin `egresados_sedes`) y esa carga se elimina, el egresado se borra con las demás identidades huérfanas: la corrección solo queda en la auditoría.
+- `habilidades_curadas` es una taxonomía institucional sin `sede_id`: guarda términos, no datos fuente. El término original es único y solo su autor (un coordinador) puede modificarlo o revertirlo (RN-32, ADR-020).
 
 ## Modelo objetivo aprobado
 
@@ -186,6 +188,8 @@ ADR-012 conserva `Egresado`–`Medicion` como modelo objetivo. La propuesta arch
 - La edición manual se bloquea (409) cuando la misma identidad está vinculada a otra sede; la eliminación se bloquea mientras existan mediciones. No existe custodia institucional (ADR-014).
 - Al eliminar una carga se borran los egresados sin mediciones y sin vínculo `egresados_sedes`; los registros manuales se conservan.
 - Las consultas de historial deben filtrar nuevamente por sede, incluso si la lista inicial ya fue filtrada.
+- Los filtros por programa, los pares de la comparación y la audiencia de publicaciones usan `egresados.programa`, que fija la primera carga o la corrección manual (RN-01, RN-13).
+- Un archivo rechazado (RN-20) revierte la transacción y no deja fila en `cargas`; el detalle por fila solo viaja en la respuesta 422.
 - Las respuestas JSON no deben interpolarse directamente en SQL.
 
 ## Gráficas publicadas
@@ -194,6 +198,6 @@ ADR-012 conserva `Egresado`–`Medicion` como modelo objetivo. La propuesta arch
 
 La publicación no copia documentos, nombres, correos, respuestas individuales ni archivos fuente. El cliente solo envía la definición; etiquetas, series y programas los calcula el backend y las etiquetas provienen de nombres de programa, categorías fijas o respuestas a variables del catálogo RN-31 con al menos 5 observaciones. No existe una FK hacia mediciones: la instantánea no concede acceso a datos fuente ni se recalcula automáticamente. Una actualización crea una versión nueva con nueva confirmación de privacidad (ADR-015).
 
-La unicidad de `egresados.numero_documento` no implica unicidad de medición. `application/medicion_policy.py` declara que los indicadores actuales toman el último intento identificado y conservan todas las mediciones anónimas permitidas en agregados.
+La unicidad de `egresados.numero_documento` no implica unicidad de medición. `application/medicion_policy.py` declara que los indicadores actuales toman el último intento identificado y que solo los KPI del reporte general incluyen las mediciones anónimas (RN-15).
 
 Los programas autorizables no provienen todavía de un catálogo institucional independiente: se derivan de los nombres distintos observados en cargas visibles de la sede. La persistencia de asignaciones debe conservar el valor normalizado y permitir distinguir renombres o alias futuros sin conceder acceso por coincidencias ambiguas.

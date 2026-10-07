@@ -23,3 +23,4 @@ Los ADR registran decisiones relevantes y sus consecuencias. Una decisión reemp
 | [017](017-normalizacion-documento-limites-carga.md) | Normalización del documento de identidad y límites de carga | Aceptado |
 | [018](018-catalogo-publicaciones-coordinador.md) | Catálogo del coordinador: sus publicaciones con retiro y las de los demás coordinadores | Aceptado |
 | [019](019-modelo-predictivo-empleabilidad.md) | Modelo predictivo de empleabilidad y reactivación de IA-01 | Aceptado |
+| [020](020-decisiones-auditoria-07.md) | Alcance de la IA, propiedad y privacidad de publicaciones y un archivo por cohorte | Aceptado |

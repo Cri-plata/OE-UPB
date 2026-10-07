@@ -11,10 +11,12 @@ Restricciones:
   - El diccionario es de propósito GENERAL, sin lógica condicionada a carreras específicas
 """
 
+import copy
+import hashlib
 import unicodedata
 import re
 from functools import lru_cache
-from typing import Dict, List, Set, Tuple, Optional
+from typing import Any, Dict, List, Set, Tuple, Optional
 from collections import Counter
 
 import numpy as np
@@ -418,30 +420,27 @@ _STOPWORDS_ENCUESTA = [
 _STOPWORDS_DINAMICAS: Set[str] = set()
 
 
+_TAXONOMIA_BASE: Dict[str, Dict] = copy.deepcopy(TAXONOMIA_HABILIDADES_BRUTA)
+_FIRMA_CURADURIAS: Optional[str] = None
+
+
 def invalidar_cache_taxonomia():
-    """Invalida la taxonomía compilada en memoria para re-compilar con nuevas curadurías."""
-    global _TAXONOMIA_PREP, _TIPOS_HABILIDAD, _PATRONES_COMPILADOS
+    """Invalida la taxonomía compilada; la próxima sincronización la reconstruye desde la base."""
+    global _TAXONOMIA_PREP, _TIPOS_HABILIDAD, _PATRONES_COMPILADOS, _FIRMA_CURADURIAS
     _TAXONOMIA_PREP = None
     _TIPOS_HABILIDAD = None
     _PATRONES_COMPILADOS = None
+    _FIRMA_CURADURIAS = None
     _extraer_habilidades_cached.cache_clear()
 
 
-def registrar_habilidad_curada_en_memoria(
-    termino_original: str,
-    etiqueta_canonica: str,
-    tipo: str,
-    variantes: List[str],
-    estado: str,
-):
-    """
-    Integra inmediatamente una curaduría en la taxonomía en memoria (IA-15).
-    Si es 'aprobada', la agrega como categoría canónica con sus variantes.
-    Si es 'descartada', la añade a stopwords dinámicas para que TF-IDF no la vuelva a sugerir.
-    """
-    global TAXONOMIA_HABILIDADES_BRUTA
-    term_limpio = termino_original.lower().strip()
+def _aplicar_curaduria(termino_original: str, etiqueta_canonica: str, tipo: str, variantes: List[str], estado: str):
+    """Integra una curaduría en la taxonomía en memoria (IA-15), sin recompilar.
 
+    'aprobada' agrega o amplía la categoría canónica; 'descartada' la añade a las
+    stopwords dinámicas para que TF-IDF no la vuelva a sugerir.
+    """
+    term_limpio = termino_original.lower().strip()
     if estado == "aprobada":
         vars_unificadas = list(set([termino_original, etiqueta_canonica] + (variantes or [])))
         if etiqueta_canonica in TAXONOMIA_HABILIDADES_BRUTA:
@@ -460,24 +459,32 @@ def registrar_habilidad_curada_en_memoria(
         for v in (variantes or []):
             _STOPWORDS_DINAMICAS.add(v.lower().strip())
 
+
+def sincronizar_curadurias_bd(db) -> str:
+    """Alinea la taxonomía en memoria con `habilidades_curadas` y devuelve su firma.
+
+    Cada worker de Uvicorn tiene su propia memoria: la firma detecta altas, cambios y
+    reversiones hechas en otro proceso. Si cambió, la taxonomía se reconstruye desde la
+    base fija más las curadurías vigentes, de modo que una reversión deja de aplicarse.
+    Las cachés de resultados incluyen la firma en su clave.
+    """
+    global _FIRMA_CURADURIAS
+    from domain.models import HabilidadCurada
+    curadas = db.query(HabilidadCurada).order_by(HabilidadCurada.id).all()
+    firma = hashlib.sha256(repr([
+        (c.id, c.termino_original, c.etiqueta_canonica, c.tipo, c.estado, sorted(c.variantes or []))
+        for c in curadas
+    ]).encode("utf-8")).hexdigest()[:16]
+    if firma == _FIRMA_CURADURIAS:
+        return firma
+    TAXONOMIA_HABILIDADES_BRUTA.clear()
+    TAXONOMIA_HABILIDADES_BRUTA.update(copy.deepcopy(_TAXONOMIA_BASE))
+    _STOPWORDS_DINAMICAS.clear()
+    for c in curadas:
+        _aplicar_curaduria(c.termino_original, c.etiqueta_canonica, c.tipo, c.variantes or [], c.estado)
     invalidar_cache_taxonomia()
-
-
-def sincronizar_curadurias_bd(db):
-    """Carga todas las habilidades curadas desde la base de datos a memoria al iniciar/consultar."""
-    try:
-        from domain.models import HabilidadCurada
-        curadas = db.query(HabilidadCurada).all()
-        for c in curadas:
-            registrar_habilidad_curada_en_memoria(
-                termino_original=c.termino_original,
-                etiqueta_canonica=c.etiqueta_canonica,
-                tipo=c.tipo,
-                variantes=c.variantes or [],
-                estado=c.estado,
-            )
-    except Exception:
-        pass
+    _FIRMA_CURADURIAS = firma
+    return firma
 
 
 def _extraer_emergentes_tfidf(textos_residuales: List[str], top_n: int = 15) -> List[dict]:

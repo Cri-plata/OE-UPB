@@ -2,6 +2,26 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-10-06] - Estudio del proyecto
+
+* **Estudio:** `docs/08-estudio-proyecto.md` resume alcance, arquitectura, métricas, estado de requisitos, seguridad, calidad, lecciones, deuda técnica, recomendaciones y un guion de demostración.
+* **OpenAPI:** `PrediccionEmpleabilidadResponse.estrategia_balanceo`.
+* **Backlog:** TST-01.
+
+## [2026-10-04] - Auditoría funcional del despliegue 08
+
+* **Auditoría:** `audits/08-auditoria-funcional-despliegue.md` recoge el recorrido del stack de producción con datos sintéticos, 10 defectos corregidos, lo comprobado sin defectos y la lista de preparación para la exposición.
+* **Operación:** el runbook incluye el modelo de spaCy, la sincronización del reloj, el calentamiento de la IA y comprobaciones adicionales tras desplegar. `05-despliegue.md` documenta los límites del proxy y la caché del índice. `00-comandos-desarrollo.md` fija Python 3.13.
+
+## [2026-10-03] - Auditoría de requerimientos 07 y su resolución
+
+* **Auditoría:** `audits/07-auditoria-requerimientos.md` registra 20 contradicciones y 21 casos de borde entre `specs/`, `requirements/` y `architecture/`, con su verificación contra el código y la resolución de cada hallazgo.
+* **Decisiones:** [ADR-020](adr/020-decisiones-auditoria-07.md) fija que entre sedes solo se comparten publicaciones, que la curaduría es institucional y exclusiva de coordinadores, que se asume un coordinador activo por sede, que el título de las publicaciones se valida, que la revelación por diferencia es un riesgo aceptado, que se mantiene la audiencia por programa en común y que cada cohorte se carga en un único archivo.
+* **Requisitos:** RF-71 y HU-10 dejan de figurar en pausa (ADR-019). Se reescriben RF-17, RF-37, RNF-05, HU-02, HU-05, HU-06 y HU-13, y RN-01, RN-07, RN-08, RN-12, RN-14, RN-24 y RN-25. Se agrega RN-32 (módulo de IA). CU-09, CU-10, la matriz y los hallazgos de Figma quedan alineados.
+* **Arquitectura:** inventario de `/api/ia` y `/habilidades`, claims reales del token, política de mediciones anónimas, formas del 422, diagrama ER de `auditoria_cuentas` y reglas de consulta (programa, cargas rechazadas, protección por corrección manual).
+* **OpenAPI:** regenerado (roles y respuestas de la IA, validación del título).
+* **Backlog:** PUB-03, PUB-04, PUB-05, CAR-01 y AUT-01; PRD-01 incluye el campo "Requerimiento Ligado".
+
 ## [2026-10-01] - Habilidades curadas y aislamiento de pruebas
 
 * **Modelo:** `HABILIDADES_CURADAS` en el diagrama ER de `04-modelo-datos.md`; la revisión esperada de Alembic es `k8a26e3b5c74`.

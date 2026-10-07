@@ -2,7 +2,7 @@
 
 **Estado:** Vigente
 
-**Última verificación:** 2026-09-25
+**Última verificación:** 2026-10-03
 
 **Alcance:** todo el monorepo OE UPB.
 
@@ -45,7 +45,7 @@ Cuando la documentación contradiga el código, no se debe ocultar la diferencia
 1. El documento de identidad identifica de forma única al egresado cuando está disponible.
 2. Los momentos admitidos son 0, 1 y 5.
 3. El aislamiento por `sede_id` debe aplicarse en backend a todos los datos fuente; nunca se confía solo en filtros del frontend.
-4. Los textos enviados a servicios externos de IA deben anonimizarse.
+4. Los textos enviados a servicios externos de IA deben anonimizarse, y el texto libre que analiza el módulo de IA local también se anonimiza antes de mostrarse, exportarse o curarse (RN-04, RN-32).
 5. La doble titulación dentro de una misma carga conserva el registro con fecha de grado más reciente.
 6. Los archivos de carga se validan antes de persistirlos y aceptan exclusivamente `.xlsx`.
 7. La matriz RBAC aprobada usa `Admin_CTIC`, `Coordinador_Sede` y `Usuario_Consulta`. CTIC administra coordinadores; cada coordinador administra usuarios de consulta de su sede con permisos y programas.
@@ -61,8 +61,8 @@ Cuando la documentación contradiga el código, no se debe ocultar la diferencia
 - Guards funcionales protegen sesión y navegación por rol; el backend continúa siendo la autoridad de autorización.
 - Backend FastAPI con capas `domain/`, `application/`, `infrastructure/` y `presentation/`.
 - MySQL mediante SQLAlchemy y Alembic. El modelo incluye usuarios, catálogo de sedes, egresados, cargas, mediciones con intentos y eventos inmutables de auditoría.
-- JWT HS256 emitido por el backend; incluye `sub`, `rol` y `sede_id`.
-- API actual sin prefijo de versión: `/api/auth`, `/api/usuarios`, `/api/carga`, `/api/reportes`, `/api/directorio`, `/api/sedes` y `/api/publicaciones`.
+- JWT HS256 emitido por el backend; incluye `sub`, `usuario_id`, `rol`, `sede_id`, `debe_cambiar_contrasena` y `version_autorizacion`.
+- API actual sin prefijo de versión: `/api/auth`, `/api/usuarios`, `/api/carga`, `/api/reportes`, `/api/directorio`, `/api/sedes`, `/api/publicaciones`, `/api/analitica` e `/api/ia`.
 - Respuestas extensas de encuestas almacenadas como JSON en `mediciones.respuestas`.
 
 ## Flujo obligatorio de trabajo

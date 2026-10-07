@@ -117,6 +117,20 @@ class PublicacionesTest(unittest.TestCase):
         self.assertEqual(retiro.json()["estado"], "retirada")
         self.assertEqual(self.client.get("/api/publicaciones/", headers=self.login("coord2@upb.edu.co")).json(), [])
 
+    def test_titulo_con_datos_personales_se_rechaza(self):
+        coord1 = self.login("coord1@upb.edu.co")
+        for titulo in ("Empleo de 1.098.765.432", "Contacto e1@mail.com", "Ver https://ejemplo.com"):
+            payload = {**self.payload(), "titulo": titulo}
+            respuesta = self.client.post("/api/publicaciones/", headers=coord1, json=payload)
+            self.assertEqual(respuesta.status_code, 422, titulo)
+            self.assertIn("título", respuesta.json()["detail"])
+        db = self.Session()
+        self.assertEqual(db.query(PublicacionGrafica).count(), 0)
+        db.close()
+        # Los años y cohortes de los filtros siguen siendo válidos.
+        valido = {**self.payload(), "titulo": "Distribución por programa (cohortes 2024-2025)"}
+        self.assertEqual(self.client.post("/api/publicaciones/", headers=coord1, json=valido).status_code, 201)
+
     def test_audiencia_exige_permiso_y_programa(self):
         coord1 = self.login("coord1@upb.edu.co")
         creada = self.client.post("/api/publicaciones/", headers=coord1, json=self.payload())

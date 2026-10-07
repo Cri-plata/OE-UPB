@@ -28,7 +28,7 @@ describe('AdminUsuariosComponent', () => {
     fixture.detectChanges();
     http.expectOne(`${API}/sedes/`).flush([{ id: 1, codigo: 'BUC', nombre: 'Bucaramanga' }]);
     http.expectOne(`${API}/usuarios/programas-asignables`).flush(['Derecho']);
-    http.expectOne(r => r.url === `${API}/usuarios`).flush([profe]);
+    http.expectOne(r => r.url === `${API}/usuarios/`).flush([profe]);
     await fixture.whenStable();
     expect(fixture.nativeElement.textContent).toContain('Sin datos actuales: Programa Retirado');
 
@@ -64,7 +64,7 @@ describe('AdminUsuariosComponent', () => {
       debe_cambiar_contrasena: false, activo: false, version_autorizacion: 1, etiqueta: 'Administrativo',
       permisos: [], programas: [], programas_sin_datos: []
     };
-    http.expectOne(r => r.url === `${API}/usuarios`).flush([profe, usuario2]);
+    http.expectOne(r => r.url === `${API}/usuarios/`).flush([profe, usuario2]);
     await fixture.whenStable();
 
     const comp = fixture.componentInstance;
@@ -116,7 +116,7 @@ describe('AdminUsuariosComponent', () => {
       debe_cambiar_contrasena: false, activo: false, version_autorizacion: 1, etiqueta: 'Administrativo',
       permisos: [], programas: [], programas_sin_datos: []
     };
-    http.expectOne(r => r.url === `${API}/usuarios`).flush([profe, usuario2]);
+    http.expectOne(r => r.url === `${API}/usuarios/`).flush([profe, usuario2]);
     await fixture.whenStable();
 
     const comp = fixture.componentInstance;

@@ -27,9 +27,9 @@ OEUPB-Contracts
 
 | Módulo | Responsabilidad actual |
 |---|---|
-| Frontend | Login, cuentas, carga, reportes, tendencias, explorador, publicaciones, analítica, directorio y perfiles |
-| Backend | JWT, cuentas y credenciales, ETL de Excel, reportes, directorio, sedes, publicaciones, analítica NLP y health checks |
-| Base de datos | Sedes, usuarios, egresados, vínculos manuales, cargas, mediciones JSON, publicaciones y auditorías |
+| Frontend | Login, cuentas, carga, reportes, tendencias, explorador, publicaciones, analítica, habilidades, directorio y perfiles |
+| Backend | JWT, cuentas y credenciales, ETL de Excel, reportes, directorio, sedes, publicaciones, analítica NLP, módulo de IA (habilidades, reglas de asociación, curaduría y predicción) y health checks |
+| Base de datos | Sedes, usuarios, egresados, vínculos manuales, cargas, mediciones JSON, publicaciones, habilidades curadas y auditorías |
 | Contratos | Tipos TypeScript generados desde OpenAPI (`generated-api.models.ts`); `OEUPB-Contracts` es histórico |
 
 ## Roles observados

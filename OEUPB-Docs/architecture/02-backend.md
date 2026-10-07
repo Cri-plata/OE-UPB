@@ -38,6 +38,7 @@ La estructura usa nombres de Clean Architecture, pero los límites son parciales
 | `/api/sedes` | Catálogo autenticado de sedes activas |
 | `/api/publicaciones` | Publicar (con recálculo), retirar, listar propias y catálogo autorizado |
 | `/api/analitica` | Resumen NLP y alertas descriptivas de la sede |
+| `/api/ia` | Habilidades demandadas, reglas de asociación, comparativa temporal, curaduría, predicción, robustez del modelo y exportaciones Excel; solo coordinador y sede propia (RN-32) |
 | `/api/health` | Liveness y readiness |
 
 El inventario exacto se encuentra en `../specs/api/openapi.json`.
@@ -45,8 +46,8 @@ El inventario exacto se encuentra en `../specs/api/openapi.json`.
 ## Seguridad actual
 
 - JWT HS256 con expiración configurable.
-- El token incluye correo, rol y sede.
-- `OAuth2PasswordBearer` protege los endpoints que dependen de `get_current_user`.
+- El token incluye `sub` (correo), `usuario_id`, `rol`, `sede_id`, `debe_cambiar_contrasena` y `version_autorizacion`; cada operación protegida compara esa versión y el estado de la cuenta con la base (RN-22).
+- El contrato declara el esquema `HTTPBearer` para todos los endpoints que dependen de `get_current_user`.
 - El alta usa el documento como credencial temporal en desarrollo y una credencial aleatoria obligatoria en producción. Solo se conserva el hash; las credenciales vencen, pueden reemitirse con auditoría y el JWT restringido permite únicamente establecer una contraseña personal.
 - CORS se configura por ambiente mediante `CORS_ALLOWED_ORIGINS`.
 - El log HTTP sustituye el documento de las rutas del directorio por `{documento}` y la imagen Docker desactiva el access log de Uvicorn, que registraría rutas y query strings completos.
@@ -66,7 +67,7 @@ El inventario exacto se encuentra en `../specs/api/openapi.json`.
 
 `Sede` es una entidad de catálogo referenciada por usuarios, cargas y mediciones. Una carga siempre conserva actor y sede; su eliminación física exige motivo y genera primero un `EventoEliminacionCarga` inmutable con la instantánea necesaria para auditoría. Las mediciones conservan `intento` y `fecha_registro`, y enlazan obligatoriamente carga, sede, momento y cohorte.
 
-Los reportes aplican la política explícita de `application/medicion_policy.py`: para registros identificados seleccionan el intento más reciente de cada documento, sede, momento y cohorte; las mediciones anónimas válidas se incluyen. ADR-012 conserva la separación entre identidad (`Egresado`) y respuestas longitudinales (`Medicion`).
+Los reportes aplican la política explícita de `application/medicion_policy.py`: para registros identificados seleccionan el intento más reciente de cada documento, sede, momento y cohorte. Las mediciones anónimas solo entran en los KPI del reporte general sin filtro de programa; Tendencias, Explorador y comparación usan solo mediciones identificadas (RN-15). ADR-012 conserva la separación entre identidad (`Egresado`) y respuestas longitudinales (`Medicion`).
 
 Consultar el backlog para prioridad y trazabilidad.
 

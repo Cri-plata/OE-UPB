@@ -142,6 +142,26 @@ describe('LoginComponent', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/reporte']);
   });
 
+  it('redirige al usuario de consulta a las gráficas publicadas', () => {
+    const navigateSpy = vi.spyOn(router, 'navigate');
+    mockLoginUseCase.execute.mockReturnValue(of({
+      token: 'jwt-consulta',
+      usuario: {
+        id: 3,
+        nombre: 'Usuario Consulta',
+        correo: 'consulta@upb.edu.co',
+        rol: 'Usuario_Consulta',
+        sedeId: 1,
+        debeCambiarContrasena: false,
+      },
+    }));
+
+    component.loginForm.setValue({ correo: 'consulta@upb.edu.co', contrasena: 'ClaveSegura123' });
+    component.onSubmit();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/publicaciones']);
+  });
+
   it('debe activar el modal de cambio obligatorio si debeCambiarContrasena es true', () => {
     mockLoginUseCase.execute.mockReturnValue(of({
       token: 'jwt-temp',

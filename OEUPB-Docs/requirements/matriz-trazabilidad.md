@@ -1,6 +1,6 @@
 # Matriz de trazabilidad funcional
 
-**Verificada:** 2026-09-30  
+**Verificada:** 2026-10-03  
 **Alcance:** auditoría individual de RF-01 a RF-73 contra código, contrato y pruebas vigentes.
 
 Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacidad genérica), **No implementado** (sin comportamiento correspondiente) y **En pausa** (decisión explícita).
@@ -23,7 +23,7 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 | RF-14 | Buscar por nombre | parámetro `q` del Directorio | Implementado |
 | RF-15 | Buscar por identificación | `q` por documento o ID del estudiante; perfil por documento con el ID | Implementado |
 | RF-16 | Agrupar por programa | catálogo y filtro `programa` | Implementado |
-| RF-17 | Actualizar situación laboral catalogada | respuesta JSON; CRUD no edita el catálogo | Parcial |
+| RF-17 | Clasificar situación laboral catalogada | taxonomía RN-16 en cada carga; sin edición manual por ADR-014; formalidad solo en M1/M5 | Parcial |
 | RF-18 | Dashboard interactivo | Reporte, Tendencias, Explorador y Chart.js | Implementado |
 | RF-19 | Situación laboral | KPI de empleabilidad y Tendencias | Implementado |
 | RF-20 | Estudios adicionales | pregunta genérica, sin indicador curado | Parcial |
@@ -75,10 +75,10 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 | RF-66 | Herramientas de emprendimiento | pregunta graficable en Explorador | Parcial |
 | RF-67 | Tendencias de nuevos estudios | pregunta graficable, sin detector dedicado | Parcial |
 | RF-68 | Destinos de movilidad | pregunta graficable, sin mapa/flujo | Parcial |
-| RF-69 | Descargar tablas en Excel | exporta Directorio, no toda analítica | Parcial |
+| RF-69 | Descargar tablas en Excel | exporta Directorio e informes de IA; no las tablas de Reporte, Tendencias ni Explorador | Parcial |
 | RF-70 | Exportar gráficas | PNG en Reporte, Tendencias y Explorador | Implementado |
-| RF-71 | Modelo predictivo | ADR-019, `prediccion_service.py`, `/api/ia/prediccion-empleabilidad`, Analítica | Implementado, Gradient Boosting longitudinal con Stratified CV |
-| RF-72 | Clasificar texto abierto | `nlp_service.py`, Analítica y pruebas | Implementado, NLP local anonimizado |
+| RF-71 | Modelo predictivo | ADR-019, `prediccion_service.py`, `/api/ia/prediccion-empleabilidad`, exportación y robustez de la sede propia, Analítica | Implementado, Gradient Boosting longitudinal con Stratified CV |
+| RF-72 | Clasificar texto abierto | `nlp_service.py`, `/api/ia/habilidades-*`, reglas de asociación, curaduría (RN-32), Analítica y Habilidades; `test_ia_alcance.py` | Implementado, NLP local anonimizado |
 | RF-73 | Alertas de patrones negativos | endpoint y vista Analítica; criterios ANA-02 (M1/M5, muestra ≥ 5, severidad enumerada) | Implementado, descriptivo |
 
 ## Resultado
@@ -103,6 +103,7 @@ Los RF-38 a RF-51 preservan cualquier columna dinámica, pero no tienen validaci
 | Carga y eliminación | No | Propia sede | No |
 | Publicar/retirar | No | Gráfica propia (retiro también si el propietario está inactivo o reasignado) | No |
 | Ver publicadas | No | Las propias (con retiro) y todas las de los demás coordinadores, de cualquier sede (ADR-018) | Según permisos/programas, cualquier sede |
-| Reportes, tendencias, explorador, analítica | No | Propia sede | No |
+| Reportes, tendencias, explorador, analítica e IA | No | Propia sede | No |
+| Curaduría de habilidades | No | Taxonomía institucional; solo modifica o revierte las propias | No |
 
 La autoridad se aplica en backend; los guards del frontend solo controlan navegación.

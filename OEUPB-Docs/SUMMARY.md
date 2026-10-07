@@ -37,6 +37,7 @@
   - [Inventario de scripts](docs/05-inventario-scripts.md)
   - [Runbook de despliegue y rollback](docs/06-runbook-despliegue.md)
   - [Estado funcional actual](docs/07-estado-funcional-actual.md)
+  - [Estudio del proyecto](docs/08-estudio-proyecto.md)
 - Auditorías
   - [Organización documental](audits/01-auditoria-organizacion-documental.md)
   - [Requerimientos, especificaciones y arquitectura](audits/02-auditoria-requerimientos.md)
@@ -44,6 +45,8 @@
   - [Hallazgos del Explorador y publicaciones](audits/04-hallazgos-explorador-publicaciones.md)
   - [Auditoría de requerimientos 05 y su resolución](audits/05-auditoria-requerimientos.md)
   - [Auditoría de diseño UI 06](audits/06-auditoria-ui.md)
+  - [Auditoría de requerimientos 07](audits/07-auditoria-requerimientos.md)
+  - [Auditoría funcional del despliegue 08](audits/08-auditoria-funcional-despliegue.md)
   - [Prompt de auditoría de requerimientos](audits/auditoria_requerimientos.md)
 - Planes
   - [Backend — histórico](plans/01-plan-backend.md)

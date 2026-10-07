@@ -140,7 +140,7 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☐ Alta/Esencial | ☑ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-04 |
-| Descripción del requerimiento | El sistema debe permitir actualizar el estado principal del egresado usando el catálogo: empleado, independiente, estudiante o sin empleo. Cuando aplique, la formalidad del empleo se registra como un atributo separado. |
+| Descripción del requerimiento | El sistema debe clasificar el estado principal del egresado con el catálogo: empleado, independiente, estudiante o sin empleo. Cuando aplique, la formalidad del empleo se registra como un atributo separado. El estado se actualiza con cada carga de encuesta; no existe edición manual de respuestas porque las encuestas manuales están fuera del alcance (RN-13, ADR-014). |
 
 | Número de requisito | RF-18 |
 |---|---|
@@ -308,7 +308,7 @@
 | Tipo | ☐ Requisito | ☑ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-01 |
-| Descripción del requerimiento | El sistema debe estar diseñado para poder crecer y usarse en otras sedes de la universidad. **Criterio verificable (propuesto):** Una sede nueva se habilita solo con un registro en el catálogo `sedes`, sin cambios de código; las pruebas de aislamiento cubren al menos 2 sedes. |
+| Descripción del requerimiento | El sistema debe estar diseñado para poder crecer y usarse en otras sedes de la universidad. **Criterio verificable (propuesto):** Una sede nueva se habilita con un registro en el catálogo `sedes` (migración de datos de Alembic), sin cambios en el código de la aplicación; las pruebas de aislamiento cubren al menos 2 sedes. |
 
 | Número de requisito | RF-34 |
 |---|---|
@@ -348,7 +348,7 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☑ Alta/Esencial | ☐ Media/Deseado | ☐ Baja/Opcional |
 | Requerimiento Ligado | RF-36 |
-| Descripción del requerimiento | Al crear un usuario de consulta, el coordinador debe asignarle manualmente programas y permisos de visualización. Las etiquetas rector, profesor y administrativo son informativas y no conceden privilegios implícitos. El backend debe mostrar únicamente las gráficas publicadas compatibles con los permisos y programas asignados. Los coordinadores, por su rol técnico, pueden ver todas las publicadas. |
+| Descripción del requerimiento | Al crear un usuario de consulta, el coordinador debe asignarle manualmente programas y permisos de visualización. Las etiquetas rector, profesor y administrativo son informativas y no conceden privilegios implícitos. El backend debe mostrar únicamente las gráficas publicadas compatibles con los permisos y programas asignados. Los coordinadores, por su rol técnico, pueden ver todas las publicadas. Una publicación es compatible con un usuario de consulta si este tiene `ver_publicaciones`, el permiso del origen y al menos un programa en común con ella (RN-24, ADR-020). |
 
 | Número de requisito | RF-38 |
 |---|---|
@@ -620,7 +620,7 @@
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☐ Alta/Esencial | ☐ Media/Deseado | ☑ Baja/Opcional (en pausa) |
 | Requerimiento Ligado | RF-04 |
-| Descripción del requerimiento | **En pausa por decisión de producto.** No se implementará un modelo predictivo hasta aprobar la variable objetivo, las métricas, la población, el horizonte y los criterios de aceptación. |
+| Descripción del requerimiento | El sistema debe proyectar, por programa académico y con el modelo aprobado en ADR-019, la probabilidad de cada estado laboral y el rango salarial en el horizonte M1 o M5, a partir de trayectorias longitudinales de la sede del coordinador. Exige al menos 30 trayectorias (si no las hay, informa datos insuficientes), no usa identificadores personales como variables y solo presenta resultados agregados por programa, con una alerta cuando la probabilidad de desempleo supera el 30 %. |
 
 | Número de requisito | RF-72 |
 |---|---|

@@ -7,4 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 USER oeupb
 EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", "--proxy-headers", "--no-access-log"]
+# El backend solo es accesible desde el proxy en la red interna de Compose (no publica puertos):
+# se confía en sus cabeceras X-Forwarded-* para que las URL generadas usen https.
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", "--proxy-headers", "--forwarded-allow-ips", "*", "--no-access-log"]

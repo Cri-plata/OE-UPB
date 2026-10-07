@@ -3,6 +3,28 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Corregido (2026-10-06, integración de 46921d7)
+- **Badge de balanceo de clases:** el servicio predictivo devolvía `estrategia_balanceo`, pero el `response_model` del endpoint lo descartaba y la interfaz nunca mostraba el badge. El campo se declara en `PrediccionEmpleabilidadResponse`, con una prueba sobre el endpoint.
+
+### Corregido (2026-10-04, auditoría funcional del despliegue 08)
+- **Arranque del backend en producción:** `ia_service.py` usaba `Any` sin importarlo; en Python 3.13 (imagen Docker) el proceso moría al iniciar.
+- **Administrar Usuarios detrás del proxy:** el cliente llamaba a `/api/usuarios` sin barra final y la redirección 307 de FastAPI apuntaba a `http://` sin puerto. El cliente usa `/api/usuarios/` y Uvicorn confía en las cabeceras del proxy interno. `validate_contracts.py` comprueba que cada ruta de los clientes exista tal cual en el OpenAPI.
+- **Cargas de más de 1 MB:** el proxy las rechazaba con 413; ahora admite 26 MB y espera 180 s en `/api/`.
+- **Curadurías revertidas:** seguían aplicándose hasta reiniciar, y cada worker tenía su propia taxonomía y caché. La taxonomía se reconstruye a partir de la BD según su firma.
+- **Exportación de habilidades:** respondía 500 por un argumento posicional mal pasado.
+- **Modelo de spaCy:** la imagen no lo instalaba y la IA perdía la lematización sin avisar; ahora se instala con `requirements.txt`.
+- **Mi Perfil:** mostraba "Sin Sede Asignada"; el nombre de la sede vive en un signal.
+- **Habilidades:** el filtro de año ofrece las cohortes con datos en lugar de 2022 a 2026 fijos, y los errores de curaduría (409/403) muestran su motivo.
+- **Caché del frontend:** `index.csr.html` se sirve con `Cache-Control: no-cache` para que un redespliegue no deje la versión anterior en los navegadores.
+
+### Corregido (2026-10-03, auditoría de requerimientos 07)
+- **Benchmark de IA sin datos de otras sedes:** `GET /api/ia/prediccion-benchmark-sedes` entregaba a `Admin_CTIC` las métricas predictivas de todas las sedes. Ahora es solo para coordinadores y evalúa únicamente la sede del JWT (ADR-020).
+- **Curaduría de habilidades:** `Admin_CTIC` ya no lista, cura ni revierte términos. Un coordinador no puede sobrescribir (409) ni revertir (403) la curaduría de otro. `creado_por_correo` se guardaba como "desconocido"; ahora guarda el correo del autor.
+- **Anonimización en la IA:** el texto libre que analizan `/api/ia/*` (habilidades, reglas, comparativa, exportación y variables de la predicción) no se anonimizaba. Ahora se retiran correos, números largos, documento, nombre y apellido antes del análisis (RN-04).
+- **Título de publicaciones:** `POST /api/publicaciones/` rechaza con 422 los títulos con correos, enlaces o secuencias de 5 o más dígitos.
+- **Inicio del usuario de consulta:** el login lo enviaba a `/mi-perfil`; ahora va a `/publicaciones`, igual que los guards y el mapa de pantallas.
+- **Política de mediciones:** `medicion_policy.py` declara que Tendencias y Explorador usan solo mediciones identificadas, como ya hacía el cálculo.
+
 ### Corregido (2026-10-01, integración de dev-gio)
 - **Migración de habilidades curadas:** `habilidades_curadas` no tenía migración de Alembic. La migración `k8a26e3b5c74` la crea con las restricciones del esquema (tipo `blanda`/`dura`, estado `aprobada`/`descartada`) o, si ya existía por un `create_all`, le añade solo las restricciones. El modelo `HabilidadCurada` declara las mismas restricciones.
 - **Pruebas aisladas:** `test_curaduria_habilidades.py` escribía en la base configurada en `.env` (creaba la tabla con `create_all` y un coordinador de prueba). Ahora usa SQLite en memoria como el resto de la suite.

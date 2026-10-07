@@ -60,13 +60,13 @@
 
 - **Actor:** Coordinador de Sede. El catálogo aprobado de permisos de consulta no incluye exportación, por lo que la vista de publicaciones no ofrece descarga.
 - **Resultado esperado:** tabla Excel o gráfica como imagen.
-- **Implementación:** directorio filtrado en Excel y gráficas privadas como PNG.
+- **Implementación:** directorio filtrado en Excel, gráficas privadas como PNG y, en el módulo de IA, informes Excel de habilidades (`/api/ia/habilidades-export`) y de predicción (`/api/ia/prediccion-export`) con resultados anonimizados y agregados.
 
 ## CU-10 — Ejecutar análisis de IA
 
 - **Actor:** Coordinador de Sede.
-- **Flujo implementado:** seleccionar los datos de la sede → anonimizar respuestas abiertas localmente → clasificar competencias y reglas de asociación de mercado → entrenar y evaluar modelo predictivo supervisado (Gradient Boosting) con validación cruzada estratificada → mostrar proyecciones y semáforo de riesgo por programa.
-- **Implementación:** clasificación de habilidades, reglas de asociación y modelo predictivo supervisado (RF-71) verificados conforme a ADR-019 y plan aprobado.
+- **Flujo implementado:** seleccionar los datos de la sede del JWT → anonimizar respuestas abiertas localmente (correos, números largos, documento, nombre y apellido) → clasificar competencias, reglas de asociación y comparativa M0/M1/M5 → curar términos emergentes → entrenar y evaluar el modelo predictivo (Gradient Boosting, validación cruzada estratificada, mínimo 30 trayectorias) → mostrar proyecciones por programa, con alerta cuando la probabilidad de desempleo supera el 30 % → exportar los informes.
+- **Implementación:** RF-71, RF-72 y RF-73 (ADR-019). La robustez del modelo (`/api/ia/prediccion-benchmark-sedes`) solo evalúa la sede propia. La taxonomía curada es institucional y solo la modifica su autor (RN-32, ADR-020). `Admin_CTIC` no accede.
 
 ## CU-11 — Configurar usuario de consulta
 

@@ -6,13 +6,15 @@
 2. Instalar certificados institucionales como `deploy/tls/fullchain.pem` y `deploy/tls/privkey.pem`.
 3. Ejecutar `python backup_database.py` y conservar la ruta, tamaño y SHA-256 reportados.
 4. Ejecutar `alembic upgrade head` en una tarea única antes de aumentar réplicas.
-5. Ejecutar `docker compose build` y `docker compose up -d`.
+5. Ejecutar `docker compose build` y `docker compose up -d`. La imagen del backend descarga el modelo de spaCy `es_core_news_md` durante la construcción (requiere acceso a internet).
+6. Confirmar que el reloj del servidor está sincronizado: un salto de reloj invalida los tokens vigentes.
+7. Calentar la IA: abrir Analítica y Co-relaciones dos o tres veces (una por worker), porque la primera consulta tras un reinicio carga spaCy y procesa todas las respuestas abiertas.
 
 ## Verificación
 
 - `GET /api/health/live` confirma que el proceso responde.
 - `GET /api/health/ready` confirma acceso a MySQL.
-- Verificar login, un reporte de una sede y que los logs contengan `request_id`, estado y duración, pero no PII ni cuerpos.
+- Verificar login, la lista de Administrar Usuarios (detecta redirecciones http detrás del proxy), una carga de Excel de más de 1 MB, un reporte de una sede y que los logs contengan `request_id`, estado y duración, pero no PII ni cuerpos.
 - Probar periódicamente los respaldos en una base aislada; generar el respaldo no demuestra que sea restaurable.
 
 ## Rollback

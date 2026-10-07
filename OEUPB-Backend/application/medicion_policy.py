@@ -1,9 +1,10 @@
 """Reglas explícitas de selección de intentos para indicadores agregados."""
 
+# RN-15: las anónimas solo entran en los KPI del reporte general sin filtro de programa.
 POLITICAS_INDICADORES = {
     "reporte_general": "ultimo_intento_identificado_y_todos_los_anonimos",
-    "tendencias": "ultimo_intento_identificado_y_todos_los_anonimos",
-    "explorador": "ultimo_intento_identificado_y_todos_los_anonimos",
+    "tendencias": "ultimo_intento_identificado",
+    "explorador": "ultimo_intento_identificado",
 }
 
 

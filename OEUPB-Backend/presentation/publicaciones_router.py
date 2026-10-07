@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timezone
 from typing import Literal
 
@@ -14,6 +15,21 @@ from infrastructure.database import get_db
 
 
 router = APIRouter(prefix="/api/publicaciones", tags=["Publicaciones"], responses=RESPUESTAS_PROTEGIDAS)
+
+# El título es el único texto libre que llega a otras sedes: no puede contener
+# correos, documentos ni enlaces (RN-09, RN-14, ADR-020).
+_CORREO = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
+_ENLACE = re.compile(r"https?://|www\.", re.I)
+_PUNTO_ENTRE_DIGITOS = re.compile(r"(?<=\d)[.\s](?=\d{3}(?!\d))")
+_SECUENCIA_DOCUMENTO = re.compile(r"\d{5,}")
+MENSAJE_TITULO_INVALIDO = "El título no puede contener correos, enlaces ni números de 5 o más dígitos"
+
+
+def titulo_publicable(titulo: str) -> bool:
+    if _CORREO.search(titulo) or _ENLACE.search(titulo):
+        return False
+    return not _SECUENCIA_DOCUMENTO.search(_PUNTO_ENTRE_DIGITOS.sub("", titulo))
+
 
 PERMISOS_POR_ORIGEN = {
     "reporte_general": "ver_reporte_general",
@@ -115,7 +131,7 @@ def _serializar(publicacion: PublicacionGrafica, sede_nombre: str) -> dict:
     status_code=status.HTTP_201_CREATED,
     responses={
         **errores(403, d403="El actor no es coordinador o no tiene sede"),
-        422: {"model": ErrorResponse, "description": "Definición no publicable o sin celdas que superen el umbral mínimo de privacidad"},
+        422: {"model": ErrorResponse, "description": "Título con datos personales, definición no publicable o sin celdas que superen el umbral mínimo de privacidad"},
     },
 )
 def publicar_grafica(
@@ -126,6 +142,8 @@ def publicar_grafica(
     sede_id = current_user.get("sede_id")
     if not sede_id:
         raise HTTPException(status_code=403, detail="El coordinador no tiene una sede asignada")
+    if not titulo_publicable(payload.titulo):
+        raise HTTPException(status_code=422, detail=MENSAJE_TITULO_INVALIDO)
     definicion = payload.definicion.model_dump(exclude_none=True)
     try:
         metricas, programas = construir_publicacion(db, sede_id, definicion)

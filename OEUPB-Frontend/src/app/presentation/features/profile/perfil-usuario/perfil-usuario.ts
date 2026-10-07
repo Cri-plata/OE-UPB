@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar';
 import { AuthImplementationRepository } from '../../../../data/repositories/auth-implementation.repository';
@@ -18,7 +18,8 @@ export class PerfilUsuarioComponent implements OnInit {
   private sedesApi = inject(SedesApi);
 
   usuario: any = null;
-  sedeNombre: string = 'Sin Sede Asignada';
+  // Zoneless: el nombre llega de forma asíncrona y debe vivir en un signal para refrescar la vista.
+  sedeNombre = signal('Cargando sede…');
 
   ngOnInit() {
     this.usuario = this.authRepo.getUsuarioActual();
@@ -31,14 +32,14 @@ export class PerfilUsuarioComponent implements OnInit {
 
   determinarSede(sedeId: number | null) {
     if (!sedeId) {
-      this.sedeNombre = 'Nivel Nacional (Todas las sedes)';
+      this.sedeNombre.set('Nivel Nacional (Todas las sedes)');
       return;
     }
     this.sedesApi.listar().subscribe({
       next: sedes => {
-        this.sedeNombre = sedes.find(s => s.id === sedeId)?.nombre || `Sede desconocida (${sedeId})`;
+        this.sedeNombre.set(sedes.find(s => s.id === sedeId)?.nombre || `Sede desconocida (${sedeId})`);
       },
-      error: () => this.sedeNombre = `Sede ${sedeId}`
+      error: () => this.sedeNombre.set(`Sede ${sedeId}`)
     });
   }
 }
