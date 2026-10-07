@@ -12,7 +12,7 @@ def main() -> None:
     parser.add_argument("--backup", required=True, type=Path)
     parser.add_argument("--confirm-database", required=True)
     args = parser.parse_args()
-    load_dotenv(Path(__file__).with_name(".env"))
+    load_dotenv(Path(__file__).resolve().parents[2] / ".env")
     url = make_url(os.environ["DATABASE_URL"])
     backup = args.backup.resolve(strict=True)
     if backup.suffix.lower() != ".sql" or args.confirm_database != url.database:

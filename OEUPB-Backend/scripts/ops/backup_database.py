@@ -22,7 +22,7 @@ def quote_identifier(value: str) -> str:
 
 
 def main() -> None:
-    load_dotenv(Path(__file__).with_name(".env"))
+    load_dotenv(Path(__file__).resolve().parents[2] / ".env")
     database_url = os.environ.get("DATABASE_URL")
     if not database_url:
         raise RuntimeError("DATABASE_URL no está configurada")

@@ -3,6 +3,11 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Cambiado (2026-10-06, reorganización de archivos sueltos)
+- **Backend:** `seed_db.py`, `backup_database.py` y `restore_database.py` pasan a `scripts/ops/`. Los diagnósticos manuales de IA (`test_diagnostico.py`, `test_ia_pipeline.py`, `test_reglas_asociacion.py`) pasan a `scripts/dev/diagnostico_ia/` como `diagnostico_*.py`, porque no son pruebas.
+- **Pruebas de predicción:** `test_prediccion_empleabilidad.py` pasa a `tests/` y usa SQLite en memoria con trayectorias sintéticas. Antes se conectaba a la base de `.env` y su prueba de endpoint podía cambiar el rol de un usuario real.
+- **Raíz:** se elimina `package-lock.json`, que estaba vacío y no tenía `package.json`.
+
 ### Corregido (2026-10-06, integración de 46921d7)
 - **Badge de balanceo de clases:** el servicio predictivo devolvía `estrategia_balanceo`, pero el `response_model` del endpoint lo descartaba y la interfaz nunca mostraba el badge. El campo se declara en `PrediccionEmpleabilidadResponse`, con una prueba sobre el endpoint.
 

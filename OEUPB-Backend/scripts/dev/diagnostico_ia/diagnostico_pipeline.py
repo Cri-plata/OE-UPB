@@ -1,4 +1,7 @@
 """Prueba del pipeline completo con datos simulados de encuestas."""
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[3]))  # OEUPB-Backend/
 import json
 from application.ia_service import analizar_habilidades_demandadas
 

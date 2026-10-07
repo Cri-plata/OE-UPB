@@ -3,6 +3,9 @@
 Prueba FINAL de fragmentos con doble-forma (A+B).
 Corrige el bug del test anterior: compara claves SIN tildes usando normalizacion.
 """
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[3]))  # OEUPB-Backend/
 import unicodedata
 from application.ia_service import analizar_habilidades_demandadas
 

@@ -1,7 +1,8 @@
-﻿import sys
+import sys
 import os
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# El script vive en scripts/ops/: los paquetes de la aplicación están dos niveles arriba.
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from infrastructure.database import SessionLocal
 from domain.models import Usuario
 from application.auth_service import expiracion_credencial_inicial, generar_contrasena_temporal, get_password_hash

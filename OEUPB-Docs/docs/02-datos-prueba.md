@@ -2,7 +2,7 @@
 
 ## Fuentes actuales
 
-- `OEUPB-Backend/seed_db.py`: creación de usuarios/datos iniciales; revisar antes de ejecutar.
+- `OEUPB-Backend/scripts/ops/seed_db.py`: creación de usuarios/datos iniciales; revisar antes de ejecutar.
 - `OEUPB-Backend/scripts/dev/generate_excel_fixtures.py`: generador parametrizable y reproducible de archivos Excel sintéticos.
 
 ## Reglas

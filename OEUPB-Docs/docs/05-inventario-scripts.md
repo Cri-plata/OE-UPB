@@ -25,8 +25,9 @@ También se retiraron tres pruebas manuales de raíz que ya habían sido convert
 - `tools/validate_frontend_architecture.py`: límites frontend.
 - `tools/generate_api_types.py`: generación reproducible de contratos.
 - `OEUPB-Backend/scripts/dev/generate_excel_fixtures.py`: datos sintéticos parametrizables.
-- `OEUPB-Backend/seed_db.py`: alta operativa idempotente del administrador inicial.
-- `OEUPB-Backend/backup_database.py` y `restore_database.py`: respaldo/restauración protegida.
+- `OEUPB-Backend/scripts/ops/seed_db.py`: alta operativa idempotente del administrador inicial.
+- `OEUPB-Backend/scripts/ops/backup_database.py` y `restore_database.py`: respaldo/restauración protegida.
+- `OEUPB-Backend/scripts/dev/diagnostico_ia/`: diagnósticos manuales del pipeline NLP, sin conexión a la base (antes `test_*.py` en la raíz del backend).
 
 ## Reglas permanentes
 

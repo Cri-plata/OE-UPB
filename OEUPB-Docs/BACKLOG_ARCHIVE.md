@@ -2,6 +2,10 @@
 
 Este archivo conserva tareas completadas, reemplazadas o descartadas. No debe usarse para priorizar trabajo activo.
 
+## Completado el 2026-10-06
+
+- [x] **TST-01 — Scripts de prueba en la raíz del backend.** `test_prediccion_empleabilidad.py` pasó a `tests/` sobre SQLite en memoria, con trayectorias sintéticas y las mismas verificaciones; ya no usa la base de `.env` (su prueba de endpoint podía cambiar el rol del primer usuario de la base real). `test_diagnostico.py`, `test_ia_pipeline.py` y `test_reglas_asociacion.py` eran diagnósticos manuales sin base de datos: pasaron a `scripts/dev/diagnostico_ia/` con nombres `diagnostico_*.py`. Los scripts operativos (`seed_db`, `backup_database`, `restore_database`) pasaron a `scripts/ops/`.
+
 ## Verificado y archivado el 2026-09-22
 
 Los siguientes ítems figuraban como pendientes en el backlog de 2026-08-26, pero el código actual demuestra que existe una implementación al menos funcional. Que estén archivados no significa que carezcan de deuda técnica; los pendientes reales relacionados están en `BACKLOG.md`.

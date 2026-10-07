@@ -14,7 +14,7 @@ python -m pip install -r requirements.txt
 Copy-Item .env.example .env
 # Editar .env con la conexión MySQL y un SECRET_KEY local.
 python -m alembic upgrade head
-python seed_db.py
+python scripts/ops/seed_db.py
 python -m unittest discover -s tests -v
 uvicorn main:app --reload --port 8000
 ```
@@ -23,7 +23,7 @@ uvicorn main:app --reload --port 8000
 - Swagger: `http://localhost:8000/docs`
 - OpenAPI: `http://localhost:8000/openapi.json`
 
-`requirements.txt` fija las versiones verificadas e incluye el modelo de spaCy `es_core_news_md` (se descarga al instalar). Usar Python 3.13, la versión de la imagen: en 3.14 las anotaciones se evalúan de forma diferida y pueden ocultar errores de importación que en producción detienen el backend (auditoría 08). `seed_db.py` crea el administrador inicial solo si no existe y muestra su contraseña temporal una sola vez; debe guardarse en un canal seguro.
+`requirements.txt` fija las versiones verificadas e incluye el modelo de spaCy `es_core_news_md` (se descarga al instalar). Usar Python 3.13, la versión de la imagen: en 3.14 las anotaciones se evalúan de forma diferida y pueden ocultar errores de importación que en producción detienen el backend (auditoría 08). `scripts/ops/seed_db.py` crea el administrador inicial solo si no existe y muestra su contraseña temporal una sola vez; debe guardarse en un canal seguro.
 
 Para generar un Excel totalmente sintético de carga:
 
@@ -57,7 +57,7 @@ Copy-Item OEUPB-Backend/.env.example OEUPB-Backend/.env
 cd OEUPB-Backend
 python -m pip install -r requirements.txt
 python -m alembic upgrade head
-python seed_db.py
+python scripts/ops/seed_db.py
 python -m alembic current
 cd ../OEUPB-Frontend
 npm ci

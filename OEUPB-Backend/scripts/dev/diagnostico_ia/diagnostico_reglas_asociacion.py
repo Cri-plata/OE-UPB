@@ -3,6 +3,9 @@
 Prueba de Validación de Reglas de Asociación (Market Basket Analysis)
 sobre las 18 Respuestas Simuladas del Observatorio de Egresados UPB.
 """
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[3]))  # OEUPB-Backend/
 import sys
 import json
 
@@ -16,7 +19,7 @@ from application.ia_service import (
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 1. 18 Respuestas abiertas simuladas (las mismas usadas en test_ia_pipeline.py)
+# 1. 18 Respuestas abiertas simuladas (las mismas usadas en diagnostico_pipeline.py)
 # ─────────────────────────────────────────────────────────────────────────────
 respuestas_simuladas = [
     # Ingeniería de Sistemas
