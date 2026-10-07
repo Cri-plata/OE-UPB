@@ -2,6 +2,12 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-10-06] - Integración de dev-gio (auditoría 09, IA-06, IA-16)
+
+* **Auditoría 09:** incorporada al índice. Terminología alineada con ADR-021, IA-AUD-08 marcado como resuelto (TST-01) y nota con el recuento tras la fusión (91 de backend y 108 de frontend).
+* **Modelos de análisis:** extracción única y anonimizada en `ia_service.extraer_textos_libres_encuesta`, alias `m*_porcentaje` de la comparativa, homologación de programas en los filtros de la IA, caché del modelo con sede y caché efectiva desde la corrección de `ModelCache.set()`.
+* **Estrategia de pruebas:** recuento actualizado.
+
 ## [2026-10-06] - Modelo de análisis en interfaz, informe y contrato (IA-02)
 
 * **Mockups:** `analitica.html` y `screen-map.md` hablan de "Modelo de Análisis de Empleabilidad" (ADR-021).

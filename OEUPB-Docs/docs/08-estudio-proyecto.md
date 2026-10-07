@@ -7,7 +7,7 @@
 
 OE UPB es el Observatorio de Egresados de la Universidad Pontificia Bolivariana. Reemplaza las hojas de cálculo dispersas de las encuestas del OLE (momentos 0, 1 y 5) por una plataforma web con aislamiento estricto por sede, analítica, publicación controlada de gráficas entre sedes e inteligencia artificial local.
 
-El producto está **listo para la exposición**. El stack de producción (Docker Compose con MySQL, FastAPI, Angular y nginx con HTTPS) se desplegó desde cero y superó un recorrido funcional de 54 comprobaciones con los tres roles (auditoría 08). Las suites automáticas pasan: 82 pruebas de backend y 107 de frontend. De los 73 requisitos funcionales, 36 están implementados, 30 parcialmente y 7 sin implementar. Las brechas restantes son analíticas curadas de baja o media prioridad, no funciones del núcleo.
+El producto está **listo para la exposición**. El stack de producción (Docker Compose con MySQL, FastAPI, Angular y nginx con HTTPS) se desplegó desde cero y superó un recorrido funcional de 54 comprobaciones con los tres roles (auditoría 08). Las suites automáticas pasan: 91 pruebas de backend y 108 de frontend. De los 73 requisitos funcionales, 36 están implementados, 30 parcialmente y 7 sin implementar. Las brechas restantes son analíticas curadas de baja o media prioridad, no funciones del núcleo.
 
 | Indicador | Valor |
 |---|---|
@@ -17,7 +17,7 @@ El producto está **listo para la exposición**. El stack de producción (Docker
 | API | 46 operaciones en 42 rutas; 70 esquemas |
 | Pantallas | 14 rutas Angular; 15 mockups |
 | Modelo de datos | 11 tablas; 12 migraciones Alembic |
-| Pruebas automáticas | 82 backend (15 archivos) y 107 frontend (21 archivos) |
+| Pruebas automáticas | 91 backend (17 archivos) y 108 frontend (21 archivos), a 2026-10-06 tras integrar `dev-gio` |
 | Decisiones documentadas | 20 ADR |
 | Pendientes activos | 11 ítems en el backlog |
 

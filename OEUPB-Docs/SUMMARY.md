@@ -48,6 +48,7 @@
   - [Auditoría de diseño UI 06](audits/06-auditoria-ui.md)
   - [Auditoría de requerimientos 07](audits/07-auditoria-requerimientos.md)
   - [Auditoría funcional del despliegue 08](audits/08-auditoria-funcional-despliegue.md)
+  - [Auditoría del módulo de IA 09](audits/09-auditoria-modulo-ia.md)
   - [Prompt de auditoría de requerimientos](audits/auditoria_requerimientos.md)
 - Planes
   - [Backend — histórico](plans/01-plan-backend.md)

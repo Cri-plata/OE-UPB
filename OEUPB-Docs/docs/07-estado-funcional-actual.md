@@ -209,8 +209,8 @@ El stack Docker de producción se desplegó desde cero y se verificó con datos 
 
 La última revisión (2026-10-06) aprobó:
 
-- 87 pruebas de backend, también ejecutadas con Python 3.13 (la versión de la imagen y la CI) en `OEUPB-Backend/.venv`;
-- 107 pruebas de frontend;
+- 91 pruebas de backend, también ejecutadas con Python 3.13 (la versión de la imagen y la CI) en `OEUPB-Backend/.venv`;
+- 108 pruebas de frontend;
 - despliegue del stack Docker con un recorrido funcional de 54 comprobaciones (auditoría 08);
 - compilación productiva de Angular;
 - sincronización entre FastAPI, OpenAPI y tipos TypeScript;

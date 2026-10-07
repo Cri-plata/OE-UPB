@@ -24,6 +24,8 @@ Este documento explica qué calcula cada modelo de análisis, con qué datos, co
 
 Reglas comunes a todos los modelos:
 
+- El filtro de programa de los endpoints de habilidades agrupa las variantes históricas del nombre (mayúsculas, tildes, abreviaturas como "INGENIERIA INFORMATICA" o "COMUNICACION SOCIAL- PERIODISMO") mediante `programas.canonizar_programa` y sus homologaciones institucionales (IA-16, `_variantes_programa_filtro`).
+
 - Solo `Coordinador_Sede` los consume, y siempre con los datos de la sede de su JWT (RN-06, RN-32). `Usuario_Consulta` y `Admin_CTIC` no acceden. Entre sedes solo viajan las publicaciones del modelo 3.
 - Las mediciones identificadas se toman en su intento más reciente por documento, sede, momento y cohorte (`medicion_policy.py`).
 - Todo el procesamiento es local: ningún texto ni dato sale a servicios externos (RNF-07).
@@ -92,7 +94,7 @@ Las alertas describen lo observado; no son predicciones ni decisiones automátic
 ### 7.1 Extracción y anonimización
 
 - **Textos:** se toman las preguntas abiertas reconocidas por patrones (tarea principal, aspectos a mejorar, qué le faltó, sugerencia, recomendación, observación, comentario, curso, seminario, "(otro)"). Se excluyen preguntas cerradas conocidas (canal de búsqueda, tipo de contrato, ingreso, sector, etc.) y textos de menos de 5 caracteres.
-- **Anonimización (RN-04):** cada texto se anonimiza antes de cualquier análisis (`ia_router._extraer_textos_libres`): correos por `[CORREO]`, números de 8 o más caracteres por `[DATO_NUMERICO]`, y documento, nombre y apellido del egresado por `[PERSONA]`.
+- **Anonimización (RN-04):** cada texto se anonimiza antes de cualquier análisis (`ia_service.extraer_textos_libres_encuesta`, función única que usan el router y el modelo de empleabilidad; sus patrones son `PATRONES_PREGUNTAS_ABIERTAS` y `PATRONES_EXCLUSION_PREGUNTAS`): correos por `[CORREO]`, números de 8 o más caracteres por `[DATO_NUMERICO]`, y documento, nombre y apellido del egresado por `[PERSONA]`.
 
 ### 7.2 Preprocesamiento doble
 
@@ -141,7 +143,7 @@ La taxonomía curada es institucional y compartida por todas las sedes (`habilid
 
 ## 9. Comparativa temporal de habilidades (modelo 9)
 
-Para cada habilidad se calcula su porcentaje sobre las respuestas con al menos una habilidad en M0, M1 y M5, y el delta M1 − M0. La tendencia se clasifica así:
+Para cada habilidad se calcula su porcentaje sobre las respuestas con al menos una habilidad en M0, M1 y M5, y el delta M1 − M0. La respuesta incluye `m0_pct`, `m1_pct` y `m5_pct`, y sus alias `m0_porcentaje`, `m1_porcentaje` y `m5_porcentaje` (IA-06). La tendencia se clasifica así:
 
 | Tendencia | Condición |
 |---|---|
@@ -250,17 +252,19 @@ En una presentación conviene hablar de **estimaciones** o **probabilidades esti
 
 | Caché | Alcance | Clave | Vigencia |
 |---|---|---|---|
-| `prediccion_model_cache` | Por worker | Número y máximo id de mediciones, momentos y filtros | 300 s, 50 entradas |
+| `prediccion_model_cache` | Por worker | Sede (`tag_sede`), número y máximo id de mediciones, momentos y filtros | 300 s, 50 entradas |
 | `habilidades_cache` | Por worker | Firma de curadurías, sede, filtros y número de mediciones | 300 s, 100 entradas |
 | `_preprocesar_dual` y extracción por texto | Por worker | Texto | Hasta 16.384 textos |
 
-La primera consulta de cada worker tras un reinicio carga spaCy (unos 3 s) y preprocesa todas las respuestas abiertas (unos 3 ms por texto distinto). En la auditoría 08 tardó unos 40 s con 31.000 respuestas; en caliente responde en 2-7 s. Se recomienda calentar Analítica y Co-relaciones antes de una demostración.
+Hasta la auditoría 09, `ModelCache.set()` no guardaba ninguna entrada, así que estas cachés no tenían efecto; desde entonces funcionan. La primera consulta de cada worker tras un reinicio carga spaCy (unos 3 s) y preprocesa todas las respuestas abiertas (unos 3 ms por texto distinto). En la auditoría 08 tardó unos 40 s con 31.000 respuestas; en caliente responde en 2-7 s. Se recomienda calentar Analítica y Co-relaciones antes de una demostración.
 
 ## 12. Cómo se verifica
 
 - **Pruebas automatizadas** (`OEUPB-Backend/tests/`, SQLite en memoria):
   - `test_prediccion_empleabilidad.py`: entrenamiento, robustez, datos insuficientes, endpoint y balanceo.
   - `test_ia_alcance.py`: sede propia, curaduría por autor, reversión entre workers, anonimización, exportación y campo de balanceo.
+  - `test_habilidades_comparativa.py`: contrato de la comparativa temporal (IA-06).
+  - `test_programa_normalizer.py`: canonización y homologación de programas (IA-16).
   - `test_curaduria_habilidades.py`, `test_nlp_service.py`, `test_reportes_analiticos.py` y `test_indicadores.py`: NLP, alertas, KPI, comparación y publicación.
 - **Diagnósticos manuales** (`OEUPB-Backend/scripts/dev/diagnostico_ia/`): imprimen el resultado del pipeline sobre textos de ejemplo, sin base de datos.
 
