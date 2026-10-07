@@ -20,6 +20,8 @@ from functools import lru_cache
 from typing import Any, Dict, List, Set, Tuple, Optional
 from collections import Counter
 
+from application.nlp_service import anonimizar
+
 import numpy as np
 import pandas as pd
 
@@ -69,6 +71,82 @@ def _get_nlp():
         else:
             _nlp = False
     return _nlp if _nlp is not False else None
+
+
+# Patrones canónicos para identificar preguntas abiertas en el instrumento UPB / OLE / SNIES
+PATRONES_PREGUNTAS_ABIERTAS = [
+    "describa brevemente la principal tarea",
+    "tarea que usted realiza",
+    "aspecto a mejorar",
+    "aspectos a mejorar",
+    "qué le faltó",
+    "qué le hizo falta",
+    "sugerencia",
+    "recomendación",
+    "recomendacion",
+    "observación",
+    "observacion",
+    "comentario",
+    "curso",
+    "seminario",
+    "(otro)",
+]
+
+# Patrones para descartar opciones cerradas de selección única o metadatos
+PATRONES_EXCLUSION_PREGUNTAS = [
+    "canal de b",
+    "dificultad a la hora",
+    "razón para recomendar",
+    "razon para recomendar",
+    "razón para no recomendar",
+    "razon para no recomendar",
+    "opciones de formación",
+    "opciones de formacion",
+    "lugar de residencia",
+    "tipo de contrato",
+    "sector está",
+    "sector esta",
+    "sector se",
+    "factor",
+    "smlv",
+    "ingreso mensual",
+    "cine ",
+    "formas de trabajo",
+]
+
+_OPEN_PATTERNS = PATRONES_PREGUNTAS_ABIERTAS
+_EXCLUDE_PATTERNS = PATRONES_EXCLUSION_PREGUNTAS
+
+
+def extraer_textos_libres_encuesta(
+    respuestas_json: Optional[dict],
+    datos_personales: Optional[List[str]] = None,
+) -> List[str]:
+    """
+    Extrae y anonimiza las respuestas a preguntas abiertas de una encuesta de egresados.
+    Descarta opciones cerradas de selección única y filtra datos personales (RN-04).
+    """
+    if not respuestas_json or not isinstance(respuestas_json, dict):
+        return []
+
+    textos = []
+    for key, val in respuestas_json.items():
+        if val is None or not isinstance(val, str):
+            continue
+
+        val_strip = val.strip()
+        if len(val_strip) < 5:
+            continue
+
+        key_lower = key.lower()
+
+        if any(exc in key_lower for exc in PATRONES_EXCLUSION_PREGUNTAS):
+            continue
+
+        if any(pat in key_lower for pat in PATRONES_PREGUNTAS_ABIERTAS):
+            textos.append(anonimizar(val_strip, datos_personales))
+
+    return textos
 
 
 # ─────────────────────────────────────────────────────────────────────────────

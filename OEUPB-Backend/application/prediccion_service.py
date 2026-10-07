@@ -31,49 +31,20 @@ from sklearn.utils.class_weight import compute_sample_weight
 
 from domain.models import Medicion, Egresado, Sede
 from application.indicadores import estado_laboral, salario
-from application.ia_service import extraer_habilidades_por_respuesta, TAXONOMIA_HABILIDADES_BRUTA
+from application.ia_service import (
+    extraer_habilidades_por_respuesta,
+    TAXONOMIA_HABILIDADES_BRUTA,
+    extraer_textos_libres_encuesta,
+    PATRONES_PREGUNTAS_ABIERTAS,
+    PATRONES_EXCLUSION_PREGUNTAS,
+)
 from application.model_cache import prediccion_model_cache
 from application.programas import canonizar_programa
 
-# Patrones para identificar preguntas abiertas en respuestas_completas
-_OPEN_PATTERNS = [
-    "describa brevemente la principal tarea",
-    "tarea que usted realiza",
-    "aspecto a mejorar",
-    "aspectos a mejorar",
-    "qué le faltó",
-    "qué le hizo falta",
-    "sugerencia",
-    "recomendación",
-    "recomendacion",
-    "observación",
-    "observacion",
-    "comentario",
-    "curso",
-    "seminario",
-    "(otro)",
-]
-
-_EXCLUDE_PATTERNS = [
-    "canal de b",
-    "dificultad a la hora",
-    "razón para recomendar",
-    "razon para recomendar",
-    "razón para no recomendar",
-    "razon para no recomendar",
-    "opciones de formación",
-    "opciones de formacion",
-    "lugar de residencia",
-    "tipo de contrato",
-    "sector está",
-    "sector esta",
-    "sector se",
-    "factor",
-    "smlv",
-    "ingreso mensual",
-    "cine ",
-    "formas de trabajo",
-]
+# Reutilizar patrones canónicos definidos en ia_service (IA-AUD-05)
+_OPEN_PATTERNS = PATRONES_PREGUNTAS_ABIERTAS
+_EXCLUDE_PATTERNS = PATRONES_EXCLUSION_PREGUNTAS
+_extraer_textos_libres = extraer_textos_libres_encuesta
 
 MAPA_ESTADO_NUM = {
     "sin_empleo": 0,
@@ -83,25 +54,6 @@ MAPA_ESTADO_NUM = {
 }
 
 UMBRAL_MINIMO_TRAYECTORIAS = 30
-
-
-def _extraer_textos_libres(respuestas_json: Optional[dict]) -> List[str]:
-    """Extrae respuestas abiertas relevantes para conteo de competencias."""
-    if not respuestas_json or not isinstance(respuestas_json, dict):
-        return []
-    textos = []
-    for key, val in respuestas_json.items():
-        if val is None or not isinstance(val, str):
-            continue
-        val_strip = val.strip()
-        if len(val_strip) < 5:
-            continue
-        key_lower = key.lower()
-        if any(exc in key_lower for exc in _EXCLUDE_PATTERNS):
-            continue
-        if any(pat in key_lower for pat in _OPEN_PATTERNS):
-            textos.append(val_strip)
-    return textos
 
 
 def _calcular_satisfaccion_promedio(respuestas: Optional[dict]) -> float:
@@ -648,6 +600,7 @@ def predecir_empleabilidad_servicio(
     momento_destino: int = 1,
     filtro_programa: Optional[str] = None,
     filtro_anio: Optional[int] = None,
+    sede_id: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     Punto de entrada principal para el router /api/ia/prediccion-empleabilidad.
@@ -656,7 +609,10 @@ def predecir_empleabilidad_servicio(
     mediciones_count = len(mediciones)
     max_medicion_id = max((m.id for m in mediciones), default=0)
 
-    # IA-09: Verificación de cache en memoria
+    # IA-09 / IA-AUD-02: Verificación de cache en memoria con aislamiento por sede
+    s_id = sede_id if sede_id is not None else (getattr(mediciones[0], "sede_id", 0) if mediciones else 0)
+    tag_sede = f"sede_{s_id}"
+
     cached_result = prediccion_model_cache.get(
         mediciones_count=mediciones_count,
         max_medicion_id=max_medicion_id,
@@ -664,6 +620,7 @@ def predecir_empleabilidad_servicio(
         momento_destino=momento_destino,
         filtro_programa=filtro_programa,
         filtro_anio=filtro_anio,
+        extra_tag=tag_sede,
     )
     if cached_result is not None:
         return cached_result
@@ -779,7 +736,7 @@ def predecir_empleabilidad_servicio(
         "validacion_temporal": val_temporal,
     }
 
-    # IA-09: Guardar en cache
+    # IA-09 / IA-AUD-02: Guardar en cache con aislamiento de sede
     prediccion_model_cache.set(
         mediciones_count=mediciones_count,
         max_medicion_id=max_medicion_id,
@@ -788,6 +745,7 @@ def predecir_empleabilidad_servicio(
         filtro_programa=filtro_programa,
         filtro_anio=filtro_anio,
         data=resultado,
+        extra_tag=tag_sede,
     )
 
     return resultado
@@ -919,6 +877,7 @@ def benchmark_sedes_servicio(
             egresados=egresados,
             momento_origen=momento_origen,
             momento_destino=momento_destino,
+            sede_id=s_id,
         )
 
         if res["estado"] == "exitoso":
