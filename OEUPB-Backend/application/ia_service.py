@@ -13,6 +13,7 @@ Restricciones:
 
 import copy
 import hashlib
+import io
 import unicodedata
 import re
 from functools import lru_cache
@@ -948,7 +949,7 @@ def generar_excel_habilidades(
     habilidades_data: Dict[str, Any],
     reglas_data: Dict[str, Any],
     comparativa_data: Optional[Dict[str, Any]] = None,
-) -> "io.BytesIO":
+) -> io.BytesIO:
     """
     Genera un archivo Excel (.xlsx) estructurado (IA-07):
       1. Habilidades Reconocidas
@@ -957,7 +958,6 @@ def generar_excel_habilidades(
       4. Comparativa Temporal M0-M1-M5 (si se suministra)
     Aplica cabecera institucional y anchos de columna automáticos.
     """
-    import io
     import openpyxl
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from openpyxl.utils import get_column_letter

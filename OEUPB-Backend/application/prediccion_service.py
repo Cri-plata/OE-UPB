@@ -13,9 +13,10 @@ Restricciones éticas y técnicas:
   - Umbral mínimo de 30 trayectorias para evitar predicciones espurias con muestras insuficientes.
 """
 
+import io
+import time
 from typing import Dict, List, Optional, Any, Tuple
 from collections import Counter
-import time
 import numpy as np
 import pandas as pd
 import sklearn.base
@@ -792,7 +793,7 @@ def predecir_empleabilidad_servicio(
     return resultado
 
 
-def generar_excel_prediccion(resultado: Dict[str, Any]) -> "io.BytesIO":
+def generar_excel_prediccion(resultado: Dict[str, Any]) -> io.BytesIO:
     """
     Genera un informe ejecutivo en Excel (.xlsx) para directores de programa (IA-14):
       1. Resumen Ejecutivo y Métricas de Validación
@@ -800,7 +801,6 @@ def generar_excel_prediccion(resultado: Dict[str, Any]) -> "io.BytesIO":
       3. Factores Determinantes de Empleabilidad
       4. Comparativa Multi-Algoritmo (IA-10)
     """
-    import io
     import openpyxl
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from openpyxl.utils import get_column_letter
