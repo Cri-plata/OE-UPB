@@ -52,17 +52,16 @@
       </div>
     </ng-container>
 
-    <!-- SECCIÓN 2: MODELO DE ANÁLISIS DE EMPLEABILIDAD (RF-71, ADR-021) -->
+    <!-- SECCIÓN 2: PROYECCIÓN DE INSERCIÓN LABORAL Y EMPLEABILIDAD -->
     <section class="card predictive-section">
       <div class="predictive-header">
         <div>
           <div class="title-with-badge">
-            <h2 class="card-title">Modelo de Análisis de Empleabilidad (RF-71)</h2>
-            <span class="badge badge-ai">Gradient Boosting</span>
+            <h2 class="card-title">Proyección de Inserción Laboral y Empleabilidad</h2>
+            <span class="badge badge-ai" title="Modelo predictivo supervisado basado en Gradient Boosting">Modelo Predictivo Institucional</span>
           </div>
           <p class="section-subtitle">
-            Proyección longitudinal de inserción laboral y rangos salariales por programa académico, entrenado on-demand
-            a partir de las encuestas longitudinales de la sede.
+            Estimación de la probabilidad de empleo y niveles salariales futuros por programa académico, basada en el seguimiento histórico a egresados de la sede.
           </p>
         </div>
 
@@ -117,7 +116,7 @@
 
       <div *ngIf="cargandoPrediccion" class="loading-state">
         <div class="spinner"></div>
-        <p>Entrenando y evaluando el modelo de análisis con validación cruzada...</p>
+        <p>Generando proyecciones y evaluando la precisión del modelo con datos históricos...</p>
       </div>
 
       <div *ngIf="errorPrediccion" class="error-message">
@@ -156,12 +155,12 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
               </span>
               <span class="kpi-label">
-                Precisión del Modelo
-                <span class="tooltip-trigger" title="Porcentaje de clasificaciones correctas sobre el total de egresados evaluados mediante validación cruzada estratificada (Stratified K-Fold).">ℹ</span>
+                Nivel de Acierto del Modelo
+                <span class="tooltip-trigger" title="Porcentaje de predicciones correctas sobre el total de egresados evaluados mediante validación cruzada estratificada (Stratified K-Fold).">ℹ</span>
               </span>
             </div>
             <div class="kpi-value">{{ prediccion.precision_modelo }}%</div>
-            <div class="kpi-subtext">Stratified CV · F1: {{ prediccion.f1_score }}</div>
+            <div class="kpi-subtext">Validación rigurosa · Certeza: {{ prediccion.f1_score >= 0.5 ? 'Alta' : 'Moderada' }} (F1: {{ prediccion.f1_score }})</div>
           </div>
 
           <div class="kpi-card">
@@ -170,12 +169,12 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               </span>
               <span class="kpi-label">
-                Trayectorias M0 → M{{ momentoDestino }}
+                Egresados con Seguimiento
                 <span class="tooltip-trigger" title="Número de egresados con respuestas vinculadas entre grado (M0) y el horizonte proyectado.">ℹ</span>
               </span>
             </div>
             <div class="kpi-value">{{ prediccion.total_trayectorias }}</div>
-            <div class="kpi-subtext">Egresados con seguimiento</div>
+            <div class="kpi-subtext">Trayectorias M0 → M{{ momentoDestino }}</div>
           </div>
 
           <div class="kpi-card">
@@ -198,14 +197,14 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
               </span>
               <span class="kpi-label">
-                Egresados en Riesgo
+                Egresados con Atención Prioritaria
                 <span class="tooltip-trigger" title="Egresados en programas con probabilidad proyectada de desempleo superior al 30%.">ℹ</span>
               </span>
             </div>
             <div class="kpi-value" [class.highlight-danger]="prediccion.egresados_en_riesgo > 0">
               {{ prediccion.egresados_en_riesgo }}
             </div>
-            <div class="kpi-subtext">Riesgo proyectado &gt; 30%</div>
+            <div class="kpi-subtext">Riesgo de desempleo &gt; 30%</div>
           </div>
         </div>
 
@@ -214,28 +213,28 @@
           <div class="robustness-header">
             <div class="robustness-status">
               <span class="semaphore-indicator" [ngClass]="prediccion.indicadores_robustez.color_general"></span>
-              <span class="robustness-title">Confiabilidad Estadística del Modelo:</span>
+              <span class="robustness-title">Nivel de Confianza de los Resultados:</span>
               <span class="badge" [ngClass]="getRobustnessBadgeClass(prediccion.indicadores_robustez.color_general)">
                 Robustez {{ prediccion.indicadores_robustez.nivel_general }}
               </span>
             </div>
-            <span class="robustness-help">Diagnóstico de significancia metodológica institucional</span>
+            <span class="robustness-help">Diagnóstico de representatividad estadística para la sede</span>
           </div>
 
           <div class="robustness-pills">
             <div class="dimension-pill">
               <span class="pill-dot" [ngClass]="prediccion.indicadores_robustez.muestra.color"></span>
-              <strong class="pill-title">Muestra:</strong>
+              <strong class="pill-title">Volumen de Datos:</strong>
               <span class="pill-desc">{{ prediccion.indicadores_robustez.muestra.observacion }}</span>
             </div>
             <div class="dimension-pill">
               <span class="pill-dot" [ngClass]="prediccion.indicadores_robustez.balance_clases.color"></span>
-              <strong class="pill-title">Balance:</strong>
+              <strong class="pill-title">Equilibrio de Respuestas:</strong>
               <span class="pill-desc">{{ prediccion.indicadores_robustez.balance_clases.observacion }}</span>
             </div>
             <div class="dimension-pill">
               <span class="pill-dot" [ngClass]="prediccion.indicadores_robustez.precision.color"></span>
-              <strong class="pill-title">Concordancia:</strong>
+              <strong class="pill-title">Capacidad de Acierto:</strong>
               <span class="pill-desc">{{ prediccion.indicadores_robustez.precision.observacion }}</span>
             </div>
           </div>
@@ -430,22 +429,22 @@
           <div class="card-header-flex">
             <div>
               <div class="title-with-badge">
-                <h3 class="card-subtitle">Matriz de Confusión y Diagnóstico del Modelo</h3>
-                <span class="badge badge-ai">Stratified K-Fold</span>
+                <h3 class="card-subtitle">Tabla de Comprobación: Proyección vs. Realidad Histórica</h3>
+                <span class="badge badge-ai" title="Validación rigurosa mediante partición estratificada Stratified K-Fold">Evaluación de Fiabilidad</span>
                 <span class="badge badge-success" *ngIf="prediccion.estrategia_balanceo">Ponderación Balanceada Activa</span>
               </div>
               <p class="section-subtitle">
-                Evaluación de aciertos y desvíos entre los estados laborales reales y los proyectados por el clasificador.
+                Contrasta las situaciones laborales reales observadas en los egresados frente a lo estimado por el modelo.
               </p>
             </div>
             <div class="matrix-legend">
               <span class="legend-item">
                 <span class="legend-dot green"></span>
-                Aciertos (diagonal)
+                Proyecciones Acertadas (diagonal)
               </span>
               <span class="legend-item">
                 <span class="legend-dot red"></span>
-                Desvíos / confusión
+                Diferencias observadas
               </span>
             </div>
           </div>
@@ -455,8 +454,8 @@
               <thead>
                 <tr>
                   <th class="corner-header">
-                    <span class="axis-observed">Real ↓</span>
-                    <span class="axis-predicted">Estimado →</span>
+                    <span class="axis-observed">Situación Real ↓</span>
+                    <span class="axis-predicted">Proyección Estimada →</span>
                   </th>
                   <th *ngFor="let colClase of prediccion.matriz_confusion.clases" class="text-center col-header">
                     {{ formatClaseLabel(colClase) }}
@@ -492,10 +491,10 @@
 
           <div class="heatmap-footer">
             <small class="cell-subtext">
-              Precisión general validada: <strong>{{ prediccion.precision_modelo }}%</strong> · F1-Score Macro: <strong>{{ prediccion.f1_score }}</strong>.
-              Las celdas verdes en la diagonal representan trayectorias donde el clasificador predijo con exactitud el estado del egresado.
+              Nivel de acierto general comprobado: <strong>{{ prediccion.precision_modelo }}%</strong> · Coeficiente de balance: <strong>{{ prediccion.f1_score }}</strong>.
+              Las celdas verdes en la diagonal representan trayectorias donde el modelo anticipó con exactitud la condición laboral del egresado.
               <span *ngIf="prediccion.estrategia_balanceo">
-                El modelo opera con ponderación adaptativa de clases (Cost-Sensitive Learning) para priorizar la identificación de egresados en situación de desempleo.
+                El sistema aplica especial atención a la identificación oportuna de egresados en búsqueda de empleo (Cost-Sensitive Learning) para orientar planes de apoyo institucional.
               </span>
             </small>
           </div>
@@ -506,11 +505,11 @@
           <div class="card-header-flex">
             <div>
               <div class="title-with-badge">
-                <h3 class="card-subtitle">Evaluación Comparativa Multi-Algoritmo (IA-10)</h3>
-                <span class="badge badge-ai">Selección Transparente de Modelos</span>
+                <h3 class="card-subtitle">Comparativa de Métodos Estadísticos Evaluados</h3>
+                <span class="badge badge-ai">Selección Automática del Mejor Método</span>
               </div>
               <p class="section-subtitle">
-                Comparación empírica entre estimadores supervisados sobre la misma partición estratificada de validación cruzada.
+                Se contrastaron múltiples técnicas de analítica sobre los mismos datos históricos para elegir automáticamente la de mayor exactitud para la Universidad.
               </p>
             </div>
           </div>
@@ -519,25 +518,25 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Algoritmo Evaluado</th>
-                  <th class="text-center">Precisión (Accuracy)</th>
-                  <th class="text-center">F1-Score Macro</th>
-                  <th class="text-center">Tiempo Inferencia</th>
-                  <th class="text-center">Estado del Modelo</th>
+                  <th>Método Analítico Evaluado</th>
+                  <th class="text-center">Nivel de Acierto (Exactitud)</th>
+                  <th class="text-center">Equilibrio General (F1)</th>
+                  <th class="text-center">Tiempo de Cálculo</th>
+                  <th class="text-center">Estado del Método</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let a of comparativaAlgoritmos" [class.highlight-row]="a.seleccionado">
                   <td>
                     <strong>{{ a.algoritmo }}</strong>
-                    <span class="subtext-d" *ngIf="a.seleccionado"> · Ensamble por árboles de decisión en cascada</span>
+                    <span class="subtext-d" *ngIf="a.seleccionado"> · Ensamble predictivo por árboles de decisión (Mayor precisión demostrada)</span>
                   </td>
                   <td class="text-center font-bold">{{ a.accuracy }}%</td>
                   <td class="text-center">{{ a.f1_score }}</td>
                   <td class="text-center font-mono">{{ a.tiempo_ms }} ms</td>
                   <td class="text-center">
                     <span class="badge" [ngClass]="a.seleccionado ? 'badge-success' : 'badge-neutral'">
-                      {{ a.seleccionado ? '✦ En Producción' : 'Evaluado' }}
+                      {{ a.seleccionado ? '✦ Seleccionado para Proyección' : 'Comparado' }}
                     </span>
                   </td>
                 </tr>
@@ -551,11 +550,11 @@
           <div class="card-header-flex">
             <div>
               <div class="title-with-badge">
-                <h3 class="card-subtitle">Validación Temporal por Cohorte / Backtesting (IA-17)</h3>
-                <span class="badge badge-ai">Generalización en el Tiempo</span>
+                <h3 class="card-subtitle">Validación Temporal por Cohorte / Backtesting (IA-17): Prueba de Estabilidad</h3>
+                <span class="badge badge-ai">Consistencia en el Tiempo</span>
               </div>
               <p class="section-subtitle">
-                Simula la proyección en escenario real: entrena con las cohortes históricas previas y evalúa su capacidad de generalización contra la cohorte más reciente.
+                Simula el desempeño real hacia el futuro: el modelo se entrenó con promociones previas y se puso a prueba anticipando los resultados reales de la promoción más reciente.
               </p>
             </div>
             <div *ngIf="prediccion.validacion_temporal.disponible">
@@ -574,31 +573,31 @@
 
           <div class="backtesting-grid" *ngIf="prediccion.validacion_temporal.disponible">
             <div class="backtesting-metric-card">
-              <span class="metric-label">Cohorte Evaluada</span>
+              <span class="metric-label">Promoción Evaluada</span>
               <div class="metric-val highlight">Año {{ prediccion.validacion_temporal.cohorte_evaluada }}</div>
-              <span class="metric-desc">Graduados de la última cohorte disponible</span>
+              <span class="metric-desc">Última promoción de egresados disponible</span>
             </div>
 
             <div class="backtesting-metric-card">
-              <span class="metric-label">Muestras de Split</span>
+              <span class="metric-label">Datos Históricos vs. Prueba</span>
               <div class="metric-val">
                 {{ prediccion.validacion_temporal.tamano_muestra_entrenamiento }}
                 <span class="metric-divider">/</span>
                 <span class="text-accent">{{ prediccion.validacion_temporal.tamano_muestra_prueba }}</span>
               </div>
-              <span class="metric-desc">Entrenamiento histórico vs Prueba no vista</span>
+              <span class="metric-desc">Entrenamiento histórico vs Promoción de prueba</span>
             </div>
 
             <div class="backtesting-metric-card">
-              <span class="metric-label">Exactitud Temporal</span>
+              <span class="metric-label">Acierto con la Última Promoción</span>
               <div class="metric-val success-val">{{ prediccion.validacion_temporal.accuracy_temporal }}%</div>
-              <span class="metric-desc">Accuracy real sobre la cohorte no vista</span>
+              <span class="metric-desc">Exactitud real sobre egresados nuevos no vistos</span>
             </div>
 
             <div class="backtesting-metric-card">
-              <span class="metric-label">F1-Score Temporal</span>
+              <span class="metric-label">Equilibrio Temporal (F1)</span>
               <div class="metric-val">{{ prediccion.validacion_temporal.f1_temporal }}</div>
-              <span class="metric-desc">F1 Macro ponderado interanual</span>
+              <span class="metric-desc">Consistencia entre distintas condiciones laborales</span>
             </div>
           </div>
 
@@ -608,7 +607,7 @@
 
           <div class="ethical-notice mt-16" *ngIf="prediccion.validacion_temporal.disponible">
             <span>
-              <strong>Criterio de Acreditación Curricular:</strong> El backtesting garantiza que las recomendaciones y alertas tempranas del modelo reflejen patrones sostenidos en el tiempo y no sobreajustes estadísticos a una sola promoción.
+              <strong>Criterio de Calidad Curricular:</strong> Esta prueba demuestra que las proyecciones y recomendaciones reflejan patrones sostenidos a lo largo de los años y no particularidades aisladas de una sola promoción.
             </span>
           </div>
         </article>
