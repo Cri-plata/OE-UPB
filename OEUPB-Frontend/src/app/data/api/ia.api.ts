@@ -55,10 +55,13 @@ export interface HabilidadComparativaRow {
   tipo: 'blanda' | 'dura' | string;
   m0_menciones: number;
   m0_porcentaje: number;
+  m0_pct?: number;
   m1_menciones: number;
   m1_porcentaje: number;
+  m1_pct?: number;
   m5_menciones: number;
   m5_porcentaje: number;
+  m5_pct?: number;
   delta_m1_m0: number;
   tendencia: 'crece' | 'decrece' | 'estable' | 'emergente_en_m1' | 'emergente_en_m5' | string;
   total_menciones: number;

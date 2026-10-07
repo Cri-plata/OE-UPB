@@ -248,10 +248,13 @@ export interface HabilidadComparativaItem {
   "tipo": string;
   "m0_menciones": number;
   "m0_pct": number;
+  "m0_porcentaje"?: number | null;
   "m1_menciones": number;
   "m1_pct": number;
+  "m1_porcentaje"?: number | null;
   "m5_menciones": number;
   "m5_pct": number;
+  "m5_porcentaje"?: number | null;
   "delta_m1_m0": number;
   "tendencia": string;
   "total_menciones": number;

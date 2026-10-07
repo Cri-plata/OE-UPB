@@ -13,11 +13,14 @@ Restricciones:
 
 import copy
 import hashlib
+import io
 import unicodedata
 import re
 from functools import lru_cache
 from typing import Any, Dict, List, Set, Tuple, Optional
 from collections import Counter
+
+from application.nlp_service import anonimizar
 
 import numpy as np
 import pandas as pd
@@ -70,6 +73,82 @@ def _get_nlp():
     return _nlp if _nlp is not False else None
 
 
+# Patrones canónicos para identificar preguntas abiertas en el instrumento UPB / OLE / SNIES
+PATRONES_PREGUNTAS_ABIERTAS = [
+    "describa brevemente la principal tarea",
+    "tarea que usted realiza",
+    "aspecto a mejorar",
+    "aspectos a mejorar",
+    "qué le faltó",
+    "qué le hizo falta",
+    "sugerencia",
+    "recomendación",
+    "recomendacion",
+    "observación",
+    "observacion",
+    "comentario",
+    "curso",
+    "seminario",
+    "(otro)",
+]
+
+# Patrones para descartar opciones cerradas de selección única o metadatos
+PATRONES_EXCLUSION_PREGUNTAS = [
+    "canal de b",
+    "dificultad a la hora",
+    "razón para recomendar",
+    "razon para recomendar",
+    "razón para no recomendar",
+    "razon para no recomendar",
+    "opciones de formación",
+    "opciones de formacion",
+    "lugar de residencia",
+    "tipo de contrato",
+    "sector está",
+    "sector esta",
+    "sector se",
+    "factor",
+    "smlv",
+    "ingreso mensual",
+    "cine ",
+    "formas de trabajo",
+]
+
+_OPEN_PATTERNS = PATRONES_PREGUNTAS_ABIERTAS
+_EXCLUDE_PATTERNS = PATRONES_EXCLUSION_PREGUNTAS
+
+
+def extraer_textos_libres_encuesta(
+    respuestas_json: Optional[dict],
+    datos_personales: Optional[List[str]] = None,
+) -> List[str]:
+    """
+    Extrae y anonimiza las respuestas a preguntas abiertas de una encuesta de egresados.
+    Descarta opciones cerradas de selección única y filtra datos personales (RN-04).
+    """
+    if not respuestas_json or not isinstance(respuestas_json, dict):
+        return []
+
+    textos = []
+    for key, val in respuestas_json.items():
+        if val is None or not isinstance(val, str):
+            continue
+
+        val_strip = val.strip()
+        if len(val_strip) < 5:
+            continue
+
+        key_lower = key.lower()
+
+        if any(exc in key_lower for exc in PATRONES_EXCLUSION_PREGUNTAS):
+            continue
+
+        if any(pat in key_lower for pat in PATRONES_PREGUNTAS_ABIERTAS):
+            textos.append(anonimizar(val_strip, datos_personales))
+
+    return textos
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 2. PREPROCESAMIENTO DE TEXTO (Paso 1 aprobado)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -89,7 +168,7 @@ def _preprocesar_dual(texto: str) -> Tuple[str, str]:
     if not texto or not isinstance(texto, str):
         return "", ""
 
-    texto_strip = texto.strip()
+    texto_strip = re.sub(r"[_\-]+", " ", texto.strip())
     if not texto_strip:
         return "", ""
 
@@ -314,13 +393,14 @@ def _compilar_taxonomia() -> Tuple[Dict[str, List[str]], Dict[str, str], list]:
         tipos_habilidad[etiqueta] = config["tipo"]
         vars_limpias = set()
         for variante in config["variantes"]:
+            variante_norm = re.sub(r"[_\-]+", " ", variante)
             # Forma lematizada (pipeline completo con spaCy)
-            v_prep = preprocesar_texto(variante)
+            v_prep = preprocesar_texto(variante_norm)
             if v_prep:
                 vars_limpias.add(v_prep)
             # Forma cruda normalizada (sin lematizar, solo minúsculas + quitar tildes)
             # Esto cubre los casos en que spaCy asigna POS distinto en aislamiento vs. contexto
-            v_cruda = _quitar_tildes(variante.lower().strip())
+            v_cruda = _quitar_tildes(variante_norm.lower().strip())
             v_cruda = re.sub(r"[^a-zA-Z0-9\s]", "", v_cruda)
             v_cruda = " ".join(p for p in v_cruda.split() if len(p) > 1)
             if v_cruda and v_cruda not in vars_limpias:
@@ -920,10 +1000,13 @@ def comparar_habilidades_temporales(
             "tipo": tipos_hab.get(h, "blanda"),
             "m0_menciones": m0_count,
             "m0_pct": pct_m0,
+            "m0_porcentaje": pct_m0,
             "m1_menciones": m1_count,
             "m1_pct": pct_m1,
+            "m1_porcentaje": pct_m1,
             "m5_menciones": m5_count,
             "m5_pct": pct_m5,
+            "m5_porcentaje": pct_m5,
             "delta_m1_m0": delta_m1_m0,
             "tendencia": tendencia,
             "total_menciones": m0_count + m1_count + m5_count,
@@ -944,7 +1027,7 @@ def generar_excel_habilidades(
     habilidades_data: Dict[str, Any],
     reglas_data: Dict[str, Any],
     comparativa_data: Optional[Dict[str, Any]] = None,
-) -> "io.BytesIO":
+) -> io.BytesIO:
     """
     Genera un archivo Excel (.xlsx) estructurado (IA-07):
       1. Habilidades Reconocidas
@@ -953,7 +1036,6 @@ def generar_excel_habilidades(
       4. Comparativa Temporal M0-M1-M5 (si se suministra)
     Aplica cabecera institucional y anchos de columna automáticos.
     """
-    import io
     import openpyxl
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from openpyxl.utils import get_column_letter

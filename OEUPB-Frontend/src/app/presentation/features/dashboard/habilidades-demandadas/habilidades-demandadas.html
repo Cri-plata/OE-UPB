@@ -431,15 +431,15 @@
                     </span>
                   </td>
                   <td class="text-center">
-                    <span class="pct-val">{{ row.m0_porcentaje }}%</span>
+                    <span class="pct-val">{{ row.m0_porcentaje ?? row.m0_pct ?? 0 }}%</span>
                     <span class="cnt-sub">({{ row.m0_menciones }})</span>
                   </td>
                   <td class="text-center">
-                    <span class="pct-val">{{ row.m1_porcentaje }}%</span>
+                    <span class="pct-val">{{ row.m1_porcentaje ?? row.m1_pct ?? 0 }}%</span>
                     <span class="cnt-sub">({{ row.m1_menciones }})</span>
                   </td>
                   <td class="text-center">
-                    <span class="pct-val">{{ row.m5_porcentaje }}%</span>
+                    <span class="pct-val">{{ row.m5_porcentaje ?? row.m5_pct ?? 0 }}%</span>
                     <span class="cnt-sub">({{ row.m5_menciones }})</span>
                   </td>
                   <td class="text-center font-bold" [ngClass]="getDeltaClass(row.delta_m1_m0)">

@@ -81,6 +81,15 @@ _MAPA_ABREVIATURAS = {
     r"\bCOM\b": "COMUNICACION",
 }
 
+_HOMOLOGACIONES_INSTITUCIONALES = {
+    # Variantes históricas y abreviadas de Ingeniería de Sistemas e Informática
+    r"^INGENIERIA\s+INFORMATICA$": "INGENIERIA DE SISTEMAS E INFORMATICA",
+    r"^INGENIERIA\s+EN\s+INFORMATICA$": "INGENIERIA DE SISTEMAS E INFORMATICA",
+    # Variantes de Comunicación Social y Periodismo con guiones o sin conjunción
+    r"^COMUNICACION\s+SOCIAL\s*[-–—]\s*PERIODISMO$": "COMUNICACION SOCIAL Y PERIODISMO",
+    r"^COMUNICACION\s+SOCIAL\s+PERIODISMO$": "COMUNICACION SOCIAL Y PERIODISMO",
+}
+
 _DICCIONARIO_TILDE_PROGRAMAS = {
     "ingenieria": "Ingeniería",
     "administracion": "Administración",
@@ -100,6 +109,15 @@ _DICCIONARIO_TILDE_PROGRAMAS = {
     "biologia": "Biología",
     "odontologia": "Odontología",
     "enfermeria": "Enfermería",
+    # Extensiones de acentuación institucional UPB (IA-16)
+    "informatica": "Informática",
+    "mecanica": "Mecánica",
+    "grafico": "Gráfico",
+    "grafica": "Gráfica",
+    "electronica": "Electrónica",
+    "electrica": "Eléctrica",
+    "politicas": "Políticas",
+    "politica": "Política",
 }
 
 
@@ -116,6 +134,7 @@ def normalizar_forma_base(nombre: Optional[str]) -> str:
       2. Remueve prefijos institucionales vacíos (Pregrado en, Programa de...).
       3. Remueve sufijos de jornada, modalidad y sede (- Diurna, Virtual...).
       4. Normaliza puntos de abreviaturas y expande términos (Ing. -> INGENIERIA).
+      5. Normaliza guiones en nombres compuestos (COMUNICACION SOCIAL- PERIODISMO -> COMUNICACION SOCIAL Y PERIODISMO).
     """
     if not nombre or not isinstance(nombre, str):
         return ""
@@ -140,6 +159,9 @@ def normalizar_forma_base(nombre: Optional[str]) -> str:
     # 4. Expandir abreviaturas
     for abrev_regex, expansion in _MAPA_ABREVIATURAS.items():
         texto_mayusc = re.sub(abrev_regex, expansion, texto_mayusc, flags=re.IGNORECASE)
+
+    # 5. Normalizar variantes de guiones en nombres compuestos
+    texto_mayusc = re.sub(r"\bCOMUNICACION\s+SOCIAL\s*[-–—]\s*PERIODISMO\b", "COMUNICACION SOCIAL Y PERIODISMO", texto_mayusc)
 
     # Re-limpiar espacios dobles generados
     return " ".join(texto_mayusc.split())
@@ -219,6 +241,12 @@ def canonizar_programa(
     if not forma_base:
         return "Otros"
 
+    # Homologación institucional determinística de alias históricos o abreviados (IA-16)
+    for patron, homologado in _HOMOLOGACIONES_INSTITUCIONALES.items():
+        if re.search(patron, forma_base, flags=re.IGNORECASE):
+            forma_base = homologado
+            break
+
     if catalogo_canonica:
         mejor_match = None
         mejor_score = 0.0
@@ -256,15 +284,20 @@ def construir_mapa_canonico(
         base = normalizar_forma_base(p)
         grupos_base.setdefault(base, []).append(p)
 
-    # Identificar nombres canónicos para cada grupo base
+    # Identificar nombres canónicos para cada grupo base con homologaciones
     canones_identificados: List[str] = []
     mapa_base_a_canon: Dict[str, str] = {}
 
     for base, variantes in grupos_base.items():
-        # La forma canónica deriva de la base limpia para excluir sufijos y abreviaturas
-        canon_tit = _formato_titulo_respetuoso(base)
+        base_homologada = base
+        for patron, homologado in _HOMOLOGACIONES_INSTITUCIONALES.items():
+            if re.search(patron, base, flags=re.IGNORECASE):
+                base_homologada = homologado
+                break
+        canon_tit = _formato_titulo_respetuoso(base_homologada)
         mapa_base_a_canon[base] = canon_tit
-        canones_identificados.append(canon_tit)
+        if canon_tit not in canones_identificados:
+            canones_identificados.append(canon_tit)
 
     # Segunda pasada: unificar entre grupos base que tengan alta similitud difusa (ej. contención / fuzzy)
     mapa_final: Dict[str, str] = {}

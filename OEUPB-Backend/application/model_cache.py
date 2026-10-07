@@ -82,6 +82,12 @@ class ModelCache:
                     oldest_key = min(self._cache.keys(), key=lambda k: self._cache[k]["created_at"])
                     del self._cache[oldest_key]
 
+            self._cache[key] = {
+                "data": data,
+                "created_at": time.time(),
+                "expires_at": time.time() + ttl,
+            }
+
     def get_by_key(self, key: str) -> Optional[Any]:
         """Obtiene una entrada de caché dada una clave arbitraria si no ha expirado."""
         with self._lock:

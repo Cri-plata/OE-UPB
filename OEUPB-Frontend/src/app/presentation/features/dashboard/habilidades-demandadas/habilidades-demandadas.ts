@@ -324,7 +324,12 @@ export class HabilidadesDemandadasComponent implements OnInit {
       top_n: this.filtroTopComparativa,
     }).subscribe({
       next: (data) => {
-        this.comparativaData = data.comparativa || [];
+        this.comparativaData = (data.comparativa || []).map((row: any) => ({
+          ...row,
+          m0_porcentaje: row.m0_porcentaje ?? row.m0_pct ?? 0,
+          m1_porcentaje: row.m1_porcentaje ?? row.m1_pct ?? 0,
+          m5_porcentaje: row.m5_porcentaje ?? row.m5_pct ?? 0,
+        }));
         this.totalesRespuestasMomento = data.totales_respuestas || {};
         this.totalesConHabilidadMomento = data.totales_con_habilidad || {};
         this.isLoadingComparativa = false;

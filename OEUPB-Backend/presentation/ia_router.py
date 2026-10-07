@@ -24,7 +24,11 @@ from application.ia_service import (
     comparar_habilidades_temporales,
     generar_excel_habilidades,
     sincronizar_curadurias_bd,
+    extraer_textos_libres_encuesta,
+    PATRONES_PREGUNTAS_ABIERTAS,
+    PATRONES_EXCLUSION_PREGUNTAS,
 )
+from application.programas import canonizar_programa
 from application.prediccion_service import (
     predecir_empleabilidad_servicio,
     generar_excel_prediccion,
@@ -203,10 +207,13 @@ class HabilidadComparativaItem(BaseModel):
     tipo: str
     m0_menciones: int
     m0_pct: float
+    m0_porcentaje: Optional[float] = None
     m1_menciones: int
     m1_pct: float
+    m1_porcentaje: Optional[float] = None
     m5_menciones: int
     m5_pct: float
+    m5_porcentaje: Optional[float] = None
     delta_m1_m0: float
     tendencia: str
     total_menciones: int
@@ -221,46 +228,10 @@ class HabilidadesComparativaResponse(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 # Utilidad: extraer textos libres relevantes de preguntas abiertas auténticas
 # ─────────────────────────────────────────────────────────────────────────────
-# Patrones para identificar preguntas abiertas en el instrumento de egresados UPB / SNIES
-_OPEN_PATTERNS = [
-    "describa brevemente la principal tarea",
-    "tarea que usted realiza",
-    "aspecto a mejorar",
-    "aspectos a mejorar",
-    "qué le faltó",
-    "qué le hizo falta",
-    "sugerencia",
-    "recomendación",
-    "recomendacion",
-    "observación",
-    "observacion",
-    "comentario",
-    "curso",
-    "seminario",
-    "(otro)",
-]
-
-# Patrones para excluir preguntas de opción múltiple fija o metadatos
-_EXCLUDE_PATTERNS = [
-    "canal de b",
-    "dificultad a la hora",
-    "razón para recomendar",
-    "razon para recomendar",
-    "razón para no recomendar",
-    "razon para no recomendar",
-    "opciones de formación",
-    "opciones de formacion",
-    "lugar de residencia",
-    "tipo de contrato",
-    "sector está",
-    "sector esta",
-    "sector se",
-    "factor",
-    "smlv",
-    "ingreso mensual",
-    "cine ",
-    "formas de trabajo",
-]
+# Reutilizar patrones y función de extracción canónica de ia_service (IA-AUD-05)
+_OPEN_PATTERNS = PATRONES_PREGUNTAS_ABIERTAS
+_EXCLUDE_PATTERNS = PATRONES_EXCLUSION_PREGUNTAS
+_extraer_textos_libres = extraer_textos_libres_encuesta
 
 
 def _datos_personales(medicion: Medicion) -> List[str]:
@@ -271,40 +242,17 @@ def _datos_personales(medicion: Medicion) -> List[str]:
     return [egresado.numero_documento, egresado.primer_nombre or "", egresado.primer_apellido or ""]
 
 
-def _extraer_textos_libres(respuestas_json: dict, datos_personales: Optional[List[str]] = None) -> List[str]:
+def _variantes_programa_filtro(db: Session, programa: Optional[str]) -> Optional[List[str]]:
     """
-    Dado el diccionario JSON de una medición (respuestas_completas),
-    extrae los textos libres de preguntas abiertas (tareas laborales, aspectos
-    a mejorar, campos de especificación 'Otro', cursos o sugerencias).
-
-    Filtra explícitamente opciones cerradas de selección única para evitar
-    ruido estadístico en el análisis de PLN. Cada texto se anonimiza (correos,
-    números largos y los datos personales recibidos) antes de analizarlo, porque
-    los términos emergentes se muestran, se exportan y se curan (RN-04).
+    Resuelve todas las variantes en la base de datos que corresponden al programa solicitado (IA-AUD-04).
+    Permite filtrar tanto por el nombre canónico oficial como por variantes crudas en mayúsculas o abreviadas.
     """
-    if not respuestas_json or not isinstance(respuestas_json, dict):
-        return []
-
-    textos = []
-    for key, val in respuestas_json.items():
-        if val is None or not isinstance(val, str):
-            continue
-
-        val_strip = val.strip()
-        if len(val_strip) < 5:
-            continue
-
-        key_lower = key.lower()
-
-        # Descartar preguntas que son de opción múltiple cerrada conocida
-        if any(exc in key_lower for exc in _EXCLUDE_PATTERNS):
-            continue
-
-        # Extraer si coincide con preguntas abiertas reconocidas
-        if any(pat in key_lower for pat in _OPEN_PATTERNS):
-            textos.append(anonimizar(val_strip, datos_personales))
-
-    return textos
+    if not programa:
+        return None
+    canon = canonizar_programa(programa)
+    filas = db.query(Egresado.programa).filter(Egresado.programa.isnot(None)).distinct().all()
+    coincidentes = [r[0] for r in filas if r[0] and (r[0] == programa or canonizar_programa(r[0]) == canon)]
+    return coincidentes if coincidentes else [programa]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -341,7 +289,8 @@ def get_habilidades_demandadas(
     if anio is not None:
         query = query.filter(Medicion.anio == anio)
     if programa:
-        query = query.join(Medicion.egresado).filter(Egresado.programa == programa)
+        vars_prog = _variantes_programa_filtro(db, programa)
+        query = query.join(Medicion.egresado).filter(Egresado.programa.in_(vars_prog))
 
     mediciones = query.all()
 
@@ -416,7 +365,8 @@ def get_reglas_asociacion(
     if anio is not None:
         query = query.filter(Medicion.anio == anio)
     if programa:
-        query = query.join(Medicion.egresado).filter(Egresado.programa == programa)
+        vars_prog = _variantes_programa_filtro(db, programa)
+        query = query.join(Medicion.egresado).filter(Egresado.programa.in_(vars_prog))
 
     mediciones = query.all()
 
@@ -482,7 +432,8 @@ def get_habilidades_comparativa(
     if anio is not None:
         query = query.filter(Medicion.anio == anio)
     if programa:
-        query = query.join(Medicion.egresado).filter(Egresado.programa == programa)
+        vars_prog = _variantes_programa_filtro(db, programa)
+        query = query.join(Medicion.egresado).filter(Egresado.programa.in_(vars_prog))
 
     mediciones = query.all()
 
@@ -534,7 +485,8 @@ def exportar_habilidades_excel(
     if anio is not None:
         query = query.filter(Medicion.anio == anio)
     if programa:
-        query = query.join(Medicion.egresado).filter(Egresado.programa == programa)
+        vars_prog = _variantes_programa_filtro(db, programa)
+        query = query.join(Medicion.egresado).filter(Egresado.programa.in_(vars_prog))
 
     mediciones = query.all()
 
@@ -595,7 +547,8 @@ def get_prediccion_empleabilidad(
         query = query.filter(Medicion.sede_id == current_user["sede_id"])
 
     mediciones = query.all()
-    egresados = db.query(Egresado).all()
+    docs_sede = {m.egresado_documento for m in mediciones if m.egresado_documento}
+    egresados = db.query(Egresado).filter(Egresado.numero_documento.in_(docs_sede)).all() if docs_sede else []
 
     resultado = predecir_empleabilidad_servicio(
         mediciones=mediciones,
@@ -604,6 +557,7 @@ def get_prediccion_empleabilidad(
         momento_destino=momento_destino,
         filtro_programa=programa,
         filtro_anio=anio,
+        sede_id=current_user.get("sede_id"),
     )
 
     return resultado
@@ -627,7 +581,8 @@ def exportar_prediccion_excel(
         query = query.filter(Medicion.sede_id == current_user["sede_id"])
 
     mediciones = query.all()
-    egresados = db.query(Egresado).all()
+    docs_sede = {m.egresado_documento for m in mediciones if m.egresado_documento}
+    egresados = db.query(Egresado).filter(Egresado.numero_documento.in_(docs_sede)).all() if docs_sede else []
 
     resultado = predecir_empleabilidad_servicio(
         mediciones=mediciones,
@@ -636,6 +591,7 @@ def exportar_prediccion_excel(
         momento_destino=momento_destino,
         filtro_programa=programa,
         filtro_anio=anio,
+        sede_id=current_user.get("sede_id"),
     )
 
     excel_stream = generar_excel_prediccion(resultado)
@@ -664,7 +620,8 @@ def get_benchmark_sedes(
     query = db.query(Medicion).filter(Medicion.sede_id == sede_id)
 
     all_mediciones = query.all()
-    egresados = db.query(Egresado).all()
+    docs_sede = {m.egresado_documento for m in all_mediciones if m.egresado_documento}
+    egresados = db.query(Egresado).filter(Egresado.numero_documento.in_(docs_sede)).all() if docs_sede else []
 
     mediciones_por_sede: Dict[int, List[Medicion]] = {}
     for m in all_mediciones:
