@@ -1,6 +1,6 @@
 # Estado funcional actual de OE UPB
 
-**Fecha de corte:** 2026-09-30  
+**Fecha de corte:** 2026-10-06  
 **Estado:** referencia funcional verificada contra código, pruebas y migraciones  
 **Versión de base de datos esperada:** `k8a26e3b5c74 (head)`
 
@@ -165,7 +165,31 @@ El flujo implementado:
 
 Este procesamiento no envía texto a servicios externos y no devuelve las respuestas originales. Las alertas no son predicciones ni decisiones automáticas.
 
-## 10. Capacidades operativas
+### Modelo de análisis de empleabilidad
+
+En la misma pantalla, el coordinador puede analizar por programa cómo se relaciona la situación de origen con la situación laboral y el rango salarial en el horizonte M1 o M5 (RF-71, ADR-019, ADR-021):
+
+1. Empareja a cada egresado identificado de la sede entre el momento de origen y el de destino; exige al menos 30 trayectorias.
+2. Entrena un Gradient Boosting con ponderación de clases. Las variables son el estado laboral inicial, el salario, la satisfacción, las habilidades detectadas, la cohorte y el programa.
+3. Muestra la exactitud y el F1 de la validación cruzada estratificada, la importancia de variables, la comparativa con Random Forest y Regresión Logística, el semáforo de robustez, la validación temporal por cohorte y un semáforo de riesgo por programa (alto si la probabilidad de desempleo es del 30 % o más).
+4. Exporta un informe ejecutivo en Excel.
+
+Es un análisis retrospectivo sobre trayectorias ya observadas y solo publica agregados por programa. El detalle está en [Modelos de análisis](../architecture/06-modelos-analiticos.md).
+
+## 10. Co-relaciones de habilidades
+
+La pantalla **Co-relaciones** (`/habilidades`) analiza el texto libre anonimizado de la sede:
+
+- habilidades blandas y duras reconocidas por una taxonomía de 33 categorías con spaCy;
+- términos emergentes por TF-IDF;
+- reglas de asociación entre habilidades (Apriori, con lift y confianza);
+- comparativa M0, M1 y M5;
+- curaduría humana de términos: aprobar o descartar, con una taxonomía institucional que solo modifica el autor de cada curaduría;
+- exportación Excel.
+
+Los filtros de cohorte se cargan desde los datos de la sede.
+
+## 11. Capacidades operativas
 
 El repositorio contiene:
 
@@ -175,35 +199,37 @@ El repositorio contiene:
 - CORS configurable mediante `CORS_ALLOWED_ORIGINS`;
 - endpoints `/api/health/live` y `/api/health/ready`;
 - identificador de petición, estado y duración en logs, sin registrar cuerpos ni datos personales; el documento se enmascara en las rutas del directorio y la imagen desactiva el access log de Uvicorn;
-- respaldo lógico mediante `backup_database.py`;
-- restauración con confirmación explícita mediante `restore_database.py`;
+- respaldo lógico mediante `scripts/ops/backup_database.py`;
+- restauración con confirmación explícita mediante `scripts/ops/restore_database.py`;
 - procedimiento de despliegue y rollback documentado.
 
-La infraestructura Docker no se ejecutó en el equipo de desarrollo porque Docker no está instalado. Los certificados, dominio, secretos y la prueba periódica de restauración deben configurarse y verificarse en el ambiente institucional.
+El stack Docker de producción se desplegó desde cero y se verificó con datos sintéticos en la auditoría 08 (2026-10-04): 54 comprobaciones funcionales con los tres roles. Los certificados, dominio, secretos y la prueba periódica de restauración deben configurarse y verificarse en el ambiente institucional. Las herramientas operativas viven en `OEUPB-Backend/scripts/ops/`.
 
-## 11. Verificación disponible
+## 12. Verificación disponible
 
-La última revisión (2026-09-30) aprobó:
+La última revisión (2026-10-06) aprobó:
 
-- 73 pruebas de backend;
-- 100 pruebas de frontend;
+- 87 pruebas de backend, también ejecutadas con Python 3.13 (la versión de la imagen y la CI) en `OEUPB-Backend/.venv`;
+- 107 pruebas de frontend;
+- despliegue del stack Docker con un recorrido funcional de 54 comprobaciones (auditoría 08);
 - compilación productiva de Angular;
 - sincronización entre FastAPI, OpenAPI y tipos TypeScript;
 - validación de capas frontend, guards y tokens visuales;
 - validación de enlaces y documentación;
 - migraciones hasta `k8a26e3b5c74` (catálogo de habilidades curadas); la base local debe actualizarse con `alembic upgrade head`.
 
-La compilación Angular mantiene advertencias no bloqueantes por tamaño del paquete inicial y del SCSS de carga de datos.
+La compilación Angular mantiene advertencias no bloqueantes por el tamaño de los estilos de Analítica y Co-relaciones.
 
-## 12. Lo que todavía no debe considerarse terminado
+## 13. Lo que todavía no debe considerarse terminado
 
 | Pendiente | Estado |
 |---|---|
-| Modelo predictivo RF-71 | En pausa. Producto debe aprobar objetivo, población, horizonte, métricas y criterios de aceptación conforme a ADR-009. |
-| Auditoría individual RF-01 a RF-73 | La matriz agrupa capacidades; falta revisar cada requisito individualmente. |
-| Simulacro Docker y restauración | Requiere infraestructura con Docker, certificados y una base aislada. |
+| Brechas analíticas (30 RF parciales y 7 sin implementar) | Producto debe priorizarlas (PRD-01). |
+| Retiro por sucesor, vista previa de privacidad, aviso de recarga | Pendientes de interfaz con mockup: PUB-03, PUB-04 y CAR-01. |
+| Ciclo de vida de sedes y cuentas CTIC | AUT-01. |
+| Prueba de restauración en el ambiente institucional | Requiere la base y los certificados reales. |
 
-## 13. Lista mínima de comprobación funcional
+## 14. Lista mínima de comprobación funcional
 
 En un ambiente correctamente configurado deberían aprobarse estas comprobaciones:
 
@@ -216,15 +242,18 @@ En un ambiente correctamente configurado deberían aprobarse estas comprobacione
 7. Crear, editar y eliminar un egresado manual sin mediciones.
 8. Descargar el directorio como Excel y una gráfica como PNG.
 9. Publicar una gráfica y verificar su audiencia con un usuario de consulta autorizado y otro no autorizado.
-10. Abrir Analítica y alertas y comprobar que la respuesta no contiene textos fuente.
-11. Comprobar `health/live`, `health/ready`, respaldo y restauración en una base aislada.
+10. Abrir Analítica y alertas y comprobar que la respuesta no contiene textos fuente, y que el modelo de análisis de empleabilidad muestra su robustez.
+11. Abrir Co-relaciones, curar un término y revertirlo.
+12. Comprobar `health/live`, `health/ready`, respaldo y restauración en una base aislada.
 
-## 14. Documentos relacionados
+## 15. Documentos relacionados
 
 - [Comandos de desarrollo](00-comandos-desarrollo.md)
 - [Configuración local](01-configuracion-local.md)
 - [Estrategia de pruebas](03-estrategia-pruebas.md)
 - [Seguridad y privacidad](04-seguridad-privacidad.md)
 - [Runbook de despliegue y rollback](06-runbook-despliegue.md)
+- [Modelos de análisis](../architecture/06-modelos-analiticos.md)
+- [Estudio del proyecto](08-estudio-proyecto.md)
 - [Backlog activo](../BACKLOG.md)
 - [Matriz de trazabilidad](../requirements/matriz-trazabilidad.md)

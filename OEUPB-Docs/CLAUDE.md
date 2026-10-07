@@ -2,7 +2,7 @@
 
 **Estado:** Vigente
 
-**Última verificación:** 2026-10-03
+**Última verificación:** 2026-10-06
 
 **Alcance:** todo el monorepo OE UPB.
 
@@ -90,6 +90,7 @@ Cuando la documentación contradiga el código, no se debe ocultar la diferencia
 - Backend: `architecture/02-backend.md`.
 - API: `architecture/03-contratos.md` y `specs/api/openapi.json`.
 - Datos: `architecture/04-modelo-datos.md` y `specs/db/oeupb-schema.sql`.
+- Analítica, IA y modelo de análisis de empleabilidad: `architecture/06-modelos-analiticos.md`, ADR-016, ADR-019, ADR-020 y ADR-021. Es un modelo de análisis retrospectivo, no predictivo.
 - Requisitos: `requirements/` y `requirements/matriz-trazabilidad.md`.
 - Seguridad: `docs/04-seguridad-privacidad.md` y ADR-004.
 - Despliegue: `architecture/05-despliegue.md`.

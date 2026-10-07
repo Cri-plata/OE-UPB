@@ -2,6 +2,17 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-10-06] - Documentación de los modelos de análisis
+
+* **Nuevo:** `architecture/06-modelos-analiticos.md` documenta los 11 modelos de análisis (KPI laborales, comparación entre momentos, publicación con k = 5, NLP descriptivo y alertas, habilidades con spaCy, emergentes TF-IDF, curaduría, reglas de asociación, comparativa temporal, modelo de empleabilidad y su robustez). Para cada uno: datos, parámetros reales, salida, cachés, verificación y límites de interpretación.
+* **ADR-021:** el modelo de empleabilidad es un modelo de análisis retrospectivo, no predictivo. Se corrige la denominación en requisitos (RF-71, HU-10), casos de uso, matriz, arquitectura, estado funcional, estudio, seguridad, pruebas, `README.md` y `CLAUDE.md`. Pendiente en la interfaz y el informe: IA-02.
+* **Actualizados:** `07-estado-funcional-actual.md` (corte 2026-10-06, modelo de empleabilidad, Co-relaciones, verificación y pendientes reales), `03-estrategia-pruebas.md` (87/107 pruebas, Python 3.13, pruebas sobre el endpoint), `04-seguridad-privacidad.md` (IA, anonimización local y despliegue), `00-proyecto.md` y `02-backend.md`.
+
+## [2026-10-06] - Reorganización de archivos sueltos
+
+* **Backend:** los scripts operativos pasan a `scripts/ops/`, los diagnósticos de IA a `scripts/dev/diagnostico_ia/` y la prueba de predicción a `tests/`. Actualizados comandos, runbook, inventario de scripts, datos de prueba, estado funcional y `02-backend.md`.
+* **Backlog:** TST-01 cerrado y archivado.
+
 ## [2026-10-06] - Estudio del proyecto
 
 * **Estudio:** `docs/08-estudio-proyecto.md` resume alcance, arquitectura, métricas, estado de requisitos, seguridad, calidad, lecciones, deuda técnica, recomendaciones y un guion de demostración.

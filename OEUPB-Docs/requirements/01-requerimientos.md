@@ -616,11 +616,11 @@
 
 | Número de requisito | RF-71 |
 |---|---|
-| Nombre de requisito | El modelo de IA debe... |
+| Nombre de requisito | El modelo de análisis de empleabilidad debe... |
 | Tipo | ☑ Requisito | ☐ Restricción |
 | Prioridad del requisito | ☐ Alta/Esencial | ☐ Media/Deseado | ☑ Baja/Opcional (en pausa) |
 | Requerimiento Ligado | RF-04 |
-| Descripción del requerimiento | El sistema debe proyectar, por programa académico y con el modelo aprobado en ADR-019, la probabilidad de cada estado laboral y el rango salarial en el horizonte M1 o M5, a partir de trayectorias longitudinales de la sede del coordinador. Exige al menos 30 trayectorias (si no las hay, informa datos insuficientes), no usa identificadores personales como variables y solo presenta resultados agregados por programa, con una alerta cuando la probabilidad de desempleo supera el 30 %. |
+| Descripción del requerimiento | Es un modelo de análisis retrospectivo, no predictivo (ADR-021). El sistema debe estimar, por programa académico y con el modelo aprobado en ADR-019, la probabilidad de cada estado laboral y el rango salarial en el horizonte M1 o M5, a partir de trayectorias longitudinales de la sede del coordinador. Exige al menos 30 trayectorias (si no las hay, informa datos insuficientes), no usa identificadores personales como variables y solo presenta resultados agregados por programa, con una alerta cuando la probabilidad de desempleo supera el 30 %. |
 
 | Número de requisito | RF-72 |
 |---|---|

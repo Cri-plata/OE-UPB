@@ -77,7 +77,7 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 | RF-68 | Destinos de movilidad | pregunta graficable, sin mapa/flujo | Parcial |
 | RF-69 | Descargar tablas en Excel | exporta Directorio e informes de IA; no las tablas de Reporte, Tendencias ni Explorador | Parcial |
 | RF-70 | Exportar gráficas | PNG en Reporte, Tendencias y Explorador | Implementado |
-| RF-71 | Modelo predictivo | ADR-019, `prediccion_service.py`, `/api/ia/prediccion-empleabilidad`, exportación y robustez de la sede propia, Analítica | Implementado, Gradient Boosting longitudinal con Stratified CV |
+| RF-71 | Modelo de análisis de empleabilidad (ADR-021) | ADR-019, `prediccion_service.py`, `/api/ia/prediccion-empleabilidad`, exportación y robustez de la sede propia, Analítica | Implementado, Gradient Boosting longitudinal con Stratified CV |
 | RF-72 | Clasificar texto abierto | `nlp_service.py`, `/api/ia/habilidades-*`, reglas de asociación, curaduría (RN-32), Analítica y Habilidades; `test_ia_alcance.py` | Implementado, NLP local anonimizado |
 | RF-73 | Alertas de patrones negativos | endpoint y vista Analítica; criterios ANA-02 (M1/M5, muestra ≥ 5, severidad enumerada) | Implementado, descriptivo |
 

@@ -12,7 +12,7 @@ OE UPB trata documentos de identidad, información académica, situación labora
 - HTTPS en entornos compartidos o productivos.
 - Archivos de carga limitados por tipo, tamaño y estructura.
 - Consultas parametrizadas mediante ORM o parámetros SQL.
-- Anonimización antes de cualquier servicio externo de IA.
+- Anonimización antes de cualquier servicio externo de IA y también en el análisis local de texto libre (habilidades, emergentes, reglas, exportación y curaduría). Se reemplazan correos, números de 8 o más caracteres, y documento, nombre y apellido del egresado (RN-04, RN-32).
 - Logs sin tokens, documentos, correos ni respuestas completas. El middleware HTTP registra `/api/directorio/perfil/{documento}` y `/api/directorio/egresados/{documento}` con el documento enmascarado, y la imagen Docker desactiva el access log de Uvicorn.
 - Backups cifrados y acceso por mínimo privilegio.
 
@@ -30,11 +30,25 @@ En producción, `INITIAL_CREDENTIAL_MODE=random` es obligatorio: el backend no i
 
 Fuera de desarrollo el backend tampoco inicia sin un `SECRET_KEY` no trivial de al menos 32 caracteres.
 
+## Inteligencia artificial
+
+- El módulo de IA es exclusivo de `Coordinador_Sede` y solo procesa datos de la sede del JWT. Ningún endpoint de IA devuelve métricas de otras sedes (ADR-020).
+- El modelo de análisis de empleabilidad no usa documento, nombres ni correo como variables, y solo publica agregados por programa (ADR-019).
+- La taxonomía curada es institucional y contiene términos, no datos fuente. Como los términos emergentes salen de respuestas individuales, la anonimización previa es obligatoria.
+- El detalle de cada modelo y sus límites está en [`architecture/06-modelos-analiticos.md`](../architecture/06-modelos-analiticos.md).
+
+## Despliegue
+
+- El proxy termina TLS con HSTS y reenvía `X-Forwarded-*`. Uvicorn solo confía en ellos porque el backend no publica puertos fuera de la red interna de Compose.
+- El proxy limita los cuerpos a 26 MB y el backend valida tipo, tamaño (25 MB) y filas (50.000) de cada carga.
+
 ## Gráficas compartidas entre sedes
 
 - Solo el coordinador propietario puede publicar una gráfica. Puede retirarla el propietario o, si este está inactivo o fue reasignado, otro coordinador de la sede.
 - El backend recalcula la publicación con datos de la sede del JWT; el cliente no aporta métricas ni programas.
 - Ninguna celda publicada representa menos de 5 observaciones (ADR-015), y solo se publican variables del catálogo analítico RN-31.
+- El título es el único texto libre del cliente: se rechaza si contiene correos, enlaces o secuencias de 5 o más dígitos (ADR-020).
+- Riesgo residual aceptado: publicar la misma métrica con filtros solapados permite deducir por diferencia una celda suprimida (ADR-020).
 - No se comparten filas, documentos, nombres, correos, respuestas individuales, archivos de carga, directorios ni perfiles.
 - La audiencia se determina en backend con los permisos y programas asignados a la cuenta; el coordinador no selecciona destinatarios manualmente.
 - Un permiso para ver gráficas compartidas nunca concede acceso a endpoints de datos fuente de otra sede.

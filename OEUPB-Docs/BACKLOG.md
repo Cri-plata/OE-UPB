@@ -19,9 +19,9 @@
 - [ ] **CAR-01 — Avisar que una recarga reemplaza la cohorte.** La pantalla de carga debe advertir que un archivo con la misma sede, momento y año sustituye la versión vigente completa y que cada cohorte se carga en un único archivo consolidado (ADR-020, punto 8). Requiere mockup.
 - [ ] **PUB-05 — Publicaciones derivadas de cargas eliminadas o reemplazadas.** Una instantánea sigue vigente aunque se elimine o reemplace la carga de la que salió (B-06). Producto debe decidir si se retira, se marca como desactualizada o se notifica al propietario.
 
-## P2 — Calidad
+## P2 — Analítica (denominación)
 
-- [ ] **TST-01 — Retirar los scripts de prueba de la raíz del backend.** `test_diagnostico.py`, `test_ia_pipeline.py`, `test_prediccion_empleabilidad.py` y `test_reglas_asociacion.py` usan la base configurada en `.env` y no corren con `unittest discover`. Pasar sus casos a `tests/` sobre SQLite en memoria (como `test_ia_alcance.py`) o retirarlos (estudio del proyecto, 2026-10-06).
+- [ ] **IA-02 — Dejar de presentar el modelo de empleabilidad como predictivo en la interfaz y el informe.** La pantalla Analítica ("Modelo Predictivo de Empleabilidad", "proyección", "riesgo proyectado"), el informe Excel de `generar_excel_prediccion` y las descripciones del OpenAPI siguen usando lenguaje predictivo. Según ADR-021 deben hablar de modelo de análisis y estimaciones. Orden obligatorio: `mockups/analitica.html`, `mockups/screen-map.md`, la plantilla Angular con sus pruebas, el Excel y los docstrings del router, y regenerar el OpenAPI. Los identificadores técnicos (`prediccion_*`) se conservan.
 
 ## P2 — Autenticación
 
@@ -39,4 +39,4 @@
 
 ## Completadas recientemente
  
-- [x] **IA-01 — Modelo predictivo de empleabilidad.** Implementado y validado conforme a ADR-019 y RF-71 con `GradientBoostingClassifier`, validación cruzada estratificada, endpoint `/api/ia/prediccion-empleabilidad` y visualización institucional por programa en la vista de Analítica y alertas.
+- [x] **IA-01 — Modelo de análisis de empleabilidad** (antes llamado predictivo; ver ADR-021). Implementado y validado conforme a ADR-019 y RF-71 con `GradientBoostingClassifier`, validación cruzada estratificada, endpoint `/api/ia/prediccion-empleabilidad` y visualización institucional por programa en la vista de Analítica y alertas.

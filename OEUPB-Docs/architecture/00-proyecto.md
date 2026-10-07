@@ -47,7 +47,7 @@ La política normativa está definida en RN-03 y RN-06 a RN-11. RBAC, cuentas, a
 1. **Autenticación:** credenciales institucionales → JWT con rol y sede → almacenamiento local en frontend.
 2. **Carga:** Excel + momento + año → validación y limpieza con Pandas → egresados y mediciones JSON.
 3. **Consulta:** frontend solicita indicadores/directorio → backend filtra según identidad JWT → MySQL responde.
-4. **Análisis:** endpoints agregan campos conocidos y respuestas JSON para gráficas.
+4. **Análisis:** endpoints agregan campos conocidos y respuestas JSON para gráficas. El módulo de IA analiza el texto libre anonimizado (habilidades, emergentes, reglas de asociación) y entrena on-demand el modelo de análisis de empleabilidad de la sede ([modelos de análisis](06-modelos-analiticos.md)).
 5. **Publicación:** coordinador publica una gráfica propia → backend recalcula métricas y programas con datos de su sede, aplica k = 5 y versiona → usuarios autorizados la consultan sin acceso a datos fuente.
 
 ## Principios vigentes
@@ -68,4 +68,5 @@ La política normativa está definida en RN-03 y RN-06 a RN-11. RBAC, cuentas, a
 - [Contratos](03-contratos.md)
 - [Modelo de datos](04-modelo-datos.md)
 - [Despliegue](05-despliegue.md)
+- [Modelos de análisis](06-modelos-analiticos.md)
 - [ADRs](../adr/INDEX.md)

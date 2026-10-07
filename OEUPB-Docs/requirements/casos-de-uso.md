@@ -60,12 +60,12 @@
 
 - **Actor:** Coordinador de Sede. El catálogo aprobado de permisos de consulta no incluye exportación, por lo que la vista de publicaciones no ofrece descarga.
 - **Resultado esperado:** tabla Excel o gráfica como imagen.
-- **Implementación:** directorio filtrado en Excel, gráficas privadas como PNG y, en el módulo de IA, informes Excel de habilidades (`/api/ia/habilidades-export`) y de predicción (`/api/ia/prediccion-export`) con resultados anonimizados y agregados.
+- **Implementación:** directorio filtrado en Excel, gráficas privadas como PNG y, en el módulo de IA, informes Excel de habilidades (`/api/ia/habilidades-export`) y del modelo de análisis de empleabilidad (`/api/ia/prediccion-export`) con resultados anonimizados y agregados.
 
 ## CU-10 — Ejecutar análisis de IA
 
 - **Actor:** Coordinador de Sede.
-- **Flujo implementado:** seleccionar los datos de la sede del JWT → anonimizar respuestas abiertas localmente (correos, números largos, documento, nombre y apellido) → clasificar competencias, reglas de asociación y comparativa M0/M1/M5 → curar términos emergentes → entrenar y evaluar el modelo predictivo (Gradient Boosting, validación cruzada estratificada, mínimo 30 trayectorias) → mostrar proyecciones por programa, con alerta cuando la probabilidad de desempleo supera el 30 % → exportar los informes.
+- **Flujo implementado:** seleccionar los datos de la sede del JWT → anonimizar respuestas abiertas localmente (correos, números largos, documento, nombre y apellido) → clasificar competencias, reglas de asociación y comparativa M0/M1/M5 → curar términos emergentes → entrenar y evaluar el modelo de análisis de empleabilidad (Gradient Boosting, validación cruzada estratificada, mínimo 30 trayectorias; retrospectivo, no predictivo, ADR-021) → mostrar las estimaciones por programa, con alerta cuando la probabilidad estimada de desempleo supera el 30 % → exportar los informes.
 - **Implementación:** RF-71, RF-72 y RF-73 (ADR-019). La robustez del modelo (`/api/ia/prediccion-benchmark-sedes`) solo evalúa la sede propia. La taxonomía curada es institucional y solo la modifica su autor (RN-32, ADR-020). `Admin_CTIC` no accede.
 
 ## CU-11 — Configurar usuario de consulta

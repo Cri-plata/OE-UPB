@@ -12,6 +12,7 @@
   - [Contratos](architecture/03-contratos.md)
   - [Modelo de datos](architecture/04-modelo-datos.md)
   - [Despliegue](architecture/05-despliegue.md)
+  - [Modelos de análisis](architecture/06-modelos-analiticos.md)
 - Requisitos
   - [Requerimientos](requirements/01-requerimientos.md)
   - [Historias de usuario](requirements/02-historias-usuario.md)

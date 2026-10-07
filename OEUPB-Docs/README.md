@@ -14,13 +14,16 @@ Documentación transversal del monorepo **OE UPB — Observatorio de Egresados U
 | Revisar el backend real | [`architecture/02-backend.md`](architecture/02-backend.md) |
 | Consultar endpoints y contratos | [`architecture/03-contratos.md`](architecture/03-contratos.md) y [`specs/api/openapi.json`](specs/api/openapi.json) |
 | Consultar el modelo de datos | [`architecture/04-modelo-datos.md`](architecture/04-modelo-datos.md) |
+| Entender los modelos de análisis (KPI, NLP, reglas de asociación, modelo de análisis de empleabilidad) | [`architecture/06-modelos-analiticos.md`](architecture/06-modelos-analiticos.md) |
+| Ver el estado y las métricas del proyecto | [`docs/08-estudio-proyecto.md`](docs/08-estudio-proyecto.md) y [`docs/07-estado-funcional-actual.md`](docs/07-estado-funcional-actual.md) |
+| Desplegar o preparar una demostración | [`docs/06-runbook-despliegue.md`](docs/06-runbook-despliegue.md) y [`audits/08-auditoria-funcional-despliegue.md`](audits/08-auditoria-funcional-despliegue.md) |
 | Levantar o probar el proyecto | [`docs/00-comandos-desarrollo.md`](docs/00-comandos-desarrollo.md) |
 | Revisar requisitos y reglas | [`requirements/`](requirements/) |
 | Ver cobertura requisito–código | [`requirements/matriz-trazabilidad.md`](requirements/matriz-trazabilidad.md) |
 | Entender decisiones arquitectónicas | [`adr/INDEX.md`](adr/INDEX.md) |
 | Aplicar estilos y componentes | [`design/design.md`](design/design.md) |
 | Revisar pantallas y flujos antes de desarrollar UI | [`mockups/index.html`](mockups/index.html) y [`mockups/screen-map.md`](mockups/screen-map.md) |
-| Revisar hallazgos documentales | [`audits/01-auditoria-organizacion-documental.md`](audits/01-auditoria-organizacion-documental.md) y [`audits/02-auditoria-requerimientos.md`](audits/02-auditoria-requerimientos.md) |
+| Revisar auditorías | [`audits/`](audits/), las más recientes [`audits/07-auditoria-requerimientos.md`](audits/07-auditoria-requerimientos.md) y [`audits/08-auditoria-funcional-despliegue.md`](audits/08-auditoria-funcional-despliegue.md) |
 | Consultar el plan de organización | [`plans/04-plan-reorganizacion-documental.md`](plans/04-plan-reorganizacion-documental.md) |
 
 ## Convenciones

@@ -66,7 +66,7 @@ Los módulos más grandes son `ia_service.py` (1.071), `prediccion_service.py` (
 | Explorador | Cruces de variables con catálogo analítico que excluye datos personales (RN-31) | Completo |
 | Publicaciones | Recálculo en backend, umbral k = 5, versiones, retiro y audiencia derivada de permisos y programas | Completo (retiro por sucesor sin interfaz: PUB-03) |
 | Analítica | Competencias en texto libre (NLP local) y alertas descriptivas por programa | Completo |
-| IA | Habilidades demandadas, reglas de asociación, comparativa M0/M1/M5, curaduría institucional, modelo predictivo (Gradient Boosting con ponderación de clases), exportaciones | Completo |
+| IA | Habilidades demandadas, reglas de asociación, comparativa M0/M1/M5, curaduría institucional, modelo de análisis de empleabilidad (Gradient Boosting con ponderación de clases), exportaciones | Completo |
 
 **Brechas de requisitos (30 parciales y 7 sin implementar):** sobre todo indicadores curados de preguntas específicas (RF-38 a RF-51 se conservan en el JSON sin validación semántica), cruces avanzados (RF-53 a RF-55), dispersión (RF-28, RF-62), mapas de movilidad, exportación Excel de todas las tablas analíticas (RF-69) y recomendación de programas (RF-31). Producto debe priorizarlas (PRD-01).
 
@@ -74,7 +74,7 @@ Los módulos más grandes son `ia_service.py` (1.071), `prediccion_service.py` (
 
 - **Aislamiento por sede en el backend:** la sede sale del JWT y no hay selector de sede en las vistas privadas. Las pruebas cubren el acceso entre sedes.
 - **Única vía entre sedes:** las publicaciones. Cada una se recalcula en el backend, ninguna celda representa menos de 5 observaciones y el título se valida contra correos, enlaces y números de documento (ADR-015, ADR-020).
-- **IA local y anonimizada:** el texto libre se anonimiza antes de analizarlo (correos, números largos, documento y nombre) y no sale a servicios externos. El modelo predictivo no usa identificadores como variables.
+- **IA local y anonimizada:** el texto libre se anonimiza antes de analizarlo (correos, números largos, documento y nombre) y no sale a servicios externos. El modelo de análisis de empleabilidad no usa identificadores como variables.
 - **Credenciales y sesiones:** solo se guardan hashes bcrypt, la credencial aleatoria se muestra una vez y vence, y desactivar una cuenta revoca su sesión al instante.
 - **Operación:** logs sin documentos (se enmascaran rutas y el access log de Uvicorn está desactivado), HTTPS con HSTS, CORS por entorno y secreto JWT obligatorio de 32 caracteres o más en producción.
 - **Riesgos aceptados:** revelación por diferencia entre publicaciones con filtros solapados, y métricas de otros programas visibles para un usuario con al menos un programa en común (ADR-020).
@@ -97,7 +97,7 @@ Los módulos más grandes son `ia_service.py` (1.071), `prediccion_service.py` (
 | Riesgo | Impacto | Recomendación |
 |---|---|---|
 | Lógica de negocio en routers grandes (`ia_router.py`, `carga_router.py`) | Mantenimiento y pruebas más costosos | Extraer casos de uso a `application/` con pruebas |
-| Scripts de prueba en la raíz del backend (`test_diagnostico.py`, `test_ia_pipeline.py`, `test_prediccion_empleabilidad.py`, `test_reglas_asociacion.py`) que usan la base de `.env` | Pueden escribir en una base real y no corren en la suite; contradicen `02-backend.md` y la regla de pruebas aisladas | Moverlos a `tests/` sobre SQLite en memoria o retirarlos |
+| ~~Scripts de prueba en la raíz del backend que usaban la base de `.env`~~ | Resuelto el 2026-10-06 (TST-01): la prueba de predicción pasó a `tests/` sobre SQLite y los diagnósticos a `scripts/dev/diagnostico_ia/` | — |
 | Pantallas con `ChangeDetectorRef` (UI-03) | Pantallas en "Cargando…" tras recargas en caliente | Migrar a signals |
 | IA en frío | La primera consulta por worker tras un reinicio puede tardar unos 40 s con decenas de miles de respuestas | Calentar antes de la demo; a futuro, precálculo o caché compartida |
 | Cachés en memoria por worker | Resultados de IA calculados por proceso (la taxonomía ya se alinea por firma) | Caché compartida (Redis) si se escala |
@@ -107,7 +107,7 @@ Los módulos más grandes son `ia_service.py` (1.071), `prediccion_service.py` (
 ## 8. Recomendaciones
 
 1. **Antes de la exposición:** seguir la lista de preparación de la [auditoría 08](../audits/08-auditoria-funcional-despliegue.md): certificados y dominio reales, reloj sincronizado, calentamiento de la IA, cuentas de demostración ya activadas y un archivo de pocos miles de filas.
-2. **Corto plazo:** mover a `tests/` los scripts de prueba de la raíz del backend, cerrar UI-03 y añadir a la integración continua la construcción de imágenes y una prueba de humo contra el stack desplegado.
+2. **Corto plazo:** cerrar UI-03 y añadir a la integración continua la construcción de imágenes y una prueba de humo contra el stack desplegado.
 3. **Mediano plazo:** priorizar con producto las brechas analíticas (PRD-01), extraer la lógica de los routers y definir el ciclo de vida de sedes y cuentas CTIC (AUT-01).
 
 ## 9. Guion sugerido para la demostración
@@ -116,5 +116,5 @@ Los módulos más grandes son `ia_service.py` (1.071), `prediccion_service.py` (
 2. **Coordinador:** cargar un Excel (doble titulación y rechazo de un archivo idéntico) y recorrer el Reporte general con filtros, Tendencias con la comparación M0→M1 y el Explorador.
 3. **Publicación:** publicar una gráfica, mostrar que la instantánea se recalcula con k = 5 y verla desde el coordinador de otra sede.
 4. **Usuario de consulta:** entrar y comprobar que solo ve las publicaciones de su permiso y programa, sin acceso a datos fuente.
-5. **IA:** competencias demandadas, reglas de asociación, curaduría de un término y modelo predictivo con su confiabilidad y el balanceo de clases.
+5. **IA:** competencias demandadas, reglas de asociación, curaduría de un término y modelo de análisis de empleabilidad con su confiabilidad y el balanceo de clases.
 6. **Cierre:** aislamiento por sede, anonimización y trazabilidad (auditorías, ADR, matriz).

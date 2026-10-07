@@ -20,7 +20,7 @@
 | Carpeta | Responsabilidad actual |
 |---|---|
 | `domain/` | Modelos ORM; actualmente dependen de SQLAlchemy, por lo que el dominio no es puro |
-| `application/` | Autenticación y JWT, política de intentos, indicadores, taxonomía laboral, filtros, comparación, catálogo analítico y umbral de publicación (`indicadores.py`), normalización del documento (`documentos.py`), NLP local |
+| `application/` | Autenticación y JWT, política de intentos, indicadores, taxonomía laboral, filtros, comparación, catálogo analítico y umbral de publicación (`indicadores.py`), normalización del documento (`documentos.py`), NLP descriptivo (`nlp_service.py`), pipeline de habilidades, emergentes, curaduría y reglas de asociación (`ia_service.py`), modelo de análisis de empleabilidad (`prediccion_service.py`, nombre histórico), cachés en memoria (`model_cache.py`), canonización de programas (`programas.py`). Detalle en [`06-modelos-analiticos.md`](06-modelos-analiticos.md) |
 | `infrastructure/` | Engine, sesiones y Base de SQLAlchemy |
 | `presentation/` | Routers FastAPI, payloads y parte importante de la lógica de negocio |
 
@@ -58,7 +58,7 @@ El inventario exacto se encuentra en `../specs/api/openapi.json`.
 - La validación de cuenta vigente y las dependencias de rol están centralizadas; algunas validaciones de alcance específicas permanecen en routers.
 - La carga rechaza usuarios que no sean coordinadores, coordinadores sin sede, momentos distintos de 0/1/5 y formatos diferentes de `.xlsx`; las denegaciones y el aislamiento tienen pruebas automatizadas.
 - Alembic gestiona el baseline, el catálogo de sedes, las restricciones de nulabilidad, los intentos de medición y el evento inmutable de eliminación de cargas.
-- Las pruebas automatizadas viven en `tests/`; los scripts manuales ad hoc de la raíz fueron retirados.
+- Las pruebas automatizadas viven en `tests/` y usan SQLite en memoria. Los scripts operativos están en `scripts/ops/` y los diagnósticos manuales en `scripts/dev/`; en la raíz del backend solo quedan los puntos de entrada que exigen las herramientas (`main.py`, `alembic.ini`, `requirements.txt`, `Dockerfile`).
 - El modelo representa publicaciones agregadas inmutables y versionadas. `/api/publicaciones` publica, retira, lista las propias y calcula el catálogo autorizado.
 - Cada operación protegida contrasta cuenta activa y versión de autorización; desactivaciones, cambios de sede o reducciones de permisos incrementan la versión y revocan JWT anteriores.
 - Las cargas de una sede se serializan con `SELECT ... FOR UPDATE` sobre la fila de la sede; en SQLite (pruebas) el bloqueo no aplica.

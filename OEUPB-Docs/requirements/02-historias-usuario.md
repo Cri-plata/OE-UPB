@@ -87,12 +87,12 @@ Formato: **Como** [rol], **quiero** [acción], **para** [beneficio]. Incluye cri
 
 ---
 
-## Épica 4: Inteligencia Artificial (Módulo Predictivo)
+## Épica 4: Inteligencia Artificial (Modelos de Análisis)
 
-### HU-10 — Predicción de Riesgo de Desempleo
-> **Estado:** implementada conforme a ADR-019, que aprobó objetivo, métricas, población, horizonte y criterios éticos. Los criterios vigentes son los de RF-71; los siguientes se conservan como antecedente cuando difieren (el modelo usa Gradient Boosting sobre trayectorias M0 → M1 o M0/M1 → M5 y no recibe la cohorte como parámetro de entrada).
+### HU-10 — Análisis de Riesgo de Desempleo por Programa
+> **Estado:** implementada como **modelo de análisis retrospectivo, no predictivo** (ADR-021), conforme a ADR-019, que aprobó objetivo, métricas, población, horizonte y criterios éticos. Los criterios vigentes son los de RF-71; los siguientes se conservan como antecedente cuando difieren (el modelo usa Gradient Boosting sobre trayectorias M0 → M1 o M0/M1 → M5 y no recibe la cohorte como parámetro de entrada).
 
-**Como** Coordinador de Sede, **quiero** que el sistema corra un modelo predictivo sobre los egresados recién graduados, **para** identificar qué porcentaje tiene un alto riesgo de quedar desempleado a los 5 años.
+**Como** Coordinador de Sede, **quiero** que el sistema analice las trayectorias de los egresados con seguimiento, **para** identificar qué programas concentran un mayor riesgo estimado de desempleo en el horizonte de 1 o 5 años.
 
 - CA1: El backend cuenta con un endpoint que recibe las características sociodemográficas y de desempeño académico de una cohorte. *(RF-71)*
 - CA2: Un modelo entrenado en scikit-learn evalúa los datos y devuelve una probabilidad de empleabilidad (0 a 100%).
