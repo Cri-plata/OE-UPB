@@ -35,7 +35,7 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 | RF-26 | Salario promedio/rango | promedio y rango (mínimo, mediana, máximo) con SMLV/SMMLV | Implementado |
 | RF-27 | Sectores económicos | pregunta genérica, sin gráfica curada | Parcial |
 | RF-28 | Dispersión de datos | sin cálculo ni visualización de dispersión | No implementado |
-| RF-29 | Ciudades de residencia | pregunta genérica, sin mapa | Parcial |
+| RF-29 | Ciudades de residencia | Explorador con nombres de municipio y departamento (diccionario DIVIPOLA, `divipola.py`); sin mapa | Parcial |
 | RF-30 | Satisfacción con universidad | promedios y gráfica de satisfacción | Implementado |
 | RF-31 | Sugerir cursos/programas | sin motor de recomendación aprobado | No implementado |
 | RF-32 | Usuario y contraseña | JWT, hash, expiración, cambio; ADR-013 | Implementado |
@@ -74,7 +74,7 @@ Estados: **Implementado** (flujo verificable), **Parcial** (solo parte o capacid
 | RF-65 | Razones para recomendar | pregunta graficable en Explorador | Parcial |
 | RF-66 | Herramientas de emprendimiento | pregunta graficable en Explorador | Parcial |
 | RF-67 | Tendencias de nuevos estudios | pregunta graficable, sin detector dedicado | Parcial |
-| RF-68 | Destinos de movilidad | pregunta graficable, sin mapa/flujo | Parcial |
+| RF-68 | Destinos de movilidad | preguntas de residencia graficables con nombres DIVIPOLA; sin mapa ni flujo entre etapas | Parcial |
 | RF-69 | Descargar tablas en Excel | exporta Directorio e informes de IA; no las tablas de Reporte, Tendencias ni Explorador | Parcial |
 | RF-70 | Exportar gráficas | PNG en Reporte, Tendencias y Explorador | Implementado |
 | RF-71 | Modelo de análisis de empleabilidad (ADR-021) | ADR-019, `prediccion_service.py`, `/api/ia/prediccion-empleabilidad`, exportación y robustez de la sede propia, Analítica | Implementado, Gradient Boosting longitudinal con Stratified CV |

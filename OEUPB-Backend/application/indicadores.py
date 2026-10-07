@@ -12,6 +12,7 @@ from functools import lru_cache
 from sqlalchemy.orm import Session
 
 from application.medicion_policy import seleccionar_intentos
+from application.divipola import describir_ubicacion
 from domain.models import Egresado, Medicion
 
 UMBRAL_MINIMO_PUBLICACION = 5
@@ -368,6 +369,9 @@ def conteo_respuestas(db: Session, sede_id: int, pregunta: str, momento=None, pr
         valor = str(respuestas[pregunta]).strip()
         if valor.lower() in ("nan", "none", ""):
             valor = "Sin respuesta"
+        else:
+            # Las preguntas de lugar llegan como códigos DIVIPOLA: se muestran con su nombre.
+            valor = str(describir_ubicacion(pregunta, valor))
         conteo[valor] = conteo.get(valor, 0) + 1
         if programa_egresado:
             programas.add(programa_egresado)

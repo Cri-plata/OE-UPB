@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from application.divipola import describir_respuestas
 from application.auth_service import require_roles
 from presentation.errores import RESPUESTAS_PROTEGIDAS, errores
 from application.documentos import normalizar_documento, normalizar_documento_obligatorio
@@ -147,7 +148,7 @@ def obtener_perfil_egresado(documento: str, db: Session = Depends(get_db), curre
     encuestas = []
     for medicion in mediciones:
         respuestas = medicion.respuestas or {}
-        encuestas.append({"momento": medicion.momento, "anio": medicion.anio, "empleabilidad": ETIQUETAS_ESTADO.get(estado_laboral(respuestas), "No informa"), "salario": str(respuestas.get(clave_salario(respuestas) or "") or "No informa"), "respuestas_completas": respuestas})
+        encuestas.append({"momento": medicion.momento, "anio": medicion.anio, "empleabilidad": ETIQUETAS_ESTADO.get(estado_laboral(respuestas), "No informa"), "salario": str(respuestas.get(clave_salario(respuestas) or "") or "No informa"), "respuestas_completas": describir_respuestas(respuestas)})
     return {"documento": documento, "id_estudiante": egresado.id_estudiante, "nombre_completo": f"{egresado.primer_nombre} {egresado.primer_apellido or ''}".strip(), "programa": egresado.programa, "fecha_grado": egresado.fecha_grado.strftime("%Y-%m-%d") if egresado.fecha_grado else "N/A", "encuestas": encuestas}
 
 

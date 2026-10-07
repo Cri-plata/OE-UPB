@@ -181,6 +181,10 @@ erDiagram
 
 ADR-012 conserva `Egresado`–`Medicion` como modelo objetivo. La propuesta archivada de `historial_academico` y `encuestas_laborales` queda descartada para el alcance vigente.
 
+## Catálogos de referencia
+
+- `OEUPB-Backend/application/data/divipola.json`: códigos DIVIPOLA del DANE (33 departamentos y 1.121 municipios) para traducir las respuestas de ubicación. Es un archivo de solo lectura, no una tabla: las respuestas guardadas conservan el código original. El detalle está en [`06-modelos-analiticos.md`](06-modelos-analiticos.md#21-diccionario-de-ubicación-divipola).
+
 ## Reglas de consulta
 
 - Toda lectura de mediciones debe limitarse por sede según la identidad autenticada.

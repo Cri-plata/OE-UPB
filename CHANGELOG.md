@@ -3,6 +3,10 @@
 Este es el historial global del producto y el código del monorepo. Los cambios exclusivos de documentación se registran en [`OEUPB-Docs/CHANGELOG.md`](OEUPB-Docs/CHANGELOG.md).
 
 ## [Unreleased] - 2026-08-30
+### Añadido (2026-10-06, diccionario de ubicación DIVIPOLA)
+- **Diccionario DIVIPOLA:** `application/data/divipola.json` contiene 33 departamentos (DANE 2012) y 1.121 municipios (DIVIPOLA 2007 más Norosí). `application/divipola.py` normaliza los códigos que Excel deja sin cero inicial o con `.0`.
+- **Explorador y publicaciones:** las preguntas de lugar (residencia actual, durante la carrera, al graduarse del colegio, al primer empleo, nacimiento de la madre, ubicación de la empresa) muestran "Bucaramanga (Santander)" o "Santander" en lugar del código; el umbral k = 5 se mantiene. La ficha del egresado recibe las mismas etiquetas. Los datos guardados no cambian y un código desconocido se muestra tal cual.
+
 ### Cambiado (2026-10-06, modelo de análisis de empleabilidad, ADR-021)
 - **Pantalla Analítica:** "Modelo de Análisis de Empleabilidad" en lugar de "Modelo Predictivo". El tooltip de exactitud habla de clasificaciones correctas, el eje de la matriz de confusión dice "Estimado" y la validación temporal mide la capacidad de generalización. También se corrigieron el mensaje de error y el nombre del archivo descargado. Las referencias a proyecciones se conservan.
 - **Backend:** el mensaje del servicio, el informe Excel ("Factor Explicativo"), los docstrings y las descripciones del OpenAPI dejan de presentar el modelo como predictivo. El archivo del informe se llama `informe_analisis_empleabilidad_oeupb.xlsx`. Rutas e identificadores `prediccion_*` sin cambios.

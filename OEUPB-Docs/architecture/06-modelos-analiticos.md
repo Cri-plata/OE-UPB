@@ -46,6 +46,18 @@ Los modelos localizan las preguntas por **fragmentos normalizados del nombre de 
 | Ingreso | contiene `ingreso_mensual` y `smlv`, `smmlv` o `salarios_minimos` |
 | Satisfacción | contiene `califique su nivel de satisfacci` (aplicación de conocimientos, retos, estabilidad, ascenso) |
 
+### 2.1 Diccionario de ubicación (DIVIPOLA)
+
+Las preguntas de lugar llegan como tres columnas con el mismo enunciado y los sufijos `(DEPARTAMENTO)`, `(MUNICIPIO)` y `(PAIS)`. Por ejemplo: residencia actual (M0 pregunta 52, M1 pregunta 10), residencia al graduarse del colegio, residencia durante la carrera, residencia al primer empleo, lugar de nacimiento de la madre y ubicación de la empresa propia.
+
+- **Códigos:** departamento y municipio usan los códigos DIVIPOLA del DANE. Excel suele quitarles el cero inicial (`5` por `05`, `5001` por `05001`) o agregarles `.0`; `application/divipola.py` los normaliza.
+- **Diccionario:** `application/data/divipola.json` reúne 33 departamentos (listado DANE 2012) y 1.121 municipios: 1.120 del listado DIVIPOLA 2007 más Norosí (13490), un municipio posterior que aparece en las encuestas.
+- **Cobertura:** sobre los datos locales del 2026-10-06 reconoce el 99,95 % de las respuestas de municipio. Las no reconocidas son valores inválidos y el departamento `00` ("sin dato").
+- **Uso:** el Explorador, y por tanto las publicaciones, muestra "Bucaramanga (Santander)" o "Santander" en lugar del código. La ficha del egresado (`respuestas_completas`) recibe las mismas etiquetas. Si un municipio ya nombra a su departamento (Bogotá, San Andrés), el departamento no se repite.
+- **Códigos desconocidos:** un código que no está en el diccionario se muestra tal cual; nunca se inventa un lugar.
+- **País:** la columna `(PAIS)` usa códigos ISO 3166 numéricos (`170` es Colombia) y no se traduce. Además está excluida del catálogo analítico (RN-31).
+- **Datos guardados:** las respuestas originales en `mediciones.respuestas` no se modifican; la traducción solo se aplica al mostrarlas.
+
 ## 3. Clasificación laboral y KPI (modelo 1)
 
 **Estado laboral (RN-16, ADR-016).** Cada medición se clasifica en `empleado`, `independiente`, `estudiante` o `sin_empleo`; si no hay información suficiente, en ninguno:
@@ -264,6 +276,7 @@ Hasta la auditoría 09, `ModelCache.set()` no guardaba ninguna entrada, así que
   - `test_prediccion_empleabilidad.py`: entrenamiento, robustez, datos insuficientes, endpoint y balanceo.
   - `test_ia_alcance.py`: sede propia, curaduría por autor, reversión entre workers, anonimización, exportación y campo de balanceo.
   - `test_habilidades_comparativa.py`: contrato de la comparativa temporal (IA-06).
+  - `test_divipola.py`: normalización de códigos, nombres, códigos desconocidos, etiquetas del Explorador y de las publicaciones, y ficha del egresado.
   - `test_programa_normalizer.py`: canonización y homologación de programas (IA-16).
   - `test_curaduria_habilidades.py`, `test_nlp_service.py`, `test_reportes_analiticos.py` y `test_indicadores.py`: NLP, alertas, KPI, comparación y publicación.
 - **Diagnósticos manuales** (`OEUPB-Backend/scripts/dev/diagnostico_ia/`): imprimen el resultado del pipeline sobre textos de ejemplo, sin base de datos.
