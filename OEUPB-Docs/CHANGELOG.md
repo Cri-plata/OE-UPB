@@ -2,6 +2,16 @@
 
 Este documento registra únicamente cambios de la documentación canónica. Los cambios funcionales del monorepo se registran en `../CHANGELOG.md`.
 
+## [2026-10-06] - Diccionario de ubicación DIVIPOLA
+
+* **Modelos de análisis:** sección 2.1 sobre el diccionario DIVIPOLA (estructura de las preguntas de lugar, normalización de códigos, cobertura, uso y límites).
+* **Modelo de datos:** catálogos de referencia (`application/data/divipola.json`).
+* **Matriz:** RF-29 y RF-68 registran los nombres de lugar en el Explorador; siguen parciales por no tener mapa.
+
+## [2026-10-06] - Solicitud de infraestructura
+
+* **Nuevo:** `docs/09-solicitud-infraestructura.md` define hardware, software, puertos y acceso remoto para pedir la máquina de despliegue, con un correo sugerido.
+
 ## [2026-10-06] - Integración de dev-gio (auditoría 09, IA-06, IA-16)
 
 * **Auditoría 09:** incorporada al índice. Terminología alineada con ADR-021, IA-AUD-08 marcado como resuelto (TST-01) y nota con el recuento tras la fusión (91 de backend y 108 de frontend).

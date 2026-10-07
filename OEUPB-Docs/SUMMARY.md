@@ -39,6 +39,7 @@
   - [Runbook de despliegue y rollback](docs/06-runbook-despliegue.md)
   - [Estado funcional actual](docs/07-estado-funcional-actual.md)
   - [Estudio del proyecto](docs/08-estudio-proyecto.md)
+  - [Solicitud de infraestructura](docs/09-solicitud-infraestructura.md)
 - Auditorías
   - [Organización documental](audits/01-auditoria-organizacion-documental.md)
   - [Requerimientos, especificaciones y arquitectura](audits/02-auditoria-requerimientos.md)
