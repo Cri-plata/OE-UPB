@@ -32,12 +32,34 @@ class TestProgramaNormalizer(unittest.TestCase):
         self.assertEqual(normalizar_forma_base("Lic. en Pedagogía"), "LICENCIATURA EN PEDAGOGIA")
 
     def test_canonizar_programa_sin_catalogo(self):
-        # Sin catálogo oficial, devuelve formato Title Case respetuoso
+        # Sin catálogo oficial, devuelve formato Title Case respetuoso y acentuado
         resultado = canonizar_programa("ing. de sistemas - nocturna")
         self.assertEqual(resultado, "Ingeniería de Sistemas")
 
         resultado2 = canonizar_programa("PREGRADO EN DERECHO (BUCARAMANGA)")
         self.assertEqual(resultado2, "Derecho")
+
+        # Homologación institucional de alias históricos y acentos (IA-16)
+        self.assertEqual(
+            canonizar_programa("Ingeniería Informática"),
+            "Ingeniería de Sistemas e Informática",
+        )
+        self.assertEqual(
+            canonizar_programa("Ingeniería de Sistemas e Informatica"),
+            "Ingeniería de Sistemas e Informática",
+        )
+        self.assertEqual(
+            canonizar_programa("Comunicación Social- Periodismo"),
+            "Comunicación Social y Periodismo",
+        )
+        self.assertEqual(
+            canonizar_programa("Ingeniería Mecanica"),
+            "Ingeniería Mecánica",
+        )
+        self.assertEqual(
+            canonizar_programa("Diseño Grafico"),
+            "Diseño Gráfico",
+        )
 
     def test_canonizar_programa_con_catalogo_fuzzy(self):
         catalogo = [

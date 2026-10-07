@@ -203,10 +203,13 @@ class HabilidadComparativaItem(BaseModel):
     tipo: str
     m0_menciones: int
     m0_pct: float
+    m0_porcentaje: Optional[float] = None
     m1_menciones: int
     m1_pct: float
+    m1_porcentaje: Optional[float] = None
     m5_menciones: int
     m5_pct: float
+    m5_porcentaje: Optional[float] = None
     delta_m1_m0: float
     tendencia: str
     total_menciones: int

@@ -5018,6 +5018,17 @@
             "type": "number",
             "title": "M0 Pct"
           },
+          "m0_porcentaje": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "M0 Porcentaje"
+          },
           "m1_menciones": {
             "type": "integer",
             "title": "M1 Menciones"
@@ -5026,6 +5037,17 @@
             "type": "number",
             "title": "M1 Pct"
           },
+          "m1_porcentaje": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "M1 Porcentaje"
+          },
           "m5_menciones": {
             "type": "integer",
             "title": "M5 Menciones"
@@ -5033,6 +5055,17 @@
           "m5_pct": {
             "type": "number",
             "title": "M5 Pct"
+          },
+          "m5_porcentaje": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "M5 Porcentaje"
           },
           "delta_m1_m0": {
             "type": "number",

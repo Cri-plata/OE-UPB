@@ -87,7 +87,7 @@ def _preprocesar_dual(texto: str) -> Tuple[str, str]:
     if not texto or not isinstance(texto, str):
         return "", ""
 
-    texto_strip = texto.strip()
+    texto_strip = re.sub(r"[_\-]+", " ", texto.strip())
     if not texto_strip:
         return "", ""
 
@@ -312,13 +312,14 @@ def _compilar_taxonomia() -> Tuple[Dict[str, List[str]], Dict[str, str], list]:
         tipos_habilidad[etiqueta] = config["tipo"]
         vars_limpias = set()
         for variante in config["variantes"]:
+            variante_norm = re.sub(r"[_\-]+", " ", variante)
             # Forma lematizada (pipeline completo con spaCy)
-            v_prep = preprocesar_texto(variante)
+            v_prep = preprocesar_texto(variante_norm)
             if v_prep:
                 vars_limpias.add(v_prep)
             # Forma cruda normalizada (sin lematizar, solo minúsculas + quitar tildes)
             # Esto cubre los casos en que spaCy asigna POS distinto en aislamiento vs. contexto
-            v_cruda = _quitar_tildes(variante.lower().strip())
+            v_cruda = _quitar_tildes(variante_norm.lower().strip())
             v_cruda = re.sub(r"[^a-zA-Z0-9\s]", "", v_cruda)
             v_cruda = " ".join(p for p in v_cruda.split() if len(p) > 1)
             if v_cruda and v_cruda not in vars_limpias:
@@ -913,10 +914,13 @@ def comparar_habilidades_temporales(
             "tipo": tipos_hab.get(h, "blanda"),
             "m0_menciones": m0_count,
             "m0_pct": pct_m0,
+            "m0_porcentaje": pct_m0,
             "m1_menciones": m1_count,
             "m1_pct": pct_m1,
+            "m1_porcentaje": pct_m1,
             "m5_menciones": m5_count,
             "m5_pct": pct_m5,
+            "m5_porcentaje": pct_m5,
             "delta_m1_m0": delta_m1_m0,
             "tendencia": tendencia,
             "total_menciones": m0_count + m1_count + m5_count,
