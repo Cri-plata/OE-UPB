@@ -1,0 +1,42 @@
+﻿services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: 
+      MYSQL_USER: 
+      MYSQL_PASSWORD: 
+      MYSQL_ROOT_PASSWORD: 
+    volumes: ["oeupb_mysql:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./OEUPB-Backend
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      DATABASE_URL: mysql+pymysql://:@db:3306/
+      SECRET_KEY: 
+      APP_ENV: production
+      INITIAL_CREDENTIAL_MODE: random
+      TEMPORARY_CREDENTIAL_EXPIRE_HOURS: 
+      RECOVERY_CREDENTIAL_EXPIRE_MINUTES: 
+      CORS_ALLOWED_ORIGINS: 
+    depends_on:
+      db: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/ready')"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build: ./OEUPB-Frontend
+    ports:
+      - "127.0.0.1:8080:8080"
+
+volumes:
+  oeupb_mysql:
